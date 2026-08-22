@@ -1,13 +1,26 @@
 # Brio ⚡
 
 > **Minimalist, zero-latency personal command center and life operating dashboard.**  
-> Built with Next.js (App Router), TypeScript, Tailwind CSS, and Server Actions for instantaneous task capture and bi-directional Habitica synchronization.
+> Built with Next.js (App Router), TypeScript, Tailwind CSS, and Server Actions for instantaneous task capture and bi-directional Habitica synchronization.  
+> Inspired by **Raycast** (Global `⌘K` palette & shortcuts) and **Linear** (Vim-style navigation & right inspector pane).
 
 ---
 
 ## Features
 
-- ⚡ **Frictionless Batch Capture:** Paste or type multiline tasks and dispatch them concurrently to Habitica in milliseconds using `Promise.allSettled`.
+- ⚡ **Raycast Command Palette (`⌘K`):** Global fuzzy action palette to search tasks, filter by `#tag`, rest at the inn, force sync, or switch views.
+- 🎯 **Linear-Style Split-Pane Inspector:** Select tasks (`Enter` / `j/k`) to inspect full markdown notes, interactive subtask checklists, priority tiers, and Habitica health values.
+- ⌨️ **Vim Keyboard Navigation:**
+  - <kbd>j</kbd> / <kbd>k</kbd> or <kbd>↓</kbd> / <kbd>↑</kbd>: Move selection between tasks
+  - <kbd>Space</kbd> / <kbd>x</kbd>: Check off To-Dos & Dailies
+  - <kbd>+</kbd> / <kbd>-</kbd>: Score Habits
+  - <kbd>Enter</kbd> / <kbd>e</kbd>: Focus task in Inspector Pane
+  - <kbd>d</kbd>: Delete task
+  - <kbd>/</kbd>: Focus rapid Omnibar
+  - <kbd>⌘B</kbd> or <kbd>C</kbd>: Open Batch Capture Modal
+  - <kbd>Esc</kbd>: Close inspector / palette
+- 🪄 **Hybrid Omnibar & `#` Autocomplete:** 1-line rapid single task capture with instant tag suggestion dropdown.
+- 📦 **Frictionless Batch Capture:** Paste or type multiline tasks and dispatch them concurrently to Habitica in milliseconds using `Promise.allSettled`.
 - 🧠 **Smart Syntax Parser:**
   - **Standard To-Do:** `Buy groceries`
   - **Daily (Recurring):** `* Morning 20m sprint review`
@@ -17,10 +30,7 @@
   - **Hashtags:** `#work #deepwork #health`
   - **Notes / Description:** `Deploy hotfix // Review bug #104`
   - **Priority:** `!urgent` (Hard: 2), `!medium` (1.5), `!easy` (1), `!trivial` (0.1)
-- 📊 **RPG Character Stats Ribbon:** Real-time Habitica HP, MP, EXP, Level, Class, and Gold gauges with low-HP alerts and manual sync.
-- 🎯 **Segmented Task Stream:** High-density command view for Dailies, To-Dos, and Habits with active filters, streak indicators, and live scoring.
-- ⌨️ **Keyboard Shortcut First:** Instant dispatch via <kbd>⌘ + Enter</kbd> (Mac) or <kbd>Ctrl + Enter</kbd> (Windows/Linux).
-- 🛡️ **Zero-Crash Demo Fallback:** Operates with rich in-memory mock data when API keys are not yet configured.
+- 📊 **RPG Character Stats Ribbon:** Real-time Habitica HP, MP, EXP, Level, Class, Gold gauges, and "Rest at the Inn" toggle.
 
 ---
 
@@ -59,20 +69,25 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 brio/
 ├── app/
 │   ├── actions/
-│   │   └── tasks.ts               # Server Actions (submitBatchCaptureAction, toggleTaskAction, fetchDashboardDataAction)
+│   │   └── tasks.ts               # Server Actions (CRUD, batch capture, subtasks, sleep toggle)
 │   ├── components/
-│   │   ├── HeaderStatsRibbon.tsx   # Habitica stats ribbon (HP, MP, EXP, Level, GP)
-│   │   ├── BatchCaptureInput.tsx   # Multiline input with live telemetry and Cmd+Enter dispatch
-│   │   ├── TaskStream.tsx          # Categorized task stream with search & filter
-│   │   ├── TaskItem.tsx            # Single task component with completion & habit counter triggers
-│   │   └── SetupNotice.tsx         # Setup guide & status badge for Habitica credentials
+│   │   ├── BrioCommandCenter.tsx   # Split-pane orchestrator and state coordinator
+│   │   ├── CommandPalette.tsx      # Global Cmd+K launcher with fuzzy search & actions
+│   │   ├── TaskInspectorPane.tsx   # Linear right drawer for notes, checklists, & tags
+│   │   ├── HybridOmnibar.tsx       # 1-line rapid capture bar + tag autocompletion
+│   │   ├── TagAutocomplete.tsx     # Instant dropdown suggestion popup for #tags
+│   │   ├── BatchCaptureModal.tsx   # High-focus multiline batch dispatch modal
+│   │   ├── HeaderStatsRibbon.tsx   # Habitica stats ribbon (HP, MP, EXP, Level, GP, Rest)
+│   │   ├── TaskStream.tsx          # Vim keyboard-navigable task stream
+│   │   ├── TaskItem.tsx            # Minimalist card with active selection ring & progress pills
+│   │   └── SetupNotice.tsx         # Setup guide & status badge
 │   ├── globals.css                # Polished dark theme, glowing accents, custom scrollbars
 │   ├── layout.tsx                 # Root layout with Geist font & metadata
-│   └── page.tsx                   # Main command center dashboard
+│   └── page.tsx                   # Main server page
 ├── lib/
 │   ├── env.ts                     # Strongly-typed environment validation via Zod
 │   ├── types.ts                   # Habitica models, task payloads, and batch telemetry
-│   ├── habitica.ts                # Habitica API Client Service (Single Responsibility, batch Promise.allSettled)
+│   ├── habitica.ts                # Habitica API Client Service (CRUD, batch with Promise.allSettled)
 │   ├── parser.ts                  # Multiline text parser with tag/note/priority extraction
 │   └── utils.ts                   # Formatting & color helpers
 ├── __tests__/
