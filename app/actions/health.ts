@@ -203,11 +203,115 @@ async function getBodyCompositionLogs(sql: SqlClient): Promise<BodyCompositionLo
 }
 
 /**
+ * Helper: Automatically seeds the database with the initial Chopo 2026 report
+ * if the table is empty or newly created.
+ */
+async function ensureChopoReportSeeded(sql: SqlClient) {
+  try {
+    await sql`
+      CREATE TABLE IF NOT EXISTS lab_test_reports (
+        id VARCHAR(64) PRIMARY KEY,
+        date DATE NOT NULL,
+        lab_name VARCHAR(100) NOT NULL DEFAULT 'Laboratorio Chopo',
+        order_number VARCHAR(50),
+        patient_id VARCHAR(50),
+        title VARCHAR(150) NOT NULL,
+        doctor_notes TEXT,
+        file_url TEXT,
+        file_key TEXT,
+        total_biomarkers INT DEFAULT 0,
+        abnormal_count INT DEFAULT 0,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+        updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+      );
+    `;
+
+    await sql`
+      CREATE TABLE IF NOT EXISTS biomarker_logs (
+        id VARCHAR(64) PRIMARY KEY,
+        report_id VARCHAR(64) REFERENCES lab_test_reports(id) ON DELETE CASCADE,
+        date DATE NOT NULL,
+        category VARCHAR(50) NOT NULL,
+        name VARCHAR(100) NOT NULL,
+        code VARCHAR(50),
+        value_numeric NUMERIC,
+        value_text VARCHAR(100),
+        unit VARCHAR(30),
+        ref_min NUMERIC,
+        ref_max NUMERIC,
+        ref_text VARCHAR(150),
+        status VARCHAR(20) NOT NULL DEFAULT 'normal',
+        notes TEXT,
+        order_index INT DEFAULT 0,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+      );
+    `;
+
+    const existing = await sql`
+      SELECT id FROM lab_test_reports WHERE id = ${INITIAL_CHOPO_2026_REPORT.id} LIMIT 1;
+    `;
+
+    if (existing.length === 0) {
+      await sql`
+        INSERT INTO lab_test_reports (
+          id, date, lab_name, order_number, patient_id, title,
+          doctor_notes, total_biomarkers, abnormal_count
+        )
+        VALUES (
+          ${INITIAL_CHOPO_2026_REPORT.id},
+          ${INITIAL_CHOPO_2026_REPORT.date},
+          ${INITIAL_CHOPO_2026_REPORT.labName},
+          ${INITIAL_CHOPO_2026_REPORT.orderNumber || null},
+          ${INITIAL_CHOPO_2026_REPORT.patientId || null},
+          ${INITIAL_CHOPO_2026_REPORT.title},
+          ${INITIAL_CHOPO_2026_REPORT.doctorNotes || null},
+          ${INITIAL_CHOPO_2026_REPORT.totalBiomarkers},
+          ${INITIAL_CHOPO_2026_REPORT.abnormalCount}
+        );
+      `;
+
+      for (let i = 0; i < INITIAL_CHOPO_2026_BIOMARKERS.length; i++) {
+        const b = INITIAL_CHOPO_2026_BIOMARKERS[i];
+        await sql`
+          INSERT INTO biomarker_logs (
+            id, report_id, date, category, name, code,
+            value_numeric, value_text, unit, ref_min, ref_max, ref_text,
+            status, notes, order_index
+          )
+          VALUES (
+            ${b.id},
+            ${INITIAL_CHOPO_2026_REPORT.id},
+            ${b.date},
+            ${b.category},
+            ${b.name},
+            ${b.code || null},
+            ${b.valueNumeric !== undefined ? b.valueNumeric : null},
+            ${b.valueText || null},
+            ${b.unit || null},
+            ${b.refMin !== undefined ? b.refMin : null},
+            ${b.refMax !== undefined ? b.refMax : null},
+            ${b.refText || null},
+            ${b.status},
+            ${b.notes || null},
+            ${b.orderIndex ?? i + 1}
+          )
+          ON CONFLICT (id) DO NOTHING;
+        `;
+      }
+    }
+  } catch (err) {
+    console.warn("[Ensure Chopo Seed Warn]:", err);
+  }
+}
+
+/**
  * Helper: Fetches clinical lab reports and biomarker metrics from database,
  * falling back gracefully to the initial Chopo preset if not yet initialized.
  */
 async function getBiomarkersDashboardData(sql: SqlClient): Promise<BiomarkersDashboardData> {
   try {
+    await ensureChopoReportSeeded(sql);
+
     const reportRows = await sql`
       SELECT * FROM lab_test_reports ORDER BY date DESC, created_at DESC;
     `;
