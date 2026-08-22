@@ -168,7 +168,11 @@ export function HealthView({ data, onRefresh }: HealthViewProps) {
 
       {/* RENDER ACTIVE TAB */}
       {activeHealthTab === "nutrition" && data.nutritionData && (
-        <NutritionView data={data.nutritionData} onRefresh={onRefresh} />
+        <NutritionView
+          data={data.nutritionData}
+          onOpenManageSupplements={() => setIsManageSupplementsOpen(true)}
+          onRefresh={onRefresh}
+        />
       )}
 
       {activeHealthTab === "body_composition" && (

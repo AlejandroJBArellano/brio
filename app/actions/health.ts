@@ -293,6 +293,10 @@ export async function fetchHealthDashboardDataAction(): Promise<HealthDashboardD
 
   // 6. Fetch Nutrition & Meal Planner Data
   const nutritionData = await fetchNutritionDashboardDataAction(todayStr);
+  if (nutritionData) {
+    nutritionData.supplements = todayHealth.supplements;
+    nutritionData.supplementsCatalog = catalog;
+  }
 
   return {
     todayHealth,

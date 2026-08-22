@@ -605,11 +605,11 @@ export interface NutritionHabitLog {
   dailySalad: boolean;
   hydrationGoal: boolean;
   noUltraProcessed: boolean;
-  b12Weekly: boolean;
-  spirulina: boolean;
-  omega3Dha: boolean;
-  magnesium: boolean;
-  vitC: boolean;
+  b12Weekly?: boolean;
+  spirulina?: boolean;
+  omega3Dha?: boolean;
+  magnesium?: boolean;
+  vitC?: boolean;
 }
 
 export interface NutritionDailyLog {
@@ -660,5 +660,7 @@ export interface NutritionDashboardData {
     daysWithWater: number;
     b12LoggedThisWeek: boolean;
   };
+  supplements?: SupplementItem[];
+  supplementsCatalog?: UserSupplement[];
 }
 

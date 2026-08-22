@@ -35,10 +35,15 @@ import { SmartGroceryList } from "./SmartGroceryList";
 
 interface NutritionViewProps {
   data: NutritionDashboardData;
+  onOpenManageSupplements?: () => void;
   onRefresh?: () => void;
 }
 
-export function NutritionView({ data, onRefresh }: NutritionViewProps) {
+export function NutritionView({
+  data,
+  onOpenManageSupplements,
+  onRefresh,
+}: NutritionViewProps) {
   const [activeSubTab, setActiveSubTab] = useState<
     "daily" | "planner" | "recipes" | "grocery"
   >("daily");
@@ -312,6 +317,9 @@ export function NutritionView({ data, onRefresh }: NutritionViewProps) {
             <NutritionHabitsChecklist
               date={data.todayLog.date}
               habits={data.todayLog.habits}
+              supplements={data.supplements}
+              supplementsCatalog={data.supplementsCatalog}
+              onOpenManageSupplements={onOpenManageSupplements}
               onRefresh={onRefresh}
             />
           </div>

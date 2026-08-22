@@ -282,6 +282,29 @@ export async function fetchNutritionDashboardDataAction(
       if (groupsMet >= 4) daysWithPortionsMet++;
     });
 
+    // Also check unified supplements table (health_logs) for B12 this week
+    if (!b12LoggedThisWeek) {
+      const healthLogRows = await sql`
+        SELECT supplements FROM health_logs 
+        WHERE date >= ${mondayStr} AND date <= ${sundayStr};
+      `;
+      for (const hRow of healthLogRows) {
+        if (Array.isArray(hRow.supplements)) {
+          const hasB12 = hRow.supplements.some(
+            (s: any) =>
+              (s.name?.toLowerCase().includes("b12") ||
+                s.name?.toLowerCase().includes("b-12") ||
+                s.id?.toLowerCase().includes("b12")) &&
+              s.taken
+          );
+          if (hasB12) {
+            b12LoggedThisWeek = true;
+            break;
+          }
+        }
+      }
+    }
+
     return {
       todayLog,
       settings,
