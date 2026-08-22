@@ -277,13 +277,13 @@ export function AddVaultItemModal({
 
               <div className="sm:col-span-2">
                 <label className="block text-xs font-medium text-neutral-300 mb-1.5">
-                  Enlace Web (URL de YouTube / Curso / GitHub)
+                  Enlace Web (URL de YouTube / Notion / GitHub / Curso)
                 </label>
                 <input
                   type="url"
                   value={url}
-                  onChange={(e) => setUrl(e.target.value)}
-                  placeholder="https://youtube.com/watch?v=... o https://udemy.com/..."
+                  onChange={(e) => handleUrlChange(e.target.value)}
+                  placeholder="https://notion.so/... o https://youtube.com/watch?v=... o https://github.com/..."
                   className="w-full rounded-xl border border-white/[0.1] bg-neutral-950 p-2.5 text-xs text-white placeholder:text-neutral-600 focus:outline-none focus:border-cyan-500"
                 />
               </div>

@@ -239,8 +239,22 @@ export function VaultKanbanBoard({
                         <div className="flex items-center justify-between text-[10px]">
                           <div className="flex items-center gap-1.5 flex-wrap">
                             {item.platform && (
-                              <span className="px-2 py-0.5 rounded-md bg-indigo-500/10 text-indigo-300 border border-indigo-500/20 font-semibold">
-                                {item.platform === "YouTube" ? "📺 YouTube" : item.platform === "GitHub" ? "🐙 GitHub" : `🎓 ${item.platform}`}
+                              <span className={`px-2 py-0.5 rounded-md border font-semibold ${
+                                item.platform === "Notion"
+                                  ? "bg-neutral-900 border-white/20 text-white font-mono"
+                                  : item.platform === "GitHub"
+                                  ? "bg-neutral-900 border-white/20 text-white font-mono"
+                                  : item.platform === "YouTube"
+                                  ? "bg-rose-500/10 text-rose-300 border-rose-500/20"
+                                  : "bg-indigo-500/10 text-indigo-300 border-indigo-500/20"
+                              }`}>
+                                {item.platform === "YouTube"
+                                  ? "📺 YouTube"
+                                  : item.platform === "GitHub"
+                                  ? "🐙 GitHub"
+                                  : item.platform === "Notion"
+                                  ? "📑 Notion"
+                                  : `🎓 ${item.platform}`}
                               </span>
                             )}
                             {item.instrument && (
@@ -277,15 +291,25 @@ export function VaultKanbanBoard({
                           )}
                         </div>
 
-                        {/* External URL if available */}
+                        {/* External URL with specialized labels */}
                         {item.url && (
                           <a
                             href={item.url}
                             target="_blank"
                             rel="noreferrer"
-                            className="inline-flex items-center gap-1 text-[11px] font-semibold text-cyan-400 hover:underline"
+                            className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-cyan-400 hover:underline bg-neutral-900/60 px-2.5 py-1 rounded-lg border border-white/[0.04] w-fit"
                           >
-                            <span>{isCourse ? "Abrir Curso" : isResource ? "Ver Recurso" : "Abrir Enlace"}</span>
+                            <span>
+                              {item.platform === "Notion"
+                                ? "📑 Abrir en Notion"
+                                : item.platform === "GitHub"
+                                ? "🐙 Ver en GitHub"
+                                : item.platform === "YouTube"
+                                ? "📺 Ver en YouTube"
+                                : isCourse
+                                ? "🎓 Abrir Clase / Curso"
+                                : "Abrir Enlace"}
+                            </span>
                             <ExternalLink className="h-3 w-3" />
                           </a>
                         )}
