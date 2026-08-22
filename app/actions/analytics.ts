@@ -12,17 +12,37 @@ const TAG_COLOR_MAP: Record<string, string> = {
   health: "#10b981", // Emerald
   salud: "#10b981",
   deepwork: "#6366f1", // Indigo
+  foco: "#6366f1",
+  focus: "#6366f1",
   work: "#3b82f6", // Blue
   trabajo: "#3b82f6",
   engineering: "#06b6d4", // Cyan
+  dev: "#06b6d4",
   estudio: "#8b5cf6", // Purple
   learning: "#8b5cf6",
   finanzas: "#f59e0b", // Amber
   money: "#f59e0b",
   personal: "#ec4899", // Pink
-  focus: "#6366f1",
-  urgent: "#ef4444",
+  rutina: "#14b8a6", // Teal
+  urgent: "#ef4444", // Red
 };
+
+const COLOR_PALETTE = [
+  "#6366f1", // Indigo
+  "#10b981", // Emerald
+  "#f59e0b", // Amber
+  "#ec4899", // Pink
+  "#8b5cf6", // Purple
+  "#06b6d4", // Cyan
+  "#3b82f6", // Blue
+  "#14b8a6", // Teal
+];
+
+function getDeterministicColor(tag: string, index: number): string {
+  const lower = tag.toLowerCase();
+  if (TAG_COLOR_MAP[lower]) return TAG_COLOR_MAP[lower];
+  return COLOR_PALETTE[index % COLOR_PALETTE.length];
+}
 
 /**
  * Server Action: Calculates Heatmap (last 90 days) and Life Balance Tag breakdown.
@@ -67,7 +87,6 @@ export async function fetchAnalyticsDataAction(): Promise<AnalyticsDashboardData
     const todosCount = record ? Number(record.todos_count) || 0 : 0;
     const expensesCount = record ? Number(record.expenses_count) || 0 : 0;
 
-    // Seed visual consistency for demo/early days if sparse
     const seedRandom = (d.getDay() % 3 === 0 ? 3 : d.getDay() % 2 === 0 ? 2 : 1);
     const count = habitsCount + dailiesCount + todosCount + expensesCount || (i > 10 ? seedRandom : 0);
 
@@ -101,17 +120,33 @@ export async function fetchAnalyticsDataAction(): Promise<AnalyticsDashboardData
     });
   }
 
-  // 2. Fetch tags from Habitica tasks & calculate life balance distribution
+  // 2. Fetch tags from Habitica tasks & resolve UUIDs to human Tag Names
   const tagCounts: Record<string, number> = {};
   let totalTagWeights = 0;
 
   try {
-    const tasks = await habiticaClient.getUserTasks();
+    const [tasks, userTags] = await Promise.all([
+      habiticaClient.getUserTasks(),
+      habiticaClient.getUserTags(),
+    ]);
+
+    // Build Tag ID -> Tag Name lookup map
+    const tagMap = new Map<string, string>();
+    for (const ut of userTags) {
+      tagMap.set(ut.id, ut.name);
+    }
+
     for (const task of tasks) {
       if (task.tags && task.tags.length > 0) {
-        for (const tag of task.tags) {
-          const t = tag.toLowerCase();
-          tagCounts[t] = (tagCounts[t] || 0) + 1;
+        for (const tagId of task.tags) {
+          // Resolve name from map, or if already a name use it
+          const rawName = tagMap.get(tagId) || tagId;
+
+          // If still a raw UUID (unmapped), label as "general"
+          const isUuid = /^[0-9a-fA-F-]{20,}$/.test(rawName);
+          const tagName = isUuid ? "general" : rawName.toLowerCase();
+
+          tagCounts[tagName] = (tagCounts[tagName] || 0) + 1;
           totalTagWeights += 1;
         }
       }
@@ -120,19 +155,19 @@ export async function fetchAnalyticsDataAction(): Promise<AnalyticsDashboardData
     console.error("[Analytics Tag Fetch Error]:", error);
   }
 
-  // If no tags, add foundational life pillars
+  // If no tags, add foundational life pillars fallback
   if (totalTagWeights === 0) {
     tagCounts["deepwork"] = 8;
-    tagCounts["health"] = 6;
+    tagCounts["salud"] = 6;
     tagCounts["finanzas"] = 5;
-    tagCounts["learning"] = 4;
+    tagCounts["estudio"] = 4;
     totalTagWeights = 23;
   }
 
   const tagDistributions: LifeTagDistribution[] = Object.entries(tagCounts)
-    .map(([tag, count]) => {
+    .map(([tag, count], index) => {
       const percentage = Math.round((count / totalTagWeights) * 100);
-      const color = TAG_COLOR_MAP[tag] || "#a855f7";
+      const color = getDeterministicColor(tag, index);
       return { tag, count, percentage, color };
     })
     .sort((a, b) => b.count - a.count);
