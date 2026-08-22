@@ -87,7 +87,7 @@ export function AuthGate() {
                 <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-neutral-500" />
                 <input
                   type="email"
-                  placeholder="arellanodev2021@gmail.com"
+                  placeholder="tu@correo.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
