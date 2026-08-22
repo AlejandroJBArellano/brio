@@ -2,11 +2,14 @@
 
 import { isHabiticaConfigured } from "@/lib/env";
 import { habiticaClient } from "@/lib/habitica";
-import { parseBatchInput } from "@/lib/parser";
+import { parseBatchInput, parseTaskLine, toHabiticaPayload } from "@/lib/parser";
 import {
   BatchActionResult,
+  HabiticaTag,
   HabiticaTask,
+  HabiticaTaskPayload,
   HabiticaUser,
+  TaskType,
 } from "@/lib/types";
 import { revalidatePath } from "next/cache";
 
@@ -98,6 +101,29 @@ export async function submitBatchCaptureAction(
 }
 
 /**
+ * Server Action: Rapid Single Task Capture (used by Omnibar)
+ */
+export async function createSingleTaskAction(
+  rawInput: string
+): Promise<{ success: boolean; task?: HabiticaTask; error?: string }> {
+  try {
+    const parsed = parseTaskLine(rawInput);
+    if (!parsed) {
+      return { success: false, error: "Invalid task text" };
+    }
+
+    const payload = toHabiticaPayload(parsed);
+    const task = await habiticaClient.createTask(payload);
+    revalidatePath("/");
+    return { success: true, task };
+  } catch (error: unknown) {
+    const message =
+      error instanceof Error ? error.message : "Failed to create task";
+    return { success: false, error: message };
+  }
+}
+
+/**
  * Server Action: Score or Complete Task
  */
 export async function toggleTaskAction(
@@ -116,28 +142,149 @@ export async function toggleTaskAction(
 }
 
 /**
+ * Server Action: Update Task in Place
+ */
+export async function updateTaskAction(
+  taskId: string,
+  payload: Partial<HabiticaTaskPayload>
+): Promise<{ success: boolean; task?: HabiticaTask; error?: string }> {
+  try {
+    const task = await habiticaClient.updateTask(taskId, payload);
+    revalidatePath("/");
+    return { success: true, task };
+  } catch (error: unknown) {
+    const message =
+      error instanceof Error ? error.message : "Failed to update task";
+    return { success: false, error: message };
+  }
+}
+
+/**
+ * Server Action: Delete Task
+ */
+export async function deleteTaskAction(
+  taskId: string
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    const res = await habiticaClient.deleteTask(taskId);
+    revalidatePath("/");
+    return { success: res.success };
+  } catch (error: unknown) {
+    const message =
+      error instanceof Error ? error.message : "Failed to delete task";
+    return { success: false, error: message };
+  }
+}
+
+/**
+ * Server Action: Toggle Rest at Inn (Sleep)
+ */
+export async function toggleSleepAction(): Promise<{
+  success: boolean;
+  resting?: boolean;
+  error?: string;
+}> {
+  try {
+    const res = await habiticaClient.toggleSleep();
+    revalidatePath("/");
+    return { success: res.success, resting: res.resting };
+  } catch (error: unknown) {
+    const message =
+      error instanceof Error ? error.message : "Failed to toggle inn sleep";
+    return { success: false, error: message };
+  }
+}
+
+/**
+ * Server Action: Add Checklist Subtask Item
+ */
+export async function addChecklistItemAction(
+  taskId: string,
+  text: string
+): Promise<{ success: boolean; task?: HabiticaTask; error?: string }> {
+  try {
+    const task = await habiticaClient.createChecklistItem(taskId, text);
+    revalidatePath("/");
+    return { success: true, task };
+  } catch (error: unknown) {
+    const message =
+      error instanceof Error ? error.message : "Failed to add checklist item";
+    return { success: false, error: message };
+  }
+}
+
+/**
+ * Server Action: Toggle Checklist Item Score
+ */
+export async function toggleChecklistItemAction(
+  taskId: string,
+  itemId: string
+): Promise<{ success: boolean; task?: HabiticaTask; error?: string }> {
+  try {
+    const task = await habiticaClient.scoreChecklistItem(taskId, itemId);
+    revalidatePath("/");
+    return { success: true, task };
+  } catch (error: unknown) {
+    const message =
+      error instanceof Error ? error.message : "Failed to toggle checklist item";
+    return { success: false, error: message };
+  }
+}
+
+/**
+ * Server Action: Delete Checklist Item
+ */
+export async function deleteChecklistItemAction(
+  taskId: string,
+  itemId: string
+): Promise<{ success: boolean; task?: HabiticaTask; error?: string }> {
+  try {
+    const task = await habiticaClient.deleteChecklistItem(taskId, itemId);
+    revalidatePath("/");
+    return { success: true, task };
+  } catch (error: unknown) {
+    const message =
+      error instanceof Error ? error.message : "Failed to remove checklist item";
+    return { success: false, error: message };
+  }
+}
+
+/**
+ * Server Action: Fetch Tags
+ */
+export async function fetchTagsAction(): Promise<HabiticaTag[]> {
+  try {
+    return await habiticaClient.getUserTags();
+  } catch {
+    return [];
+  }
+}
+
+/**
  * Server Action: Fetch complete dashboard data
  */
 export async function fetchDashboardDataAction(): Promise<{
   user: HabiticaUser;
   tasks: HabiticaTask[];
+  tags: HabiticaTag[];
   isConfigured: boolean;
 }> {
   try {
     const isConfigured = isHabiticaConfigured();
-    const [user, tasks] = await Promise.all([
+    const [user, tasks, tags] = await Promise.all([
       habiticaClient.getUserProfile(),
       habiticaClient.getUserTasks(),
+      habiticaClient.getUserTags(),
     ]);
 
     return {
       user,
       tasks,
+      tags,
       isConfigured,
     };
   } catch (error: unknown) {
     console.error("Dashboard data fetch error:", error);
-    // Return mock fallback on catastrophic error
     const [user, tasks] = await Promise.all([
       habiticaClient.getUserProfile(),
       habiticaClient.getUserTasks(),
@@ -145,6 +292,7 @@ export async function fetchDashboardDataAction(): Promise<{
     return {
       user,
       tasks,
+      tags: [],
       isConfigured: false,
     };
   }

@@ -76,9 +76,11 @@ export interface HabiticaTaskPayload {
   up?: boolean;
   down?: boolean;
   frequency?: "daily" | "weekly" | "monthly" | "yearly";
-  checklist?: Array<{ text: string; completed?: boolean }>;
+  checklist?: Array<{ id?: string; text: string; completed?: boolean }>;
   date?: string;
 }
+
+export type UpdateTaskPayload = Partial<HabiticaTaskPayload>;
 
 export interface HabiticaApiResponse<T> {
   success: boolean;

@@ -392,6 +392,165 @@ export class HabiticaClient {
 
     return { success: true };
   }
+
+  /**
+   * Updates an existing task (e.g. text, notes, priority, tags).
+   */
+  public async updateTask(
+    taskId: string,
+    payload: Partial<HabiticaTaskPayload>
+  ): Promise<HabiticaTask> {
+    if (!isHabiticaConfigured() && !this.customUserId) {
+      const idx = inMemoryMockTasks.findIndex((t) => t.id === taskId);
+      if (idx !== -1) {
+        inMemoryMockTasks[idx] = {
+          ...inMemoryMockTasks[idx],
+          ...payload,
+          updatedAt: new Date().toISOString(),
+        };
+        return inMemoryMockTasks[idx];
+      }
+      throw new HabiticaApiError("Task not found in mock store", 404);
+    }
+
+    return this.request<HabiticaTask>(`/tasks/${taskId}`, {
+      method: "PUT",
+      body: JSON.stringify(payload),
+    });
+  }
+
+  /**
+   * Deletes a task from Habitica.
+   */
+  public async deleteTask(taskId: string): Promise<{ success: boolean }> {
+    if (!isHabiticaConfigured() && !this.customUserId) {
+      inMemoryMockTasks = inMemoryMockTasks.filter((t) => t.id !== taskId);
+      return { success: true };
+    }
+
+    await this.request<void>(`/tasks/${taskId}`, {
+      method: "DELETE",
+    });
+
+    return { success: true };
+  }
+
+  /**
+   * Toggles 'Rest at the Inn' (pauses damage from uncompleted dailies).
+   */
+  public async toggleSleep(): Promise<{ success: boolean; resting: boolean }> {
+    if (!isHabiticaConfigured() && !this.customUserId) {
+      inMemoryMockUser.flags = {
+        ...inMemoryMockUser.flags,
+        rest: !inMemoryMockUser.flags?.rest,
+      };
+      return { success: true, resting: inMemoryMockUser.flags?.rest || false };
+    }
+
+    const res = await this.request<boolean>("/user/sleep", {
+      method: "POST",
+    });
+
+    return { success: true, resting: res };
+  }
+
+  /**
+   * Adds a checklist item to an existing task.
+   */
+  public async createChecklistItem(
+    taskId: string,
+    text: string
+  ): Promise<HabiticaTask> {
+    if (!isHabiticaConfigured() && !this.customUserId) {
+      const task = inMemoryMockTasks.find((t) => t.id === taskId);
+      if (task) {
+        task.checklist = task.checklist || [];
+        task.checklist.push({
+          id: `chk-${Date.now()}`,
+          text,
+          completed: false,
+        });
+        return task;
+      }
+      throw new HabiticaApiError("Task not found", 404);
+    }
+
+    return this.request<HabiticaTask>(`/tasks/${taskId}/checklist`, {
+      method: "POST",
+      body: JSON.stringify({ text }),
+    });
+  }
+
+  /**
+   * Scores / checks off a checklist item.
+   */
+  public async scoreChecklistItem(
+    taskId: string,
+    itemId: string
+  ): Promise<HabiticaTask> {
+    if (!isHabiticaConfigured() && !this.customUserId) {
+      const task = inMemoryMockTasks.find((t) => t.id === taskId);
+      if (task && task.checklist) {
+        const item = task.checklist.find((c) => c.id === itemId);
+        if (item) item.completed = !item.completed;
+        return task;
+      }
+      throw new HabiticaApiError("Task or checklist item not found", 404);
+    }
+
+    return this.request<HabiticaTask>(
+      `/tasks/${taskId}/checklist/${itemId}/score`,
+      {
+        method: "POST",
+      }
+    );
+  }
+
+  /**
+   * Deletes a checklist item from a task.
+   */
+  public async deleteChecklistItem(
+    taskId: string,
+    itemId: string
+  ): Promise<HabiticaTask> {
+    if (!isHabiticaConfigured() && !this.customUserId) {
+      const task = inMemoryMockTasks.find((t) => t.id === taskId);
+      if (task && task.checklist) {
+        task.checklist = task.checklist.filter((c) => c.id !== itemId);
+        return task;
+      }
+      throw new HabiticaApiError("Task or checklist item not found", 404);
+    }
+
+    return this.request<HabiticaTask>(
+      `/tasks/${taskId}/checklist/${itemId}`,
+      {
+        method: "DELETE",
+      }
+    );
+  }
+
+  /**
+   * Retrieves all user tags from Habitica.
+   */
+  public async getUserTags(): Promise<Array<{ id: string; name: string }>> {
+    if (!isHabiticaConfigured() && !this.customUserId) {
+      return [
+        { id: "tag-1", name: "work" },
+        { id: "tag-2", name: "health" },
+        { id: "tag-3", name: "focus" },
+        { id: "tag-4", name: "deepwork" },
+        { id: "tag-5", name: "mindset" },
+        { id: "tag-6", name: "finance" },
+      ];
+    }
+
+    try {
+      return await this.request<Array<{ id: string; name: string }>>("/tags");
+    } catch {
+      return [];
+    }
+  }
 }
 
 /**
