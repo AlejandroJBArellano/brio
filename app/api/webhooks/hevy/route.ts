@@ -1,4 +1,4 @@
-import { ensureDatabaseSchema, getDb } from "@/lib/db";
+import { getDb } from "@/lib/db";
 import { fetchHevyWorkoutById, saveHevyWorkoutToDb } from "@/lib/hevy";
 import { revalidatePath } from "next/cache";
 import { NextRequest, NextResponse } from "next/server";
@@ -28,7 +28,6 @@ export async function POST(req: NextRequest) {
     }
 
     // Save to DB and sync with health_logs
-    await ensureDatabaseSchema();
     const sql = getDb();
     await saveHevyWorkoutToDb(sql, workout);
 
@@ -41,10 +40,11 @@ export async function POST(req: NextRequest) {
       date: workout.date,
       totalVolumeKg: workout.totalVolumeKg,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("[Hevy Webhook Error]:", error);
+    const message = error instanceof Error ? error.message : "Internal server error";
     return NextResponse.json(
-      { success: false, error: error.message || "Internal server error" },
+      { success: false, error: message },
       { status: 500 }
     );
   }

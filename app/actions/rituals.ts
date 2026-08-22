@@ -1,17 +1,25 @@
 "use server";
 
-import { ensureDatabaseSchema, getDb } from "@/lib/db";
+import { getDb } from "@/lib/db";
 import { parseBatchInput } from "@/lib/parser";
 import { habiticaClient } from "@/lib/habitica";
 import { RitualLog } from "@/lib/types";
 import { revalidatePath } from "next/cache";
+
+interface RitualDbRow {
+  date: Date | string;
+  must_win_tasks?: string[];
+  energy_level?: number | string;
+  day_intention?: string;
+  reflection?: string;
+  expenses_logged?: boolean;
+}
 
 /**
  * Server Action: Fetches today's ritual log and Must-Win tasks.
  */
 export async function fetchTodayRitualAction(): Promise<RitualLog | null> {
   try {
-    await ensureDatabaseSchema();
     const sql = getDb();
     const todayStr = new Date().toISOString().split("T")[0];
 
@@ -21,7 +29,7 @@ export async function fetchTodayRitualAction(): Promise<RitualLog | null> {
 
     if (rows.length === 0) return null;
 
-    const row = rows[0];
+    const row = rows[0] as unknown as RitualDbRow;
     return {
       date: todayStr,
       mustWinTasks: Array.isArray(row.must_win_tasks) ? row.must_win_tasks : [],
@@ -45,7 +53,6 @@ export async function saveMorningRitualAction(payload: {
   dayIntention?: string;
 }): Promise<{ success: boolean; error?: string }> {
   try {
-    await ensureDatabaseSchema();
     const sql = getDb();
     const todayStr = new Date().toISOString().split("T")[0];
     const tasksJson = JSON.stringify(payload.mustWinTasks);
@@ -83,7 +90,6 @@ export async function saveEveningReviewAction(payload: {
   tomorrowNotes?: string;
 }): Promise<{ success: boolean; tasksCreated?: number; error?: string }> {
   try {
-    await ensureDatabaseSchema();
     const sql = getDb();
     const todayStr = new Date().toISOString().split("T")[0];
 

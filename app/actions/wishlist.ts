@@ -1,6 +1,6 @@
 "use server";
 
-import { ensureDatabaseSchema, getDb } from "@/lib/db";
+import { getDb } from "@/lib/db";
 import {
   WishlistDashboardData,
   WishlistItem,
@@ -11,14 +11,30 @@ import { revalidatePath } from "next/cache";
 
 const DEFAULT_COOLING_DAYS = 30;
 
-// Initial sample items if wishlist is completely empty
+interface WishlistDbRow {
+  id: string;
+  title: string;
+  price_estimated: number | string;
+  category?: string;
+  priority?: string;
+  url?: string;
+  image_url?: string;
+  reason_or_notes?: string;
+  status: string;
+  cooling_days_total?: number | string;
+  created_at?: Date | string;
+  resolved_at?: Date | string;
+}
+
 /**
  * Helper to process raw DB row into typed WishlistItem with calculated countdowns.
  */
-function processWishlistRow(r: any): WishlistItem {
-  const createdAt = r.created_at?.toISOString
-    ? r.created_at.toISOString()
-    : r.created_at?.toString() || new Date().toISOString();
+function processWishlistRow(r: WishlistDbRow): WishlistItem {
+  const createdAt = r.created_at
+    ? typeof r.created_at === "string"
+      ? r.created_at
+      : new Date(r.created_at).toISOString()
+    : new Date().toISOString();
 
   const createdMs = new Date(createdAt).getTime();
   const nowMs = Date.now();
@@ -65,7 +81,7 @@ export async function fetchWishlistDataAction(): Promise<WishlistDashboardData> 
     SELECT * FROM wishlist_items ORDER BY created_at DESC;
   `;
 
-  const items = rows.map(processWishlistRow);
+  const items = (rows as unknown as WishlistDbRow[]).map(processWishlistRow);
 
   const activeItems = items.filter(
     (i) => i.status === "cooling" || i.status === "ready"
@@ -116,7 +132,6 @@ export async function createWishlistItemAction(input: {
       return { success: false, error: "El precio estimado debe ser mayor a 0." };
     }
 
-    await ensureDatabaseSchema();
     const sql = getDb();
     const id = `wish-${Date.now()}`;
     const coolingDaysTotal = input.coolingDaysTotal || DEFAULT_COOLING_DAYS;
@@ -143,7 +158,7 @@ export async function createWishlistItemAction(input: {
 
     revalidatePath("/");
     return { success: true };
-  } catch (error: any) {
+  } catch (error) {
     console.error("[Create Wishlist Item Error]:", error);
     return { success: false, error: "No se pudo agregar a la wishlist." };
   }
@@ -161,7 +176,6 @@ export async function purchaseWishlistItemAction(
   }
 ): Promise<{ success: boolean; error?: string }> {
   try {
-    await ensureDatabaseSchema();
     const sql = getDb();
 
     // 1. Fetch item
@@ -173,7 +187,7 @@ export async function purchaseWishlistItemAction(
       return { success: false, error: "Artículo no encontrado." };
     }
 
-    const item = rows[0];
+    const item = rows[0] as unknown as WishlistDbRow;
     const amount = options?.actualAmount || Number(item.price_estimated) || 0;
     const category = options?.category || item.category || "General";
     const account = options?.account || "default";
@@ -208,7 +222,7 @@ export async function purchaseWishlistItemAction(
 
     revalidatePath("/");
     return { success: true };
-  } catch (error: any) {
+  } catch (error) {
     console.error("[Purchase Wishlist Item Error]:", error);
     return { success: false, error: "No se pudo registrar la compra." };
   }
@@ -221,7 +235,6 @@ export async function dismissWishlistItemAction(
   id: string
 ): Promise<{ success: boolean; error?: string }> {
   try {
-    await ensureDatabaseSchema();
     const sql = getDb();
 
     await sql`
@@ -232,7 +245,7 @@ export async function dismissWishlistItemAction(
 
     revalidatePath("/");
     return { success: true };
-  } catch (error: any) {
+  } catch (error) {
     console.error("[Dismiss Wishlist Item Error]:", error);
     return { success: false, error: "No se pudo descartar el capricho." };
   }
@@ -245,7 +258,6 @@ export async function deleteWishlistItemAction(
   id: string
 ): Promise<{ success: boolean; error?: string }> {
   try {
-    await ensureDatabaseSchema();
     const sql = getDb();
 
     await sql`
@@ -254,7 +266,7 @@ export async function deleteWishlistItemAction(
 
     revalidatePath("/");
     return { success: true };
-  } catch (error: any) {
+  } catch (error) {
     console.error("[Delete Wishlist Item Error]:", error);
     return { success: false, error: "No se pudo eliminar el elemento." };
   }

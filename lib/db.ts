@@ -12,11 +12,3 @@ export function getDb() {
   }
   return neon(databaseUrl);
 }
-
-/**
- * No-op schema initialization.
- * Database tables and indexes are already created in the Neon database.
- */
-export async function ensureDatabaseSchema(): Promise<void> {
-  return;
-}
