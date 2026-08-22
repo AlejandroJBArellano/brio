@@ -1,7 +1,6 @@
 "use client";
 
 import {
-  logDailyPortionsAction,
   quickAdjustPortionAction,
   toggleScheduledMealCompletedAction,
 } from "@/app/actions/nutrition";
@@ -12,11 +11,8 @@ import {
   Calendar,
   CalendarDays,
   CheckCircle2,
-  ChevronRight,
+  ChefHat,
   Flame,
-  Layers,
-  ListTodo,
-  Plus,
   Salad,
   Settings2,
   ShoppingBag,
@@ -29,6 +25,7 @@ import { MacroBalanceWidget } from "./MacroBalanceWidget";
 import { MealPlannerCalendar } from "./MealPlannerCalendar";
 import { NutritionHabitsChecklist } from "./NutritionHabitsChecklist";
 import { NutritionSettingsModal } from "./NutritionSettingsModal";
+import { PantryAssistantModal } from "./PantryAssistantModal";
 import { PortionCounterCard } from "./PortionCounterCard";
 import { RecipeLibraryGuide } from "./RecipeLibraryGuide";
 import { SmartGroceryList } from "./SmartGroceryList";
@@ -49,6 +46,7 @@ export function NutritionView({
   >("daily");
   const [selectedDate, setSelectedDate] = useState<string>(data.todayLog.date);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [isPantryModalOpen, setIsPantryModalOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
 
   const handleAdjustPortion = (key: FoodGroupKey, delta: number) => {
@@ -150,6 +148,15 @@ export function NutritionView({
               <span>Lista del Súper</span>
             </button>
           </div>
+
+          <button
+            type="button"
+            onClick={() => setIsPantryModalOpen(true)}
+            className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-linear-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-neutral-950 font-bold text-xs shadow-lg shadow-emerald-500/20 transition-all hover:scale-[1.02]"
+          >
+            <ChefHat className="h-4 w-4" />
+            <span>💡 ¿Qué cocino hoy? (&lt;15m)</span>
+          </button>
 
           <button
             type="button"
@@ -362,6 +369,15 @@ export function NutritionView({
         onClose={() => setIsSettingsOpen(false)}
         settings={data.settings}
         onSuccess={onRefresh}
+      />
+
+      {/* Pantry Assistant Modal */}
+      <PantryAssistantModal
+        isOpen={isPantryModalOpen}
+        onClose={() => setIsPantryModalOpen(false)}
+        recipesCatalog={data.recipesCatalog}
+        todayDate={data.todayLog.date}
+        onRefresh={onRefresh}
       />
     </div>
   );
