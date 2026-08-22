@@ -90,7 +90,7 @@ export function BrioCommandCenter({
   const [isScratchpadOpen, setIsScratchpadOpen] = useState(false);
   const [isNotificationModalOpen, setIsNotificationModalOpen] = useState(false);
   const [isBottomSheetOpen, setIsBottomSheetOpen] = useState(false);
-  const [bottomSheetTab, setBottomSheetTab] = useState<"expense" | "task" | "water" | "weight">("expense");
+  const [bottomSheetTab, setBottomSheetTab] = useState<"expense" | "task" | "water" | "weight" | "nutrition">("expense");
   const [isSmartFitModalOpen, setIsSmartFitModalOpen] = useState(false);
   const [isManageSupplementsOpen, setIsManageSupplementsOpen] = useState(false);
 

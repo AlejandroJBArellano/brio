@@ -392,6 +392,7 @@ export interface HealthDashboardData {
   previousBodyComposition?: BodyCompositionLog;
   recentHevyWorkouts?: HevyWorkout[];
   hevyStats?: HevyStats;
+  nutritionData?: NutritionDashboardData;
 }
 
 // ----------------------------------------------------
@@ -527,3 +528,128 @@ export interface VaultDashboardData {
     totalProjects: number;
   };
 }
+
+// ----------------------------------------------------
+// Módulo de Nutrición & Dietas (Plan Mariana Mont & Tracking)
+// ----------------------------------------------------
+
+export type FoodGroupKey =
+  | "fruits"
+  | "vegetables"
+  | "cereals"
+  | "tubers"
+  | "legumes"
+  | "fats_seeds"
+  | "leafy_greens";
+
+export type MealSlotType =
+  | "breakfast"
+  | "lunch"
+  | "dinner"
+  | "snack"
+  | "smoothie";
+
+export interface MacroEstimate {
+  kcal: number;
+  proteinGrams: number;
+  carbsGrams: number;
+  fatGrams: number;
+  fiberGrams: number;
+}
+
+export interface FoodGroupMeta {
+  key: FoodGroupKey;
+  label: string;
+  shortLabel: string;
+  icon: string;
+  color: string;
+  unit: string;
+  standardPortionDesc: string;
+  defaultDailyTarget: number;
+  macroFactor: MacroEstimate;
+}
+
+export interface NutritionRecipe {
+  id: string;
+  title: string;
+  mealSlot: MealSlotType;
+  weekNumber?: number; // 1 to 4 for Mariana Mont plan presets
+  optionLabel?: string; // "Opción 1", "Opción 2", "Opción A", etc.
+  portions: Partial<Record<FoodGroupKey, number>>;
+  ingredients: string[];
+  prepNotes?: string;
+  isPreset?: boolean;
+  createdAt?: string;
+}
+
+export interface ScheduledMealItem {
+  id: string;
+  date: string; // YYYY-MM-DD
+  mealSlot: MealSlotType;
+  recipeId?: string;
+  customTitle?: string;
+  isCompleted: boolean;
+  portions?: Partial<Record<FoodGroupKey, number>>;
+  notes?: string;
+  recipe?: NutritionRecipe;
+  createdAt?: string;
+}
+
+export interface NutritionHabitLog {
+  dailySalad: boolean;
+  hydrationGoal: boolean;
+  noUltraProcessed: boolean;
+  b12Weekly: boolean;
+  spirulina: boolean;
+  omega3Dha: boolean;
+  magnesium: boolean;
+  vitC: boolean;
+}
+
+export interface NutritionDailyLog {
+  date: string; // YYYY-MM-DD
+  portions: Record<FoodGroupKey, number>;
+  habits: NutritionHabitLog;
+  calculatedMacros: MacroEstimate;
+  notes?: string;
+  updatedAt?: string;
+}
+
+export interface NutritionSettings {
+  dailyPortionGoals: Record<FoodGroupKey, number>;
+  macroFactors: Record<FoodGroupKey, MacroEstimate>;
+  waterTargetMl: number;
+  activeWeek?: number;
+}
+
+export interface GroceryItem {
+  id: string;
+  name: string;
+  category: "verduras_hojas" | "frutas" | "legumbres_granos" | "semillas_frutos" | "insumos_cocina" | "otros";
+  checked: boolean;
+  sourceRecipes?: string[];
+  estimatedQty?: string;
+}
+
+export interface GroceryListCategory {
+  categoryKey: string;
+  categoryTitle: string;
+  icon: string;
+  items: GroceryItem[];
+}
+
+export interface NutritionDashboardData {
+  todayLog: NutritionDailyLog;
+  settings: NutritionSettings;
+  scheduledMealsThisWeek: ScheduledMealItem[];
+  scheduledMealsToday: ScheduledMealItem[];
+  recipesCatalog: NutritionRecipe[];
+  recentDailyLogs: NutritionDailyLog[];
+  weeklyAdherence: {
+    daysWithPortionsMet: number;
+    daysWithSalad: number;
+    daysWithWater: number;
+    b12LoggedThisWeek: boolean;
+  };
+}
+

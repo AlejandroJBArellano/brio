@@ -26,6 +26,8 @@ import {
   Star,
   Upload,
   UploadCloud,
+  Utensils,
+  Salad,
   X,
   Zap,
 } from "lucide-react";
@@ -33,6 +35,7 @@ import { useState, useTransition } from "react";
 import { BodyCompositionWidget } from "./BodyCompositionWidget";
 import { HevyWidget } from "./HevyWidget";
 import { ManageSupplementsModal } from "./ManageSupplementsModal";
+import { NutritionView } from "./nutrition/NutritionView";
 import { SmartFitModal } from "./SmartFitModal";
 
 interface HealthViewProps {
@@ -49,6 +52,9 @@ const WORKOUT_TYPES: { id: WorkoutType; label: string; icon: string }[] = [
 ];
 
 export function HealthView({ data, onRefresh }: HealthViewProps) {
+  const [activeHealthTab, setActiveHealthTab] = useState<
+    "overview" | "nutrition" | "body_composition" | "hevy"
+  >("overview");
   const [workoutNotes, setWorkoutNotes] = useState("");
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
   const [isManageSupplementsOpen, setIsManageSupplementsOpen] = useState(false);
@@ -98,72 +104,198 @@ export function HealthView({ data, onRefresh }: HealthViewProps) {
 
   return (
     <div className="flex flex-col gap-6 animate-in fade-in duration-300">
-      {/* 1. Header Metrics Row */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {/* Workout Streak */}
-        <div className="rounded-2xl border border-emerald-500/20 bg-neutral-900/60 p-4 backdrop-blur-xl shadow-xl">
-          <div className="flex items-center justify-between text-xs text-neutral-400">
-            <span>Racha de Entrenamiento</span>
-            <Flame className="h-4 w-4 text-amber-400" />
-          </div>
-          <div className="mt-2 text-2xl font-bold font-mono text-emerald-400">
-            {data.workoutStreak} días seguidos
-          </div>
-          <div className="mt-1 text-[11px] text-neutral-500">
-            {data.weeklyWorkoutsCount} sesiones esta semana
-          </div>
-        </div>
+      {/* 0. Health Sub-module Navigation Ribbon */}
+      <div className="flex flex-wrap items-center justify-between gap-3 p-2 rounded-2xl border border-white/[0.08] bg-neutral-900/60 backdrop-blur-xl shadow-lg">
+        <div className="flex flex-wrap items-center gap-1.5 p-1 rounded-xl bg-neutral-950/80 border border-white/[0.06]">
+          <button
+            type="button"
+            onClick={() => setActiveHealthTab("overview")}
+            className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all ${
+              activeHealthTab === "overview"
+                ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 shadow-sm"
+                : "text-neutral-400 hover:text-white"
+            }`}
+          >
+            <Activity className="h-3.5 w-3.5" />
+            <span>Resumen & Hábitos</span>
+          </button>
 
-        {/* Hydration */}
-        <div className="rounded-2xl border border-sky-500/20 bg-neutral-900/60 p-4 backdrop-blur-xl shadow-xl">
-          <div className="flex items-center justify-between text-xs text-neutral-400">
-            <span>Hidratación Hoy</span>
-            <Droplet className="h-4 w-4 text-sky-400" />
-          </div>
-          <div className="mt-2 text-2xl font-bold font-mono text-sky-400">
-            {data.todayHealth.waterMl} / 3000 ml
-          </div>
-          <div className="mt-1 text-[11px] text-neutral-500">
-            {data.waterPercent}% de tu meta diaria de 3L
-          </div>
-        </div>
+          <button
+            type="button"
+            onClick={() => setActiveHealthTab("nutrition")}
+            className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all ${
+              activeHealthTab === "nutrition"
+                ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 shadow-sm"
+                : "text-neutral-400 hover:text-white"
+            }`}
+          >
+            <Salad className="h-3.5 w-3.5 text-emerald-400" />
+            <span>Nutrición & Mariana Mont</span>
+            {data.nutritionData && (
+              <span className="ml-1 rounded-full bg-emerald-500/20 px-1.5 py-0.2 text-[9px] font-mono text-emerald-300">
+                {data.nutritionData.todayLog.calculatedMacros.kcal} kcal
+              </span>
+            )}
+          </button>
 
-        {/* Sleep Average */}
-        <div className="rounded-2xl border border-indigo-500/20 bg-neutral-900/60 p-4 backdrop-blur-xl shadow-xl">
-          <div className="flex items-center justify-between text-xs text-neutral-400">
-            <span>Sueño & Recuperación</span>
-            <Moon className="h-4 w-4 text-indigo-400" />
-          </div>
-          <div className="mt-2 text-2xl font-bold font-mono text-indigo-400">
-            {data.todayHealth.sleepHours} hrs
-          </div>
-          <div className="mt-1 text-[11px] text-neutral-500">
-            Calidad: {data.todayHealth.sleepQuality} de 5 ⭐ (Promedio: {data.averageSleepHours}h)
-          </div>
-        </div>
+          <button
+            type="button"
+            onClick={() => setActiveHealthTab("body_composition")}
+            className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all ${
+              activeHealthTab === "body_composition"
+                ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 shadow-sm"
+                : "text-neutral-400 hover:text-white"
+            }`}
+          >
+            <Heart className="h-3.5 w-3.5" />
+            <span>Composición Corporal</span>
+          </button>
 
-        {/* Daily Steps */}
-        <div className="rounded-2xl border border-violet-500/20 bg-neutral-900/60 p-4 backdrop-blur-xl shadow-xl">
-          <div className="flex items-center justify-between text-xs text-neutral-400">
-            <span>Pasos / Movimiento</span>
-            <Activity className="h-4 w-4 text-violet-400" />
-          </div>
-          <div className="mt-2 text-2xl font-bold font-mono text-violet-400">
-            {data.todayHealth.stepsCount > 0
-              ? `${data.todayHealth.stepsCount.toLocaleString()} pasos`
-              : "Samsung Sync"}
-          </div>
-          <div className="mt-1 text-[11px] text-neutral-500">
-            <button
-              type="button"
-              onClick={() => setIsImportModalOpen(true)}
-              className="text-violet-300 hover:underline font-semibold"
-            >
-              Importar Samsung Health ↗
-            </button>
-          </div>
+          <button
+            type="button"
+            onClick={() => setActiveHealthTab("hevy")}
+            className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all ${
+              activeHealthTab === "hevy"
+                ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 shadow-sm"
+                : "text-neutral-400 hover:text-white"
+            }`}
+          >
+            <Dumbbell className="h-3.5 w-3.5" />
+            <span>Hevy Gym Tracker</span>
+          </button>
         </div>
       </div>
+
+      {/* RENDER ACTIVE TAB */}
+      {activeHealthTab === "nutrition" && data.nutritionData && (
+        <NutritionView data={data.nutritionData} onRefresh={onRefresh} />
+      )}
+
+      {activeHealthTab === "body_composition" && (
+        <div className="space-y-6 animate-in fade-in duration-200">
+          <BodyCompositionWidget
+            logs={data.bodyCompositionLogs || []}
+            latest={data.latestBodyComposition}
+            previous={data.previousBodyComposition}
+            onOpenModal={() => setIsSmartFitModalOpen(true)}
+            onRefresh={onRefresh}
+          />
+        </div>
+      )}
+
+      {activeHealthTab === "hevy" && (
+        <div className="space-y-6 animate-in fade-in duration-200">
+          <HevyWidget
+            recentWorkouts={data.recentHevyWorkouts}
+            stats={data.hevyStats}
+            onRefresh={onRefresh}
+          />
+        </div>
+      )}
+
+      {activeHealthTab === "overview" && (
+        <div className="space-y-6 animate-in fade-in duration-200">
+          {/* 1. Header Metrics Row */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {/* Workout Streak */}
+            <div className="rounded-2xl border border-emerald-500/20 bg-neutral-900/60 p-4 backdrop-blur-xl shadow-xl">
+              <div className="flex items-center justify-between text-xs text-neutral-400">
+                <span>Racha de Entrenamiento</span>
+                <Flame className="h-4 w-4 text-amber-400" />
+              </div>
+              <div className="mt-2 text-2xl font-bold font-mono text-emerald-400">
+                {data.workoutStreak} días seguidos
+              </div>
+              <div className="mt-1 text-[11px] text-neutral-500">
+                {data.weeklyWorkoutsCount} sesiones esta semana
+              </div>
+            </div>
+
+            {/* Hydration */}
+            <div className="rounded-2xl border border-sky-500/20 bg-neutral-900/60 p-4 backdrop-blur-xl shadow-xl">
+              <div className="flex items-center justify-between text-xs text-neutral-400">
+                <span>Hidratación Hoy</span>
+                <Droplet className="h-4 w-4 text-sky-400" />
+              </div>
+              <div className="mt-2 text-2xl font-bold font-mono text-sky-400">
+                {data.todayHealth.waterMl} / 3000 ml
+              </div>
+              <div className="mt-1 text-[11px] text-neutral-500">
+                {data.waterPercent}% de tu meta diaria de 3L
+              </div>
+            </div>
+
+            {/* Sleep Average */}
+            <div className="rounded-2xl border border-indigo-500/20 bg-neutral-900/60 p-4 backdrop-blur-xl shadow-xl">
+              <div className="flex items-center justify-between text-xs text-neutral-400">
+                <span>Sueño & Recuperación</span>
+                <Moon className="h-4 w-4 text-indigo-400" />
+              </div>
+              <div className="mt-2 text-2xl font-bold font-mono text-indigo-400">
+                {data.todayHealth.sleepHours} hrs
+              </div>
+              <div className="mt-1 text-[11px] text-neutral-500">
+                Calidad: {data.todayHealth.sleepQuality} de 5 ⭐ (Promedio: {data.averageSleepHours}h)
+              </div>
+            </div>
+
+            {/* Daily Steps */}
+            <div className="rounded-2xl border border-violet-500/20 bg-neutral-900/60 p-4 backdrop-blur-xl shadow-xl">
+              <div className="flex items-center justify-between text-xs text-neutral-400">
+                <span>Pasos / Movimiento</span>
+                <Activity className="h-4 w-4 text-violet-400" />
+              </div>
+              <div className="mt-2 text-2xl font-bold font-mono text-violet-400">
+                {data.todayHealth.stepsCount > 0
+                  ? `${data.todayHealth.stepsCount.toLocaleString()} pasos`
+                  : "Samsung Sync"}
+              </div>
+              <div className="mt-1 text-[11px] text-neutral-500">
+                <button
+                  type="button"
+                  onClick={() => setIsImportModalOpen(true)}
+                  className="text-violet-300 hover:underline font-semibold"
+                >
+                  Importar Samsung Health ↗
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* 1.2 Nutrition Glance Summary Card */}
+          {data.nutritionData && (
+            <div className="rounded-2xl border border-emerald-500/20 bg-gradient-to-r from-emerald-950/30 via-neutral-900/60 to-neutral-900/60 p-4.5 backdrop-blur-xl shadow-xl flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div className="flex items-center gap-3.5">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                  <Salad className="h-5 w-5" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <h3 className="text-sm font-bold text-white tracking-tight">
+                      Nutrición Hoy: {data.nutritionData.todayLog.calculatedMacros.kcal} kcal
+                    </h3>
+                    <span className="rounded bg-emerald-500/20 border border-emerald-500/30 px-1.5 py-0.5 text-[10px] font-mono text-emerald-300 font-bold">
+                      P: {data.nutritionData.todayLog.calculatedMacros.proteinGrams}g | C: {data.nutritionData.todayLog.calculatedMacros.carbsGrams}g | G: {data.nutritionData.todayLog.calculatedMacros.fatGrams}g
+                    </span>
+                  </div>
+                  <p className="text-xs text-neutral-400 mt-0.5">
+                    {data.nutritionData.scheduledMealsToday.length > 0
+                      ? `Próxima comida: ${data.nutritionData.scheduledMealsToday[0].recipe?.title || data.nutritionData.scheduledMealsToday[0].customTitle || "Programada"}`
+                      : "Toca para registrar porciones de fruta, cereales, legumbres y ensalada diaria"}
+                  </p>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setActiveHealthTab("nutrition")}
+                className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-emerald-600 font-bold text-xs text-white hover:bg-emerald-500 transition-all shadow-md shadow-emerald-600/20 shrink-0 self-start sm:self-center"
+              >
+                <span>Abrir Nutrición</span>
+                <span>→</span>
+              </button>
+            </div>
+          )}
 
       {/* 1.5. Hevy Workout Tracker Widget */}
       <HevyWidget
@@ -435,6 +567,8 @@ export function HealthView({ data, onRefresh }: HealthViewProps) {
         onOpenModal={() => setIsSmartFitModalOpen(true)}
         onRefresh={onRefresh}
       />
+        </div>
+      )}
 
       {/* Samsung Health Import Modal */}
       {isImportModalOpen && (

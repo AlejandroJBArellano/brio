@@ -1,14 +1,15 @@
-"use client";
-
 import { createTransactionAction } from "@/app/actions/finance";
 import { createBodyCompositionAction, logWaterAction } from "@/app/actions/health";
+import { quickAdjustPortionAction, toggleNutritionHabitAction } from "@/app/actions/nutrition";
 import { createSingleTaskAction } from "@/app/actions/tasks";
+import { FoodGroupKey } from "@/lib/types";
 import {
   Check,
   CheckSquare,
   DollarSign,
   Droplet,
   Loader2,
+  Salad,
   Scale,
   Sparkles,
   Wallet,
@@ -18,7 +19,7 @@ import {
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 
-type SheetTab = "expense" | "task" | "water" | "weight";
+type SheetTab = "expense" | "task" | "water" | "weight" | "nutrition";
 
 interface MobileBottomSheetProps {
   isOpen: boolean;
@@ -152,6 +153,36 @@ export function MobileBottomSheet({
     });
   };
 
+  const handleQuickPortion = (group: FoodGroupKey, name: string) => {
+    const todayStr = new Date().toISOString().split("T")[0];
+    startTransition(async () => {
+      const res = await quickAdjustPortionAction(todayStr, group, 1.0);
+      if (res.success) {
+        setSuccessMessage(`+1 ${name} registrado 🥑`);
+        setTimeout(() => {
+          setSuccessMessage(null);
+          onClose();
+          router.refresh();
+        }, 700);
+      }
+    });
+  };
+
+  const handleQuickHabit = (habitKey: "dailySalad" | "noUltraProcessed" | "b12Weekly", name: string) => {
+    const todayStr = new Date().toISOString().split("T")[0];
+    startTransition(async () => {
+      const res = await toggleNutritionHabitAction(todayStr, habitKey);
+      if (res.success) {
+        setSuccessMessage(`${name} actualizado ✨`);
+        setTimeout(() => {
+          setSuccessMessage(null);
+          onClose();
+          router.refresh();
+        }, 700);
+      }
+    });
+  };
+
   return (
     <div className="fixed inset-0 z-50 flex flex-col justify-end bg-black/80 backdrop-blur-sm animate-in fade-in duration-200">
       {/* Click outside backdrop */}
@@ -193,6 +224,18 @@ export function MobileBottomSheet({
             >
               <CheckSquare className="size-3.5" />
               Tarea
+            </button>
+            <button
+              type="button"
+              onClick={() => setActiveTab("nutrition")}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all ${
+                activeTab === "nutrition"
+                  ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 shadow"
+                  : "text-neutral-400 hover:text-white"
+              }`}
+            >
+              <Salad className="size-3.5" />
+              Nutrición
             </button>
             <button
               type="button"
@@ -406,6 +449,70 @@ export function MobileBottomSheet({
               )}
             </button>
           </form>
+        )}
+
+        {/* 2.5. Nutrición View */}
+        {activeTab === "nutrition" && (
+          <div className="space-y-4">
+            <div>
+              <span className="text-xs font-bold text-neutral-300 block mb-2">
+                1-Tap: Sumar Porción (+1)
+              </span>
+              <div className="grid grid-cols-3 gap-2">
+                {[
+                  { key: "fruits" as const, name: "Fruta", icon: "🍎", color: "border-rose-500/30 bg-rose-500/10 text-rose-300" },
+                  { key: "vegetables" as const, name: "Verdura", icon: "🥦", color: "border-emerald-500/30 bg-emerald-500/10 text-emerald-300" },
+                  { key: "cereals" as const, name: "Cereal", icon: "🌾", color: "border-amber-500/30 bg-amber-500/10 text-amber-300" },
+                  { key: "legumes" as const, name: "Legumbre/Tofu", icon: "🫘", color: "border-purple-500/30 bg-purple-500/10 text-purple-300" },
+                  { key: "fats_seeds" as const, name: "Semillas/Grasa", icon: "🥑", color: "border-lime-500/30 bg-lime-500/10 text-lime-300" },
+                  { key: "leafy_greens" as const, name: "Hojas", icon: "🥬", color: "border-teal-500/30 bg-teal-500/10 text-teal-300" },
+                ].map((item) => (
+                  <button
+                    key={item.key}
+                    type="button"
+                    onClick={() => handleQuickPortion(item.key, item.name)}
+                    disabled={isPending}
+                    className={`flex flex-col items-center justify-center p-3 rounded-2xl border text-xs font-bold transition-all active:scale-95 ${item.color}`}
+                  >
+                    <span className="text-xl mb-1">{item.icon}</span>
+                    <span>+1 {item.name}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="pt-2 border-t border-white/8">
+              <span className="text-xs font-bold text-neutral-300 block mb-2">
+                Hábitos Clave de Mariana Mont:
+              </span>
+              <div className="grid grid-cols-3 gap-2">
+                <button
+                  type="button"
+                  onClick={() => handleQuickHabit("dailySalad", "Ensalada Diaria")}
+                  disabled={isPending}
+                  className="py-2.5 px-2 rounded-xl bg-neutral-950 border border-emerald-500/30 text-[11px] font-bold text-emerald-300 hover:bg-emerald-500/10 transition-all text-center"
+                >
+                  🥗 Ensalada Diaria
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleQuickHabit("noUltraProcessed", "Cero Procesados")}
+                  disabled={isPending}
+                  className="py-2.5 px-2 rounded-xl bg-neutral-950 border border-amber-500/30 text-[11px] font-bold text-amber-300 hover:bg-amber-500/10 transition-all text-center"
+                >
+                  🚫 Cero Procesados
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleQuickHabit("b12Weekly", "Vitamina B12")}
+                  disabled={isPending}
+                  className="py-2.5 px-2 rounded-xl bg-neutral-950 border border-violet-500/30 text-[11px] font-bold text-violet-300 hover:bg-violet-500/10 transition-all text-center"
+                >
+                  💊 Vitamina B12
+                </button>
+              </div>
+            </div>
+          </div>
         )}
 
         {/* 3. Agua View */}

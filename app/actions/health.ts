@@ -14,6 +14,7 @@ import {
   WorkoutType,
 } from "@/lib/types";
 import { revalidatePath } from "next/cache";
+import { fetchNutritionDashboardDataAction } from "./nutrition";
 
 const INITIAL_SMART_FIT_LOG: BodyCompositionLog = {
   id: "smartfit-2025-11-12",
@@ -290,6 +291,9 @@ export async function fetchHealthDashboardDataAction(): Promise<HealthDashboardD
     lastSyncedAt: statsRows[0]?.last_sync?.toString(),
   };
 
+  // 6. Fetch Nutrition & Meal Planner Data
+  const nutritionData = await fetchNutritionDashboardDataAction(todayStr);
+
   return {
     todayHealth,
     waterPercent,
@@ -303,6 +307,7 @@ export async function fetchHealthDashboardDataAction(): Promise<HealthDashboardD
     previousBodyComposition,
     recentHevyWorkouts,
     hevyStats,
+    nutritionData,
   };
 }
 

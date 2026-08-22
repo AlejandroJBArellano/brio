@@ -335,6 +335,66 @@ export async function ensureDatabaseSchema() {
       CREATE INDEX IF NOT EXISTS idx_wishlist_items_created_at ON wishlist_items(created_at DESC);
     `;
 
+    // 13. Módulo de Nutrición & Dietas (Plan Mariana Mont + Tracking)
+    await sql`
+      CREATE TABLE IF NOT EXISTS nutrition_recipes (
+        id TEXT PRIMARY KEY,
+        title VARCHAR(255) NOT NULL,
+        meal_slot VARCHAR(30) NOT NULL,
+        week_number INTEGER,
+        option_label VARCHAR(50),
+        portions JSONB DEFAULT '{}'::jsonb,
+        ingredients JSONB DEFAULT '[]'::jsonb,
+        prep_notes TEXT,
+        is_preset BOOLEAN DEFAULT false,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+      );
+    `;
+
+    await sql`
+      CREATE INDEX IF NOT EXISTS idx_nutrition_recipes_slot ON nutrition_recipes(meal_slot);
+    `;
+
+    await sql`
+      CREATE TABLE IF NOT EXISTS nutrition_meal_schedule (
+        id TEXT PRIMARY KEY,
+        date DATE NOT NULL,
+        meal_slot VARCHAR(30) NOT NULL,
+        recipe_id TEXT REFERENCES nutrition_recipes(id) ON DELETE SET NULL,
+        custom_title VARCHAR(255),
+        is_completed BOOLEAN DEFAULT false,
+        portions JSONB DEFAULT '{}'::jsonb,
+        notes TEXT,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+      );
+    `;
+
+    await sql`
+      CREATE INDEX IF NOT EXISTS idx_nutrition_schedule_date ON nutrition_meal_schedule(date DESC);
+    `;
+
+    await sql`
+      CREATE TABLE IF NOT EXISTS nutrition_daily_logs (
+        date DATE PRIMARY KEY DEFAULT CURRENT_DATE,
+        portions JSONB DEFAULT '{}'::jsonb,
+        habits JSONB DEFAULT '{}'::jsonb,
+        calculated_macros JSONB DEFAULT '{}'::jsonb,
+        notes TEXT,
+        updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+      );
+    `;
+
+    await sql`
+      CREATE TABLE IF NOT EXISTS nutrition_settings (
+        id TEXT PRIMARY KEY DEFAULT 'default',
+        daily_portion_goals JSONB DEFAULT '{}'::jsonb,
+        macro_factors JSONB DEFAULT '{}'::jsonb,
+        water_target_ml INTEGER DEFAULT 2000,
+        active_week INTEGER DEFAULT 1,
+        updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+      );
+    `;
+
     isInitialized = true;
   } catch (error) {
     console.error("[Brio DB Init Error]:", error);
