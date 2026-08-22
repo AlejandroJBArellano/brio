@@ -266,7 +266,7 @@ export async function ensureDatabaseSchema() {
       CREATE INDEX IF NOT EXISTS idx_hevy_workouts_date ON hevy_workouts(date DESC);
     `;
 
-    // 11. Bóveda & Intereses (Books, Sheet Music & Documents)
+    // 11. Bóveda & Intereses (Books, Sheet Music, Courses, Videos & Resources)
     await sql`
       CREATE TABLE IF NOT EXISTS vault_items (
         id TEXT PRIMARY KEY,
@@ -276,6 +276,8 @@ export async function ensureDatabaseSchema() {
         status VARCHAR(30) NOT NULL DEFAULT 'backlog',
         instrument VARCHAR(50),
         difficulty VARCHAR(30),
+        platform VARCHAR(50),
+        url TEXT,
         cover_url TEXT,
         file_url TEXT,
         file_key TEXT,
@@ -290,6 +292,14 @@ export async function ensureDatabaseSchema() {
       );
     `;
 
+    // Ensure backwards-compatible columns on vault_items
+    await sql`
+      ALTER TABLE vault_items ADD COLUMN IF NOT EXISTS url TEXT;
+    `;
+    await sql`
+      ALTER TABLE vault_items ADD COLUMN IF NOT EXISTS platform VARCHAR(50);
+    `;
+
     await sql`
       CREATE INDEX IF NOT EXISTS idx_vault_items_category ON vault_items(category);
     `;
@@ -298,6 +308,31 @@ export async function ensureDatabaseSchema() {
     `;
     await sql`
       CREATE INDEX IF NOT EXISTS idx_vault_items_updated_at ON vault_items(updated_at DESC);
+    `;
+
+    // 12. Wishlist Financiera Anti-Impulso
+    await sql`
+      CREATE TABLE IF NOT EXISTS wishlist_items (
+        id TEXT PRIMARY KEY,
+        title VARCHAR(200) NOT NULL,
+        price_estimated NUMERIC(12, 2) NOT NULL,
+        category VARCHAR(50) DEFAULT 'general',
+        priority VARCHAR(20) DEFAULT 'medium',
+        url TEXT,
+        image_url TEXT,
+        reason_or_notes TEXT,
+        status VARCHAR(20) DEFAULT 'cooling',
+        cooling_days_total INTEGER DEFAULT 30,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+        resolved_at TIMESTAMP WITH TIME ZONE
+      );
+    `;
+
+    await sql`
+      CREATE INDEX IF NOT EXISTS idx_wishlist_items_status ON wishlist_items(status);
+    `;
+    await sql`
+      CREATE INDEX IF NOT EXISTS idx_wishlist_items_created_at ON wishlist_items(created_at DESC);
     `;
 
     isInitialized = true;

@@ -6,11 +6,16 @@ import {
   BookOpen,
   CheckCircle2,
   FileText,
+  FolderGit2,
+  GraduationCap,
   Image as ImageIcon,
+  Link as LinkIcon,
   Music,
   Plus,
   Sparkles,
+  Tv,
   UploadCloud,
+  Video,
   X,
 } from "lucide-react";
 import { useState, useTransition } from "react";
@@ -22,7 +27,8 @@ interface AddVaultItemModalProps {
   onSuccess?: () => void;
 }
 
-const INSTRUMENTS = ["Piano", "Guitarra", "Voz", "Batería", "Bajo", "Violín", "Otro"];
+const INSTRUMENTS = ["Piano", "Guitarra", "Voz", "Batería", "Bajo", "Violín", "Producción", "Otro"];
+const PLATFORMS = ["Udemy", "YouTube", "Platzi", "Coursera", "Frontend Masters", "GitHub", "Notion", "Web"];
 const DIFFICULTIES = [
   { id: "beginner", label: "Principiante 🟢" },
   { id: "intermediate", label: "Intermedio 🟡" },
@@ -39,6 +45,8 @@ export function AddVaultItemModal({
   const [title, setTitle] = useState("");
   const [authorOrCreator, setAuthorOrCreator] = useState("");
   const [status, setStatus] = useState<VaultItemStatus>("backlog");
+  const [platform, setPlatform] = useState("Udemy");
+  const [url, setUrl] = useState("");
   const [instrument, setInstrument] = useState("Piano");
   const [difficulty, setDifficulty] = useState("intermediate");
   const [totalPages, setTotalPages] = useState("");
@@ -50,6 +58,30 @@ export function AddVaultItemModal({
   const [coverUrl, setCoverUrl] = useState("");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
+
+  const handleUrlChange = (newUrl: string) => {
+    setUrl(newUrl);
+    const low = newUrl.toLowerCase();
+    if (low.includes("notion.so") || low.includes("notion.site")) {
+      setPlatform("Notion");
+      if (category !== "link") setCategory("link");
+    } else if (low.includes("youtube.com") || low.includes("youtu.be")) {
+      setPlatform("YouTube");
+      if (category !== "video") setCategory("video");
+    } else if (low.includes("github.com")) {
+      setPlatform("GitHub");
+      if (category !== "link") setCategory("link");
+    } else if (low.includes("udemy.com")) {
+      setPlatform("Udemy");
+      if (category !== "course") setCategory("course");
+    } else if (low.includes("platzi.com")) {
+      setPlatform("Platzi");
+      if (category !== "course") setCategory("course");
+    } else if (low.includes("coursera.org")) {
+      setPlatform("Coursera");
+      if (category !== "course") setCategory("course");
+    }
+  };
 
   if (!isOpen) return null;
 
@@ -69,6 +101,8 @@ export function AddVaultItemModal({
     formData.append("status", status);
     formData.append("notes", notes.trim());
     formData.append("tags", tags.trim());
+    if (url.trim()) formData.append("url", url.trim());
+    if (platform.trim()) formData.append("platform", platform.trim());
 
     if (category === "sheet_music") {
       formData.append("instrument", instrument);
@@ -94,11 +128,11 @@ export function AddVaultItemModal({
         // Reset form
         setTitle("");
         setAuthorOrCreator("");
+        setUrl("");
         setNotes("");
         setTags("");
         setSelectedFile(null);
         setSelectedCover(null);
-        setCoverUrl("");
       } else {
         setErrorMessage(res.error || "No se pudo guardar el elemento.");
       }
@@ -107,19 +141,24 @@ export function AddVaultItemModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-200">
-      <div className="w-full max-w-xl max-h-[90vh] flex flex-col rounded-3xl border border-white/[0.12] bg-neutral-900 shadow-2xl overflow-hidden">
-        {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-white/[0.08] bg-neutral-950/60">
+      <div className="w-full max-w-xl max-h-[90vh] rounded-3xl border border-white/[0.12] bg-neutral-900 shadow-2xl overflow-hidden flex flex-col">
+        {/* Modal Header */}
+        <div className="flex items-center justify-between px-6 py-4 border-b border-white/[0.08] bg-neutral-950/60 shrink-0">
           <div className="flex items-center gap-2.5">
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-amber-500/20 to-orange-500/20 border border-amber-500/30 text-amber-400">
-              <Sparkles className="h-4 w-4" />
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-cyan-500/20 to-blue-500/20 border border-cyan-500/30 text-cyan-400">
+              {category === "sheet_music" && <Music className="h-4 w-4" />}
+              {category === "book" && <BookOpen className="h-4 w-4" />}
+              {category === "course" && <GraduationCap className="h-4 w-4" />}
+              {category === "video" && <Video className="h-4 w-4" />}
+              {category === "link" && <LinkIcon className="h-4 w-4" />}
+              {category === "document" && <FileText className="h-4 w-4" />}
             </div>
             <div>
               <h3 className="text-base font-bold text-white tracking-tight">
-                Agregar a la Bóveda de Intereses
+                Agregar a la Bóveda
               </h3>
               <p className="text-xs text-neutral-400">
-                Almacenamiento en S3, visor de partituras y seguimiento Kanban
+                Almacenamiento en AWS S3 & seguimiento de progreso
               </p>
             </div>
           </div>
@@ -133,57 +172,44 @@ export function AddVaultItemModal({
         </div>
 
         {/* Scrollable Form */}
-        <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-6 space-y-4">
+        <form onSubmit={handleSubmit} className="p-6 space-y-4 overflow-y-auto flex-1">
           {errorMessage && (
             <div className="p-3 rounded-xl border border-rose-500/30 bg-rose-500/10 text-xs font-semibold text-rose-300">
               {errorMessage}
             </div>
           )}
 
-          {/* Category Selector */}
+          {/* Category Selector Buttons */}
           <div>
-            <label className="block text-xs font-bold text-neutral-300 uppercase tracking-wider mb-2">
-              Tipo de Interés
+            <label className="block text-xs font-medium text-neutral-300 mb-2">
+              Tipo de Elemento
             </label>
-            <div className="grid grid-cols-3 gap-2">
-              <button
-                type="button"
-                onClick={() => setCategory("book")}
-                className={`flex items-center justify-center gap-2 p-3 rounded-2xl border text-xs font-bold transition-all ${
-                  category === "book"
-                    ? "bg-amber-500/20 border-amber-500/40 text-amber-300 shadow-lg shadow-amber-500/10"
-                    : "bg-neutral-950/60 border-white/[0.06] text-neutral-400 hover:text-white"
-                }`}
-              >
-                <BookOpen className="h-4 w-4" />
-                <span>Libro</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setCategory("sheet_music")}
-                className={`flex items-center justify-center gap-2 p-3 rounded-2xl border text-xs font-bold transition-all ${
-                  category === "sheet_music"
-                    ? "bg-cyan-500/20 border-cyan-500/40 text-cyan-300 shadow-lg shadow-cyan-500/10"
-                    : "bg-neutral-950/60 border-white/[0.06] text-neutral-400 hover:text-white"
-                }`}
-              >
-                <Music className="h-4 w-4" />
-                <span>Partitura</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setCategory("document")}
-                className={`flex items-center justify-center gap-2 p-3 rounded-2xl border text-xs font-bold transition-all ${
-                  category === "document"
-                    ? "bg-indigo-500/20 border-indigo-500/40 text-indigo-300 shadow-lg shadow-indigo-500/10"
-                    : "bg-neutral-950/60 border-white/[0.06] text-neutral-400 hover:text-white"
-                }`}
-              >
-                <FileText className="h-4 w-4" />
-                <span>Documento</span>
-              </button>
+            <div className="grid grid-cols-3 sm:grid-cols-6 gap-1.5">
+              {[
+                { id: "course", label: "Curso", icon: GraduationCap },
+                { id: "book", label: "Libro", icon: BookOpen },
+                { id: "sheet_music", label: "Partitura", icon: Music },
+                { id: "video", label: "Video/YT", icon: Video },
+                { id: "link", label: "GitHub/Link", icon: FolderGit2 },
+                { id: "document", label: "Doc S3", icon: FileText },
+              ].map((c) => {
+                const Icon = c.icon;
+                return (
+                  <button
+                    key={c.id}
+                    type="button"
+                    onClick={() => setCategory(c.id as VaultItemCategory)}
+                    className={`flex flex-col items-center justify-center p-2 rounded-xl border text-[11px] font-semibold transition-all ${
+                      category === c.id
+                        ? "bg-cyan-500/20 border-cyan-500/40 text-cyan-300"
+                        : "bg-neutral-950 border-white/[0.06] text-neutral-400 hover:text-white"
+                    }`}
+                  >
+                    <Icon className="h-4 w-4 mb-1" />
+                    <span>{c.label}</span>
+                  </button>
+                );
+              })}
             </div>
           </div>
 
@@ -191,64 +217,111 @@ export function AddVaultItemModal({
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <label className="block text-xs font-medium text-neutral-300 mb-1.5">
-                {category === "sheet_music" ? "Título de la Obra / Pieza *" : "Título del Libro / Doc *"}
+                Título *
               </label>
               <input
                 type="text"
                 required
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
-                placeholder={category === "sheet_music" ? "Ej. Claro de Luna" : "Ej. Atomic Habits"}
+                placeholder={
+                  category === "sheet_music"
+                    ? "Ej. Clair de Lune"
+                    : category === "course"
+                    ? "Ej. Next.js 15 & React 19 Pro"
+                    : category === "video"
+                    ? "Ej. Charla Arquitectura Distribuida"
+                    : "Ej. Designing Data-Intensive Applications"
+                }
                 className="w-full rounded-xl border border-white/[0.1] bg-neutral-950 p-2.5 text-xs text-white placeholder:text-neutral-600 focus:outline-none focus:border-cyan-500"
               />
             </div>
 
             <div>
               <label className="block text-xs font-medium text-neutral-300 mb-1.5">
-                {category === "sheet_music" ? "Compositor / Artista" : "Autor / Editorial"}
+                {category === "sheet_music"
+                  ? "Compositor"
+                  : category === "course" || category === "video"
+                  ? "Instructor / Canal"
+                  : "Autor"}
               </label>
               <input
                 type="text"
                 value={authorOrCreator}
                 onChange={(e) => setAuthorOrCreator(e.target.value)}
-                placeholder={category === "sheet_music" ? "Ej. Claude Debussy" : "Ej. James Clear"}
+                placeholder="Ej. Claude Debussy / Martin Kleppmann"
                 className="w-full rounded-xl border border-white/[0.1] bg-neutral-950 p-2.5 text-xs text-white placeholder:text-neutral-600 focus:outline-none focus:border-cyan-500"
               />
             </div>
           </div>
 
+          {/* URL & Platform if Course, Video, or Link */}
+          {(category === "course" || category === "video" || category === "link") && (
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <div>
+                <label className="block text-xs font-medium text-neutral-300 mb-1.5">
+                  Plataforma
+                </label>
+                <select
+                  value={platform}
+                  onChange={(e) => setPlatform(e.target.value)}
+                  className="w-full rounded-xl border border-white/[0.1] bg-neutral-950 p-2.5 text-xs text-white focus:outline-none"
+                >
+                  {PLATFORMS.map((plat) => (
+                    <option key={plat} value={plat}>
+                      {plat}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="sm:col-span-2">
+                <label className="block text-xs font-medium text-neutral-300 mb-1.5">
+                  Enlace Web (URL de YouTube / Curso / GitHub)
+                </label>
+                <input
+                  type="url"
+                  value={url}
+                  onChange={(e) => setUrl(e.target.value)}
+                  placeholder="https://youtube.com/watch?v=... o https://udemy.com/..."
+                  className="w-full rounded-xl border border-white/[0.1] bg-neutral-950 p-2.5 text-xs text-white placeholder:text-neutral-600 focus:outline-none focus:border-cyan-500"
+                />
+              </div>
+            </div>
+          )}
+
           {/* Sheet Music Specific Fields */}
           {category === "sheet_music" && (
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 p-3.5 rounded-2xl bg-cyan-950/20 border border-cyan-500/20">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
-                <label className="block text-xs font-medium text-cyan-300 mb-1.5">
+                <label className="block text-xs font-medium text-neutral-300 mb-1.5">
                   Instrumento
                 </label>
                 <select
                   value={instrument}
                   onChange={(e) => setInstrument(e.target.value)}
-                  className="w-full rounded-xl border border-cyan-500/30 bg-neutral-950 p-2.5 text-xs text-white focus:outline-none"
+                  className="w-full rounded-xl border border-white/[0.1] bg-neutral-950 p-2.5 text-xs text-white focus:outline-none"
                 >
-                  {INSTRUMENTS.map((ins) => (
-                    <option key={ins} value={ins}>
-                      {ins}
+                  {INSTRUMENTS.map((inst) => (
+                    <option key={inst} value={inst}>
+                      {inst}
                     </option>
                   ))}
                 </select>
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-cyan-300 mb-1.5">
+                <label className="block text-xs font-medium text-neutral-300 mb-1.5">
                   Nivel de Dificultad
                 </label>
                 <select
                   value={difficulty}
                   onChange={(e) => setDifficulty(e.target.value)}
-                  className="w-full rounded-xl border border-cyan-500/30 bg-neutral-950 p-2.5 text-xs text-white focus:outline-none"
+                  className="w-full rounded-xl border border-white/[0.1] bg-neutral-950 p-2.5 text-xs text-white focus:outline-none"
                 >
-                  {DIFFICULTIES.map((d) => (
-                    <option key={d.id} value={d.id}>
-                      {d.label}
+                  {DIFFICULTIES.map((diff) => (
+                    <option key={diff.id} value={diff.id}>
+                      {diff.label}
                     </option>
                   ))}
                 </select>
@@ -256,85 +329,121 @@ export function AddVaultItemModal({
             </div>
           )}
 
-          {/* Status Column */}
-          <div>
-            <label className="block text-xs font-medium text-neutral-300 mb-1.5">
-              Estado en el Tablero Kanban
-            </label>
-            <div className="grid grid-cols-3 gap-2">
-              {[
-                {
-                  id: "backlog",
-                  label: category === "sheet_music" ? "Por aprender" : "Por leer",
-                },
-                {
-                  id: "in_progress",
-                  label: category === "sheet_music" ? "En práctica" : "Leyendo",
-                },
-                {
-                  id: "completed",
-                  label: category === "sheet_music" ? "Dominada" : "Completado",
-                },
-              ].map((st) => (
-                <button
-                  key={st.id}
-                  type="button"
-                  onClick={() => setStatus(st.id as VaultItemStatus)}
-                  className={`py-2 rounded-xl border text-xs font-semibold transition-all ${
-                    status === st.id
-                      ? "bg-neutral-800 border-white/[0.3] text-white"
-                      : "bg-neutral-950 border-white/[0.06] text-neutral-500 hover:text-neutral-300"
-                  }`}
+          {/* Progress / Lessons / Pages */}
+          {(category === "book" || category === "course" || category === "sheet_music") && (
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+              <div>
+                <label className="block text-xs font-medium text-neutral-300 mb-1.5">
+                  {category === "course" ? "Lecciones Totales" : "Páginas Totales"}
+                </label>
+                <input
+                  type="number"
+                  value={totalPages}
+                  onChange={(e) => setTotalPages(e.target.value)}
+                  placeholder={category === "course" ? "Ej. 48 clases" : "Ej. 320 págs"}
+                  className="w-full rounded-xl border border-white/[0.1] bg-neutral-950 p-2.5 text-xs font-mono text-white placeholder:text-neutral-600 focus:outline-none focus:border-cyan-500"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-medium text-neutral-300 mb-1.5">
+                  Progreso Actual
+                </label>
+                <input
+                  type="number"
+                  value={progress}
+                  onChange={(e) => setProgress(e.target.value)}
+                  placeholder={category === "course" ? "Clases hechas" : "Págs leídas"}
+                  className="w-full rounded-xl border border-white/[0.1] bg-neutral-950 p-2.5 text-xs font-mono text-white placeholder:text-neutral-600 focus:outline-none focus:border-cyan-500"
+                />
+              </div>
+
+              <div className="col-span-2 sm:col-span-1">
+                <label className="block text-xs font-medium text-neutral-300 mb-1.5">
+                  Estado Inicial
+                </label>
+                <select
+                  value={status}
+                  onChange={(e) => setStatus(e.target.value as VaultItemStatus)}
+                  className="w-full rounded-xl border border-white/[0.1] bg-neutral-950 p-2.5 text-xs text-white focus:outline-none"
                 >
-                  {st.label}
-                </button>
-              ))}
+                  <option value="backlog">Por Empezar / Backlog</option>
+                  <option value="in_progress">En Curso / Práctica</option>
+                  <option value="completed">Completado / Dominado</option>
+                </select>
+              </div>
+            </div>
+          )}
+
+          {/* S3 File Upload Box (PDF / Archivo) */}
+          <div>
+            <label className="block text-xs font-medium text-neutral-300 mb-1.5 flex items-center justify-between">
+              <span>
+                {category === "sheet_music"
+                  ? "Partitura PDF (Subir a AWS S3)"
+                  : category === "course"
+                  ? "Certificado o Notas PDF (AWS S3)"
+                  : "Archivo PDF / Documento (AWS S3)"}
+              </span>
+              <span className="text-[10px] text-cyan-400 font-mono">Bucket: brio-media-vault-2026</span>
+            </label>
+
+            <div className="relative rounded-2xl border-2 border-dashed border-white/[0.12] bg-neutral-950/60 p-4 text-center hover:border-cyan-500/40 transition-all">
+              <input
+                type="file"
+                accept=".pdf,.doc,.docx"
+                onChange={(e) => setSelectedFile(e.target.files?.[0] || null)}
+                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+              />
+              <div className="flex flex-col items-center justify-center gap-1.5">
+                <UploadCloud className="h-6 w-6 text-cyan-400" />
+                {selectedFile ? (
+                  <div className="text-xs font-bold text-emerald-400">
+                    ✓ {selectedFile.name} ({(selectedFile.size / 1024 / 1024).toFixed(2)} MB)
+                  </div>
+                ) : (
+                  <>
+                    <p className="text-xs font-semibold text-neutral-300">
+                      Arrastra tu PDF aquí o haz clic para examinar
+                    </p>
+                    <p className="text-[10px] text-neutral-500">
+                      Se subirá de forma segura y privada a tu bucket de S3
+                    </p>
+                  </>
+                )}
+              </div>
             </div>
           </div>
 
-          {/* S3 File Upload Zone */}
-          <div className="space-y-1.5">
-            <label className="block text-xs font-medium text-neutral-300">
-              Adjuntar Archivo PDF (Subida directa a AWS S3)
-            </label>
-            <label className="flex flex-col items-center justify-center p-4 rounded-2xl border-2 border-dashed border-white/[0.12] bg-neutral-950 hover:border-cyan-500/50 hover:bg-neutral-950/80 cursor-pointer transition-all">
-              <UploadCloud className="h-7 w-7 text-neutral-500 mb-1.5" />
-              <span className="text-xs font-semibold text-neutral-200">
-                {selectedFile ? selectedFile.name : "Selecciona o arrastra el archivo PDF"}
-              </span>
-              <span className="text-[10px] text-neutral-500 mt-0.5">
-                {selectedFile
-                  ? `${(selectedFile.size / (1024 * 1024)).toFixed(2)} MB • Listo para subir`
-                  : "PDFs de partituras, libros o documentos (sin límite)"}
-              </span>
-              <input
-                type="file"
-                accept=".pdf,.epub,.doc,.docx"
-                onChange={(e) => {
-                  if (e.target.files && e.target.files[0]) {
-                    setSelectedFile(e.target.files[0]);
-                  }
-                }}
-                className="hidden"
-              />
-            </label>
-          </div>
-
-          {/* Notes & Reflections */}
+          {/* Notes & Takeaways */}
           <div>
             <label className="block text-xs font-medium text-neutral-300 mb-1.5">
-              Notas, Pasajes Clave o Digitación
+              Notas, Digitaciones o Conceptos Clave
             </label>
             <textarea
               rows={2}
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
-              placeholder="Anotaciones de práctica, tempo, conceptos destacados o reflexiones..."
+              placeholder="Apuntes rápidos sobre este recurso..."
               className="w-full rounded-xl border border-white/[0.1] bg-neutral-950 p-2.5 text-xs text-white placeholder:text-neutral-600 focus:outline-none focus:border-cyan-500"
             />
           </div>
 
-          {/* Footer Submit Button */}
+          {/* Tags */}
+          <div>
+            <label className="block text-xs font-medium text-neutral-300 mb-1.5">
+              Etiquetas (Separadas por comas)
+            </label>
+            <input
+              type="text"
+              value={tags}
+              onChange={(e) => setTags(e.target.value)}
+              placeholder="piano, clasica, debussy o react, backend, ai"
+              className="w-full rounded-xl border border-white/[0.1] bg-neutral-950 p-2.5 text-xs text-white placeholder:text-neutral-600 focus:outline-none focus:border-cyan-500"
+            />
+          </div>
+
+          {/* Submit Buttons */}
           <div className="pt-2 flex justify-end gap-2 border-t border-white/[0.08]">
             <button
               type="button"
@@ -346,19 +455,10 @@ export function AddVaultItemModal({
             <button
               type="submit"
               disabled={isPending}
-              className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-orange-600 font-bold text-xs text-white hover:from-amber-400 hover:to-orange-500 transition-all shadow-lg shadow-amber-500/20 disabled:opacity-50 inline-flex items-center gap-2"
+              className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-cyan-600 to-blue-600 font-bold text-xs text-white hover:from-cyan-500 hover:to-blue-500 transition-all shadow-lg shadow-cyan-500/20 disabled:opacity-50 inline-flex items-center gap-2"
             >
-              {isPending ? (
-                <>
-                  <UploadCloud className="h-3.5 w-3.5 animate-spin" />
-                  <span>Subiendo a S3...</span>
-                </>
-              ) : (
-                <>
-                  <Plus className="h-3.5 w-3.5" />
-                  <span>Guardar en Bóveda</span>
-                </>
-              )}
+              <Plus className="h-3.5 w-3.5" />
+              <span>{isPending ? "Subiendo a S3..." : "Guardar en Bóveda"}</span>
             </button>
           </div>
         </form>

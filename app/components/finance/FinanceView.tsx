@@ -24,6 +24,7 @@ import { useMemo, useState, useTransition } from "react";
 import { AntExpenseThermometer } from "./AntExpenseThermometer";
 import { SavingsGoalsWidget } from "./SavingsGoalsWidget";
 import { TransactionModal } from "./TransactionModal";
+import { WishlistView } from "./WishlistView";
 
 interface FinanceViewProps {
   data: FinanceDashboardData;
@@ -31,10 +32,23 @@ interface FinanceViewProps {
 }
 
 export function FinanceView({ data, onRefresh }: FinanceViewProps) {
+  const [subTab, setSubTab] = useState<"budget" | "wishlist">("budget");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [activeFilter, setActiveFilter] = useState<"all" | "expenses" | "incomes" | "ant">("all");
   const [isPending, startTransition] = useTransition();
+
+  const defaultWishlistData = {
+    items: [],
+    stats: {
+      totalWishlistValue: 0,
+      totalSavedImpulseValue: 0,
+      coolingCount: 0,
+      readyCount: 0,
+      purchasedCount: 0,
+      dismissedCount: 0,
+    },
+  };
 
   const netBalance = data.totalIncomeThisMonth - data.totalExpensesThisMonth;
   const isHealthyBalance = netBalance >= 0;
@@ -73,23 +87,66 @@ export function FinanceView({ data, onRefresh }: FinanceViewProps) {
 
   return (
     <div className="flex flex-col gap-6 animate-in fade-in duration-300">
-      {/* 1. Header Metrics Row */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {/* Total Incomes */}
-        <div className="rounded-2xl border border-emerald-500/20 bg-neutral-900/60 p-4 backdrop-blur-xl shadow-xl">
-          <div className="flex items-center justify-between text-xs text-neutral-400">
-            <span>Ingresos del Mes</span>
-            <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-emerald-500/10 text-emerald-400">
-              <ArrowUpRight className="h-4 w-4" />
-            </div>
-          </div>
-          <div className="mt-2 text-2xl font-bold font-mono text-emerald-400 tracking-tight">
-            +${data.totalIncomeThisMonth.toLocaleString("es-MX", { minimumFractionDigits: 2 })}
-          </div>
-          <div className="mt-1 text-[11px] text-neutral-500">
-            Presupuestado: ${data.currentBudget.budgetedIncome.toLocaleString()}
-          </div>
+      {/* Sub-Navigation Tabs */}
+      <div className="flex items-center justify-between border-b border-white/[0.08] pb-3">
+        <div className="flex items-center gap-2 p-1 bg-neutral-950/80 rounded-2xl border border-white/[0.08]">
+          <button
+            type="button"
+            onClick={() => setSubTab("budget")}
+            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all ${
+              subTab === "budget"
+                ? "bg-amber-500 text-neutral-950 shadow-lg shadow-amber-500/20"
+                : "text-neutral-400 hover:text-white hover:bg-neutral-900"
+            }`}
+          >
+            <Wallet className="h-3.5 w-3.5" />
+            <span>Presupuesto & Movimientos</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setSubTab("wishlist")}
+            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all ${
+              subTab === "wishlist"
+                ? "bg-violet-600 text-white shadow-lg shadow-violet-500/20"
+                : "text-neutral-400 hover:text-white hover:bg-neutral-900"
+            }`}
+          >
+            <Sparkles className="h-3.5 w-3.5" />
+            <span>Wishlist Anti-Impulso</span>
+            {data.wishlistData?.stats.coolingCount ? (
+              <span className="px-1.5 py-0.2 rounded-full bg-cyan-500/30 text-cyan-200 text-[10px] font-mono">
+                {data.wishlistData.stats.coolingCount}
+              </span>
+            ) : null}
+          </button>
         </div>
+      </div>
+
+      {subTab === "wishlist" ? (
+        <WishlistView
+          data={data.wishlistData || defaultWishlistData}
+          onRefresh={onRefresh}
+        />
+      ) : (
+        <>
+          {/* 1. Header Metrics Row */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {/* Total Incomes */}
+            <div className="rounded-2xl border border-emerald-500/20 bg-neutral-900/60 p-4 backdrop-blur-xl shadow-xl">
+              <div className="flex items-center justify-between text-xs text-neutral-400">
+                <span>Ingresos del Mes</span>
+                <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-emerald-500/10 text-emerald-400">
+                  <ArrowUpRight className="h-4 w-4" />
+                </div>
+              </div>
+              <div className="mt-2 text-2xl font-bold font-mono text-emerald-400 tracking-tight">
+                +${data.totalIncomeThisMonth.toLocaleString("es-MX", { minimumFractionDigits: 2 })}
+              </div>
+              <div className="mt-1 text-[11px] text-neutral-500">
+                Presupuestado: ${data.currentBudget.budgetedIncome.toLocaleString()}
+              </div>
+            </div>
 
         {/* Total Expenses */}
         <div className="rounded-2xl border border-rose-500/20 bg-neutral-900/60 p-4 backdrop-blur-xl shadow-xl">
@@ -383,6 +440,8 @@ export function FinanceView({ data, onRefresh }: FinanceViewProps) {
           )}
         </div>
       </div>
+    </>
+  )}
 
       {/* Transaction Modal */}
       <TransactionModal

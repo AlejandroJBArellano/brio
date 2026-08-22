@@ -17,6 +17,8 @@ import {
   Code2,
   ExternalLink,
   Flame,
+  FolderGit2,
+  GraduationCap,
   Layers,
   Music,
   Plus,
@@ -24,7 +26,9 @@ import {
   ShieldCheck,
   Sparkles,
   Trash2,
+  Tv,
   UploadCloud,
+  Video,
   X,
 } from "lucide-react";
 import { useState, useTransition } from "react";
@@ -37,7 +41,7 @@ interface VaultViewProps {
   onOpenScratchpad?: () => void;
 }
 
-type VaultTab = "sheet_music" | "books" | "projects";
+type VaultTab = "courses" | "books" | "sheet_music" | "resources" | "projects";
 
 const STATUS_LABELS: Record<ProjectStatus, { label: string; color: string }> = {
   idea: { label: "💡 Idea", color: "border-amber-500/30 bg-amber-500/10 text-amber-300" },
@@ -47,9 +51,9 @@ const STATUS_LABELS: Record<ProjectStatus, { label: string; color: string }> = {
 };
 
 export function VaultView({ data, onRefresh, onOpenScratchpad }: VaultViewProps) {
-  const [activeTab, setActiveTab] = useState<VaultTab>("sheet_music");
+  const [activeTab, setActiveTab] = useState<VaultTab>("courses");
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-  const [addModalCategory, setAddModalCategory] = useState<VaultItemCategory>("sheet_music");
+  const [addModalCategory, setAddModalCategory] = useState<VaultItemCategory>("course");
 
   // Project creator modal state
   const [isNewProjectModalOpen, setIsNewProjectModalOpen] = useState(false);
@@ -100,6 +104,7 @@ export function VaultView({ data, onRefresh, onOpenScratchpad }: VaultViewProps)
   };
 
   const handleDeleteProject = (id: string) => {
+    if (!confirm("¿Eliminar este proyecto?")) return;
     startTransition(async () => {
       await deleteProjectAction(id);
       if (onRefresh) onRefresh();
@@ -108,120 +113,161 @@ export function VaultView({ data, onRefresh, onOpenScratchpad }: VaultViewProps)
 
   return (
     <div className="flex flex-col gap-6 animate-in fade-in duration-300">
-      {/* 1. Header Metrics Ribbon with S3 Status */}
+      {/* 1. Header Metrics Ribbon */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        {/* Sheet Music Stats */}
-        <div className="rounded-2xl border border-cyan-500/20 bg-neutral-900/60 p-4 backdrop-blur-xl shadow-xl">
+        {/* Courses Metric */}
+        <div className="rounded-2xl border border-indigo-500/20 bg-neutral-900/60 p-4 backdrop-blur-xl shadow-xl">
           <div className="flex items-center justify-between text-xs text-neutral-400">
-            <span>Partituras & Repertorio</span>
-            <Music className="h-4 w-4 text-cyan-400" />
+            <span>Cursos en Marcha</span>
+            <GraduationCap className="h-4 w-4 text-indigo-400" />
           </div>
-          <div className="mt-2 text-2xl font-bold font-mono text-cyan-400">
-            {data.stats.sheetMusicMastered} / {data.stats.totalSheetMusic}
+          <div className="mt-2 text-2xl font-bold font-mono text-indigo-400">
+            {data.stats.coursesCompleted || 0} / {data.stats.totalCourses || 0}
           </div>
           <div className="mt-1 text-[11px] text-neutral-500">
-            Dominadas en repertorio activo
+            Certificaciones y talleres completados
           </div>
         </div>
 
-        {/* Books Stats */}
+        {/* Books Metric */}
         <div className="rounded-2xl border border-amber-500/20 bg-neutral-900/60 p-4 backdrop-blur-xl shadow-xl">
           <div className="flex items-center justify-between text-xs text-neutral-400">
-            <span>Libros & Lecturas</span>
+            <span>Libros Leídos</span>
             <BookOpen className="h-4 w-4 text-amber-400" />
           </div>
           <div className="mt-2 text-2xl font-bold font-mono text-amber-400">
             {data.stats.booksCompleted} / {data.stats.totalBooks}
           </div>
           <div className="mt-1 text-[11px] text-neutral-500">
-            Libros completados & estudiados
+            Páginas & síntesis asimiladas
           </div>
         </div>
 
-        {/* Projects Stats */}
-        <div className="rounded-2xl border border-indigo-500/20 bg-neutral-900/60 p-4 backdrop-blur-xl shadow-xl">
+        {/* Sheet Music Metric */}
+        <div className="rounded-2xl border border-cyan-500/20 bg-neutral-900/60 p-4 backdrop-blur-xl shadow-xl">
           <div className="flex items-center justify-between text-xs text-neutral-400">
-            <span>Proyectos Creativos</span>
-            <Rocket className="h-4 w-4 text-indigo-400" />
+            <span>Repertorio Dominado</span>
+            <Music className="h-4 w-4 text-cyan-400" />
           </div>
-          <div className="mt-2 text-2xl font-bold font-mono text-indigo-400">
-            {data.stats.totalProjects} proyectos
+          <div className="mt-2 text-2xl font-bold font-mono text-cyan-400">
+            {data.stats.sheetMusicMastered} / {data.stats.totalSheetMusic}
           </div>
           <div className="mt-1 text-[11px] text-neutral-500">
-            En backlog y desarrollo
+            Piezas musicales en repertorio
           </div>
         </div>
 
-        {/* S3 Storage Vault Status */}
+        {/* S3 Storage Status */}
         <div className="rounded-2xl border border-emerald-500/20 bg-neutral-900/60 p-4 backdrop-blur-xl shadow-xl">
           <div className="flex items-center justify-between text-xs text-neutral-400">
-            <span>Almacenamiento S3</span>
-            <ShieldCheck className="h-4 w-4 text-emerald-400" />
+            <span>Bóveda AWS S3</span>
+            <UploadCloud className="h-4 w-4 text-emerald-400" />
           </div>
-          <div className="mt-2 text-lg font-bold font-mono text-emerald-400 truncate">
-            brio-media-vault
+          <div className="mt-2 text-lg font-bold font-mono text-emerald-400 flex items-center gap-1.5">
+            <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
+            <span>S3 Online</span>
           </div>
-          <div className="mt-1 text-[10px] text-neutral-500 flex items-center gap-1 font-mono">
-            <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
-            <span>AWS us-east-1 • Conectado</span>
+          <div className="mt-1 text-[10px] text-neutral-500 font-mono truncate">
+            brio-media-vault-2026
           </div>
         </div>
       </div>
 
-      {/* 2. Sub-Tab Switcher & Main Controls */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-white/[0.08]">
+      {/* 2. Top Navigation Bar: Sub-Tabs & Action Buttons */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-white/[0.08] pb-3">
         {/* Navigation Tabs */}
         <div className="flex items-center gap-1.5 p-1 bg-neutral-950/80 rounded-2xl border border-white/[0.08] overflow-x-auto">
           <button
             type="button"
-            onClick={() => setActiveTab("sheet_music")}
-            className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold transition-all shrink-0 ${
-              activeTab === "sheet_music"
-                ? "bg-gradient-to-r from-cyan-500 to-blue-600 text-white shadow-lg shadow-cyan-500/20"
-                : "text-neutral-400 hover:text-white"
+            onClick={() => setActiveTab("courses")}
+            className={`flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all shrink-0 ${
+              activeTab === "courses"
+                ? "bg-indigo-600 text-white shadow-lg shadow-indigo-500/20"
+                : "text-neutral-400 hover:text-white hover:bg-neutral-900"
             }`}
           >
-            <Music className="h-4 w-4" />
-            <span>Música & Partituras ({data.sheetMusic.length})</span>
+            <GraduationCap className="h-3.5 w-3.5" />
+            <span>🎓 Cursos</span>
+            <span className="px-1.5 py-0.2 rounded-full bg-black/30 text-[10px] font-mono">
+              {data.courses?.length || 0}
+            </span>
           </button>
 
           <button
             type="button"
             onClick={() => setActiveTab("books")}
-            className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold transition-all shrink-0 ${
+            className={`flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all shrink-0 ${
               activeTab === "books"
-                ? "bg-gradient-to-r from-amber-500 to-orange-600 text-white shadow-lg shadow-amber-500/20"
-                : "text-neutral-400 hover:text-white"
+                ? "bg-amber-500 text-neutral-950 shadow-lg shadow-amber-500/20"
+                : "text-neutral-400 hover:text-white hover:bg-neutral-900"
             }`}
           >
-            <BookOpen className="h-4 w-4" />
-            <span>Libros & Lecturas ({data.books.length})</span>
+            <BookOpen className="h-3.5 w-3.5" />
+            <span>📚 Libros</span>
+            <span className="px-1.5 py-0.2 rounded-full bg-black/30 text-[10px] font-mono">
+              {data.books.length}
+            </span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setActiveTab("sheet_music")}
+            className={`flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all shrink-0 ${
+              activeTab === "sheet_music"
+                ? "bg-cyan-600 text-white shadow-lg shadow-cyan-500/20"
+                : "text-neutral-400 hover:text-white hover:bg-neutral-900"
+            }`}
+          >
+            <Music className="h-3.5 w-3.5" />
+            <span>🎼 Partituras</span>
+            <span className="px-1.5 py-0.2 rounded-full bg-black/30 text-[10px] font-mono">
+              {data.sheetMusic.length}
+            </span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setActiveTab("resources")}
+            className={`flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all shrink-0 ${
+              activeTab === "resources"
+                ? "bg-rose-600 text-white shadow-lg shadow-rose-500/20"
+                : "text-neutral-400 hover:text-white hover:bg-neutral-900"
+            }`}
+          >
+            <Video className="h-3.5 w-3.5" />
+            <span>📺 Watchlist & Recursos</span>
+            <span className="px-1.5 py-0.2 rounded-full bg-black/30 text-[10px] font-mono">
+              {data.resources?.length || 0}
+            </span>
           </button>
 
           <button
             type="button"
             onClick={() => setActiveTab("projects")}
-            className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold transition-all shrink-0 ${
+            className={`flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all shrink-0 ${
               activeTab === "projects"
-                ? "bg-gradient-to-r from-indigo-500 to-purple-600 text-white shadow-lg shadow-indigo-500/20"
-                : "text-neutral-400 hover:text-white"
+                ? "bg-pink-600 text-white shadow-lg shadow-pink-500/20"
+                : "text-neutral-400 hover:text-white hover:bg-neutral-900"
             }`}
           >
-            <Rocket className="h-4 w-4" />
-            <span>Proyectos ({data.projects.length})</span>
+            <Code2 className="h-3.5 w-3.5" />
+            <span>🛠️ Proyectos</span>
+            <span className="px-1.5 py-0.2 rounded-full bg-black/30 text-[10px] font-mono">
+              {data.projects.length}
+            </span>
           </button>
         </div>
 
-        {/* Action Buttons */}
-        <div className="flex items-center gap-2">
+        {/* Action Triggers */}
+        <div className="flex items-center gap-2 shrink-0">
           {onOpenScratchpad && (
             <button
               type="button"
               onClick={onOpenScratchpad}
-              className="flex items-center gap-1.5 px-3 py-2 rounded-xl border border-white/[0.08] bg-neutral-900 text-xs font-semibold text-neutral-300 hover:text-white transition-all shadow-sm"
-              title="Abrir bloc de notas rápido"
+              className="flex items-center gap-1.5 px-3 py-2 rounded-xl border border-white/[0.08] bg-neutral-900 hover:bg-neutral-800 text-xs font-semibold text-neutral-300 transition-all"
             >
-              <span>📝 Scratchpad (⌘J)</span>
+              <span>📝 Scratchpad</span>
+              <kbd className="text-[10px] font-mono opacity-60">⌘J</kbd>
             </button>
           )}
 
@@ -229,7 +275,7 @@ export function VaultView({ data, onRefresh, onOpenScratchpad }: VaultViewProps)
             <button
               type="button"
               onClick={() => setIsNewProjectModalOpen(true)}
-              className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-indigo-600 font-bold text-xs text-white hover:bg-indigo-500 transition-all shadow-lg shadow-indigo-500/20"
+              className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-gradient-to-r from-pink-600 to-rose-600 text-xs font-bold text-white hover:brightness-110 shadow-lg shadow-pink-500/20 transition-all"
             >
               <Plus className="h-4 w-4" />
               <span>Nuevo Proyecto</span>
@@ -239,28 +285,38 @@ export function VaultView({ data, onRefresh, onOpenScratchpad }: VaultViewProps)
               type="button"
               onClick={() =>
                 handleOpenAddModal(
-                  activeTab === "sheet_music" ? "sheet_music" : "book"
+                  activeTab === "courses"
+                    ? "course"
+                    : activeTab === "books"
+                    ? "book"
+                    : activeTab === "resources"
+                    ? "video"
+                    : "sheet_music"
                 )
               }
-              className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 font-bold text-xs text-white hover:from-cyan-400 hover:to-blue-500 transition-all shadow-lg shadow-cyan-500/20 active:scale-95"
+              className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-gradient-to-r from-cyan-600 to-blue-600 text-xs font-bold text-white hover:brightness-110 shadow-lg shadow-cyan-500/20 transition-all"
             >
               <Plus className="h-4 w-4" />
               <span>
-                {activeTab === "sheet_music"
-                  ? "Subir Partitura (S3)"
-                  : "Agregar Libro (S3)"}
+                {activeTab === "courses"
+                  ? "Agregar Curso"
+                  : activeTab === "books"
+                  ? "Agregar Libro (S3)"
+                  : activeTab === "resources"
+                  ? "Guardar Video/Link"
+                  : "Subir Partitura (S3)"}
               </span>
             </button>
           )}
         </div>
       </div>
 
-      {/* 3. Main Content Views */}
-      {activeTab === "sheet_music" && (
+      {/* 3. Sub-View Rendering */}
+      {activeTab === "courses" && (
         <VaultKanbanBoard
-          category="sheet_music"
-          items={data.sheetMusic}
-          onOpenAddModal={() => handleOpenAddModal("sheet_music")}
+          category="course"
+          items={data.courses || []}
+          onOpenAddModal={() => handleOpenAddModal("course")}
           onRefresh={onRefresh}
         />
       )}
@@ -274,112 +330,146 @@ export function VaultView({ data, onRefresh, onOpenScratchpad }: VaultViewProps)
         />
       )}
 
+      {activeTab === "sheet_music" && (
+        <VaultKanbanBoard
+          category="sheet_music"
+          items={data.sheetMusic}
+          onOpenAddModal={() => handleOpenAddModal("sheet_music")}
+          onRefresh={onRefresh}
+        />
+      )}
+
+      {activeTab === "resources" && (
+        <VaultKanbanBoard
+          category="video"
+          items={data.resources || []}
+          onOpenAddModal={() => handleOpenAddModal("video")}
+          onRefresh={onRefresh}
+        />
+      )}
+
       {activeTab === "projects" && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {data.projects.map((project) => {
-            const statusConfig = STATUS_LABELS[project.status] || STATUS_LABELS.idea;
-
-            return (
-              <div
-                key={project.id}
-                className="rounded-2xl border border-white/[0.08] bg-neutral-900/60 p-5 backdrop-blur-xl shadow-xl flex flex-col justify-between group hover:border-indigo-500/40 transition-all"
-              >
-                <div>
-                  <div className="flex items-center justify-between gap-2">
-                    <span
-                      className={`px-2 py-0.5 rounded-md border text-[11px] font-bold ${statusConfig.color}`}
-                    >
-                      {statusConfig.label}
-                    </span>
-
-                    <button
-                      type="button"
-                      onClick={() => handleDeleteProject(project.id)}
-                      title="Eliminar proyecto"
-                      className="opacity-0 group-hover:opacity-100 text-neutral-500 hover:text-rose-400 transition-opacity p-1"
-                    >
-                      <Trash2 className="h-3.5 w-3.5" />
-                    </button>
-                  </div>
-
-                  <h3 className="mt-3 text-base font-bold text-white tracking-tight">
-                    {project.title}
-                  </h3>
-
-                  {project.description && (
-                    <p className="mt-1 text-xs text-neutral-400 line-clamp-2">
-                      {project.description}
-                    </p>
-                  )}
-
-                  {/* Tech stack tags */}
-                  {project.techStack.length > 0 && (
-                    <div className="mt-3 flex flex-wrap gap-1.5">
-                      {project.techStack.map((tech) => (
-                        <span
-                          key={tech}
-                          className="px-2 py-0.5 rounded bg-neutral-950/80 border border-white/[0.06] text-[10px] font-mono text-neutral-300"
-                        >
-                          {tech}
-                        </span>
-                      ))}
-                    </div>
-                  )}
-                </div>
-
-                <div className="mt-5 pt-3 border-t border-white/[0.06] flex items-center justify-between">
-                  {/* Progress bar */}
-                  <div className="flex items-center gap-2">
-                    <div className="h-1.5 w-20 overflow-hidden rounded-full bg-neutral-950">
-                      <div
-                        className="h-full bg-indigo-500"
-                        style={{ width: `${project.progress}%` }}
-                      />
-                    </div>
-                    <span className="font-mono text-[10px] text-neutral-400">
-                      {project.progress}%
-                    </span>
-                  </div>
-
-                  {/* Status dropdown */}
-                  <select
-                    value={project.status}
-                    onChange={(e) =>
-                      handleUpdateProjectStatus(
-                        project.id,
-                        e.target.value as ProjectStatus
-                      )
-                    }
-                    className="rounded-lg border border-white/[0.08] bg-neutral-950 px-2 py-1 text-[11px] text-neutral-300 focus:outline-none"
-                  >
-                    <option value="idea">Idea</option>
-                    <option value="in_progress">En Desarrollo</option>
-                    <option value="paused">Pausado</option>
-                    <option value="launched">Lanzado</option>
-                  </select>
-                </div>
+        <div className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {data.projects.length === 0 ? (
+              <div className="col-span-full p-12 text-center rounded-3xl border border-dashed border-white/[0.08] bg-neutral-950/40">
+                <Code2 className="h-8 w-8 text-neutral-600 mx-auto mb-2" />
+                <p className="text-sm font-semibold text-neutral-400">
+                  Aún no tienes proyectos registrados
+                </p>
+                <p className="text-xs text-neutral-600 mt-1">
+                  Agrega ideas de desarrollo, startups o experimentos técnicos.
+                </p>
               </div>
-            );
-          })}
+            ) : (
+              data.projects.map((proj) => {
+                const statusMeta = STATUS_LABELS[proj.status] || STATUS_LABELS.idea;
+                return (
+                  <div
+                    key={proj.id}
+                    className="group rounded-3xl border border-white/[0.08] bg-neutral-900/60 p-5 backdrop-blur-xl shadow-xl hover:border-white/[0.18] transition-all flex flex-col justify-between"
+                  >
+                    <div className="space-y-3">
+                      {/* Status and Action delete */}
+                      <div className="flex items-center justify-between">
+                        <select
+                          value={proj.status}
+                          onChange={(e) =>
+                            handleUpdateProjectStatus(proj.id, e.target.value as ProjectStatus)
+                          }
+                          className={`text-[11px] font-bold px-2.5 py-1 rounded-xl border ${statusMeta.color} bg-neutral-950 focus:outline-none cursor-pointer`}
+                        >
+                          <option value="idea">💡 Idea</option>
+                          <option value="in_progress">⚡ En Desarrollo</option>
+                          <option value="paused">⏸️ Pausado</option>
+                          <option value="launched">🚀 Lanzado</option>
+                        </select>
+
+                        <button
+                          type="button"
+                          onClick={() => handleDeleteProject(proj.id)}
+                          className="opacity-0 group-hover:opacity-100 p-1 text-neutral-500 hover:text-rose-400 transition-all"
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </button>
+                      </div>
+
+                      {/* Title & Description */}
+                      <div>
+                        <h4 className="text-base font-bold text-white tracking-tight">
+                          {proj.title}
+                        </h4>
+                        {proj.description && (
+                          <p className="text-xs text-neutral-400 mt-1 line-clamp-2">
+                            {proj.description}
+                          </p>
+                        )}
+                      </div>
+
+                      {/* Tech Stack Badges */}
+                      {proj.techStack && proj.techStack.length > 0 && (
+                        <div className="flex flex-wrap gap-1.5 pt-1">
+                          {proj.techStack.map((tech) => (
+                            <span
+                              key={tech}
+                              className="px-2 py-0.5 rounded-md bg-neutral-950 border border-white/[0.06] text-[10px] font-mono text-neutral-300"
+                            >
+                              {tech}
+                            </span>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Links */}
+                    {(proj.repoUrl || proj.liveUrl) && (
+                      <div className="pt-4 mt-4 border-t border-white/[0.04] flex items-center gap-3 text-xs">
+                        {proj.repoUrl && (
+                          <a
+                            href={proj.repoUrl}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="text-neutral-400 hover:text-white flex items-center gap-1"
+                          >
+                            <Code2 className="h-3.5 w-3.5" />
+                            <span>Repo</span>
+                          </a>
+                        )}
+                        {proj.liveUrl && (
+                          <a
+                            href={proj.liveUrl}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="text-cyan-400 hover:text-cyan-300 flex items-center gap-1 font-semibold"
+                          >
+                            <ExternalLink className="h-3.5 w-3.5" />
+                            <span>Live</span>
+                          </a>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                );
+              })
+            )}
+          </div>
         </div>
       )}
 
-      {/* Add Vault Item Modal */}
+      {/* Add Item Modal */}
       <AddVaultItemModal
         isOpen={isAddModalOpen}
         onClose={() => setIsAddModalOpen(false)}
         defaultCategory={addModalCategory}
-        onSuccess={() => {
-          if (onRefresh) onRefresh();
-        }}
+        onSuccess={onRefresh}
       />
 
       {/* New Project Modal */}
       {isNewProjectModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-200">
-          <div className="w-full max-w-md rounded-3xl border border-white/[0.1] bg-neutral-900/95 p-6 shadow-2xl backdrop-blur-2xl">
-            <div className="flex items-center justify-between pb-3 border-b border-white/[0.08]">
-              <h3 className="text-base font-bold text-white">Nuevo Proyecto</h3>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-200">
+          <div className="w-full max-w-lg rounded-3xl border border-white/[0.12] bg-neutral-900 shadow-2xl p-6 space-y-4">
+            <div className="flex items-center justify-between border-b border-white/[0.08] pb-3">
+              <h3 className="text-base font-bold text-white">Nuevo Proyecto Técnico</h3>
               <button
                 type="button"
                 onClick={() => setIsNewProjectModalOpen(false)}
@@ -389,18 +479,18 @@ export function VaultView({ data, onRefresh, onOpenScratchpad }: VaultViewProps)
               </button>
             </div>
 
-            <form onSubmit={handleCreateProject} className="mt-4 space-y-3">
+            <form onSubmit={handleCreateProject} className="space-y-3">
               <div>
                 <label className="block text-xs font-medium text-neutral-300 mb-1">
-                  Nombre del Proyecto
+                  Nombre del Proyecto *
                 </label>
                 <input
                   type="text"
-                  placeholder="Brio OS ⚡"
+                  required
                   value={projectTitle}
                   onChange={(e) => setProjectTitle(e.target.value)}
-                  required
-                  className="w-full rounded-xl border border-white/[0.1] bg-neutral-950 px-3 py-2 text-xs text-white focus:outline-none"
+                  placeholder="Ej. Brio OS"
+                  className="w-full rounded-xl border border-white/[0.1] bg-neutral-950 p-2.5 text-xs text-white focus:outline-none focus:border-pink-500"
                 />
               </div>
 
@@ -410,10 +500,10 @@ export function VaultView({ data, onRefresh, onOpenScratchpad }: VaultViewProps)
                 </label>
                 <textarea
                   rows={2}
-                  placeholder="Sistema operativo personal..."
                   value={projectDesc}
                   onChange={(e) => setProjectDesc(e.target.value)}
-                  className="w-full rounded-xl border border-white/[0.1] bg-neutral-950 px-3 py-2 text-xs text-white focus:outline-none"
+                  placeholder="Objetivo principal del proyecto..."
+                  className="w-full rounded-xl border border-white/[0.1] bg-neutral-950 p-2.5 text-xs text-white focus:outline-none focus:border-pink-500"
                 />
               </div>
 
@@ -423,10 +513,10 @@ export function VaultView({ data, onRefresh, onOpenScratchpad }: VaultViewProps)
                 </label>
                 <input
                   type="text"
-                  placeholder="Next.js, Tailwind, Neon DB"
                   value={projectTech}
                   onChange={(e) => setProjectTech(e.target.value)}
-                  className="w-full rounded-xl border border-white/[0.1] bg-neutral-950 px-3 py-2 text-xs text-white focus:outline-none"
+                  placeholder="Next.js, TypeScript, Tailwind, Neon"
+                  className="w-full rounded-xl border border-white/[0.1] bg-neutral-950 p-2.5 text-xs text-white focus:outline-none focus:border-pink-500"
                 />
               </div>
 
@@ -434,16 +524,16 @@ export function VaultView({ data, onRefresh, onOpenScratchpad }: VaultViewProps)
                 <button
                   type="button"
                   onClick={() => setIsNewProjectModalOpen(false)}
-                  className="px-3 py-2 text-xs text-neutral-400 hover:text-white"
+                  className="px-4 py-2 text-xs text-neutral-400"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
                   disabled={isPending}
-                  className="px-4 py-2 rounded-xl bg-indigo-600 font-bold text-xs text-white hover:bg-indigo-500"
+                  className="px-4 py-2 rounded-xl bg-pink-600 hover:bg-pink-500 text-xs font-bold text-white transition-all"
                 >
-                  {isPending ? "Guardando..." : "Crear Proyecto"}
+                  Crear Proyecto
                 </button>
               </div>
             </form>

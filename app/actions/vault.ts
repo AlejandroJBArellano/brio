@@ -14,6 +14,30 @@ import { revalidatePath } from "next/cache";
 // Initial seed data if vault is completely empty
 const INITIAL_VAULT_ITEMS: Omit<VaultItem, "id" | "createdAt" | "updatedAt">[] = [
   {
+    category: "course",
+    title: "Next.js 15 & React 19 Pro Architecture",
+    authorOrCreator: "Lee Robinson / Vercel",
+    platform: "Udemy",
+    url: "https://nextjs.org/learn",
+    status: "in_progress",
+    progress: 18,
+    totalPages: 42,
+    notes: "Patrones de Server Components, Server Actions y optimización de caché Turbopack.",
+    tags: ["Next.js", "React", "Frontend"],
+  },
+  {
+    category: "course",
+    title: "Armonía Moderna & Re-harmonización para Piano",
+    authorOrCreator: "Open Studio Jazz",
+    platform: "Web",
+    url: "https://openstudiojazz.com",
+    status: "in_progress",
+    progress: 6,
+    totalPages: 24,
+    notes: "Acordes 2-5-1 con extensiones 9na, 11na y sustituciones tritónicas.",
+    tags: ["Piano", "Jazz", "Armonía"],
+  },
+  {
     category: "sheet_music",
     title: "Clair de Lune (Suite bergamasque)",
     authorOrCreator: "Claude Debussy",
@@ -36,6 +60,36 @@ const INITIAL_VAULT_ITEMS: Omit<VaultItem, "id" | "createdAt" | "updatedAt">[] =
     progress: 3,
     totalPages: 3,
     tags: ["Satie", "Repertorio"],
+  },
+  {
+    category: "video",
+    title: "Understanding Postgres Execution Plans & Indexing",
+    authorOrCreator: "Hussein Nasser",
+    platform: "YouTube",
+    url: "https://www.youtube.com/watch?v=hd_4O_13Fwo",
+    status: "in_progress",
+    notes: "Diferencia entre Seq Scan, Index Scan y Bitmap Scan con EXPLAIN ANALYZE.",
+    tags: ["Postgres", "Performance", "Bases de Datos"],
+  },
+  {
+    category: "link",
+    title: "Notion Workspace: Notas & Arquitectura de Proyectos",
+    authorOrCreator: "Alejandro",
+    platform: "Notion",
+    url: "https://notion.so",
+    status: "in_progress",
+    notes: "Documentación centralizada de flujos de trabajo y diagramas.",
+    tags: ["Notion", "Arquitectura", "Organización"],
+  },
+  {
+    category: "link",
+    title: "shadcn/ui - Accessible Component System",
+    authorOrCreator: "shadcn",
+    platform: "GitHub",
+    url: "https://github.com/shadcn-ui/ui",
+    status: "completed",
+    notes: "Referencia de Radix UI y Tailwind CSS primitives.",
+    tags: ["GitHub", "UI", "OpenSource"],
   },
   {
     category: "book",
@@ -68,7 +122,7 @@ async function seedInitialVaultItems(sql: any) {
     await sql`
       INSERT INTO vault_items (
         id, category, title, author_or_creator, status, instrument,
-        difficulty, progress, total_pages, notes, tags
+        difficulty, platform, url, progress, total_pages, notes, tags
       )
       VALUES (
         ${id},
@@ -78,6 +132,8 @@ async function seedInitialVaultItems(sql: any) {
         ${item.status},
         ${item.instrument || null},
         ${item.difficulty || null},
+        ${item.platform || null},
+        ${item.url || null},
         ${item.progress || 0},
         ${item.totalPages || null},
         ${item.notes || null},
@@ -115,6 +171,8 @@ export async function fetchVaultDashboardDataAction(): Promise<VaultDashboardDat
     status: r.status as VaultItemStatus,
     instrument: r.instrument || undefined,
     difficulty: r.difficulty || undefined,
+    platform: r.platform || undefined,
+    url: r.url || undefined,
     coverUrl: r.cover_url || undefined,
     fileUrl: r.file_url || undefined,
     fileKey: r.file_key || undefined,
@@ -130,6 +188,10 @@ export async function fetchVaultDashboardDataAction(): Promise<VaultDashboardDat
 
   const books = allItems.filter((i) => i.category === "book");
   const sheetMusic = allItems.filter((i) => i.category === "sheet_music");
+  const courses = allItems.filter((i) => i.category === "course");
+  const resources = allItems.filter(
+    (i) => i.category === "video" || i.category === "link" || i.category === "document"
+  );
   const documents = allItems.filter((i) => i.category === "document");
 
   // 2. Fetch projects
@@ -158,6 +220,8 @@ export async function fetchVaultDashboardDataAction(): Promise<VaultDashboardDat
   return {
     books,
     sheetMusic,
+    courses,
+    resources,
     documents,
     projects,
     scratchpadContent,
@@ -166,6 +230,9 @@ export async function fetchVaultDashboardDataAction(): Promise<VaultDashboardDat
       booksCompleted: books.filter((b) => b.status === "completed").length,
       totalSheetMusic: sheetMusic.length,
       sheetMusicMastered: sheetMusic.filter((s) => s.status === "completed").length,
+      totalCourses: courses.length,
+      coursesCompleted: courses.filter((c) => c.status === "completed").length,
+      totalResources: resources.length,
       totalProjects: projects.length,
     },
   };
@@ -184,6 +251,8 @@ export async function createVaultItemAction(
     const status = (formData.get("status") as VaultItemStatus) || "backlog";
     const instrument = (formData.get("instrument") as string)?.trim() || null;
     const difficulty = (formData.get("difficulty") as string)?.trim() || null;
+    const platform = (formData.get("platform") as string)?.trim() || null;
+    const url = (formData.get("url") as string)?.trim() || null;
     const notes = (formData.get("notes") as string)?.trim() || null;
     const totalPages = parseInt(formData.get("totalPages") as string, 10) || null;
     const progress = parseInt(formData.get("progress") as string, 10) || 0;
@@ -200,11 +269,11 @@ export async function createVaultItemAction(
     let fileSizeBytes: number | null = null;
     let coverUrl: string | null = (formData.get("coverUrl") as string)?.trim() || null;
 
-    // 1. Process S3 main file upload (PDF/Document)
+    // 1. Process S3 main file upload (PDF/Document/Certificate)
     const file = formData.get("file") as File | null;
     if (file && file.size > 0) {
       const buffer = Buffer.from(await file.arrayBuffer());
-      const s3Folder = category === "sheet_music" ? "sheet_music" : "books";
+      const s3Folder = category === "sheet_music" ? "sheet_music" : category === "course" ? "courses" : "books";
       fileKey = generateS3FileKey(s3Folder, file.name);
       const s3Res = await uploadBufferToS3({
         buffer,
@@ -236,7 +305,7 @@ export async function createVaultItemAction(
     await sql`
       INSERT INTO vault_items (
         id, category, title, author_or_creator, status, instrument,
-        difficulty, cover_url, file_url, file_key, file_name, file_size_bytes,
+        difficulty, platform, url, cover_url, file_url, file_key, file_name, file_size_bytes,
         progress, total_pages, notes, tags, created_at, updated_at
       )
       VALUES (
@@ -247,6 +316,8 @@ export async function createVaultItemAction(
         ${status},
         ${instrument},
         ${difficulty},
+        ${platform},
+        ${url},
         ${coverUrl},
         ${fileUrl},
         ${fileKey},
@@ -273,6 +344,8 @@ export async function createVaultItemAction(
         status,
         instrument: instrument || undefined,
         difficulty: difficulty || undefined,
+        platform: platform || undefined,
+        url: url || undefined,
         coverUrl: coverUrl || undefined,
         fileUrl: fileUrl || undefined,
         fileKey: fileKey || undefined,
@@ -287,6 +360,45 @@ export async function createVaultItemAction(
   } catch (error: any) {
     console.error("[Create Vault Item Error]:", error);
     return { success: false, error: error.message || "Error al crear el elemento en la bóveda." };
+  }
+}
+
+/**
+ * Server Action: Increments progress (pages read or lessons completed).
+ */
+export async function incrementVaultItemProgressAction(
+  id: string,
+  amount: number
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    await ensureDatabaseSchema();
+    const sql = getDb();
+
+    const rows = await sql`
+      SELECT progress, total_pages, status FROM vault_items WHERE id = ${id} LIMIT 1;
+    `;
+
+    if (rows.length === 0) return { success: false, error: "Item no encontrado" };
+
+    const item = rows[0];
+    const currentProg = Number(item.progress) || 0;
+    const total = Number(item.total_pages) || 0;
+    const newProg = total > 0 ? Math.min(total, currentProg + amount) : currentProg + amount;
+    const isCompleted = total > 0 && newProg >= total;
+
+    await sql`
+      UPDATE vault_items
+      SET progress = ${newProg},
+          status = CASE WHEN ${isCompleted} THEN 'completed' ELSE status END,
+          updated_at = NOW()
+      WHERE id = ${id};
+    `;
+
+    revalidatePath("/");
+    return { success: true };
+  } catch (error: any) {
+    console.error("[Increment Progress Error]:", error);
+    return { success: false, error: "No se pudo actualizar el progreso." };
   }
 }
 

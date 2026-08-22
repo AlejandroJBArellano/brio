@@ -213,11 +213,22 @@ export function CommandPalette({
       {
         id: "action-tab-projects",
         title: "🏛️ Ir a Bóveda & Intereses",
-        subtitle: "Tableros Kanban de partituras (S3), libros, documentos y proyectos",
+        subtitle: "Cursos, partituras S3, libros, videos y proyectos",
         icon: Layers,
         badge: "⌘6",
         run: () => {
           onSelectMainTab("projects");
+          onClose();
+        },
+      },
+      {
+        id: "action-wishlist",
+        title: "🛍️ Wishlist Anti-Impulso",
+        subtitle: "Ver caprichos en enfriamiento de 30 días y dinero ahorrado",
+        icon: Sparkles,
+        badge: "Finanzas",
+        run: () => {
+          onSelectMainTab("finance");
           onClose();
         },
       },

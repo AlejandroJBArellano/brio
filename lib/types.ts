@@ -191,6 +191,7 @@ export interface FinanceDashboardData {
   recentTransactions: Transaction[];
   savingsGoals: SavingsGoal[];
   categoryBreakdown: CategoryBreakdown[];
+  wishlistData?: WishlistDashboardData;
 }
 
 export interface ParsedFinancialInput {
@@ -433,10 +434,55 @@ export interface ProjectsDashboardData {
 }
 
 // ----------------------------------------------------
-// Bóveda & Intereses (Vault: Books, Sheet Music & S3 Media)
+// Wishlist Anti-Impulso Models (Brio Finanzas)
 // ----------------------------------------------------
 
-export type VaultItemCategory = "book" | "sheet_music" | "document" | "project";
+export type WishlistStatus = "cooling" | "ready" | "purchased" | "dismissed";
+export type WishlistPriority = "high" | "medium" | "low";
+
+export interface WishlistItem {
+  id: string;
+  title: string;
+  priceEstimated: number;
+  category: string;
+  priority: WishlistPriority;
+  url?: string;
+  imageUrl?: string;
+  reasonOrNotes?: string;
+  status: WishlistStatus;
+  coolingDaysTotal: number;
+  daysElapsed: number;
+  daysRemaining: number;
+  isCoolingFinished: boolean;
+  createdAt: string;
+  resolvedAt?: string;
+}
+
+export interface WishlistDashboardData {
+  items: WishlistItem[];
+  stats: {
+    totalWishlistValue: number;
+    totalSavedImpulseValue: number;
+    coolingCount: number;
+    readyCount: number;
+    purchasedCount: number;
+    dismissedCount: number;
+  };
+}
+
+// ----------------------------------------------------
+// Bóveda & Intereses (Vault: Books, Sheet Music, Courses, Videos & Resources)
+// ----------------------------------------------------
+
+export type VaultItemCategory =
+  | "book"
+  | "sheet_music"
+  | "course"
+  | "video"
+  | "link"
+  | "document"
+  | "project";
+
 export type VaultItemStatus = "backlog" | "in_progress" | "completed";
 
 export interface VaultItem {
@@ -447,13 +493,15 @@ export interface VaultItem {
   status: VaultItemStatus;
   instrument?: string; // Piano, Guitarra, Voz, etc.
   difficulty?: "beginner" | "intermediate" | "advanced" | string;
+  platform?: string; // Udemy, YouTube, Platzi, Coursera, GitHub, Notion, etc.
+  url?: string;
   coverUrl?: string;
   fileUrl?: string;
   fileKey?: string;
   fileName?: string;
   fileSizeBytes?: number;
-  progress?: number; // Current page or percentage
-  totalPages?: number;
+  progress?: number; // Current page or percentage or current lesson
+  totalPages?: number; // Total pages or total lessons
   notes?: string;
   tags?: string[];
   createdAt?: string;
@@ -463,6 +511,8 @@ export interface VaultItem {
 export interface VaultDashboardData {
   books: VaultItem[];
   sheetMusic: VaultItem[];
+  courses: VaultItem[];
+  resources: VaultItem[];
   documents: VaultItem[];
   projects: ProjectItem[];
   scratchpadContent: string;
@@ -471,6 +521,9 @@ export interface VaultDashboardData {
     booksCompleted: number;
     totalSheetMusic: number;
     sheetMusicMastered: number;
+    totalCourses: number;
+    coursesCompleted: number;
+    totalResources: number;
     totalProjects: number;
   };
 }

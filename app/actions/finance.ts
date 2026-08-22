@@ -185,6 +185,61 @@ export async function fetchFinanceDashboardDataAction(
   const remainingDailyAntBudget = Math.max(0, currentBudget.dailyAntLimit - totalAntExpensesToday);
   const remainingMonthlyVariableBudget = currentBudget.budgetedVariableExpenses - totalVariableExpensesThisMonth;
 
+  // 4. Fetch Wishlist Anti-Impulso data
+  const wishlistRows = await sql`
+    SELECT * FROM wishlist_items ORDER BY created_at DESC;
+  `;
+
+  const nowMs = Date.now();
+  const wishlistItems = wishlistRows.map((r: any) => {
+    const createdAt = r.created_at?.toISOString
+      ? r.created_at.toISOString()
+      : r.created_at?.toString() || new Date().toISOString();
+    const createdMs = new Date(createdAt).getTime();
+    const daysElapsed = Math.max(0, Math.floor((nowMs - createdMs) / (1000 * 60 * 60 * 24)));
+    const coolingDaysTotal = Number(r.cooling_days_total) || 30;
+    const daysRemaining = Math.max(0, coolingDaysTotal - daysElapsed);
+    const isCoolingFinished = daysRemaining === 0;
+
+    let computedStatus = r.status;
+    if (computedStatus === "cooling" && isCoolingFinished) {
+      computedStatus = "ready";
+    }
+
+    return {
+      id: r.id,
+      title: r.title,
+      priceEstimated: Number(r.price_estimated) || 0,
+      category: r.category || "General",
+      priority: r.priority || "medium",
+      url: r.url || undefined,
+      imageUrl: r.image_url || undefined,
+      reasonOrNotes: r.reason_or_notes || undefined,
+      status: computedStatus,
+      coolingDaysTotal,
+      daysElapsed,
+      daysRemaining,
+      isCoolingFinished,
+      createdAt,
+      resolvedAt: r.resolved_at?.toString(),
+    };
+  });
+
+  const activeWishlist = wishlistItems.filter((i: any) => i.status === "cooling" || i.status === "ready");
+  const dismissedWishlist = wishlistItems.filter((i: any) => i.status === "dismissed");
+
+  const wishlistData = {
+    items: wishlistItems,
+    stats: {
+      totalWishlistValue: Number(activeWishlist.reduce((sum: number, i: any) => sum + i.priceEstimated, 0).toFixed(2)),
+      totalSavedImpulseValue: Number(dismissedWishlist.reduce((sum: number, i: any) => sum + i.priceEstimated, 0).toFixed(2)),
+      coolingCount: wishlistItems.filter((i: any) => i.status === "cooling").length,
+      readyCount: wishlistItems.filter((i: any) => i.status === "ready").length,
+      purchasedCount: wishlistItems.filter((i: any) => i.status === "purchased").length,
+      dismissedCount: dismissedWishlist.length,
+    },
+  };
+
   return {
     currentBudget,
     totalExpensesThisMonth,
@@ -198,6 +253,7 @@ export async function fetchFinanceDashboardDataAction(
     recentTransactions: transactions,
     savingsGoals,
     categoryBreakdown,
+    wishlistData,
   };
 }
 
