@@ -115,15 +115,15 @@ export const MOCK_TASKS: HabiticaTask[] = [
 
 // In-memory mock store for demo mode sessions
 let inMemoryMockTasks: HabiticaTask[] = [...MOCK_TASKS];
-let inMemoryMockUser: HabiticaUser = { ...MOCK_USER };
+const inMemoryMockUser: HabiticaUser = { ...MOCK_USER };
 
 // In-memory cache to prevent Habitica 429 Rate Limits
 interface CacheEntry<T> {
   data: T;
   timestamp: number;
 }
-const apiCache = new Map<string, CacheEntry<any>>();
-const lastKnownData = new Map<string, any>();
+const apiCache = new Map<string, CacheEntry<unknown>>();
+const lastKnownData = new Map<string, unknown>();
 const CACHE_TTL_MS = 20000; // 20 seconds TTL
 
 /**
@@ -187,7 +187,7 @@ export class HabiticaClient {
     if (method === "GET") {
       const cached = apiCache.get(cacheKey);
       if (cached && Date.now() - cached.timestamp < CACHE_TTL_MS) {
-        return cached.data;
+        return cached.data as T;
       }
     }
 
@@ -209,7 +209,7 @@ export class HabiticaClient {
       if (response.status === 429) {
         console.warn(`[Habitica 429 Rate Limit]: Hit on ${endpoint}. Serving cached/fallback data.`);
         if (lastKnownData.has(cacheKey)) {
-          return lastKnownData.get(cacheKey);
+          return lastKnownData.get(cacheKey) as T;
         }
         if (endpoint.includes("/user")) {
           return MOCK_USER as unknown as T;
@@ -234,7 +234,7 @@ export class HabiticaClient {
         // Fallback to stale data if available
         if (method === "GET" && lastKnownData.has(cacheKey)) {
           console.warn(`[Habitica Error]: ${errorMsg}. Falling back to cached data.`);
-          return lastKnownData.get(cacheKey);
+          return lastKnownData.get(cacheKey) as T;
         }
 
         throw new HabiticaApiError(errorMsg, response.status, json);
@@ -253,7 +253,7 @@ export class HabiticaClient {
     } catch (error: unknown) {
       if (method === "GET" && lastKnownData.has(cacheKey)) {
         console.warn(`[Habitica Error]: Network failure. Serving cached data.`);
-        return lastKnownData.get(cacheKey);
+        return lastKnownData.get(cacheKey) as T;
       }
 
       if (error instanceof HabiticaApiError) {

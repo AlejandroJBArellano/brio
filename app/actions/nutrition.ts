@@ -1,6 +1,6 @@
 "use server";
 
-import { ensureDatabaseSchema, getDb } from "@/lib/db";
+import { getDb } from "@/lib/db";
 import {
   DEFAULT_NUTRITION_SETTINGS,
   FOOD_GROUPS_CATALOG,
@@ -11,6 +11,7 @@ import {
   FoodGroupKey,
   GroceryItem,
   GroceryListCategory,
+  MacroEstimate,
   MealSlotType,
   NutritionDailyLog,
   NutritionDashboardData,
@@ -42,10 +43,61 @@ const DEFAULT_PORTIONS: Record<FoodGroupKey, number> = {
   leafy_greens: 0,
 };
 
+interface NutritionSettingsDbRow {
+  daily_portion_goals?: Record<string, number>;
+  macro_factors?: Record<string, number>;
+  water_target_ml?: number | string;
+  active_week?: number | string;
+}
+
+interface NutritionDailyLogDbRow {
+  date: Date | string;
+  portions?: Record<FoodGroupKey, number>;
+  habits?: NutritionHabitLog;
+  calculated_macros?: MacroEstimate;
+  notes?: string;
+  created_at?: Date | string;
+  updated_at?: Date | string;
+}
+
+interface NutritionRecipeDbRow {
+  id: string;
+  title: string;
+  meal_slot: string;
+  week_number?: number | string;
+  option_label?: string;
+  portions?: Record<FoodGroupKey, number>;
+  ingredients?: string[];
+  prep_notes?: string;
+  is_preset?: boolean;
+  created_at?: Date | string;
+}
+
+interface NutritionMealScheduleDbRow {
+  id: string;
+  date: Date | string;
+  meal_slot: string;
+  recipe_id?: string;
+  custom_title?: string;
+  is_completed?: boolean;
+  portions?: Record<FoodGroupKey, number>;
+  notes?: string;
+  created_at?: Date | string;
+  recipe_portions?: Record<FoodGroupKey, number>;
+}
+
+interface HealthLogWaterRow {
+  date: Date | string;
+  water_ml?: number | string;
+  supplements?: Array<{ id?: string; name?: string; taken?: boolean }>;
+}
+
+type SqlClient = { (strings: TemplateStringsArray, ...values: unknown[]): Promise<unknown[]> };
+
 /**
  * Fetches nutrition settings.
  */
-async function getSettings(sql: any): Promise<NutritionSettings> {
+async function getSettings(sql: SqlClient): Promise<NutritionSettings> {
   const rows = await sql`
     SELECT * FROM nutrition_settings WHERE id = 'default' LIMIT 1;
   `;
@@ -54,7 +106,7 @@ async function getSettings(sql: any): Promise<NutritionSettings> {
     return DEFAULT_NUTRITION_SETTINGS;
   }
 
-  const row = rows[0];
+  const row = rows[0] as unknown as NutritionSettingsDbRow;
   return {
     dailyPortionGoals: {
       ...DEFAULT_NUTRITION_SETTINGS.dailyPortionGoals,
@@ -85,6 +137,7 @@ function toDateStr(date?: Date | string): string {
 
 /**
  * Fetches the entire Nutrition Dashboard Data payload for a specific date (defaults to today).
+ * Uses Promise.all to fetch all settings, daily logs, recipes, schedule, and health log adherence in parallel.
  */
 export async function fetchNutritionDashboardDataAction(
   targetDateStr?: string
@@ -92,16 +145,45 @@ export async function fetchNutritionDashboardDataAction(
   try {
     const sql = getDb();
     const todayDate = toDateStr(targetDateStr);
-    const settings = await getSettings(sql);
 
-    // 1. Fetch Today's Daily Log
-    const todayLogRows = await sql`
-      SELECT * FROM nutrition_daily_logs WHERE date = ${todayDate} LIMIT 1;
-    `;
+    const currDate = new Date(`${todayDate}T12:00:00Z`);
+    const dayOfWeek = currDate.getUTCDay();
+    const diffToMonday = (dayOfWeek + 6) % 7;
+    const monday = new Date(currDate);
+    monday.setUTCDate(monday.getUTCDate() - diffToMonday);
+    const sunday = new Date(monday);
+    sunday.setUTCDate(sunday.getUTCDate() + 6);
 
+    const mondayStr = toDateStr(monday);
+    const sundayStr = toDateStr(sunday);
+
+    // Parallel execution of all independent nutrition queries
+    const [settings, todayLogRows, recipeRows, scheduleRows, recentLogsRows, healthLogRows] =
+      await Promise.all([
+        getSettings(sql),
+        sql`SELECT * FROM nutrition_daily_logs WHERE date = ${todayDate} LIMIT 1;`,
+        sql`SELECT * FROM nutrition_recipes ORDER BY week_number ASC NULLS LAST, meal_slot ASC, title ASC;`,
+        sql`
+          SELECT * FROM nutrition_meal_schedule 
+          WHERE date >= ${mondayStr} AND date <= ${sundayStr}
+          ORDER BY date ASC, 
+            CASE meal_slot 
+              WHEN 'breakfast' THEN 1 
+              WHEN 'lunch' THEN 2 
+              WHEN 'snack' THEN 3 
+              WHEN 'dinner' THEN 4 
+              WHEN 'smoothie' THEN 5 
+              ELSE 6 
+            END ASC;
+        `,
+        sql`SELECT * FROM nutrition_daily_logs ORDER BY date DESC LIMIT 14;`,
+        sql`SELECT date, water_ml, supplements FROM health_logs WHERE date >= ${mondayStr} AND date <= ${sundayStr};`,
+      ]);
+
+    // 1. Process Today's Daily Log
     let todayLog: NutritionDailyLog;
     if (todayLogRows.length > 0) {
-      const row = todayLogRows[0];
+      const row = todayLogRows[0] as unknown as NutritionDailyLogDbRow;
       const portions = {
         ...DEFAULT_PORTIONS,
         ...(row.portions || {}),
@@ -133,12 +215,8 @@ export async function fetchNutritionDashboardDataAction(
       };
     }
 
-    // 2. Fetch Recipes Catalog
-    const recipeRows = await sql`
-      SELECT * FROM nutrition_recipes ORDER BY week_number ASC NULLS LAST, meal_slot ASC, title ASC;
-    `;
-
-    const recipesCatalog: NutritionRecipe[] = recipeRows.map((r: any) => ({
+    // 2. Process Recipes Catalog
+    const recipesCatalog: NutritionRecipe[] = (recipeRows as unknown as NutritionRecipeDbRow[]).map((r) => ({
       id: r.id,
       title: r.title,
       mealSlot: r.meal_slot as MealSlotType,
@@ -154,33 +232,8 @@ export async function fetchNutritionDashboardDataAction(
     const recipeMap = new Map<string, NutritionRecipe>();
     recipesCatalog.forEach((rec) => recipeMap.set(rec.id, rec));
 
-    // 3. Fetch Scheduled Meals for Current Week (Monday to Sunday)
-    const currDate = new Date(`${todayDate}T12:00:00Z`);
-    const dayOfWeek = currDate.getUTCDay(); // 0 = Sunday, 1 = Monday
-    const diffToMonday = (dayOfWeek + 6) % 7;
-    const monday = new Date(currDate);
-    monday.setUTCDate(monday.getUTCDate() - diffToMonday);
-    const sunday = new Date(monday);
-    sunday.setUTCDate(sunday.getUTCDate() + 6);
-
-    const mondayStr = toDateStr(monday);
-    const sundayStr = toDateStr(sunday);
-
-    const scheduleRows = await sql`
-      SELECT * FROM nutrition_meal_schedule 
-      WHERE date >= ${mondayStr} AND date <= ${sundayStr}
-      ORDER BY date ASC, 
-        CASE meal_slot 
-          WHEN 'breakfast' THEN 1 
-          WHEN 'lunch' THEN 2 
-          WHEN 'snack' THEN 3 
-          WHEN 'dinner' THEN 4 
-          WHEN 'smoothie' THEN 5 
-          ELSE 6 
-        END ASC;
-    `;
-
-    const scheduledMealsThisWeek: ScheduledMealItem[] = scheduleRows.map((s: any) => {
+    // 3. Process Scheduled Meals
+    const scheduledMealsThisWeek: ScheduledMealItem[] = (scheduleRows as unknown as NutritionMealScheduleDbRow[]).map((s) => {
       const rec = s.recipe_id ? recipeMap.get(s.recipe_id) : undefined;
       return {
         id: s.id,
@@ -198,21 +251,15 @@ export async function fetchNutritionDashboardDataAction(
 
     const scheduledMealsToday = scheduledMealsThisWeek.filter((m) => m.date === todayDate);
 
-    // 4. Fetch Recent Daily Logs for Adherence Analytics (Last 14 days)
-    const recentLogsRows = await sql`
-      SELECT * FROM nutrition_daily_logs 
-      ORDER BY date DESC 
-      LIMIT 14;
-    `;
-
-    const recentDailyLogs: NutritionDailyLog[] = recentLogsRows.map((row: any) => ({
+    // 4. Process Recent Daily Logs
+    const recentDailyLogs: NutritionDailyLog[] = (recentLogsRows as unknown as NutritionDailyLogDbRow[]).map((row) => ({
       date: toDateStr(row.date),
       portions: { ...DEFAULT_PORTIONS, ...(row.portions || {}) },
       habits: { ...DEFAULT_HABITS, ...(row.habits || {}) },
       calculatedMacros:
         row.calculated_macros && Object.keys(row.calculated_macros).length > 0
           ? row.calculated_macros
-          : calculateMacrosFromPortions(row.portions || {}, settings.macroFactors),
+          : calculateMacrosFromPortions({ ...DEFAULT_PORTIONS, ...(row.portions || {}) }, settings.macroFactors),
       notes: row.notes || "",
       createdAt: row.created_at ? new Date(row.created_at).toISOString() : undefined,
       updatedAt: row.updated_at ? new Date(row.updated_at).toISOString() : undefined,
@@ -229,7 +276,6 @@ export async function fetchNutritionDashboardDataAction(
       if (l.habits.dailySalad) daysWithSalad++;
       if (l.habits.b12Weekly) b12LoggedThisWeek = true;
 
-      // Check if at least 4 out of 7 food groups met target
       let groupsMet = 0;
       (Object.keys(settings.dailyPortionGoals) as FoodGroupKey[]).forEach((g) => {
         if ((l.portions[g] || 0) >= (settings.dailyPortionGoals[g] || 1)) {
@@ -239,20 +285,15 @@ export async function fetchNutritionDashboardDataAction(
       if (groupsMet >= 4) daysWithPortionsMet++;
     });
 
-    // Check health_logs for actual water intake and B12 supplement this week
-    const healthLogRows = await sql`
-      SELECT date, water_ml, supplements FROM health_logs 
-      WHERE date >= ${mondayStr} AND date <= ${sundayStr};
-    `;
-
+    // Check health_logs for water & B12
     const waterTarget = settings.waterTargetMl || 1500;
-    healthLogRows.forEach((hRow: any) => {
+    (healthLogRows as unknown as HealthLogWaterRow[]).forEach((hRow) => {
       if (Number(hRow.water_ml || 0) >= waterTarget) {
         daysWithWater++;
       }
       if (!b12LoggedThisWeek && Array.isArray(hRow.supplements)) {
         const hasB12 = hRow.supplements.some(
-          (s: any) =>
+          (s) =>
             (s.name?.toLowerCase().includes("b12") ||
               s.name?.toLowerCase().includes("b-12") ||
               s.id?.toLowerCase().includes("b12")) &&
@@ -312,12 +353,10 @@ export async function logDailyPortionsAction(
   notes?: string
 ) {
   try {
-    await ensureDatabaseSchema();
     const sql = getDb();
     const targetDate = toDateStr(dateStr);
     const settings = await getSettings(sql);
 
-    // Merge existing habits if any
     const existing = await sql`
       SELECT * FROM nutrition_daily_logs WHERE date = ${targetDate} LIMIT 1;
     `;
@@ -370,7 +409,6 @@ export async function quickAdjustPortionAction(
   delta: number
 ) {
   try {
-    await ensureDatabaseSchema();
     const sql = getDb();
     const targetDate = toDateStr(dateStr);
     const settings = await getSettings(sql);
@@ -426,7 +464,6 @@ export async function toggleNutritionHabitAction(
   habitKey: keyof NutritionHabitLog
 ) {
   try {
-    await ensureDatabaseSchema();
     const sql = getDb();
     const targetDate = toDateStr(dateStr);
 
@@ -484,12 +521,10 @@ export async function scheduleMealSlotAction(payload: {
   notes?: string;
 }) {
   try {
-    await ensureDatabaseSchema();
     const sql = getDb();
     const id = `meal-${payload.date}-${payload.mealSlot}-${Date.now().toString(36)}`;
     const targetDate = toDateStr(payload.date);
 
-    // If recipe is selected and portions not provided, resolve recipe's portions
     let mealPortions = payload.portions || {};
     if (payload.recipeId && Object.keys(mealPortions).length === 0) {
       const rec = await sql`
@@ -531,7 +566,6 @@ export async function toggleScheduledMealCompletedAction(
   autoFillPortions: boolean = true
 ) {
   try {
-    await ensureDatabaseSchema();
     const sql = getDb();
 
     const mealRows = await sql`
@@ -545,7 +579,7 @@ export async function toggleScheduledMealCompletedAction(
       return { success: false, error: "Meal not found" };
     }
 
-    const meal = mealRows[0];
+    const meal = mealRows[0] as unknown as NutritionMealScheduleDbRow;
     const newCompleted = !meal.is_completed;
 
     await sql`
@@ -554,7 +588,6 @@ export async function toggleScheduledMealCompletedAction(
       WHERE id = ${mealId};
     `;
 
-    // Auto-fill portions into the daily log if completing
     if (newCompleted && autoFillPortions) {
       const targetDate = toDateStr(meal.date);
       const mealPortions: Partial<Record<FoodGroupKey, number>> =
@@ -615,7 +648,6 @@ export async function toggleScheduledMealCompletedAction(
  */
 export async function deleteScheduledMealAction(mealId: string) {
   try {
-    await ensureDatabaseSchema();
     const sql = getDb();
 
     await sql`
@@ -635,7 +667,6 @@ export async function deleteScheduledMealAction(mealId: string) {
  */
 export async function saveRecipeAction(recipe: Partial<NutritionRecipe>) {
   try {
-    await ensureDatabaseSchema();
     const sql = getDb();
     const id = recipe.id || `rec-custom-${Date.now().toString(36)}`;
 
@@ -677,7 +708,6 @@ export async function saveRecipeAction(recipe: Partial<NutritionRecipe>) {
  */
 export async function deleteRecipeAction(recipeId: string) {
   try {
-    await ensureDatabaseSchema();
     const sql = getDb();
 
     await sql`
@@ -697,7 +727,6 @@ export async function deleteRecipeAction(recipeId: string) {
  */
 export async function updateNutritionSettingsAction(settings: Partial<NutritionSettings>) {
   try {
-    await ensureDatabaseSchema();
     const sql = getDb();
     const current = await getSettings(sql);
 
@@ -742,6 +771,12 @@ export async function updateNutritionSettingsAction(settings: Partial<NutritionS
   }
 }
 
+interface GrocerySourceRow {
+  recipe_title?: string;
+  custom_title?: string;
+  recipe_ingredients?: string[];
+}
+
 /**
  * Generates a smart categorized grocery shopping list based on scheduled meals in a date range.
  */
@@ -750,7 +785,6 @@ export async function generateGroceryListAction(
   endDateStr: string
 ): Promise<GroceryListCategory[]> {
   try {
-    await ensureDatabaseSchema();
     const sql = getDb();
     const start = toDateStr(startDateStr);
     const end = toDateStr(endDateStr);
@@ -765,7 +799,7 @@ export async function generateGroceryListAction(
 
     const ingredientsMap = new Map<string, { name: string; sourceRecipes: Set<string> }>();
 
-    rows.forEach((r: any) => {
+    (rows as unknown as GrocerySourceRow[]).forEach((r) => {
       const mealName = r.recipe_title || r.custom_title || "Comida agendada";
       const ingredients: string[] = Array.isArray(r.recipe_ingredients) ? r.recipe_ingredients : [];
 
@@ -784,7 +818,6 @@ export async function generateGroceryListAction(
       });
     });
 
-    // Categorization dictionary
     const categoriesMap: Record<string, GroceryItem[]> = {
       verduras_hojas: [],
       frutas: [],
@@ -800,7 +833,7 @@ export async function generateGroceryListAction(
     const SEED_KEYWORDS = ["pepita", "semilla", "chía", "chia", "linaza", "ajonjolí", "ajonjoli", "nuez", "nueces", "almendra", "cacahuate", "hemp", "tahini", "crema de cacahuate"];
     const PANTRY_KEYWORDS = ["aceite", "vinagreta", "monkfruit", "stevia", "miel de agave", "sal", "canela", "cúrcuma", "curcuma", "cacao", "páprika", "paprika", "orégano", "leche de"];
 
-    ingredientsMap.forEach((item, _) => {
+    ingredientsMap.forEach((item) => {
       const lower = item.name.toLowerCase();
       let assignedCategory: GroceryItem["category"] = "otros";
 

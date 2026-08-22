@@ -1,6 +1,6 @@
 "use server";
 
-import { ensureDatabaseSchema, getDb } from "@/lib/db";
+import { getDb } from "@/lib/db";
 import {
   CategoryBreakdown,
   FinanceDashboardData,
@@ -8,11 +8,28 @@ import {
   SavingsGoal,
   Transaction,
   TransactionType,
+  WishlistStatus,
 } from "@/lib/types";
 import { revalidatePath } from "next/cache";
 
+interface WishlistDbRow {
+  id: string;
+  title: string;
+  price_estimated: number | string;
+  category?: string;
+  priority?: string;
+  url?: string;
+  image_url?: string;
+  reason_or_notes?: string;
+  status: string;
+  cooling_days_total?: number | string;
+  created_at?: Date | string;
+  resolved_at?: Date | string;
+}
+
 /**
  * Server Action: Fetches all financial metrics, budget thermometer, transactions, and savings goals.
+ * Uses Promise.all to fetch budget, transactions, savings goals, and wishlist concurrently.
  */
 export async function fetchFinanceDashboardDataAction(
   targetMonth?: number,
@@ -25,11 +42,20 @@ export async function fetchFinanceDashboardDataAction(
   const year = targetYear || now.getFullYear();
   const budgetId = `${year}-${String(month).padStart(2, "0")}`;
 
-  // 1. Fetch or create default monthly budget
-  const budgetRows = await sql`
-    SELECT * FROM monthly_budgets WHERE id = ${budgetId} LIMIT 1;
-  `;
+  const startDate = `${year}-${String(month).padStart(2, "0")}-01`;
+  const nextMonth = month === 12 ? 1 : month + 1;
+  const nextYear = month === 12 ? year + 1 : year;
+  const endDate = `${nextYear}-${String(nextMonth).padStart(2, "0")}-01`;
 
+  // Parallel execution of all 4 independent queries
+  const [budgetRows, transactionRows, goalsRows, wishlistRows] = await Promise.all([
+    sql`SELECT * FROM monthly_budgets WHERE id = ${budgetId} LIMIT 1;`,
+    sql`SELECT * FROM transactions WHERE date >= ${startDate} AND date < ${endDate} ORDER BY date DESC, created_at DESC;`,
+    sql`SELECT * FROM savings_goals ORDER BY created_at ASC;`,
+    sql`SELECT * FROM wishlist_items ORDER BY created_at DESC;`,
+  ]);
+
+  // 1. Process Monthly Budget
   let currentBudget: MonthlyBudget;
   if (budgetRows.length > 0) {
     const row = budgetRows[0];
@@ -43,7 +69,6 @@ export async function fetchFinanceDashboardDataAction(
       dailyAntLimit: Number(row.daily_ant_limit) || 150,
     };
   } else {
-    // Default initial budget for new months (in memory)
     currentBudget = {
       id: budgetId,
       month,
@@ -55,18 +80,7 @@ export async function fetchFinanceDashboardDataAction(
     };
   }
 
-  // 2. Fetch all transactions for this month
-  const startDate = `${year}-${String(month).padStart(2, "0")}-01`;
-  const nextMonth = month === 12 ? 1 : month + 1;
-  const nextYear = month === 12 ? year + 1 : year;
-  const endDate = `${nextYear}-${String(nextMonth).padStart(2, "0")}-01`;
-
-  const transactionRows = await sql`
-    SELECT * FROM transactions
-    WHERE date >= ${startDate} AND date < ${endDate}
-    ORDER BY date DESC, created_at DESC;
-  `;
-
+  // 2. Process Transactions
   const todayStr = now.toISOString().split("T")[0];
 
   let totalExpensesThisMonth = 0;
@@ -87,12 +101,10 @@ export async function fetchFinanceDashboardDataAction(
       totalExpensesThisMonth += amt;
       const cat = (r.category || "general").toLowerCase();
 
-      // Track categories
       if (!categoryMap[cat]) categoryMap[cat] = { total: 0, count: 0 };
       categoryMap[cat].total += amt;
       categoryMap[cat].count += 1;
 
-      // Fixed vs Variable
       if (cat === "fijo" || cat === "renta" || cat === "servicios" || cat === "suscripciones") {
         totalFixedExpensesThisMonth += amt;
       } else {
@@ -122,7 +134,6 @@ export async function fetchFinanceDashboardDataAction(
     };
   });
 
-  // Calculate category breakdowns
   const categoryBreakdown: CategoryBreakdown[] = Object.entries(categoryMap)
     .map(([category, data]) => ({
       category,
@@ -132,11 +143,7 @@ export async function fetchFinanceDashboardDataAction(
     }))
     .sort((a, b) => b.total - a.total);
 
-  // 3. Fetch savings goals
-  const goalsRows = await sql`
-    SELECT * FROM savings_goals ORDER BY created_at ASC;
-  `;
-
+  // 3. Process Savings Goals
   const savingsGoals: SavingsGoal[] = goalsRows.map((g) => ({
     id: g.id,
     title: g.title,
@@ -151,16 +158,14 @@ export async function fetchFinanceDashboardDataAction(
   const remainingDailyAntBudget = Math.max(0, currentBudget.dailyAntLimit - totalAntExpensesToday);
   const remainingMonthlyVariableBudget = currentBudget.budgetedVariableExpenses - totalVariableExpensesThisMonth;
 
-  // 4. Fetch Wishlist Anti-Impulso data
-  const wishlistRows = await sql`
-    SELECT * FROM wishlist_items ORDER BY created_at DESC;
-  `;
-
+  // 4. Process Wishlist Anti-Impulso data
   const nowMs = Date.now();
-  const wishlistItems = wishlistRows.map((r: any) => {
-    const createdAt = r.created_at?.toISOString
-      ? r.created_at.toISOString()
-      : r.created_at?.toString() || new Date().toISOString();
+  const wishlistItems = (wishlistRows as unknown as WishlistDbRow[]).map((r) => {
+    const createdAt = r.created_at
+      ? typeof r.created_at === "string"
+        ? r.created_at
+        : new Date(r.created_at).toISOString()
+      : new Date().toISOString();
     const createdMs = new Date(createdAt).getTime();
     const daysElapsed = Math.max(0, Math.floor((nowMs - createdMs) / (1000 * 60 * 60 * 24)));
     const coolingDaysTotal = Number(r.cooling_days_total) || 30;
@@ -177,11 +182,11 @@ export async function fetchFinanceDashboardDataAction(
       title: r.title,
       priceEstimated: Number(r.price_estimated) || 0,
       category: r.category || "General",
-      priority: r.priority || "medium",
+      priority: (r.priority as "high" | "medium" | "low") || "medium",
       url: r.url || undefined,
       imageUrl: r.image_url || undefined,
       reasonOrNotes: r.reason_or_notes || undefined,
-      status: computedStatus,
+      status: (computedStatus === "bought" ? "purchased" : computedStatus) as WishlistStatus,
       coolingDaysTotal,
       daysElapsed,
       daysRemaining,
@@ -191,17 +196,18 @@ export async function fetchFinanceDashboardDataAction(
     };
   });
 
-  const activeWishlist = wishlistItems.filter((i: any) => i.status === "cooling" || i.status === "ready");
-  const dismissedWishlist = wishlistItems.filter((i: any) => i.status === "dismissed");
+
+  const activeWishlist = wishlistItems.filter((i) => i.status === "cooling" || i.status === "ready");
+  const dismissedWishlist = wishlistItems.filter((i) => i.status === "dismissed");
 
   const wishlistData = {
     items: wishlistItems,
     stats: {
-      totalWishlistValue: Number(activeWishlist.reduce((sum: number, i: any) => sum + i.priceEstimated, 0).toFixed(2)),
-      totalSavedImpulseValue: Number(dismissedWishlist.reduce((sum: number, i: any) => sum + i.priceEstimated, 0).toFixed(2)),
-      coolingCount: wishlistItems.filter((i: any) => i.status === "cooling").length,
-      readyCount: wishlistItems.filter((i: any) => i.status === "ready").length,
-      purchasedCount: wishlistItems.filter((i: any) => i.status === "purchased").length,
+      totalWishlistValue: Number(activeWishlist.reduce((sum, i) => sum + i.priceEstimated, 0).toFixed(2)),
+      totalSavedImpulseValue: Number(dismissedWishlist.reduce((sum, i) => sum + i.priceEstimated, 0).toFixed(2)),
+      coolingCount: wishlistItems.filter((i) => i.status === "cooling").length,
+      readyCount: wishlistItems.filter((i) => i.status === "ready").length,
+      purchasedCount: wishlistItems.filter((i) => i.status === "purchased").length,
       dismissedCount: dismissedWishlist.length,
     },
   };
@@ -237,7 +243,6 @@ export async function createTransactionAction(payload: {
   date?: string;
 }): Promise<{ success: boolean; transaction?: Transaction; error?: string }> {
   try {
-    await ensureDatabaseSchema();
     const sql = getDb();
 
     const id = `tx-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
@@ -290,7 +295,6 @@ export async function createTransactionAction(payload: {
  */
 export async function deleteTransactionAction(id: string): Promise<{ success: boolean; error?: string }> {
   try {
-    await ensureDatabaseSchema();
     const sql = getDb();
     await sql`DELETE FROM transactions WHERE id = ${id};`;
     revalidatePath("/");
@@ -313,7 +317,6 @@ export async function updateMonthlyBudgetAction(payload: {
   dailyAntLimit: number;
 }): Promise<{ success: boolean; error?: string }> {
   try {
-    await ensureDatabaseSchema();
     const sql = getDb();
     const id = `${payload.year}-${String(payload.month).padStart(2, "0")}`;
 
@@ -348,7 +351,6 @@ export async function createSavingsGoalAction(payload: {
   color?: string;
 }): Promise<{ success: boolean; error?: string }> {
   try {
-    await ensureDatabaseSchema();
     const sql = getDb();
     const id = `goal-${Date.now()}`;
 
@@ -370,7 +372,6 @@ export async function contributeToSavingsGoalAction(
   amount: number
 ): Promise<{ success: boolean; error?: string }> {
   try {
-    await ensureDatabaseSchema();
     const sql = getDb();
     await sql`
       UPDATE savings_goals

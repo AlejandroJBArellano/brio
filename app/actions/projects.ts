@@ -1,6 +1,6 @@
 "use server";
 
-import { ensureDatabaseSchema, getDb } from "@/lib/db";
+import { getDb } from "@/lib/db";
 import {
   LearningItem,
   LearningItemType,
@@ -11,18 +11,47 @@ import {
 } from "@/lib/types";
 import { revalidatePath } from "next/cache";
 
+interface ProjectDbRow {
+  id: string;
+  title: string;
+  description?: string;
+  status: string;
+  tech_stack?: string[];
+  repo_url?: string;
+  live_url?: string;
+  progress?: number | string;
+  created_at?: Date | string;
+}
+
+interface LearningDbRow {
+  id: string;
+  title: string;
+  type: string;
+  author?: string;
+  current_progress?: number | string;
+  total_progress?: number | string;
+  key_takeaways?: string;
+  status: string;
+  created_at?: Date | string;
+}
+
+interface ScratchpadDbRow {
+  content?: string;
+}
+
 /**
- * Server Action: Fetches all projects, learning items, and scratchpad content.
+ * Server Action: Fetches all projects, learning items, and scratchpad content concurrently.
  */
 export async function fetchProjectsDashboardDataAction(): Promise<ProjectsDashboardData> {
   const sql = getDb();
 
-  // 1. Fetch projects
-  const projectRows = await sql`
-    SELECT * FROM projects ORDER BY created_at DESC;
-  `;
+  const [projectRows, learningRows, scratchRows] = await Promise.all([
+    sql`SELECT * FROM projects ORDER BY created_at DESC;`,
+    sql`SELECT * FROM learning_items ORDER BY created_at DESC;`,
+    sql`SELECT content FROM scratchpad_notes WHERE id = 'default' LIMIT 1;`,
+  ]);
 
-  const projects: ProjectItem[] = projectRows.map((p) => ({
+  const projects: ProjectItem[] = (projectRows as unknown as ProjectDbRow[]).map((p) => ({
     id: p.id,
     title: p.title,
     description: p.description || undefined,
@@ -34,12 +63,7 @@ export async function fetchProjectsDashboardDataAction(): Promise<ProjectsDashbo
     createdAt: p.created_at?.toString(),
   }));
 
-  // 2. Fetch learning items (Books & Courses)
-  const learningRows = await sql`
-    SELECT * FROM learning_items ORDER BY created_at DESC;
-  `;
-
-  const learningItems: LearningItem[] = learningRows.map((l) => ({
+  const learningItems: LearningItem[] = (learningRows as unknown as LearningDbRow[]).map((l) => ({
     id: l.id,
     title: l.title,
     type: l.type as LearningItemType,
@@ -51,14 +75,9 @@ export async function fetchProjectsDashboardDataAction(): Promise<ProjectsDashbo
     createdAt: l.created_at?.toString(),
   }));
 
-  // 3. Fetch scratchpad
-  const scratchRows = await sql`
-    SELECT content FROM scratchpad_notes WHERE id = 'default' LIMIT 1;
-  `;
-
   const scratchpadContent =
     scratchRows.length > 0
-      ? scratchRows[0].content || ""
+      ? (scratchRows[0] as unknown as ScratchpadDbRow).content || ""
       : "# 📝 Scratchpad & Brain Vault\n\n- [ ] Revisar métricas semanales\n- Idea de side project: Generador de contratos con IA\n- Nota: Configurar webhook de Google Calendar";
 
   return {
@@ -81,7 +100,6 @@ export async function createProjectAction(payload: {
   progress?: number;
 }): Promise<{ success: boolean; error?: string }> {
   try {
-    await ensureDatabaseSchema();
     const sql = getDb();
     const id = `prj-${Date.now()}`;
 
@@ -107,7 +125,6 @@ export async function updateProjectStatusAction(
   progress?: number
 ): Promise<{ success: boolean; error?: string }> {
   try {
-    await ensureDatabaseSchema();
     const sql = getDb();
 
     if (progress !== undefined) {
@@ -137,7 +154,6 @@ export async function updateProjectStatusAction(
  */
 export async function deleteProjectAction(id: string): Promise<{ success: boolean; error?: string }> {
   try {
-    await ensureDatabaseSchema();
     const sql = getDb();
     await sql`DELETE FROM projects WHERE id = ${id};`;
     revalidatePath("/");
@@ -158,7 +174,6 @@ export async function createLearningItemAction(payload: {
   totalProgress?: number;
 }): Promise<{ success: boolean; error?: string }> {
   try {
-    await ensureDatabaseSchema();
     const sql = getDb();
     const id = `lrn-${Date.now()}`;
 
@@ -185,7 +200,6 @@ export async function updateLearningProgressAction(
   status?: LearningStatus
 ): Promise<{ success: boolean; error?: string }> {
   try {
-    await ensureDatabaseSchema();
     const sql = getDb();
 
     await sql`
@@ -209,7 +223,6 @@ export async function updateLearningProgressAction(
  */
 export async function deleteLearningItemAction(id: string): Promise<{ success: boolean; error?: string }> {
   try {
-    await ensureDatabaseSchema();
     const sql = getDb();
     await sql`DELETE FROM learning_items WHERE id = ${id};`;
     revalidatePath("/");
@@ -227,7 +240,6 @@ export async function saveScratchpadAction(
   content: string
 ): Promise<{ success: boolean; error?: string }> {
   try {
-    await ensureDatabaseSchema();
     const sql = getDb();
 
     await sql`

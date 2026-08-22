@@ -81,34 +81,11 @@ export async function logoutOwnerAction(): Promise<void> {
   revalidatePath("/");
 }
 
+import { getCachedOwnerSession, OwnerSession } from "@/lib/dal/auth";
+
 /**
- * Server Action: Verify current session
+ * Server Action: Verify current session (Deduplicated with React.cache)
  */
-export async function getOwnerSession(): Promise<{
-  isAuthenticated: boolean;
-  user?: { email: string; name: string };
-}> {
-  try {
-    const cookieStore = await cookies();
-    const token = cookieStore.get(AUTH_COOKIE_NAME)?.value;
-
-    if (!token) {
-      return { isAuthenticated: false };
-    }
-
-    const payload = JSON.parse(Buffer.from(token, "base64").toString("utf-8"));
-    if (!payload.email) {
-      return { isAuthenticated: false };
-    }
-
-    return {
-      isAuthenticated: true,
-      user: {
-        email: payload.email,
-        name: payload.name || "Alejandro Arellano",
-      },
-    };
-  } catch {
-    return { isAuthenticated: false };
-  }
+export async function getOwnerSession(): Promise<OwnerSession> {
+  return getCachedOwnerSession();
 }

@@ -1,12 +1,20 @@
 "use server";
 
-import { ensureDatabaseSchema, getDb } from "@/lib/db";
-import { habiticaClient } from "@/lib/habitica";
+import { getDb } from "@/lib/db";
+import { getCachedHabiticaTags, getCachedHabiticaTasks } from "@/lib/dal/habitica";
 import {
   AnalyticsDashboardData,
   HeatmapDay,
   LifeTagDistribution,
 } from "@/lib/types";
+
+interface DailyActivityDbRow {
+  date: Date | string;
+  habits_count?: number | string;
+  dailies_count?: number | string;
+  todos_count?: number | string;
+  expenses_count?: number | string;
+}
 
 const TAG_COLOR_MAP: Record<string, string> = {
   health: "#10b981", // Emerald
@@ -48,7 +56,6 @@ function getDeterministicColor(tag: string, index: number): string {
  * Server Action: Calculates Heatmap (last 90 days) and Life Balance Tag breakdown.
  */
 export async function fetchAnalyticsDataAction(): Promise<AnalyticsDashboardData> {
-  await ensureDatabaseSchema();
   const sql = getDb();
 
   // 1. Fetch activity logs from Neon for the past 90 days
@@ -62,8 +69,8 @@ export async function fetchAnalyticsDataAction(): Promise<AnalyticsDashboardData
     ORDER BY date ASC;
   `;
 
-  const activityMap = new Map<string, any>();
-  for (const row of activityRows) {
+  const activityMap = new Map<string, DailyActivityDbRow>();
+  for (const row of activityRows as unknown as DailyActivityDbRow[]) {
     const dStr = typeof row.date === "string" ? row.date.split("T")[0] : new Date(row.date).toISOString().split("T")[0];
     activityMap.set(dStr, row);
   }
@@ -120,14 +127,14 @@ export async function fetchAnalyticsDataAction(): Promise<AnalyticsDashboardData
     });
   }
 
-  // 2. Fetch tags from Habitica tasks & resolve UUIDs to human Tag Names
+  // 2. Fetch tags from Habitica tasks & resolve UUIDs to human Tag Names (Deduplicated with React.cache)
   const tagCounts: Record<string, number> = {};
   let totalTagWeights = 0;
 
   try {
     const [tasks, userTags] = await Promise.all([
-      habiticaClient.getUserTasks(),
-      habiticaClient.getUserTags(),
+      getCachedHabiticaTasks(),
+      getCachedHabiticaTags(),
     ]);
 
     // Build Tag ID -> Tag Name lookup map

@@ -2,6 +2,7 @@
 
 import { isHabiticaConfigured } from "@/lib/env";
 import { habiticaClient, MOCK_TASKS, MOCK_USER } from "@/lib/habitica";
+import { getCachedHabiticaDashboardData } from "@/lib/dal/habitica";
 import { parseBatchInput, parseTaskLine, toHabiticaPayload } from "@/lib/parser";
 import {
   BatchActionResult,
@@ -9,7 +10,6 @@ import {
   HabiticaTask,
   HabiticaTaskPayload,
   HabiticaUser,
-  TaskType,
 } from "@/lib/types";
 import { revalidatePath } from "next/cache";
 
@@ -261,7 +261,7 @@ export async function fetchTagsAction(): Promise<HabiticaTag[]> {
 }
 
 /**
- * Server Action: Fetch complete dashboard data
+ * Server Action: Fetch complete dashboard data (Deduplicated with React.cache)
  */
 export async function fetchDashboardDataAction(): Promise<{
   user: HabiticaUser;
@@ -270,19 +270,7 @@ export async function fetchDashboardDataAction(): Promise<{
   isConfigured: boolean;
 }> {
   try {
-    const isConfigured = isHabiticaConfigured();
-    const [user, tasks, tags] = await Promise.all([
-      habiticaClient.getUserProfile(),
-      habiticaClient.getUserTasks(),
-      habiticaClient.getUserTags(),
-    ]);
-
-    return {
-      user,
-      tasks,
-      tags,
-      isConfigured,
-    };
+    return await getCachedHabiticaDashboardData();
   } catch (error: unknown) {
     console.error("[Dashboard Habitica Fetch Warning]:", error);
     return {
