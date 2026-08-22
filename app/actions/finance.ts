@@ -18,7 +18,6 @@ export async function fetchFinanceDashboardDataAction(
   targetMonth?: number,
   targetYear?: number
 ): Promise<FinanceDashboardData> {
-  await ensureDatabaseSchema();
   const sql = getDb();
 
   const now = new Date();
@@ -44,7 +43,7 @@ export async function fetchFinanceDashboardDataAction(
       dailyAntLimit: Number(row.daily_ant_limit) || 150,
     };
   } else {
-    // Default initial budget for new months
+    // Default initial budget for new months (in memory)
     currentBudget = {
       id: budgetId,
       month,
@@ -54,12 +53,6 @@ export async function fetchFinanceDashboardDataAction(
       budgetedVariableExpenses: 8000,
       dailyAntLimit: 150,
     };
-
-    await sql`
-      INSERT INTO monthly_budgets (id, month, year, budgeted_income, budgeted_fixed_expenses, budgeted_variable_expenses, daily_ant_limit)
-      VALUES (${budgetId}, ${month}, ${year}, ${currentBudget.budgetedIncome}, ${currentBudget.budgetedFixedExpenses}, ${currentBudget.budgetedVariableExpenses}, ${currentBudget.dailyAntLimit})
-      ON CONFLICT (id) DO NOTHING;
-    `;
   }
 
   // 2. Fetch all transactions for this month
@@ -144,7 +137,7 @@ export async function fetchFinanceDashboardDataAction(
     SELECT * FROM savings_goals ORDER BY created_at ASC;
   `;
 
-  let savingsGoals: SavingsGoal[] = goalsRows.map((g) => ({
+  const savingsGoals: SavingsGoal[] = goalsRows.map((g) => ({
     id: g.id,
     title: g.title,
     targetAmount: Number(g.target_amount),
@@ -154,33 +147,6 @@ export async function fetchFinanceDashboardDataAction(
     color: g.color || "#6366f1",
     createdAt: g.created_at?.toString(),
   }));
-
-  // Seed default emergency fund goal if empty
-  if (savingsGoals.length === 0) {
-    const defaultGoal = {
-      id: `goal-${Date.now()}`,
-      title: "Fondo de Emergencia 🛡️",
-      target_amount: 30000,
-      current_amount: 8500,
-      category: "seguridad",
-      color: "#10b981",
-    };
-    await sql`
-      INSERT INTO savings_goals (id, title, target_amount, current_amount, category, color)
-      VALUES (${defaultGoal.id}, ${defaultGoal.title}, ${defaultGoal.target_amount}, ${defaultGoal.current_amount}, ${defaultGoal.category}, ${defaultGoal.color})
-      ON CONFLICT (id) DO NOTHING;
-    `;
-    savingsGoals = [
-      {
-        id: defaultGoal.id,
-        title: defaultGoal.title,
-        targetAmount: defaultGoal.target_amount,
-        currentAmount: defaultGoal.current_amount,
-        category: defaultGoal.category,
-        color: defaultGoal.color,
-      },
-    ];
-  }
 
   const remainingDailyAntBudget = Math.max(0, currentBudget.dailyAntLimit - totalAntExpensesToday);
   const remainingMonthlyVariableBudget = currentBudget.budgetedVariableExpenses - totalVariableExpensesThisMonth;

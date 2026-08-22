@@ -15,7 +15,6 @@ import { revalidatePath } from "next/cache";
  * Server Action: Fetches all projects, learning items, and scratchpad content.
  */
 export async function fetchProjectsDashboardDataAction(): Promise<ProjectsDashboardData> {
-  await ensureDatabaseSchema();
   const sql = getDb();
 
   // 1. Fetch projects
@@ -23,7 +22,7 @@ export async function fetchProjectsDashboardDataAction(): Promise<ProjectsDashbo
     SELECT * FROM projects ORDER BY created_at DESC;
   `;
 
-  let projects: ProjectItem[] = projectRows.map((p) => ({
+  const projects: ProjectItem[] = projectRows.map((p) => ({
     id: p.id,
     title: p.title,
     description: p.description || undefined,
@@ -35,30 +34,12 @@ export async function fetchProjectsDashboardDataAction(): Promise<ProjectsDashbo
     createdAt: p.created_at?.toString(),
   }));
 
-  // Seed sample project if empty
-  if (projects.length === 0) {
-    const defaultProject: ProjectItem = {
-      id: `prj-${Date.now()}`,
-      title: "Brio OS ⚡",
-      description: "Personal command center & life operating dashboard",
-      status: "in_progress",
-      techStack: ["Next.js", "Neon DB", "Habitica", "Tailwind CSS"],
-      progress: 85,
-    };
-    await sql`
-      INSERT INTO projects (id, title, description, status, tech_stack, progress)
-      VALUES (${defaultProject.id}, ${defaultProject.title}, ${defaultProject.description}, ${defaultProject.status}, ${JSON.stringify(defaultProject.techStack)}::jsonb, ${defaultProject.progress})
-      ON CONFLICT (id) DO NOTHING;
-    `;
-    projects = [defaultProject];
-  }
-
   // 2. Fetch learning items (Books & Courses)
   const learningRows = await sql`
     SELECT * FROM learning_items ORDER BY created_at DESC;
   `;
 
-  let learningItems: LearningItem[] = learningRows.map((l) => ({
+  const learningItems: LearningItem[] = learningRows.map((l) => ({
     id: l.id,
     title: l.title,
     type: l.type as LearningItemType,
@@ -69,26 +50,6 @@ export async function fetchProjectsDashboardDataAction(): Promise<ProjectsDashbo
     status: l.status as LearningStatus,
     createdAt: l.created_at?.toString(),
   }));
-
-  // Seed default book if empty
-  if (learningItems.length === 0) {
-    const defaultBook: LearningItem = {
-      id: `lrn-${Date.now()}`,
-      title: "Deep Work: Rules for Focused Success",
-      type: "book",
-      author: "Cal Newport",
-      currentProgress: 180,
-      totalProgress: 300,
-      keyTakeaways: "La capacidad de concentrarse profundamente es un superpoder escaso en la economía moderna.",
-      status: "reading",
-    };
-    await sql`
-      INSERT INTO learning_items (id, title, type, author, current_progress, total_progress, key_takeaways, status)
-      VALUES (${defaultBook.id}, ${defaultBook.title}, ${defaultBook.type}, ${defaultBook.author}, ${defaultBook.currentProgress}, ${defaultBook.totalProgress}, ${defaultBook.keyTakeaways}, ${defaultBook.status})
-      ON CONFLICT (id) DO NOTHING;
-    `;
-    learningItems = [defaultBook];
-  }
 
   // 3. Fetch scratchpad
   const scratchRows = await sql`

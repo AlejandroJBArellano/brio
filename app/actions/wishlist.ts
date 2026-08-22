@@ -12,67 +12,6 @@ import { revalidatePath } from "next/cache";
 const DEFAULT_COOLING_DAYS = 30;
 
 // Initial sample items if wishlist is completely empty
-const INITIAL_WISHLIST_ITEMS = [
-  {
-    title: "Audífonos Sony WH-1000XM5 (Noise Cancelling)",
-    priceEstimated: 6499.0,
-    category: "Tech",
-    priority: "high" as WishlistPriority,
-    url: "https://amazon.com.mx",
-    reasonOrNotes: "Para sesiones de Deep Work y viajes sin distracciones sonoras.",
-    coolingDaysTotal: 30,
-    daysAgo: 18,
-  },
-  {
-    title: "Teclado Mecánico Custom Keychron Q1 Pro",
-    priceEstimated: 3890.0,
-    category: "Tech",
-    priority: "medium" as WishlistPriority,
-    url: "https://keychron.com",
-    reasonOrNotes: "Ergonomía de escritura para código diario.",
-    coolingDaysTotal: 30,
-    daysAgo: 32, // Already cooling finished -> Ready
-  },
-  {
-    title: "Pedal de Sustain Metálico para Teclado/Piano",
-    priceEstimated: 650.0,
-    category: "Música",
-    priority: "high" as WishlistPriority,
-    url: "https://amazon.com.mx",
-    reasonOrNotes: "Mayor precisión dinámica al tocar piezas de Debussy.",
-    coolingDaysTotal: 15,
-    daysAgo: 16, // Ready
-  },
-];
-
-async function seedInitialWishlistItems(sql: any) {
-  for (const item of INITIAL_WISHLIST_ITEMS) {
-    const id = `wish-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`;
-    const createdDate = new Date();
-    createdDate.setDate(createdDate.getDate() - item.daysAgo);
-
-    await sql`
-      INSERT INTO wishlist_items (
-        id, title, price_estimated, category, priority, url,
-        reason_or_notes, status, cooling_days_total, created_at
-      )
-      VALUES (
-        ${id},
-        ${item.title},
-        ${item.priceEstimated},
-        ${item.category},
-        ${item.priority},
-        ${item.url},
-        ${item.reasonOrNotes},
-        'cooling',
-        ${item.coolingDaysTotal},
-        ${createdDate.toISOString()}
-      )
-      ON CONFLICT (id) DO NOTHING;
-    `;
-  }
-}
-
 /**
  * Helper to process raw DB row into typed WishlistItem with calculated countdowns.
  */
@@ -120,19 +59,11 @@ function processWishlistRow(r: any): WishlistItem {
  * Server Action: Fetches all Wishlist items and computes financial & cooling statistics.
  */
 export async function fetchWishlistDataAction(): Promise<WishlistDashboardData> {
-  await ensureDatabaseSchema();
   const sql = getDb();
 
-  let rows = await sql`
+  const rows = await sql`
     SELECT * FROM wishlist_items ORDER BY created_at DESC;
   `;
-
-  if (rows.length === 0) {
-    await seedInitialWishlistItems(sql);
-    rows = await sql`
-      SELECT * FROM wishlist_items ORDER BY created_at DESC;
-    `;
-  }
 
   const items = rows.map(processWishlistRow);
 

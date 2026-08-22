@@ -43,53 +43,14 @@ const DEFAULT_PORTIONS: Record<FoodGroupKey, number> = {
 };
 
 /**
- * Ensures preset recipes from Mariana Mont's clinical plan exist in the database.
+ * Fetches nutrition settings.
  */
-async function ensurePresetRecipes(sql: any) {
-  for (const rec of MARIANA_MONT_PRESET_RECIPES) {
-    await sql`
-      INSERT INTO nutrition_recipes (
-        id, title, meal_slot, week_number, option_label, portions, ingredients, prep_notes, is_preset
-      ) VALUES (
-        ${rec.id},
-        ${rec.title},
-        ${rec.mealSlot},
-        ${rec.weekNumber || 1},
-        ${rec.optionLabel || null},
-        ${JSON.stringify(rec.portions)},
-        ${JSON.stringify(rec.ingredients)},
-        ${rec.prepNotes || null},
-        true
-      ) ON CONFLICT (id) DO UPDATE SET
-        title = EXCLUDED.title,
-        meal_slot = EXCLUDED.meal_slot,
-        portions = EXCLUDED.portions,
-        ingredients = EXCLUDED.ingredients,
-        prep_notes = EXCLUDED.prep_notes;
-    `;
-  }
-}
-
-/**
- * Fetches or initializes nutrition settings.
- */
-async function getOrSeedSettings(sql: any): Promise<NutritionSettings> {
+async function getSettings(sql: any): Promise<NutritionSettings> {
   const rows = await sql`
     SELECT * FROM nutrition_settings WHERE id = 'default' LIMIT 1;
   `;
 
   if (rows.length === 0) {
-    await sql`
-      INSERT INTO nutrition_settings (
-        id, daily_portion_goals, macro_factors, water_target_ml, active_week
-      ) VALUES (
-        'default',
-        ${JSON.stringify(DEFAULT_NUTRITION_SETTINGS.dailyPortionGoals)},
-        ${JSON.stringify(DEFAULT_NUTRITION_SETTINGS.macroFactors)},
-        ${DEFAULT_NUTRITION_SETTINGS.waterTargetMl},
-        ${DEFAULT_NUTRITION_SETTINGS.activeWeek || 1}
-      ) ON CONFLICT (id) DO NOTHING;
-    `;
     return DEFAULT_NUTRITION_SETTINGS;
   }
 
@@ -129,12 +90,9 @@ export async function fetchNutritionDashboardDataAction(
   targetDateStr?: string
 ): Promise<NutritionDashboardData> {
   try {
-    await ensureDatabaseSchema();
     const sql = getDb();
-    await ensurePresetRecipes(sql);
-
     const todayDate = toDateStr(targetDateStr);
-    const settings = await getOrSeedSettings(sql);
+    const settings = await getSettings(sql);
 
     // 1. Fetch Today's Daily Log
     const todayLogRows = await sql`
@@ -357,7 +315,7 @@ export async function logDailyPortionsAction(
     await ensureDatabaseSchema();
     const sql = getDb();
     const targetDate = toDateStr(dateStr);
-    const settings = await getOrSeedSettings(sql);
+    const settings = await getSettings(sql);
 
     // Merge existing habits if any
     const existing = await sql`
@@ -415,7 +373,7 @@ export async function quickAdjustPortionAction(
     await ensureDatabaseSchema();
     const sql = getDb();
     const targetDate = toDateStr(dateStr);
-    const settings = await getOrSeedSettings(sql);
+    const settings = await getSettings(sql);
 
     const existing = await sql`
       SELECT * FROM nutrition_daily_logs WHERE date = ${targetDate} LIMIT 1;
@@ -622,7 +580,7 @@ export async function toggleScheduledMealCompletedAction(
           portions[k] = Math.round(((portions[k] || 0) + add) * 10) / 10;
         });
 
-        const settings = await getOrSeedSettings(sql);
+        const settings = await getSettings(sql);
         const calculatedMacros = calculateMacrosFromPortions(portions, settings.macroFactors);
 
         await sql`
@@ -741,7 +699,7 @@ export async function updateNutritionSettingsAction(settings: Partial<NutritionS
   try {
     await ensureDatabaseSchema();
     const sql = getDb();
-    const current = await getOrSeedSettings(sql);
+    const current = await getSettings(sql);
 
     const merged: NutritionSettings = {
       dailyPortionGoals: {

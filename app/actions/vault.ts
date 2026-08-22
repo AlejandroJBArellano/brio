@@ -16,157 +16,16 @@ import {
 } from "@/lib/types";
 import { revalidatePath } from "next/cache";
 
-// Initial seed data if vault is completely empty
-const INITIAL_VAULT_ITEMS: Omit<VaultItem, "id" | "createdAt" | "updatedAt">[] = [
-  {
-    category: "course",
-    title: "Next.js 15 & React 19 Pro Architecture",
-    authorOrCreator: "Lee Robinson / Vercel",
-    platform: "Udemy",
-    url: "https://nextjs.org/learn",
-    status: "in_progress",
-    progress: 18,
-    totalPages: 42,
-    notes: "Patrones de Server Components, Server Actions y optimización de caché Turbopack.",
-    tags: ["Next.js", "React", "Frontend"],
-  },
-  {
-    category: "course",
-    title: "Armonía Moderna & Re-harmonización para Piano",
-    authorOrCreator: "Open Studio Jazz",
-    platform: "Web",
-    url: "https://openstudiojazz.com",
-    status: "in_progress",
-    progress: 6,
-    totalPages: 24,
-    notes: "Acordes 2-5-1 con extensiones 9na, 11na y sustituciones tritónicas.",
-    tags: ["Piano", "Jazz", "Armonía"],
-  },
-  {
-    category: "sheet_music",
-    title: "Clair de Lune (Suite bergamasque)",
-    authorOrCreator: "Claude Debussy",
-    status: "in_progress",
-    instrument: "Piano",
-    difficulty: "intermediate",
-    notes: "Trabajar el tempo rubato en el compás 27 y dinámica pianissimo.",
-    progress: 2,
-    totalPages: 6,
-    tags: ["Impresionismo", "Piano Clásico"],
-  },
-  {
-    category: "sheet_music",
-    title: "Gymnopédie No. 1",
-    authorOrCreator: "Erik Satie",
-    status: "completed",
-    instrument: "Piano",
-    difficulty: "beginner",
-    notes: "Dominada en repertorio activo. Cuidar el pedal de sustain.",
-    progress: 3,
-    totalPages: 3,
-    tags: ["Satie", "Repertorio"],
-  },
-  {
-    category: "video",
-    title: "Understanding Postgres Execution Plans & Indexing",
-    authorOrCreator: "Hussein Nasser",
-    platform: "YouTube",
-    url: "https://www.youtube.com/watch?v=hd_4O_13Fwo",
-    status: "in_progress",
-    notes: "Diferencia entre Seq Scan, Index Scan y Bitmap Scan con EXPLAIN ANALYZE.",
-    tags: ["Postgres", "Performance", "Bases de Datos"],
-  },
-  {
-    category: "link",
-    title: "Notion Workspace: Notas & Arquitectura de Proyectos",
-    authorOrCreator: "Alejandro",
-    platform: "Notion",
-    url: "https://notion.so",
-    status: "in_progress",
-    notes: "Documentación centralizada de flujos de trabajo y diagramas.",
-    tags: ["Notion", "Arquitectura", "Organización"],
-  },
-  {
-    category: "link",
-    title: "shadcn/ui - Accessible Component System",
-    authorOrCreator: "shadcn",
-    platform: "GitHub",
-    url: "https://github.com/shadcn-ui/ui",
-    status: "completed",
-    notes: "Referencia de Radix UI y Tailwind CSS primitives.",
-    tags: ["GitHub", "UI", "OpenSource"],
-  },
-  {
-    category: "book",
-    title: "Atomic Habits",
-    authorOrCreator: "James Clear",
-    status: "completed",
-    progress: 320,
-    totalPages: 320,
-    notes: "La regla de los 2 minutos y diseño de ambientes para consistencia.",
-    tags: ["Productividad", "Psicología"],
-  },
-  {
-    category: "book",
-    title: "Designing Data-Intensive Applications",
-    authorOrCreator: "Martin Kleppmann",
-    status: "in_progress",
-    progress: 145,
-    totalPages: 560,
-    notes: "Capítulo de modelos de datos, replicación y consenso distribuido.",
-    tags: ["Arquitectura", "Software"],
-  },
-];
-
-/**
- * Ensures initial seed items exist if vault table is empty.
- */
-async function seedInitialVaultItems(sql: any) {
-  for (const item of INITIAL_VAULT_ITEMS) {
-    const id = `vault-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`;
-    await sql`
-      INSERT INTO vault_items (
-        id, category, title, author_or_creator, status, instrument,
-        difficulty, platform, url, progress, total_pages, notes, tags
-      )
-      VALUES (
-        ${id},
-        ${item.category},
-        ${item.title},
-        ${item.authorOrCreator || null},
-        ${item.status},
-        ${item.instrument || null},
-        ${item.difficulty || null},
-        ${item.platform || null},
-        ${item.url || null},
-        ${item.progress || 0},
-        ${item.totalPages || null},
-        ${item.notes || null},
-        ${JSON.stringify(item.tags || [])}::jsonb
-      )
-      ON CONFLICT (id) DO NOTHING;
-    `;
-  }
-}
-
 /**
  * Server Action: Fetches all items in Brio Vault (Books, Sheet Music, Documents, Projects & Scratchpad).
  */
 export async function fetchVaultDashboardDataAction(): Promise<VaultDashboardData> {
-  await ensureDatabaseSchema();
   const sql = getDb();
 
   // 1. Fetch vault items
-  let rows = await sql`
+  const rows = await sql`
     SELECT * FROM vault_items ORDER BY updated_at DESC;
   `;
-
-  if (rows.length === 0) {
-    await seedInitialVaultItems(sql);
-    rows = await sql`
-      SELECT * FROM vault_items ORDER BY updated_at DESC;
-    `;
-  }
 
   const allItems: VaultItem[] = rows.map((r: any) => {
     const fileUrl = r.file_key ? `/api/vault/file?id=${r.id}` : r.file_url || undefined;

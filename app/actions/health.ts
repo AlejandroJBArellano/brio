@@ -54,9 +54,9 @@ const DEFAULT_USER_SUPPLEMENTS: UserSupplement[] = [
 ];
 
 /**
- * Helper: Fetches and ensures the master supplements catalog from database.
+ * Helper: Fetches the master supplements catalog from database.
  */
-async function getOrSeedSupplementsCatalog(sql: any): Promise<UserSupplement[]> {
+async function getSupplementsCatalog(sql: any): Promise<UserSupplement[]> {
   const rows = await sql`
     SELECT * FROM user_supplements WHERE is_active = true ORDER BY order_index ASC, created_at ASC;
   `;
@@ -73,22 +73,13 @@ async function getOrSeedSupplementsCatalog(sql: any): Promise<UserSupplement[]> 
     }));
   }
 
-  // Seed default catalog if empty
-  for (const s of DEFAULT_USER_SUPPLEMENTS) {
-    await sql`
-      INSERT INTO user_supplements (id, name, dosage, timing, order_index, is_active)
-      VALUES (${s.id}, ${s.name}, ${s.dosage || null}, ${s.timing || null}, ${s.orderIndex || 0}, true)
-      ON CONFLICT (id) DO NOTHING;
-    `;
-  }
-
   return DEFAULT_USER_SUPPLEMENTS;
 }
 
 /**
- * Helper: Fetches and ensures the body composition logs (Smart Fit Body) from database.
+ * Helper: Fetches the body composition logs (Smart Fit Body) from database.
  */
-async function getOrSeedBodyCompositionLogs(sql: any): Promise<BodyCompositionLog[]> {
+async function getBodyCompositionLogs(sql: any): Promise<BodyCompositionLog[]> {
   const rows = await sql`
     SELECT * FROM body_composition_logs ORDER BY date DESC;
   `;
@@ -111,30 +102,6 @@ async function getOrSeedBodyCompositionLogs(sql: any): Promise<BodyCompositionLo
     }));
   }
 
-  // Seed initial Smart Fit scan
-  await sql`
-    INSERT INTO body_composition_logs (
-      id, date, weight_kg, body_fat_percentage, skeletal_muscle_kg,
-      fat_free_mass_kg, visceral_fat_level, bmi, bmr_kcal,
-      water_liters, segmental_data, notes
-    )
-    VALUES (
-      ${INITIAL_SMART_FIT_LOG.id},
-      ${INITIAL_SMART_FIT_LOG.date},
-      ${INITIAL_SMART_FIT_LOG.weightKg},
-      ${INITIAL_SMART_FIT_LOG.bodyFatPercentage ?? null},
-      ${INITIAL_SMART_FIT_LOG.skeletalMuscleKg ?? null},
-      ${INITIAL_SMART_FIT_LOG.fatFreeMassKg ?? null},
-      ${INITIAL_SMART_FIT_LOG.visceralFatLevel ?? null},
-      ${INITIAL_SMART_FIT_LOG.bmi ?? null},
-      ${INITIAL_SMART_FIT_LOG.bmrKcal ?? null},
-      ${INITIAL_SMART_FIT_LOG.waterLiters ?? null},
-      ${JSON.stringify(INITIAL_SMART_FIT_LOG.segmentalData)}::jsonb,
-      ${INITIAL_SMART_FIT_LOG.notes ?? null}
-    )
-    ON CONFLICT (date) DO NOTHING;
-  `;
-
   return [INITIAL_SMART_FIT_LOG];
 }
 
@@ -142,15 +109,14 @@ async function getOrSeedBodyCompositionLogs(sql: any): Promise<BodyCompositionLo
  * Server Action: Fetches physical health metrics, hydration, workouts, sleep, and body composition.
  */
 export async function fetchHealthDashboardDataAction(): Promise<HealthDashboardData> {
-  await ensureDatabaseSchema();
   const sql = getDb();
   const todayStr = new Date().toISOString().split("T")[0];
 
   // 1. Fetch master supplements catalog
-  const catalog = await getOrSeedSupplementsCatalog(sql);
+  const catalog = await getSupplementsCatalog(sql);
 
   // 2. Fetch body composition records (Smart Fit Body)
-  const bodyCompositionLogs = await getOrSeedBodyCompositionLogs(sql);
+  const bodyCompositionLogs = await getBodyCompositionLogs(sql);
   const latestBodyComposition = bodyCompositionLogs.length > 0 ? bodyCompositionLogs[0] : undefined;
   const previousBodyComposition = bodyCompositionLogs.length > 1 ? bodyCompositionLogs[1] : undefined;
 
@@ -384,9 +350,8 @@ export async function addWaterAction(
  * Server Action: Fetches the master supplements catalog.
  */
 export async function fetchUserSupplementsAction(): Promise<UserSupplement[]> {
-  await ensureDatabaseSchema();
   const sql = getDb();
-  return getOrSeedSupplementsCatalog(sql);
+  return getSupplementsCatalog(sql);
 }
 
 /**
@@ -737,9 +702,8 @@ export async function importSamsungHealthDataAction(
  * Server Action: Fetches all body composition logs.
  */
 export async function fetchBodyCompositionLogsAction(): Promise<BodyCompositionLog[]> {
-  await ensureDatabaseSchema();
   const sql = getDb();
-  return getOrSeedBodyCompositionLogs(sql);
+  return getBodyCompositionLogs(sql);
 }
 
 /**
