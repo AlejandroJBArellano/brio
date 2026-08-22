@@ -269,7 +269,6 @@ export async function fetchNutritionDashboardDataAction(
 
     thisWeekLogs.forEach((l) => {
       if (l.habits.dailySalad) daysWithSalad++;
-      if (l.habits.hydrationGoal) daysWithWater++;
       if (l.habits.b12Weekly) b12LoggedThisWeek = true;
 
       // Check if at least 4 out of 7 food groups met target
@@ -282,28 +281,30 @@ export async function fetchNutritionDashboardDataAction(
       if (groupsMet >= 4) daysWithPortionsMet++;
     });
 
-    // Also check unified supplements table (health_logs) for B12 this week
-    if (!b12LoggedThisWeek) {
-      const healthLogRows = await sql`
-        SELECT supplements FROM health_logs 
-        WHERE date >= ${mondayStr} AND date <= ${sundayStr};
-      `;
-      for (const hRow of healthLogRows) {
-        if (Array.isArray(hRow.supplements)) {
-          const hasB12 = hRow.supplements.some(
-            (s: any) =>
-              (s.name?.toLowerCase().includes("b12") ||
-                s.name?.toLowerCase().includes("b-12") ||
-                s.id?.toLowerCase().includes("b12")) &&
-              s.taken
-          );
-          if (hasB12) {
-            b12LoggedThisWeek = true;
-            break;
-          }
+    // Check health_logs for actual water intake and B12 supplement this week
+    const healthLogRows = await sql`
+      SELECT date, water_ml, supplements FROM health_logs 
+      WHERE date >= ${mondayStr} AND date <= ${sundayStr};
+    `;
+
+    const waterTarget = settings.waterTargetMl || 1500;
+    healthLogRows.forEach((hRow: any) => {
+      if (Number(hRow.water_ml || 0) >= waterTarget) {
+        daysWithWater++;
+      }
+      if (!b12LoggedThisWeek && Array.isArray(hRow.supplements)) {
+        const hasB12 = hRow.supplements.some(
+          (s: any) =>
+            (s.name?.toLowerCase().includes("b12") ||
+              s.name?.toLowerCase().includes("b-12") ||
+              s.id?.toLowerCase().includes("b12")) &&
+            s.taken
+        );
+        if (hasB12) {
+          b12LoggedThisWeek = true;
         }
       }
-    }
+    });
 
     return {
       todayLog,

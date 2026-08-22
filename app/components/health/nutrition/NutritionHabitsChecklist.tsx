@@ -48,7 +48,7 @@ export function NutritionHabitsChecklist({
   };
 
   const dietaryHabitItems: Array<{
-    key: "dailySalad" | "hydrationGoal" | "noUltraProcessed";
+    key: "dailySalad" | "noUltraProcessed";
     title: string;
     description: string;
     icon: any;
@@ -58,12 +58,6 @@ export function NutritionHabitsChecklist({
       title: "1 Ensalada Diaria con Semillas",
       description: "2 tz de verdura cruda + 2 cdas de pepitas de calabaza, ajonjolí o girasol + germinados",
       icon: Salad,
-    },
-    {
-      key: "hydrationGoal",
-      title: "Hidratación 1.5L a 2L de Agua",
-      description: "Agua natural distribuida a lo largo del día entre comidas",
-      icon: Droplet,
     },
     {
       key: "noUltraProcessed",
@@ -122,14 +116,14 @@ export function NutritionHabitsChecklist({
         <div className="flex items-center justify-between">
           <span className="text-xs font-bold uppercase tracking-wider text-emerald-400 flex items-center gap-1.5">
             <Sparkles className="h-3.5 w-3.5" />
-            Reglas de Alimentación & Hábitos
+            Reglas de Alimentación
           </span>
           <span className="text-[11px] text-neutral-400 font-mono">
             {dietaryCompletedCount} / {dietaryHabitItems.length}
           </span>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-2.5">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
           {dietaryHabitItems.map((item) => {
             const isDone = habits[item.key];
             const Icon = item.icon;
