@@ -4,13 +4,11 @@ import { signIn, signUp } from "@/lib/auth-client";
 import {
   AlertCircle,
   ArrowRight,
-  CheckCircle2,
   Lock,
   Mail,
   ShieldCheck,
   Sparkles,
-  User,
-  Zap,
+  User
 } from "lucide-react";
 import { useState, useTransition } from "react";
 
@@ -77,7 +75,7 @@ export function AuthGate() {
       <div className="relative z-10 w-full max-w-md">
         {/* Brand Header */}
         <div className="text-center mb-8 space-y-3">
-          <div className="inline-flex h-14 w-14 items-center justify-center rounded-3xl bg-gradient-to-tr from-violet-600 to-indigo-500 text-white font-mono text-2xl font-bold shadow-2xl shadow-indigo-500/30">
+          <div className="inline-flex h-14 w-14 items-center justify-center rounded-3xl bg-linear-to-tr from-violet-600 to-indigo-500 text-white font-mono text-2xl font-bold shadow-2xl shadow-indigo-500/30">
             B
           </div>
           <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white">
@@ -89,20 +87,19 @@ export function AuthGate() {
         </div>
 
         {/* Auth Card */}
-        <div className="rounded-3xl border border-white/[0.08] bg-neutral-900/80 p-6 sm:p-8 shadow-2xl backdrop-blur-2xl">
+        <div className="rounded-3xl border border-white/8 bg-neutral-900/80 p-6 sm:p-8 shadow-2xl backdrop-blur-2xl">
           {/* Tabs */}
-          <div className="grid grid-cols-2 gap-1.5 p-1 rounded-2xl bg-neutral-950/80 border border-white/[0.06] mb-6">
+          <div className="grid grid-cols-2 gap-1.5 p-1 rounded-2xl bg-neutral-950/80 border border-white/6 mb-6">
             <button
               type="button"
               onClick={() => {
                 setMode("signin");
                 setError(null);
               }}
-              className={`py-2 rounded-xl text-xs font-bold transition-all ${
-                mode === "signin"
-                  ? "bg-indigo-600 text-white shadow-lg shadow-indigo-500/20"
-                  : "text-neutral-400 hover:text-white"
-              }`}
+              className={`py-2 rounded-xl text-xs font-bold transition-all ${mode === "signin"
+                ? "bg-indigo-600 text-white shadow-lg shadow-indigo-500/20"
+                : "text-neutral-400 hover:text-white"
+                }`}
             >
               Iniciar Sesión
             </button>
@@ -112,11 +109,10 @@ export function AuthGate() {
                 setMode("signup");
                 setError(null);
               }}
-              className={`py-2 rounded-xl text-xs font-bold transition-all ${
-                mode === "signup"
-                  ? "bg-indigo-600 text-white shadow-lg shadow-indigo-500/20"
-                  : "text-neutral-400 hover:text-white"
-              }`}
+              className={`py-2 rounded-xl text-xs font-bold transition-all ${mode === "signup"
+                ? "bg-indigo-600 text-white shadow-lg shadow-indigo-500/20"
+                : "text-neutral-400 hover:text-white"
+                }`}
             >
               Crear Cuenta
             </button>
@@ -143,7 +139,7 @@ export function AuthGate() {
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     required={mode === "signup"}
-                    className="w-full rounded-xl border border-white/[0.1] bg-neutral-950/80 pl-10 pr-3.5 py-2.5 text-xs text-white placeholder:text-neutral-600 focus:border-indigo-500 focus:outline-none transition-colors"
+                    className="w-full rounded-xl border border-white/1 bg-neutral-950/80 pl-10 pr-3.5 py-2.5 text-xs text-white placeholder:text-neutral-600 focus:border-indigo-500 focus:outline-none transition-colors"
                   />
                 </div>
               </div>
@@ -161,7 +157,7 @@ export function AuthGate() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
-                  className="w-full rounded-xl border border-white/[0.1] bg-neutral-950/80 pl-10 pr-3.5 py-2.5 text-xs text-white placeholder:text-neutral-600 focus:border-indigo-500 focus:outline-none transition-colors"
+                  className="w-full rounded-xl border border-white/10 bg-neutral-950/80 pl-10 pr-3.5 py-2.5 text-xs text-white placeholder:text-neutral-600 focus:border-indigo-500 focus:outline-none transition-colors"
                 />
               </div>
             </div>
@@ -178,7 +174,7 @@ export function AuthGate() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
-                  className="w-full rounded-xl border border-white/[0.1] bg-neutral-950/80 pl-10 pr-3.5 py-2.5 text-xs text-white placeholder:text-neutral-600 focus:border-indigo-500 focus:outline-none transition-colors"
+                  className="w-full rounded-xl border border-white/10 bg-neutral-950/80 pl-10 pr-3.5 py-2.5 text-xs text-white placeholder:text-neutral-600 focus:border-indigo-500 focus:outline-none transition-colors"
                 />
               </div>
             </div>
@@ -186,22 +182,22 @@ export function AuthGate() {
             <button
               type="submit"
               disabled={isPending}
-              className="w-full mt-2 py-3 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 font-bold text-xs text-neutral-950 hover:brightness-110 shadow-xl shadow-emerald-500/20 disabled:opacity-50 transition-all flex items-center justify-center gap-2"
+              className="w-full mt-2 py-3 rounded-xl bg-linear-to-r from-emerald-500 to-teal-600 font-bold text-xs text-neutral-950 hover:brightness-110 shadow-xl shadow-emerald-500/20 disabled:opacity-50 transition-all flex items-center justify-center gap-2"
             >
               <Sparkles className="h-4 w-4" />
               <span>
                 {isPending
                   ? "Verificando credenciales..."
                   : mode === "signin"
-                  ? "Entrar a Brio OS"
-                  : "Registrar Cuenta en Neon"}
+                    ? "Entrar a Brio OS"
+                    : "Registrar Cuenta en Neon"}
               </span>
               {!isPending && <ArrowRight className="h-4 w-4" />}
             </button>
           </form>
 
           {/* Security Badge Footer */}
-          <div className="mt-6 pt-4 border-t border-white/[0.06] flex items-center justify-center gap-2 text-[11px] text-neutral-500 font-mono">
+          <div className="mt-6 pt-4 border-t border-white/6 flex items-center justify-center gap-2 text-[11px] text-neutral-500 font-mono">
             <ShieldCheck className="h-3.5 w-3.5 text-emerald-400" />
             <span>Neon Auth • Sesión Encriptada Serverless</span>
           </div>
