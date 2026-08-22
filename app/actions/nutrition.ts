@@ -19,6 +19,7 @@ import {
   NutritionSettings,
   ScheduledMealItem,
 } from "@/lib/types";
+import { awardHabiticaEvent } from "@/lib/habiticaEvents";
 import { revalidatePath } from "next/cache";
 
 const DEFAULT_HABITS: NutritionHabitLog = {
@@ -500,6 +501,12 @@ export async function toggleNutritionHabitAction(
         updated_at = NOW();
     `;
 
+    if (habits[habitKey]) {
+      await awardHabiticaEvent("NUTRITION_HABIT", {
+        customNotes: `Hábito nutricional cumplido: ${habitKey}`,
+      });
+    }
+
     revalidatePath("/");
     return { success: true, habits };
   } catch (error) {
@@ -632,6 +639,12 @@ export async function toggleScheduledMealCompletedAction(
             updated_at = NOW();
         `;
       }
+    }
+
+    if (newCompleted) {
+      await awardHabiticaEvent("SCHEDULED_MEAL_COMPLETED", {
+        customNotes: `Comida completada: ${meal.custom_title || meal.meal_slot}`,
+      });
     }
 
     revalidatePath("/");

@@ -9,6 +9,7 @@ import {
   ProjectsDashboardData,
   ProjectStatus,
 } from "@/lib/types";
+import { awardHabiticaEvent } from "@/lib/habiticaEvents";
 import { revalidatePath } from "next/cache";
 
 interface ProjectDbRow {
@@ -127,6 +128,14 @@ export async function updateProjectStatusAction(
   try {
     const sql = getDb();
 
+    let projectTitle = "Proyecto";
+    if (status === "launched") {
+      const rows = await sql`SELECT title FROM projects WHERE id = ${id} LIMIT 1;`;
+      if (rows.length > 0) {
+        projectTitle = (rows[0].title as string) || projectTitle;
+      }
+    }
+
     if (progress !== undefined) {
       await sql`
         UPDATE projects
@@ -139,6 +148,13 @@ export async function updateProjectStatusAction(
         SET status = ${status}, updated_at = NOW()
         WHERE id = ${id};
       `;
+    }
+
+    if (status === "launched") {
+      await awardHabiticaEvent("PROJECT_COMPLETED", {
+        customTitle: `Proyecto: ${projectTitle}`,
+        customNotes: `Proyecto completado y lanzado en Brio`,
+      });
     }
 
     revalidatePath("/");
@@ -202,13 +218,35 @@ export async function updateLearningProgressAction(
   try {
     const sql = getDb();
 
+    const rows = await sql`
+      SELECT title, type, total_progress FROM learning_items WHERE id = ${id} LIMIT 1;
+    `;
+    const itemTitle = rows.length > 0 ? (rows[0].title as string) : "Estudio";
+    const itemType = rows.length > 0 ? (rows[0].type as string) : "Curso";
+    const totalProg = rows.length > 0 ? Number(rows[0].total_progress) || 100 : 100;
+
+    const isFinished = status === "completed" || currentProgress >= totalProg;
+    const finalStatus = isFinished ? "completed" : status;
+
     await sql`
       UPDATE learning_items
       SET current_progress = ${currentProgress},
           key_takeaways = COALESCE(${keyTakeaways || null}, key_takeaways),
-          status = COALESCE(${status || null}, status)
+          status = COALESCE(${finalStatus || null}, status)
       WHERE id = ${id};
     `;
+
+    // Award Habitica XP for study session
+    await awardHabiticaEvent("VAULT_PROGRESS", {
+      customNotes: `Progreso en "${itemTitle}" (${currentProgress}/${totalProg})`,
+    });
+
+    if (isFinished) {
+      await awardHabiticaEvent("VAULT_COMPLETED", {
+        customTitle: `${itemTitle} (${itemType})`,
+        customNotes: `Completado al 100%`,
+      });
+    }
 
     revalidatePath("/");
     return { success: true };

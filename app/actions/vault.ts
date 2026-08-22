@@ -15,6 +15,7 @@ import {
   VaultItemCategory,
   VaultItemStatus,
 } from "@/lib/types";
+import { awardHabiticaEvent } from "@/lib/habiticaEvents";
 import { revalidatePath } from "next/cache";
 
 interface VaultDbRow {
@@ -304,7 +305,7 @@ export async function incrementVaultItemProgressAction(
     const sql = getDb();
 
     const rows = await sql`
-      SELECT progress, total_pages, status FROM vault_items WHERE id = ${id} LIMIT 1;
+      SELECT title, category, progress, total_pages, status FROM vault_items WHERE id = ${id} LIMIT 1;
     `;
 
     if (rows.length === 0) return { success: false, error: "Item no encontrado" };
@@ -322,6 +323,18 @@ export async function incrementVaultItemProgressAction(
           updated_at = NOW()
       WHERE id = ${id};
     `;
+
+    // Award Habitica XP for reading / study session
+    await awardHabiticaEvent("VAULT_PROGRESS", {
+      customNotes: `+${amount} páginas/unidades en "${item.title || "Recurso"}"`,
+    });
+
+    if (isCompleted) {
+      await awardHabiticaEvent("VAULT_COMPLETED", {
+        customTitle: `${item.title || "Recurso"} (${item.category || "Bóveda"})`,
+        customNotes: `Completado al 100% (${newProg}/${total})`,
+      });
+    }
 
     revalidatePath("/");
     return { success: true };
@@ -341,11 +354,30 @@ export async function updateVaultItemStatusAction(
   try {
     const sql = getDb();
 
+    let itemTitle = "Recurso";
+    let itemCategory = "Bóveda";
+    if (newStatus === "completed") {
+      const rows = await sql`
+        SELECT title, category FROM vault_items WHERE id = ${id} LIMIT 1;
+      `;
+      if (rows.length > 0) {
+        itemTitle = (rows[0].title as string) || itemTitle;
+        itemCategory = (rows[0].category as string) || itemCategory;
+      }
+    }
+
     await sql`
       UPDATE vault_items
       SET status = ${newStatus}, updated_at = NOW()
       WHERE id = ${id};
     `;
+
+    if (newStatus === "completed") {
+      await awardHabiticaEvent("VAULT_COMPLETED", {
+        customTitle: `${itemTitle} (${itemCategory})`,
+        customNotes: `Marcado como completado en Brio`,
+      });
+    }
 
     revalidatePath("/");
     return { success: true };

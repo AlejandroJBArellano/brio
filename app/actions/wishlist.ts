@@ -7,6 +7,7 @@ import {
   WishlistPriority,
   WishlistStatus,
 } from "@/lib/types";
+import { awardHabiticaEvent } from "@/lib/habiticaEvents";
 import { revalidatePath } from "next/cache";
 
 const DEFAULT_COOLING_DAYS = 30;
@@ -237,11 +238,22 @@ export async function dismissWishlistItemAction(
   try {
     const sql = getDb();
 
+    const itemRows = await sql`
+      SELECT title, price_estimated FROM wishlist_items WHERE id = ${id} LIMIT 1;
+    `;
+    const title = itemRows.length > 0 ? (itemRows[0].title as string) : "Capricho";
+    const price = itemRows.length > 0 ? Number(itemRows[0].price_estimated) || 0 : 0;
+
     await sql`
       UPDATE wishlist_items
       SET status = 'dismissed', resolved_at = NOW()
       WHERE id = ${id};
     `;
+
+    // Award Habitica XP for self-control & money saved
+    await awardHabiticaEvent("WISHLIST_DISMISSED_COOLING", {
+      customNotes: `Ahorraste $${price} al descartar: ${title}`,
+    });
 
     revalidatePath("/");
     return { success: true };

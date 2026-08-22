@@ -1,5 +1,6 @@
 import { getDb } from "@/lib/db";
 import { fetchHevyWorkoutById, saveHevyWorkoutToDb } from "@/lib/hevy";
+import { awardHabiticaEvent } from "@/lib/habiticaEvents";
 import { revalidatePath } from "next/cache";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -30,6 +31,11 @@ export async function POST(req: NextRequest) {
     // Save to DB and sync with health_logs
     const sql = getDb();
     await saveHevyWorkoutToDb(sql, workout);
+
+    // Award Habitica XP for Hevy workout
+    await awardHabiticaEvent("WORKOUT_COMPLETED", {
+      customNotes: `Hevy: ${workout.title} • ${workout.totalVolumeKg || 0} kg levantados (${workout.setsCount || 0} sets)`,
+    });
 
     revalidatePath("/");
 

@@ -19,6 +19,7 @@ import {
   UserSupplement,
   WorkoutType,
 } from "@/lib/types";
+import { awardHabiticaEvent } from "@/lib/habiticaEvents";
 import { revalidatePath } from "next/cache";
 import { fetchNutritionDashboardDataAction } from "./nutrition";
 
@@ -492,6 +493,11 @@ export async function logWorkoutAction(
           updated_at = NOW();
     `;
 
+    // Award Habitica XP for workout
+    await awardHabiticaEvent("WORKOUT_COMPLETED", {
+      customNotes: `Entrenamiento: ${workoutType}${workoutNotes ? ` • ${workoutNotes}` : ""}`,
+    });
+
     revalidatePath("/");
     return { success: true };
   } catch (error) {
@@ -517,6 +523,11 @@ export async function addWaterAction(
       SET water_ml = health_logs.water_ml + ${amountMl},
           updated_at = NOW();
     `;
+
+    // Award Habitica XP for hydration
+    await awardHabiticaEvent("HYDRATION_LOGGED", {
+      customNotes: `Ingesta de agua: +${amountMl}ml`,
+    });
 
     revalidatePath("/");
     return { success: true };
@@ -735,6 +746,9 @@ export async function toggleSupplementAction(
           updated_at = NOW();
     `;
 
+    // Award Habitica XP
+    await awardHabiticaEvent("SUPPLEMENTS_COMPLETED");
+
     revalidatePath("/");
     return { success: true };
   } catch (error) {
@@ -789,6 +803,12 @@ export async function batchToggleSupplementsByTimingAction(
           updated_at = NOW();
     `;
 
+    if (modifiedCount > 0 && completed) {
+      await awardHabiticaEvent("SUPPLEMENTS_COMPLETED", {
+        customNotes: `Protocolo ${timing}: ${modifiedCount} suplementos tomados`,
+      });
+    }
+
     revalidatePath("/");
     return { success: true, modifiedCount };
   } catch (error) {
@@ -816,6 +836,13 @@ export async function logSleepAction(
           sleep_quality = ${sleepQuality},
           updated_at = NOW();
     `;
+
+    // Award Habitica XP if optimal sleep
+    if (sleepHours >= 7 || sleepQuality >= 4) {
+      await awardHabiticaEvent("SLEEP_LOGGED", {
+        customNotes: `Descanso: ${sleepHours}h (Calidad ${sleepQuality}/5)`,
+      });
+    }
 
     revalidatePath("/");
     return { success: true };
@@ -928,6 +955,11 @@ export async function createBodyCompositionLogAction(input: {
           segmental_data = ${JSON.stringify(input.segmentalData || {})}::jsonb,
           notes = ${input.notes?.trim() || null};
     `;
+
+    // Award Habitica XP for body composition tracking
+    await awardHabiticaEvent("BODY_COMPOSITION_LOGGED", {
+      customNotes: `Peso: ${input.weightKg} kg${input.bodyFatPercentage ? ` • Grasa: ${input.bodyFatPercentage}%` : ""}${input.skeletalMuscleKg ? ` • Músculo: ${input.skeletalMuscleKg} kg` : ""}`,
+    });
 
     revalidatePath("/");
     return { success: true, id };
@@ -1191,6 +1223,12 @@ export async function createLabReportAction(input: {
         );
       `;
     }
+
+    // Award Habitica XP for lab checkup
+    await awardHabiticaEvent("LAB_REPORT_LOGGED", {
+      customTitle: `Estudio Clínico: ${input.title} (${input.labName})`,
+      customNotes: `${input.biomarkers.length} biomarcadores analizados (${abnormalCount} fuera de rango)`,
+    });
 
     revalidatePath("/");
     return { success: true, id: reportId };

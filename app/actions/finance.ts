@@ -10,6 +10,7 @@ import {
   TransactionType,
   WishlistStatus,
 } from "@/lib/types";
+import { awardHabiticaEvent } from "@/lib/habiticaEvents";
 import { revalidatePath } from "next/cache";
 
 interface WishlistDbRow {
@@ -266,6 +267,11 @@ export async function createTransactionAction(payload: {
           updated_at = NOW();
     `;
 
+    // Award Habitica XP for logging transactions
+    await awardHabiticaEvent("DAILY_EXPENSES_LOGGED", {
+      customNotes: `${payload.type === "expense" ? "Gasto" : "Ingreso"}: $${payload.amount} • ${payload.concept || category}`,
+    });
+
     revalidatePath("/");
 
     return {
@@ -378,6 +384,12 @@ export async function contributeToSavingsGoalAction(
       SET current_amount = current_amount + ${amount}
       WHERE id = ${goalId};
     `;
+
+    // Award Habitica XP for saving money
+    await awardHabiticaEvent("SAVINGS_CONTRIBUTION", {
+      customNotes: `Aporte de $${amount} a meta de ahorro`,
+    });
+
     revalidatePath("/");
     return { success: true };
   } catch (error) {

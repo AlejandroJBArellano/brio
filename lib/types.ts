@@ -132,6 +132,25 @@ export interface BatchActionResult {
   isDemo?: boolean;
 }
 
+export type HabiticaEventType =
+  | "MORNING_KICKOFF"
+  | "EVENING_REVIEW"
+  | "WORKOUT_COMPLETED"
+  | "HYDRATION_LOGGED"
+  | "SUPPLEMENTS_COMPLETED"
+  | "SLEEP_LOGGED"
+  | "BODY_COMPOSITION_LOGGED"
+  | "LAB_REPORT_LOGGED"
+  | "NUTRITION_HABIT"
+  | "SCHEDULED_MEAL_COMPLETED"
+  | "DAILY_EXPENSES_LOGGED"
+  | "SAVINGS_CONTRIBUTION"
+  | "WISHLIST_DISMISSED_COOLING"
+  | "VAULT_PROGRESS"
+  | "VAULT_COMPLETED"
+  | "PROJECT_COMPLETED"
+  | "CIRCADIAN_HABIT_COMPLETED";
+
 // ----------------------------------------------------
 // Brio Finanzas Models (Neon PostgreSQL)
 // ----------------------------------------------------

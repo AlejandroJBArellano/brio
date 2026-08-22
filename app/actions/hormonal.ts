@@ -9,6 +9,7 @@ import {
   HormonalDailyChecklist,
   HormonalScheduleConfig,
 } from "@/lib/types";
+import { awardHabiticaEvent } from "@/lib/habiticaEvents";
 import { revalidatePath } from "next/cache";
 
 /**
@@ -125,6 +126,12 @@ export async function toggleHormonalChecklistItemAction(
       SET checklist = ${JSON.stringify(updatedChecklist)}::jsonb,
           updated_at = NOW();
     `;
+
+    if (updatedChecklist[key]) {
+      await awardHabiticaEvent("CIRCADIAN_HABIT_COMPLETED", {
+        customNotes: `Hábito circadiano cumplido: ${key}`,
+      });
+    }
 
     revalidatePath("/");
     return { success: true, checklist: updatedChecklist };

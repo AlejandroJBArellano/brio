@@ -3,6 +3,7 @@
 import { getDb } from "@/lib/db";
 import { parseBatchInput } from "@/lib/parser";
 import { habiticaClient } from "@/lib/habitica";
+import { awardHabiticaEvent } from "@/lib/habiticaEvents";
 import { RitualLog } from "@/lib/types";
 import { revalidatePath } from "next/cache";
 
@@ -73,6 +74,11 @@ export async function saveMorningRitualAction(payload: {
       ON CONFLICT (date) DO UPDATE SET updated_at = NOW();
     `;
 
+    // Award Habitica XP for completing Morning Kickoff
+    await awardHabiticaEvent("MORNING_KICKOFF", {
+      customNotes: `Nivel de energía: ${payload.energyLevel}/5${payload.dayIntention ? ` • Intención: ${payload.dayIntention}` : ""}`,
+    });
+
     revalidatePath("/");
     return { success: true };
   } catch (error) {
@@ -110,6 +116,11 @@ export async function saveEveningReviewAction(payload: {
         tasksCreated = batchResult.createdCount;
       }
     }
+
+    // Award Habitica XP for completing Evening Review
+    await awardHabiticaEvent("EVENING_REVIEW", {
+      customNotes: payload.reflection ? `Reflexión: ${payload.reflection}` : undefined,
+    });
 
     revalidatePath("/");
     return { success: true, tasksCreated };
