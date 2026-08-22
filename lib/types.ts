@@ -618,6 +618,7 @@ export interface NutritionDailyLog {
   habits: NutritionHabitLog;
   calculatedMacros: MacroEstimate;
   notes?: string;
+  createdAt?: string;
   updatedAt?: string;
 }
 
@@ -626,6 +627,8 @@ export interface NutritionSettings {
   macroFactors: Record<FoodGroupKey, MacroEstimate>;
   waterTargetMl: number;
   activeWeek?: number;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface GroceryItem {

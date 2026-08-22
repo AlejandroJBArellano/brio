@@ -239,6 +239,7 @@ export async function ensureDatabaseSchema() {
       CREATE TABLE IF NOT EXISTS scratchpad_notes (
         id TEXT PRIMARY KEY DEFAULT 'default',
         content TEXT DEFAULT '',
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
         updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
       );
     `;
@@ -380,6 +381,7 @@ export async function ensureDatabaseSchema() {
         habits JSONB DEFAULT '{}'::jsonb,
         calculated_macros JSONB DEFAULT '{}'::jsonb,
         notes TEXT,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
         updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
       );
     `;
@@ -391,8 +393,20 @@ export async function ensureDatabaseSchema() {
         macro_factors JSONB DEFAULT '{}'::jsonb,
         water_target_ml INTEGER DEFAULT 2000,
         active_week INTEGER DEFAULT 1,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
         updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
       );
+    `;
+
+    // Safe ALTER TABLE statements to guarantee created_at exists everywhere
+    await sql`
+      ALTER TABLE nutrition_daily_logs ADD COLUMN IF NOT EXISTS created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW();
+    `;
+    await sql`
+      ALTER TABLE nutrition_settings ADD COLUMN IF NOT EXISTS created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW();
+    `;
+    await sql`
+      ALTER TABLE scratchpad_notes ADD COLUMN IF NOT EXISTS created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW();
     `;
 
     isInitialized = true;

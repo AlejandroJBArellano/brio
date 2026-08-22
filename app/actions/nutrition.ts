@@ -163,6 +163,7 @@ export async function fetchNutritionDashboardDataAction(
         habits,
         calculatedMacros,
         notes: row.notes || "",
+        createdAt: row.created_at ? new Date(row.created_at).toISOString() : undefined,
         updatedAt: row.updated_at ? new Date(row.updated_at).toISOString() : undefined,
       };
     } else {
@@ -255,6 +256,7 @@ export async function fetchNutritionDashboardDataAction(
           ? row.calculated_macros
           : calculateMacrosFromPortions(row.portions || {}, settings.macroFactors),
       notes: row.notes || "",
+      createdAt: row.created_at ? new Date(row.created_at).toISOString() : undefined,
       updatedAt: row.updated_at ? new Date(row.updated_at).toISOString() : undefined,
     }));
 
@@ -351,13 +353,14 @@ export async function logDailyPortionsAction(
 
     await sql`
       INSERT INTO nutrition_daily_logs (
-        date, portions, habits, calculated_macros, notes, updated_at
+        date, portions, habits, calculated_macros, notes, created_at, updated_at
       ) VALUES (
         ${targetDate},
         ${JSON.stringify(portions)},
         ${JSON.stringify(mergedHabits)},
         ${JSON.stringify(calculatedMacros)},
         ${notes || (existing[0]?.notes || null)},
+        NOW(),
         NOW()
       )
       ON CONFLICT (date) DO UPDATE SET
@@ -410,12 +413,13 @@ export async function quickAdjustPortionAction(
 
     await sql`
       INSERT INTO nutrition_daily_logs (
-        date, portions, habits, calculated_macros, updated_at
+        date, portions, habits, calculated_macros, created_at, updated_at
       ) VALUES (
         ${targetDate},
         ${JSON.stringify(portions)},
         ${JSON.stringify(habits)},
         ${JSON.stringify(calculatedMacros)},
+        NOW(),
         NOW()
       )
       ON CONFLICT (date) DO UPDATE SET
@@ -464,12 +468,13 @@ export async function toggleNutritionHabitAction(
 
     await sql`
       INSERT INTO nutrition_daily_logs (
-        date, portions, habits, calculated_macros, updated_at
+        date, portions, habits, calculated_macros, created_at, updated_at
       ) VALUES (
         ${targetDate},
         ${JSON.stringify(portions)},
         ${JSON.stringify(habits)},
         ${JSON.stringify(calculatedMacros)},
+        NOW(),
         NOW()
       )
       ON CONFLICT (date) DO UPDATE SET
@@ -598,12 +603,13 @@ export async function toggleScheduledMealCompletedAction(
 
         await sql`
           INSERT INTO nutrition_daily_logs (
-            date, portions, habits, calculated_macros, updated_at
+            date, portions, habits, calculated_macros, created_at, updated_at
           ) VALUES (
             ${targetDate},
             ${JSON.stringify(portions)},
             ${JSON.stringify(habits)},
             ${JSON.stringify(calculatedMacros)},
+            NOW(),
             NOW()
           )
           ON CONFLICT (date) DO UPDATE SET
@@ -653,7 +659,7 @@ export async function saveRecipeAction(recipe: Partial<NutritionRecipe>) {
 
     await sql`
       INSERT INTO nutrition_recipes (
-        id, title, meal_slot, week_number, option_label, portions, ingredients, prep_notes, is_preset
+        id, title, meal_slot, week_number, option_label, portions, ingredients, prep_notes, is_preset, created_at
       ) VALUES (
         ${id},
         ${recipe.title || "Nueva Receta"},
@@ -663,7 +669,8 @@ export async function saveRecipeAction(recipe: Partial<NutritionRecipe>) {
         ${JSON.stringify(recipe.portions || {})},
         ${JSON.stringify(recipe.ingredients || [])},
         ${recipe.prepNotes || null},
-        ${recipe.isPreset ?? false}
+        ${recipe.isPreset ?? false},
+        NOW()
       )
       ON CONFLICT (id) DO UPDATE SET
         title = EXCLUDED.title,
@@ -727,13 +734,14 @@ export async function updateNutritionSettingsAction(settings: Partial<NutritionS
 
     await sql`
       INSERT INTO nutrition_settings (
-        id, daily_portion_goals, macro_factors, water_target_ml, active_week, updated_at
+        id, daily_portion_goals, macro_factors, water_target_ml, active_week, created_at, updated_at
       ) VALUES (
         'default',
         ${JSON.stringify(merged.dailyPortionGoals)},
         ${JSON.stringify(merged.macroFactors)},
         ${merged.waterTargetMl},
         ${merged.activeWeek || 1},
+        NOW(),
         NOW()
       )
       ON CONFLICT (id) DO UPDATE SET
