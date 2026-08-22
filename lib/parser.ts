@@ -1,8 +1,10 @@
 import {
   BatchParseResult,
   HabiticaTaskPayload,
+  ParsedFinancialInput,
   ParsedTask,
   TaskType,
+  TransactionType,
 } from "./types";
 
 /**
@@ -21,6 +23,79 @@ const PRIORITY_MAP: Record<string, number> = {
   "!urgent": 2,
   "!4": 2, // Hard
 };
+
+/**
+ * Detects and parses financial syntax for Brio Finanzas:
+ * e.g. `-$85 Café con leche #antojo @nu // Starbucks`
+ * e.g. `+$25000 Sueldo quincenal #ingreso @bbva`
+ * e.g. `$120 Almuerzo #comida` (defaults to expense)
+ */
+export function parseFinancialInput(rawLine: string): ParsedFinancialInput {
+  const trimmed = rawLine.trim();
+  if (!trimmed) return { isFinancial: false };
+
+  // Match financial prefixes: `-$`, `+$`, `$`, or `-[0-9]`, `+[0-9]`
+  const financialMatch = trimmed.match(/^([-+]?\$?|\$[+-]?)\s*(\d+(?:\.\d{1,2})?)(.*)$/);
+  if (!financialMatch) {
+    return { isFinancial: false };
+  }
+
+  const prefix = financialMatch[1].trim();
+  const rawAmount = parseFloat(financialMatch[2]);
+  let remaining = financialMatch[3].trim();
+
+  let type: TransactionType = "expense";
+  if (prefix.includes("+")) {
+    type = "income";
+  } else if (prefix.includes("-")) {
+    type = "expense";
+  }
+
+  let notes: string | undefined = undefined;
+  if (remaining.includes("//")) {
+    const [conceptPart, ...notesParts] = remaining.split("//");
+    remaining = conceptPart.trim();
+    notes = notesParts.join("//").trim();
+  }
+
+  // Extract account/card (e.g. @nu, @bbva, @efectivo)
+  let account = "default";
+  const accountMatch = remaining.match(/@([\w-]+)/);
+  if (accountMatch) {
+    account = accountMatch[1].toLowerCase();
+    remaining = remaining.replace(/@[\w-]+/, "").trim();
+  }
+
+  // Extract category (e.g. #antojo, #comida, #transporte)
+  let category = "general";
+  let isAntExpense = false;
+  const categoryMatch = remaining.match(/#([\w-]+)/);
+  if (categoryMatch) {
+    category = categoryMatch[1].toLowerCase();
+    remaining = remaining.replace(/#[\w-]+/, "").trim();
+    if (
+      category === "antojo" ||
+      category === "gustito" ||
+      category === "snack" ||
+      category === "hormiga"
+    ) {
+      isAntExpense = true;
+    }
+  }
+
+  const concept = remaining.replace(/\s+/g, " ").trim() || (type === "income" ? "Ingreso" : "Gasto");
+
+  return {
+    isFinancial: true,
+    type,
+    amount: rawAmount,
+    concept,
+    category,
+    account,
+    isAntExpense,
+    notes,
+  };
+}
 
 /**
  * Parses an individual single line of text into a structured ParsedTask.

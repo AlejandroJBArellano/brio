@@ -1,4 +1,4 @@
-import { parseBatchInput, parseTaskLine } from "../lib/parser";
+import { parseBatchInput, parseFinancialInput, parseTaskLine } from "../lib/parser";
 import assert from "node:assert";
 import test from "node:test";
 
@@ -87,4 +87,27 @@ Deploy to production !hard #work // Review logs first
   assert.strictEqual(parsed.stats.dailies, 1);
   assert.strictEqual(parsed.stats.habits, 2);
   assert.strictEqual(parsed.stats.total, 5);
+});
+
+test("Financial Parser - Expense with account, tag and notes", () => {
+  const parsed = parseFinancialInput("-$85.50 Café con pan #antojo @nu // Starbucks Reforma");
+  assert.ok(parsed.isFinancial);
+  assert.strictEqual(parsed.type, "expense");
+  assert.strictEqual(parsed.amount, 85.5);
+  assert.strictEqual(parsed.concept, "Café con pan");
+  assert.strictEqual(parsed.category, "antojo");
+  assert.strictEqual(parsed.account, "nu");
+  assert.strictEqual(parsed.isAntExpense, true);
+  assert.strictEqual(parsed.notes, "Starbucks Reforma");
+});
+
+test("Financial Parser - Income", () => {
+  const parsed = parseFinancialInput("+$25000 Pago quincenal #ingreso @bbva");
+  assert.ok(parsed.isFinancial);
+  assert.strictEqual(parsed.type, "income");
+  assert.strictEqual(parsed.amount, 25000);
+  assert.strictEqual(parsed.concept, "Pago quincenal");
+  assert.strictEqual(parsed.category, "ingreso");
+  assert.strictEqual(parsed.account, "bbva");
+  assert.strictEqual(parsed.isAntExpense, false);
 });
