@@ -1,10 +1,10 @@
 import { createAuthClient } from "better-auth/react";
 
-export const authClient = createAuthClient({
-  baseURL:
-    process.env.NEXT_PUBLIC_NEON_AUTH_URL ||
-    process.env.NEXT_PUBLIC_APP_URL ||
-    "http://localhost:3000",
-});
+/**
+ * Better Auth React Client.
+ * Automatically targets the same-origin Next.js Route Handler (/api/auth),
+ * ensuring zero CORS issues and secure first-party cookie management.
+ */
+export const authClient = createAuthClient();
 
 export const { signIn, signUp, useSession, signOut } = authClient;

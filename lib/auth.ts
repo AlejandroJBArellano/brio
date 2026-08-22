@@ -7,7 +7,11 @@ export const auth = betterAuth({
   }),
   secret:
     process.env.BETTER_AUTH_SECRET || "brio_neon_auth_super_secret_key_2026_x89a1c",
-  baseURL: process.env.BETTER_AUTH_URL || "http://localhost:3000",
+  baseURL: process.env.BETTER_AUTH_URL || process.env.NEXT_PUBLIC_APP_URL,
+  trustedOrigins: [
+    "http://localhost:3000",
+    "https://brio-sand.vercel.app",
+  ],
   emailAndPassword: {
     enabled: true,
     autoSignIn: true,
