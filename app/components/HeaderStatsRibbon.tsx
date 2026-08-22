@@ -1,33 +1,69 @@
 "use client";
 
 import { toggleSleepAction } from "@/app/actions/tasks";
+import { signOut, useSession } from "@/lib/auth-client";
 import { HabiticaUser } from "@/lib/types";
 import { calculatePercentage, capitalize } from "@/lib/utils";
 import {
+  Activity,
   Bed,
+  BookOpen,
+  Calendar,
   Coins,
+  Dumbbell,
+  Edit3,
+  Flame,
   Heart,
+  Layers,
+  LogOut,
+  Moon,
   RotateCw,
   Search,
-  Shield,
+  ShieldCheck,
   Sparkles,
+  Sun,
+  User,
+  Wallet,
   Zap,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useTransition } from "react";
 
+export type DashboardMainTab =
+  | "tasks"
+  | "finance"
+  | "analytics"
+  | "calendar"
+  | "health"
+  | "projects";
+
 interface HeaderStatsRibbonProps {
   user: HabiticaUser;
   isConfigured: boolean;
+  activeMainTab: DashboardMainTab;
+  onTabChange: (tab: DashboardMainTab) => void;
   onOpenCommandPalette: () => void;
+  onOpenMorningRitual: () => void;
+  onOpenEveningReview: () => void;
+  onOpenAuthModal: () => void;
+  onOpenFocusModal: () => void;
+  onOpenScratchpad: () => void;
 }
 
 export function HeaderStatsRibbon({
   user,
   isConfigured,
+  activeMainTab,
+  onTabChange,
   onOpenCommandPalette,
+  onOpenMorningRitual,
+  onOpenEveningReview,
+  onOpenAuthModal,
+  onOpenFocusModal,
+  onOpenScratchpad,
 }: HeaderStatsRibbonProps) {
   const router = useRouter();
+  const { data: session } = useSession();
   const [isPending, startTransition] = useTransition();
 
   const stats = user.stats;
@@ -50,24 +86,30 @@ export function HeaderStatsRibbon({
     });
   };
 
+  const handleSignOut = async () => {
+    await signOut();
+    handleRefresh();
+  };
+
   return (
-    <header className="rounded-2xl border border-white/[0.08] bg-neutral-900/60 p-4 backdrop-blur-xl shadow-2xl transition-all">
+    <header className="rounded-3xl border border-white/[0.08] bg-neutral-900/70 p-4 sm:p-5 backdrop-blur-xl shadow-2xl transition-all space-y-4">
+      {/* Top Row: Character ID & Gauges */}
       <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-        {/* Left: Branding, Character Identity & Inn Status */}
+        {/* Left: Branding, Identity & Inn */}
         <div className="flex items-center justify-between sm:justify-start gap-4">
           <div className="flex items-center gap-3">
-            <div className="relative flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-tr from-violet-600 to-indigo-500 font-mono font-bold text-white shadow-lg shadow-indigo-500/20">
-              <span className="text-lg">B</span>
+            <div className="relative flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-tr from-violet-600 to-indigo-500 font-mono font-bold text-white shadow-lg shadow-indigo-500/20">
+              <span className="text-xl">B</span>
               <span
-                className={`absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full border-2 border-neutral-900 ${
-                  isResting ? "bg-amber-400" : "bg-emerald-400"
+                className={`absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full border-2 border-neutral-900 ${
+                  isResting ? "bg-amber-400 animate-pulse" : "bg-emerald-400"
                 }`}
               />
             </div>
             <div>
               <div className="flex flex-wrap items-center gap-2">
                 <h1 className="text-base font-bold tracking-tight text-white">
-                  {user.profile.name || "Brio Commander"}
+                  {session?.user?.name || user.profile.name || "Brio Commander"}
                 </h1>
                 <span className="rounded-md border border-indigo-500/30 bg-indigo-500/10 px-2 py-0.5 text-[11px] font-semibold text-indigo-400">
                   Lvl {stats.lvl}
@@ -76,7 +118,7 @@ export function HeaderStatsRibbon({
                   {capitalize(stats.class || "warrior")}
                 </span>
 
-                {/* Rest at Inn Badge */}
+                {/* Rest at Inn */}
                 <button
                   type="button"
                   onClick={handleToggleRest}
@@ -89,11 +131,11 @@ export function HeaderStatsRibbon({
                   }`}
                 >
                   <Bed className="h-3 w-3" />
-                  <span>{isResting ? "Resting at Inn" : "Inn Active"}</span>
+                  <span>{isResting ? "En la Posada" : "Posada"}</span>
                 </button>
               </div>
-              <p className="text-xs text-neutral-400">
-                Personal Command Center & Life Operating Dashboard
+              <p className="text-xs text-neutral-400 mt-0.5">
+                Personal Command Center & Life OS
               </p>
             </div>
           </div>
@@ -109,29 +151,27 @@ export function HeaderStatsRibbon({
           </div>
         </div>
 
-        {/* Right: Interactive Stat Gauges (HP, MP, EXP, Gold) + Palette trigger */}
-        <div className="flex flex-wrap items-center gap-3 sm:gap-4">
+        {/* Right: RPG Stat Gauges + Auth Status */}
+        <div className="flex flex-wrap items-center gap-2.5 sm:gap-3">
           {/* Health Bar (HP) */}
-          <div className="min-w-[125px] flex-1 rounded-xl border border-white/[0.06] bg-neutral-950/60 px-3 py-2 sm:flex-initial">
+          <div className="min-w-[115px] flex-1 rounded-xl border border-white/[0.06] bg-neutral-950/60 px-3 py-1.5 sm:flex-initial">
             <div className="flex items-center justify-between text-xs">
-              <span className="flex items-center gap-1 font-semibold text-rose-400">
+              <span className="flex items-center gap-1 font-semibold text-rose-400 text-[11px]">
                 <Heart
-                  className={`h-3.5 w-3.5 fill-rose-500/20 text-rose-500 ${
+                  className={`h-3 w-3 fill-rose-500/20 text-rose-500 ${
                     isLowHp ? "animate-pulse text-rose-400" : ""
                   }`}
                 />
                 HP
               </span>
-              <span className="font-mono text-[11px] text-neutral-300">
-                {Math.round(stats.hp)} / {stats.maxHealth || 50}
+              <span className="font-mono text-[10px] text-neutral-300">
+                {Math.round(stats.hp)}/{stats.maxHealth || 50}
               </span>
             </div>
-            <div className="mt-1.5 h-1.5 w-full overflow-hidden rounded-full bg-neutral-800">
+            <div className="mt-1 h-1.5 w-full overflow-hidden rounded-full bg-neutral-800">
               <div
                 className={`h-full transition-all duration-500 ${
-                  isLowHp
-                    ? "bg-rose-500"
-                    : "bg-gradient-to-r from-rose-500 to-red-400"
+                  isLowHp ? "bg-rose-500" : "bg-gradient-to-r from-rose-500 to-red-400"
                 }`}
                 style={{ width: `${hpPercent}%` }}
               />
@@ -139,17 +179,17 @@ export function HeaderStatsRibbon({
           </div>
 
           {/* Mana Bar (MP) */}
-          <div className="min-w-[125px] flex-1 rounded-xl border border-white/[0.06] bg-neutral-950/60 px-3 py-2 sm:flex-initial">
+          <div className="min-w-[115px] flex-1 rounded-xl border border-white/[0.06] bg-neutral-950/60 px-3 py-1.5 sm:flex-initial">
             <div className="flex items-center justify-between text-xs">
-              <span className="flex items-center gap-1 font-semibold text-sky-400">
-                <Zap className="h-3.5 w-3.5 fill-sky-500/20 text-sky-400" />
+              <span className="flex items-center gap-1 font-semibold text-sky-400 text-[11px]">
+                <Zap className="h-3 w-3 fill-sky-500/20 text-sky-400" />
                 MP
               </span>
-              <span className="font-mono text-[11px] text-neutral-300">
-                {Math.round(stats.mp)} / {stats.maxMP || 100}
+              <span className="font-mono text-[10px] text-neutral-300">
+                {Math.round(stats.mp)}/{stats.maxMP || 100}
               </span>
             </div>
-            <div className="mt-1.5 h-1.5 w-full overflow-hidden rounded-full bg-neutral-800">
+            <div className="mt-1 h-1.5 w-full overflow-hidden rounded-full bg-neutral-800">
               <div
                 className="h-full bg-gradient-to-r from-sky-500 to-cyan-400 transition-all duration-500"
                 style={{ width: `${mpPercent}%` }}
@@ -157,18 +197,18 @@ export function HeaderStatsRibbon({
             </div>
           </div>
 
-          {/* Experience Bar (EXP) */}
-          <div className="min-w-[130px] flex-1 rounded-xl border border-white/[0.06] bg-neutral-950/60 px-3 py-2 sm:flex-initial">
+          {/* EXP */}
+          <div className="min-w-[115px] flex-1 rounded-xl border border-white/[0.06] bg-neutral-950/60 px-3 py-1.5 sm:flex-initial">
             <div className="flex items-center justify-between text-xs">
-              <span className="flex items-center gap-1 font-semibold text-amber-400">
-                <Sparkles className="h-3.5 w-3.5 text-amber-400" />
+              <span className="flex items-center gap-1 font-semibold text-amber-400 text-[11px]">
+                <Sparkles className="h-3 w-3 text-amber-400" />
                 EXP
               </span>
-              <span className="font-mono text-[11px] text-neutral-300">
-                {Math.round(stats.exp)} / {stats.toNextLevel || 100}
+              <span className="font-mono text-[10px] text-neutral-300">
+                {Math.round(stats.exp)}/{stats.toNextLevel || 100}
               </span>
             </div>
-            <div className="mt-1.5 h-1.5 w-full overflow-hidden rounded-full bg-neutral-800">
+            <div className="mt-1 h-1.5 w-full overflow-hidden rounded-full bg-neutral-800">
               <div
                 className="h-full bg-gradient-to-r from-amber-500 to-yellow-400 transition-all duration-500"
                 style={{ width: `${expPercent}%` }}
@@ -177,43 +217,207 @@ export function HeaderStatsRibbon({
           </div>
 
           {/* Gold (GP) */}
-          <div className="flex items-center gap-2 rounded-xl border border-amber-500/20 bg-amber-500/[0.05] px-3.5 py-2">
-            <div className="flex h-6 w-6 items-center justify-center rounded-full bg-amber-500/20 text-amber-400">
-              <Coins className="h-3.5 w-3.5" />
+          <div className="flex items-center gap-1.5 rounded-xl border border-amber-500/20 bg-amber-500/[0.05] px-3 py-1.5">
+            <div className="flex h-5 w-5 items-center justify-center rounded-full bg-amber-500/20 text-amber-400">
+              <Coins className="h-3 w-3" />
             </div>
-            <div className="flex flex-col">
-              <span className="text-[10px] uppercase font-semibold text-amber-400/80">
-                Gold
-              </span>
-              <span className="font-mono text-xs font-bold text-amber-300">
-                {stats.gp?.toFixed(1) || "0.0"}
-              </span>
-            </div>
+            <span className="font-mono text-xs font-bold text-amber-300">
+              {stats.gp?.toFixed(1) || "0.0"} GP
+            </span>
           </div>
 
-          {/* Command Palette Trigger Button */}
+          {/* Neon Auth User Badge */}
+          {session?.user ? (
+            <div className="flex items-center gap-2 rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-3 py-1.5 text-xs text-emerald-300">
+              <div className="flex h-5 w-5 items-center justify-center rounded-full bg-emerald-500/20 font-bold text-[10px]">
+                {session.user.name?.[0]?.toUpperCase() || "U"}
+              </div>
+              <span className="hidden sm:inline font-semibold">{session.user.name}</span>
+              <button
+                type="button"
+                onClick={handleSignOut}
+                title="Cerrar sesión"
+                className="text-neutral-400 hover:text-rose-400 ml-1 transition-colors"
+              >
+                <LogOut className="h-3.5 w-3.5" />
+              </button>
+            </div>
+          ) : (
+            <button
+              type="button"
+              onClick={onOpenAuthModal}
+              className="flex items-center gap-1.5 rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-3 py-1.5 text-xs font-semibold text-emerald-300 hover:bg-emerald-500/20 transition-all shadow-sm"
+            >
+              <ShieldCheck className="h-3.5 w-3.5 text-emerald-400" />
+              <span>Neon Auth</span>
+            </button>
+          )}
+
+          {/* Command Palette Trigger */}
           <button
             onClick={onOpenCommandPalette}
             title="Open Command Palette (⌘K)"
-            className="hidden sm:flex items-center gap-2 rounded-xl border border-white/10 bg-neutral-800/80 px-3 py-2 text-xs font-medium text-neutral-300 transition-all hover:border-indigo-500/50 hover:bg-indigo-500/10 hover:text-white"
+            className="hidden sm:flex items-center gap-1.5 rounded-xl border border-white/10 bg-neutral-800/80 px-2.5 py-1.5 text-xs font-medium text-neutral-300 hover:border-indigo-500/50 hover:bg-indigo-500/10 hover:text-white transition-all"
           >
             <Search className="h-3.5 w-3.5 text-neutral-400" />
-            <span>Search & Actions</span>
             <kbd className="rounded bg-neutral-900 px-1 py-0.5 font-mono text-[10px] text-neutral-400 border border-white/5">
               ⌘K
             </kbd>
           </button>
 
-          {/* Sync Trigger */}
+          {/* Sync */}
           <button
             onClick={handleRefresh}
             disabled={isPending}
-            title="Sync Habitica state (R)"
-            className="hidden h-9 w-9 items-center justify-center rounded-xl border border-white/10 bg-neutral-800/80 text-neutral-300 transition-all hover:border-indigo-500/50 hover:bg-indigo-500/10 hover:text-white sm:flex"
+            title="Sync State"
+            className="hidden h-8 w-8 items-center justify-center rounded-xl border border-white/10 bg-neutral-800/80 text-neutral-300 hover:text-white sm:flex"
           >
-            <RotateCw
-              className={`h-4 w-4 ${isPending ? "animate-spin text-indigo-400" : ""}`}
-            />
+            <RotateCw className={`h-3.5 w-3.5 ${isPending ? "animate-spin text-indigo-400" : ""}`} />
+          </button>
+        </div>
+      </div>
+
+      {/* Bottom Row: 6 Master Tabs + Ritual & Focus Launchers */}
+      <div className="flex flex-col xl:flex-row items-center justify-between gap-3 pt-3 border-t border-white/[0.06]">
+        {/* Navigation Tabs */}
+        <div className="flex flex-wrap items-center gap-1 p-1 rounded-2xl bg-neutral-950/80 border border-white/[0.08] w-full xl:w-auto">
+          <button
+            type="button"
+            onClick={() => onTabChange("tasks")}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all ${
+              activeMainTab === "tasks"
+                ? "bg-indigo-600 text-white shadow-lg shadow-indigo-500/20"
+                : "text-neutral-400 hover:text-white hover:bg-neutral-900"
+            }`}
+          >
+            <Zap className="h-3.5 w-3.5" />
+            <span>⚡ Tareas</span>
+            <kbd className="hidden md:inline-block rounded bg-black/30 px-1 text-[10px] font-mono opacity-60">
+              ⌘1
+            </kbd>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => onTabChange("finance")}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all ${
+              activeMainTab === "finance"
+                ? "bg-amber-500 text-neutral-950 shadow-lg shadow-amber-500/20"
+                : "text-neutral-400 hover:text-white hover:bg-neutral-900"
+            }`}
+          >
+            <Wallet className="h-3.5 w-3.5" />
+            <span>💰 Finanzas</span>
+            <kbd className="hidden md:inline-block rounded bg-black/30 px-1 text-[10px] font-mono opacity-60">
+              ⌘2
+            </kbd>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => onTabChange("analytics")}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all ${
+              activeMainTab === "analytics"
+                ? "bg-violet-600 text-white shadow-lg shadow-violet-500/20"
+                : "text-neutral-400 hover:text-white hover:bg-neutral-900"
+            }`}
+          >
+            <Activity className="h-3.5 w-3.5" />
+            <span>📊 Balance</span>
+            <kbd className="hidden md:inline-block rounded bg-black/30 px-1 text-[10px] font-mono opacity-60">
+              ⌘3
+            </kbd>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => onTabChange("calendar")}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all ${
+              activeMainTab === "calendar"
+                ? "bg-blue-600 text-white shadow-lg shadow-blue-500/20"
+                : "text-neutral-400 hover:text-white hover:bg-neutral-900"
+            }`}
+          >
+            <Calendar className="h-3.5 w-3.5" />
+            <span>📅 Agenda</span>
+            <kbd className="hidden md:inline-block rounded bg-black/30 px-1 text-[10px] font-mono opacity-60">
+              ⌘4
+            </kbd>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => onTabChange("health")}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all ${
+              activeMainTab === "health"
+                ? "bg-emerald-600 text-white shadow-lg shadow-emerald-500/20"
+                : "text-neutral-400 hover:text-white hover:bg-neutral-900"
+            }`}
+          >
+            <Dumbbell className="h-3.5 w-3.5" />
+            <span>🏋️ Salud</span>
+            <kbd className="hidden md:inline-block rounded bg-black/30 px-1 text-[10px] font-mono opacity-60">
+              ⌘5
+            </kbd>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => onTabChange("projects")}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all ${
+              activeMainTab === "projects"
+                ? "bg-pink-600 text-white shadow-lg shadow-pink-500/20"
+                : "text-neutral-400 hover:text-white hover:bg-neutral-900"
+            }`}
+          >
+            <BookOpen className="h-3.5 w-3.5" />
+            <span>💡 Proyectos</span>
+            <kbd className="hidden md:inline-block rounded bg-black/30 px-1 text-[10px] font-mono opacity-60">
+              ⌘6
+            </kbd>
+          </button>
+        </div>
+
+        {/* Action Triggers: Focus Mode, Scratchpad & Rituals */}
+        <div className="flex flex-wrap items-center gap-2 w-full xl:w-auto justify-end">
+          <button
+            type="button"
+            onClick={onOpenFocusModal}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-indigo-500/30 bg-indigo-500/10 text-xs font-semibold text-indigo-300 hover:bg-indigo-500/20 transition-all shadow-sm"
+          >
+            <Zap className="h-3.5 w-3.5 text-indigo-400" />
+            <span>Focus Zen</span>
+            <kbd className="hidden md:inline-block text-[10px] font-mono opacity-60">⌘P</kbd>
+          </button>
+
+          <button
+            type="button"
+            onClick={onOpenScratchpad}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-white/10 bg-neutral-900 text-xs font-semibold text-neutral-300 hover:text-white transition-all shadow-sm"
+          >
+            <Edit3 className="h-3.5 w-3.5 text-neutral-400" />
+            <span>Scratchpad</span>
+            <kbd className="hidden md:inline-block text-[10px] font-mono opacity-60">⌘J</kbd>
+          </button>
+
+          <button
+            type="button"
+            onClick={onOpenMorningRitual}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-amber-500/30 bg-amber-500/10 text-xs font-semibold text-amber-300 hover:bg-amber-500/20 transition-all shadow-sm"
+          >
+            <Sun className="h-3.5 w-3.5 text-amber-400" />
+            <span>Ritual AM</span>
+            <kbd className="hidden lg:inline-block text-[10px] font-mono opacity-60">⌘M</kbd>
+          </button>
+
+          <button
+            type="button"
+            onClick={onOpenEveningReview}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-indigo-500/30 bg-indigo-500/10 text-xs font-semibold text-indigo-300 hover:bg-indigo-500/20 transition-all shadow-sm"
+          >
+            <Moon className="h-3.5 w-3.5 text-indigo-400" />
+            <span>Cierre PM</span>
+            <kbd className="hidden lg:inline-block text-[10px] font-mono opacity-60">⌘E</kbd>
           </button>
         </div>
       </div>

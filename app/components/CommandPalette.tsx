@@ -4,6 +4,7 @@ import { toggleSleepAction } from "@/app/actions/tasks";
 import { HabiticaTag, HabiticaTask } from "@/lib/types";
 import { capitalize } from "@/lib/utils";
 import {
+  Activity,
   Bed,
   Calendar,
   Check,
@@ -13,15 +14,19 @@ import {
   Hash,
   Layers,
   ListTodo,
+  Moon,
   Plus,
   RotateCw,
   Search,
   Sparkles,
+  Sun,
   Tag,
+  Wallet,
   Zap,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState, useTransition } from "react";
+import { DashboardMainTab } from "./HeaderStatsRibbon";
 
 interface CommandPaletteProps {
   isOpen: boolean;
@@ -30,6 +35,10 @@ interface CommandPaletteProps {
   tags: HabiticaTag[];
   isResting?: boolean;
   onOpenBatchCapture: () => void;
+  onOpenMorningRitual: () => void;
+  onOpenEveningReview: () => void;
+  onOpenFinanceModal: () => void;
+  onSelectMainTab: (tab: DashboardMainTab) => void;
   onSelectTask: (task: HabiticaTask) => void;
   onFilterType: (type: "all" | "dailies" | "todos" | "habits") => void;
   onFilterTag: (tag: string) => void;
@@ -42,6 +51,10 @@ export function CommandPalette({
   tags,
   isResting = false,
   onOpenBatchCapture,
+  onOpenMorningRitual,
+  onOpenEveningReview,
+  onOpenFinanceModal,
+  onSelectMainTab,
   onSelectTask,
   onFilterType,
   onFilterTag,
@@ -67,7 +80,7 @@ export function CommandPalette({
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
         e.preventDefault();
         if (isOpen) onClose();
-        else onClose(); // Controlled by parent
+        else onClose();
       }
       if (e.key === "Escape" && isOpen) {
         e.preventDefault();
@@ -82,9 +95,108 @@ export function CommandPalette({
   const staticActions = useMemo(() => {
     return [
       {
+        id: "action-morning-ritual",
+        title: "🌅 Iniciar Ritual Matutino",
+        subtitle: "Alinear energía, agenda del día y 3 Must-Wins",
+        icon: Sun,
+        badge: "⌘M",
+        run: () => {
+          onClose();
+          onOpenMorningRitual();
+        },
+      },
+      {
+        id: "action-evening-review",
+        title: "🌙 Iniciar Cierre Nocturno",
+        subtitle: "Auditoría de daño HP, gastos del día y brain dump",
+        icon: Moon,
+        badge: "⌘E",
+        run: () => {
+          onClose();
+          onOpenEveningReview();
+        },
+      },
+      {
+        id: "action-finance-new",
+        title: "💰 Registrar Movimiento en Brio Finanzas",
+        subtitle: "Gasto o ingreso con categoría y tarjeta en Neon DB",
+        icon: Wallet,
+        badge: "⌘F",
+        run: () => {
+          onClose();
+          onOpenFinanceModal();
+        },
+      },
+      {
+        id: "action-tab-tasks",
+        title: "Ir a Tareas & Hábitos",
+        subtitle: "Vista principal de Habitica + Linear Inspector",
+        icon: Zap,
+        badge: "⌘1",
+        run: () => {
+          onSelectMainTab("tasks");
+          onClose();
+        },
+      },
+      {
+        id: "action-tab-finance",
+        title: "Ir a Brio Finanzas",
+        subtitle: "Termómetro mensual, gastos hormiga y metas de ahorro",
+        icon: Wallet,
+        badge: "⌘2",
+        run: () => {
+          onSelectMainTab("finance");
+          onClose();
+        },
+      },
+      {
+        id: "action-tab-analytics",
+        title: "Ir a Consistencia & Balance",
+        subtitle: "Heatmap de hábitos y balance de vida por tags",
+        icon: Activity,
+        badge: "⌘3",
+        run: () => {
+          onSelectMainTab("analytics");
+          onClose();
+        },
+      },
+      {
+        id: "action-tab-calendar",
+        title: "Ir a Agenda Google Calendar",
+        subtitle: "Timeline de eventos y reuniones sincronizadas",
+        icon: Calendar,
+        badge: "⌘4",
+        run: () => {
+          onSelectMainTab("calendar");
+          onClose();
+        },
+      },
+      {
+        id: "action-tab-health",
+        title: "Ir a Salud & Rendimiento",
+        subtitle: "Check-in de entrenamiento, hidratación 3L y sueño",
+        icon: Activity,
+        badge: "⌘5",
+        run: () => {
+          onSelectMainTab("health");
+          onClose();
+        },
+      },
+      {
+        id: "action-tab-projects",
+        title: "Ir a Proyectos & Aprendizaje",
+        subtitle: "Backlog de side projects y tracker de libros/cursos",
+        icon: Layers,
+        badge: "⌘6",
+        run: () => {
+          onSelectMainTab("projects");
+          onClose();
+        },
+      },
+      {
         id: "action-batch",
-        title: "Open Batch Capture",
-        subtitle: "Rapid multiline task creation",
+        title: "Captura por Lotes (Batch Tasks)",
+        subtitle: "Crear múltiples tareas de Habitica en milisegundos",
         icon: Plus,
         badge: "⌘B",
         run: () => {
@@ -94,12 +206,12 @@ export function CommandPalette({
       },
       {
         id: "action-rest",
-        title: isResting ? "Wake up from the Inn" : "Rest at the Inn",
+        title: isResting ? "Despertar de la Posada" : "Descansar en la Posada (Inn)",
         subtitle: isResting
-          ? "Resume daily damage"
-          : "Pause damage from uncompleted dailies",
+          ? "Reanudar daño de dailies"
+          : "Pausar daño de dailies no completadas",
         icon: Bed,
-        badge: isResting ? "Resting" : "Active",
+        badge: isResting ? "En Posada" : "Activo",
         run: () => {
           startTransition(async () => {
             await toggleSleepAction();
@@ -109,8 +221,8 @@ export function CommandPalette({
       },
       {
         id: "action-sync",
-        title: "Sync Habitica State",
-        subtitle: "Refresh HP, MP, EXP, and active tasks",
+        title: "Sincronizar Estado de Brio",
+        subtitle: "Refrescar HP, MP, EXP, y tareas",
         icon: RotateCw,
         badge: "Sync",
         run: () => {
@@ -120,41 +232,17 @@ export function CommandPalette({
           });
         },
       },
-      {
-        id: "action-view-dailies",
-        title: "Filter by Dailies",
-        subtitle: "Show recurring daily commitments",
-        icon: Calendar,
-        badge: "View",
-        run: () => {
-          onFilterType("dailies");
-          onClose();
-        },
-      },
-      {
-        id: "action-view-todos",
-        title: "Filter by To-Dos",
-        subtitle: "Show active to-do list",
-        icon: ListTodo,
-        badge: "View",
-        run: () => {
-          onFilterType("todos");
-          onClose();
-        },
-      },
-      {
-        id: "action-view-habits",
-        title: "Filter by Habits",
-        subtitle: "Show good & bad habits",
-        icon: Zap,
-        badge: "View",
-        run: () => {
-          onFilterType("habits");
-          onClose();
-        },
-      },
     ];
-  }, [isResting, onClose, onOpenBatchCapture, onFilterType, router]);
+  }, [
+    isResting,
+    onClose,
+    onOpenMorningRitual,
+    onOpenEveningReview,
+    onOpenFinanceModal,
+    onSelectMainTab,
+    onOpenBatchCapture,
+    router,
+  ]);
 
   // Filter tasks based on query
   const filteredTasks = useMemo(() => {
@@ -231,13 +319,13 @@ export function CommandPalette({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-start justify-center p-4 pt-16 sm:pt-24 backdrop-blur-md bg-black/60 animate-in fade-in duration-150">
+    <div className="fixed inset-0 z-50 flex items-start justify-center p-4 pt-16 sm:pt-24 backdrop-blur-md bg-black/70 animate-in fade-in duration-150">
       <div
-        className="w-full max-w-2xl overflow-hidden rounded-2xl border border-white/10 bg-neutral-900/90 shadow-2xl backdrop-blur-2xl transition-all"
+        className="w-full max-w-2xl overflow-hidden rounded-3xl border border-white/10 bg-neutral-900/95 shadow-2xl backdrop-blur-2xl transition-all"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Search input header */}
-        <div className="relative flex items-center border-b border-white/[0.08] px-4 py-3">
+        <div className="relative flex items-center border-b border-white/[0.08] px-4 py-3.5">
           <Search className="h-4 w-4 text-neutral-400" />
           <input
             ref={inputRef}
@@ -248,7 +336,7 @@ export function CommandPalette({
               setSelectedIndex(0);
             }}
             onKeyDown={handleKeyDown}
-            placeholder="Type a command, task title, or #tag..."
+            placeholder="Escribe un comando, tarea, #tag o acción..."
             className="w-full bg-transparent pl-3 pr-8 font-sans text-sm text-neutral-100 placeholder:text-neutral-500 focus:outline-none"
           />
           <kbd className="rounded border border-neutral-700 bg-neutral-800 px-1.5 py-0.5 text-[10px] font-mono text-neutral-400">
@@ -262,7 +350,7 @@ export function CommandPalette({
           {filteredActions.length > 0 && (
             <div className="mb-2">
               <div className="px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider text-neutral-500">
-                Commands & Views
+                Comandos & Vistas
               </div>
               <div className="space-y-1">
                 {filteredActions.map((action, idx) => {
@@ -273,20 +361,20 @@ export function CommandPalette({
                       key={action.id}
                       onClick={action.run}
                       onMouseEnter={() => setSelectedIndex(idx)}
-                      className={`flex w-full items-center justify-between rounded-xl px-3 py-2 text-left text-xs transition-all ${
+                      className={`flex w-full items-center justify-between rounded-2xl px-3.5 py-2.5 text-left text-xs transition-all ${
                         isSelected
-                          ? "bg-indigo-500 text-white"
+                          ? "bg-indigo-600 text-white shadow-md shadow-indigo-500/20"
                           : "text-neutral-300 hover:bg-white/5"
                       }`}
                     >
-                      <div className="flex items-center gap-2.5">
+                      <div className="flex items-center gap-3">
                         <Icon
                           className={`h-4 w-4 ${
                             isSelected ? "text-white" : "text-neutral-400"
                           }`}
                         />
                         <div>
-                          <div className="font-medium">{action.title}</div>
+                          <div className="font-semibold text-xs">{action.title}</div>
                           <div
                             className={`text-[11px] ${
                               isSelected ? "text-indigo-100" : "text-neutral-500"
@@ -297,9 +385,9 @@ export function CommandPalette({
                         </div>
                       </div>
                       <span
-                        className={`rounded px-1.5 py-0.5 font-mono text-[10px] ${
+                        className={`rounded-md px-1.5 py-0.5 font-mono text-[10px] font-bold ${
                           isSelected
-                            ? "bg-indigo-600 text-white"
+                            ? "bg-indigo-700 text-white"
                             : "bg-neutral-800 text-neutral-400"
                         }`}
                       >
@@ -316,7 +404,7 @@ export function CommandPalette({
           {filteredTags.length > 0 && (
             <div className="mb-2">
               <div className="px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider text-neutral-500">
-                Filter by Tag
+                Filtrar por Tag
               </div>
               <div className="space-y-1">
                 {filteredTags.map((tag, idx) => {
@@ -330,9 +418,9 @@ export function CommandPalette({
                         onClose();
                       }}
                       onMouseEnter={() => setSelectedIndex(itemIdx)}
-                      className={`flex w-full items-center justify-between rounded-xl px-3 py-2 text-left text-xs transition-all ${
+                      className={`flex w-full items-center justify-between rounded-2xl px-3.5 py-2 text-left text-xs transition-all ${
                         isSelected
-                          ? "bg-indigo-500 text-white"
+                          ? "bg-indigo-600 text-white"
                           : "text-neutral-300 hover:bg-white/5"
                       }`}
                     >
@@ -344,7 +432,7 @@ export function CommandPalette({
                         />
                         <span className="font-mono font-medium">#{tag.name}</span>
                       </div>
-                      <span className="text-[10px] opacity-75">Select Tag</span>
+                      <span className="text-[10px] opacity-75">Filtrar</span>
                     </button>
                   );
                 })}
@@ -356,7 +444,7 @@ export function CommandPalette({
           {filteredTasks.length > 0 && (
             <div>
               <div className="px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider text-neutral-500">
-                Matching Tasks
+                Tareas Encontradas
               </div>
               <div className="space-y-1">
                 {filteredTasks.map((task, idx) => {
@@ -371,9 +459,9 @@ export function CommandPalette({
                         onClose();
                       }}
                       onMouseEnter={() => setSelectedIndex(itemIdx)}
-                      className={`flex w-full items-center justify-between rounded-xl px-3 py-2 text-left text-xs transition-all ${
+                      className={`flex w-full items-center justify-between rounded-2xl px-3.5 py-2 text-left text-xs transition-all ${
                         isSelected
-                          ? "bg-indigo-500 text-white"
+                          ? "bg-indigo-600 text-white"
                           : "text-neutral-300 hover:bg-white/5"
                       }`}
                     >
@@ -404,7 +492,7 @@ export function CommandPalette({
                         <span
                           className={`rounded px-1.5 py-0.5 ${
                             isSelected
-                              ? "bg-indigo-600 text-white"
+                              ? "bg-indigo-700 text-white"
                               : "bg-neutral-800 text-neutral-400"
                           }`}
                         >
@@ -420,29 +508,29 @@ export function CommandPalette({
 
           {allItems.length === 0 && (
             <div className="py-8 text-center text-xs text-neutral-500">
-              No matching commands or tasks found.
+              No se encontraron comandos o tareas que coincidan con la búsqueda.
             </div>
           )}
         </div>
 
         {/* Footer hints */}
-        <div className="flex items-center justify-between border-t border-white/[0.06] bg-neutral-950/60 px-4 py-2 text-[11px] text-neutral-400">
+        <div className="flex items-center justify-between border-t border-white/[0.06] bg-neutral-950/60 px-4 py-2.5 text-[11px] text-neutral-400">
           <div className="flex items-center gap-3">
             <span className="flex items-center gap-1">
               <kbd className="rounded bg-neutral-800 px-1 py-0.5 font-mono text-[10px]">
                 ↑↓
               </kbd>{" "}
-              Navigate
+              Navegar
             </span>
             <span className="flex items-center gap-1">
               <kbd className="rounded bg-neutral-800 px-1 py-0.5 font-mono text-[10px]">
                 ↵
               </kbd>{" "}
-              Select
+              Ejecutar
             </span>
           </div>
           <span className="font-mono text-[10px] text-neutral-500">
-            Raycast / Linear Command Engine
+            Brio OS Command Launcher
           </span>
         </div>
       </div>
