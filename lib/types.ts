@@ -727,3 +727,75 @@ export interface BiomarkersDashboardData {
   historicalTrends: Record<string, Array<{ date: string; value: number; unit?: string }>>;
 }
 
+// ----------------------------------------------------
+// Male Hormonal & Circadian 24-Hour Models
+// ----------------------------------------------------
+
+export type HormonalPhaseId =
+  | "wake_sunlight"      // 07:30 - 08:30: Despertar & Luz Solar
+  | "morning_deep_work"  // 08:30 - 12:00: Pico Testosterona / Deep Work
+  | "gym_power"          // 12:00 - 14:00: Gym & Fuerza (Hevy)
+  | "anabolic_lunch"     // 14:00 - 15:00: Almuerzo Post-Gym Anabólico
+  | "afternoon_flow"     // 15:00 - 19:00: Bloque Laboral 2 / Proyectos
+  | "evening_hard_stop"  // 19:00 - 21:30: Hard Stop 7PM & Dim Light / Relax
+  | "deep_sleep_10h";    // 21:30 - 07:30: 10h Sueño Profundo & GH/Andrógenos
+
+export interface HormonalPhaseConfig {
+  id: HormonalPhaseId;
+  name: string;
+  shortName: string;
+  startTime: string;
+  endTime: string;
+  icon: string;
+  color: string;
+  hormoneFocus: string;
+  actionHeadline: string;
+  description: string;
+  keyNutrientsOrTips: string[];
+}
+
+export interface HormonalScheduleConfig {
+  sleepStart: string;         // "21:30"
+  sleepEnd: string;           // "07:30"
+  sleepTargetHours: number;   // 10
+  morningFocusStart: string;  // "08:30"
+  morningFocusEnd: string;    // "12:00"
+  gymStart: string;           // "12:00"
+  gymEnd: string;             // "14:00"
+  lunchStart: string;         // "14:00"
+  lunchEnd: string;           // "15:00"
+  afternoonWorkStart: string; // "15:00"
+  workHardStop: string;       // "19:00"
+}
+
+export interface HormonalDailyChecklist {
+  sleep10hLogged: boolean;
+  morningSunlight: boolean;
+  morningDeepWorkDone: boolean;
+  gymSessionCompleted: boolean;
+  postGymNutrition: boolean;
+  hardStop7pmRespected: boolean;
+  nightDimLightMagnesium: boolean;
+}
+
+// ----------------------------------------------------
+// Despensa Inteligente & Asistente 'Qué Cocinar' Models
+// ----------------------------------------------------
+
+export type PantryCategory =
+  | "proteins_legumes"
+  | "carbs_cereals"
+  | "healthy_fats"
+  | "vegetables_greens"
+  | "fruits"
+  | "kitchen_essentials";
+
+export interface PantryItem {
+  id: string;
+  name: string;
+  category: PantryCategory;
+  inStock: boolean;
+  icon?: string;
+}
+
+

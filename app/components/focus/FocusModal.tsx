@@ -2,19 +2,14 @@
 
 import { toggleTaskAction } from "@/app/actions/tasks";
 import { ambientAudio, AmbientSoundType } from "@/lib/audio";
+import { getHormonalStatus } from "@/lib/hormonal";
 import { HabiticaTask } from "@/lib/types";
 import {
-  CheckCircle2,
-  Clock,
   Headphones,
-  Maximize2,
-  Minimize2,
   Pause,
   Play,
   RotateCcw,
   Sparkles,
-  Volume2,
-  VolumeX,
   X,
   Zap,
 } from "lucide-react";
@@ -142,6 +137,8 @@ export function FocusModal({
     ((selectedMinutes * 60 - timeLeft) / (selectedMinutes * 60)) * 100
   );
 
+  const hormonalStatus = getHormonalStatus();
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/90 backdrop-blur-xl animate-in fade-in duration-200">
       <div
@@ -161,10 +158,24 @@ export function FocusModal({
         </button>
 
         <div className="flex flex-col items-center text-center space-y-6">
-          {/* Header Badge */}
-          <div className="flex items-center gap-2 rounded-full border border-indigo-500/30 bg-indigo-500/10 px-3.5 py-1 text-xs font-bold text-indigo-300">
-            <Zap className="h-3.5 w-3.5 text-indigo-400" />
-            <span>Modo Focus Zen & Deep Work (⌘P)</span>
+          {/* Header Badge with Hormonal Context */}
+          <div className="flex flex-col items-center gap-2">
+            <div className="flex items-center gap-2 rounded-full border border-indigo-500/30 bg-indigo-500/10 px-3.5 py-1 text-xs font-bold text-indigo-300">
+              <Zap className="h-3.5 w-3.5 text-indigo-400" />
+              <span>Modo Focus Zen & Deep Work (⌘P)</span>
+            </div>
+
+            <div
+              className="flex items-center gap-1.5 px-3 py-1 rounded-lg border text-[11px] font-medium"
+              style={{
+                backgroundColor: `${hormonalStatus.currentPhase.color}15`,
+                borderColor: `${hormonalStatus.currentPhase.color}35`,
+                color: hormonalStatus.currentPhase.color,
+              }}
+            >
+              <span>{hormonalStatus.currentPhase.icon}</span>
+              <span>{hormonalStatus.currentPhase.hormoneFocus}</span>
+            </div>
           </div>
 
           {/* Active Task Selector */}

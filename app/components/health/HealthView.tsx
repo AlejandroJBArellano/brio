@@ -10,12 +10,10 @@ import {
 import { HealthDashboardData, WorkoutType } from "@/lib/types";
 import {
   Activity,
-  Bed,
   Check,
   CheckCircle2,
   Droplet,
   Dumbbell,
-  FileSpreadsheet,
   Flame,
   FlaskConical,
   Heart,
@@ -23,19 +21,15 @@ import {
   Plus,
   Pill,
   Settings2,
-  Sparkles,
-  Star,
-  Upload,
   UploadCloud,
-  Utensils,
   Salad,
   X,
-  Zap,
 } from "lucide-react";
 import { useState, useTransition } from "react";
 import { BiomarkersView } from "./biomarkers/BiomarkersView";
 import { BodyCompositionWidget } from "./BodyCompositionWidget";
 import { HevyWidget } from "./HevyWidget";
+import { HormonalCircadianWidget } from "./HormonalCircadianWidget";
 import { ManageSupplementsModal } from "./ManageSupplementsModal";
 import { NutritionView } from "./nutrition/NutritionView";
 import { SmartFitModal } from "./SmartFitModal";
@@ -55,14 +49,14 @@ const WORKOUT_TYPES: { id: WorkoutType; label: string; icon: string }[] = [
 
 export function HealthView({ data, onRefresh }: HealthViewProps) {
   const [activeHealthTab, setActiveHealthTab] = useState<
-    "overview" | "nutrition" | "body_composition" | "hevy" | "biomarkers"
+    "overview" | "hormonal" | "nutrition" | "body_composition" | "hevy" | "biomarkers"
   >("overview");
   const [workoutNotes, setWorkoutNotes] = useState("");
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
   const [isManageSupplementsOpen, setIsManageSupplementsOpen] = useState(false);
   const [isSmartFitModalOpen, setIsSmartFitModalOpen] = useState(false);
   const [importJson, setImportJson] = useState("");
-  const [sleepHours, setSleepHours] = useState(data.todayHealth.sleepHours || 7.5);
+  const [sleepHours, setSleepHours] = useState(data.todayHealth.sleepHours || 10.0);
   const [sleepQuality, setSleepQuality] = useState(data.todayHealth.sleepQuality || 4);
   const [isPending, startTransition] = useTransition();
 
@@ -120,6 +114,19 @@ export function HealthView({ data, onRefresh }: HealthViewProps) {
           >
             <Activity className="h-3.5 w-3.5" />
             <span>Resumen & Hábitos</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setActiveHealthTab("hormonal")}
+            className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all ${
+              activeHealthTab === "hormonal"
+                ? "bg-amber-500/20 text-amber-300 border border-amber-500/30 shadow-sm"
+                : "text-neutral-400 hover:text-white"
+            }`}
+          >
+            <Flame className="h-3.5 w-3.5 text-amber-400" />
+            <span>🔥 Ritmo Hormonal 24h</span>
           </button>
 
           <button
@@ -187,6 +194,15 @@ export function HealthView({ data, onRefresh }: HealthViewProps) {
       </div>
 
       {/* RENDER ACTIVE TAB */}
+      {activeHealthTab === "hormonal" && (
+        <div className="space-y-6 animate-in fade-in duration-200">
+          <HormonalCircadianWidget
+            onOpenHevy={() => setActiveHealthTab("hevy")}
+            onOpenPantry={() => setActiveHealthTab("nutrition")}
+          />
+        </div>
+      )}
+
       {activeHealthTab === "nutrition" && data.nutritionData && (
         <NutritionView
           data={data.nutritionData}
@@ -226,6 +242,12 @@ export function HealthView({ data, onRefresh }: HealthViewProps) {
 
       {activeHealthTab === "overview" && (
         <div className="space-y-6 animate-in fade-in duration-200">
+          {/* Hormonal Circadian Engine Highlight in Overview */}
+          <HormonalCircadianWidget
+            onOpenHevy={() => setActiveHealthTab("hevy")}
+            onOpenPantry={() => setActiveHealthTab("nutrition")}
+          />
+
           {/* 1. Header Metrics Row */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {/* Workout Streak */}
