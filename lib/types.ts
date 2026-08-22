@@ -393,6 +393,7 @@ export interface HealthDashboardData {
   recentHevyWorkouts?: HevyWorkout[];
   hevyStats?: HevyStats;
   nutritionData?: NutritionDashboardData;
+  biomarkersData?: BiomarkersDashboardData;
 }
 
 // ----------------------------------------------------
@@ -662,5 +663,67 @@ export interface NutritionDashboardData {
   };
   supplements?: SupplementItem[];
   supplementsCatalog?: UserSupplement[];
+}
+
+// ----------------------------------------------------
+// Módulo de Estudios de Laboratorio & Biomarcadores
+// ----------------------------------------------------
+
+export type BiomarkerCategoryKey =
+  | "renal"
+  | "cardio"
+  | "hepatic"
+  | "iron"
+  | "immuno"
+  | "hematology"
+  | "urinalysis";
+
+export type BiomarkerStatus = "optimal" | "normal" | "high" | "low" | "critical";
+
+export interface BiomarkerLog {
+  id: string;
+  reportId?: string;
+  date: string; // YYYY-MM-DD
+  category: BiomarkerCategoryKey;
+  name: string;
+  code?: string;
+  valueNumeric?: number;
+  valueText?: string;
+  unit?: string;
+  refMin?: number;
+  refMax?: number;
+  refText?: string;
+  status: BiomarkerStatus;
+  notes?: string;
+  orderIndex?: number;
+}
+
+export interface LabTestReport {
+  id: string;
+  date: string; // YYYY-MM-DD
+  labName: string;
+  orderNumber?: string;
+  patientId?: string;
+  title: string;
+  doctorNotes?: string;
+  fileUrl?: string;
+  fileKey?: string;
+  totalBiomarkers: number;
+  abnormalCount: number;
+  biomarkers: BiomarkerLog[];
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface BiomarkersDashboardData {
+  latestReport?: LabTestReport;
+  reportsHistory: LabTestReport[];
+  totalBiomarkersTracked: number;
+  abnormalCount: number;
+  categorySummaries: Record<
+    BiomarkerCategoryKey,
+    { total: number; abnormal: number; optimal: number }
+  >;
+  historicalTrends: Record<string, Array<{ date: string; value: number; unit?: string }>>;
 }
 

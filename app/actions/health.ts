@@ -3,6 +3,10 @@
 import { getDb } from "@/lib/db";
 import { fetchHevyWorkoutsList, saveHevyWorkoutToDb } from "@/lib/hevy";
 import {
+  BiomarkerCategoryKey,
+  BiomarkerLog,
+  BiomarkerStatus,
+  BiomarkersDashboardData,
   BodyCompositionLog,
   BodyCompositionSegmental,
   HealthDashboardData,
@@ -10,12 +14,49 @@ import {
   HevyExercise,
   HevyStats,
   HevyWorkout,
+  LabTestReport,
   SupplementItem,
   UserSupplement,
   WorkoutType,
 } from "@/lib/types";
+import { INITIAL_CHOPO_2026_BIOMARKERS, INITIAL_CHOPO_2026_REPORT } from "@/lib/labPresets";
 import { revalidatePath } from "next/cache";
 import { fetchNutritionDashboardDataAction } from "./nutrition";
+
+interface LabTestReportDbRow {
+  id: string;
+  date: Date | string;
+  lab_name: string;
+  order_number?: string;
+  patient_id?: string;
+  title: string;
+  doctor_notes?: string;
+  file_url?: string;
+  file_key?: string;
+  total_biomarkers?: number | string;
+  abnormal_count?: number | string;
+  created_at?: Date | string;
+  updated_at?: Date | string;
+}
+
+interface BiomarkerDbRow {
+  id: string;
+  report_id?: string;
+  date: Date | string;
+  category: string;
+  name: string;
+  code?: string;
+  value_numeric?: number | string | null;
+  value_text?: string | null;
+  unit?: string | null;
+  ref_min?: number | string | null;
+  ref_max?: number | string | null;
+  ref_text?: string | null;
+  status: string;
+  notes?: string | null;
+  order_index?: number | string;
+  created_at?: Date | string;
+}
 
 interface UserSupplementDbRow {
   id: string;
@@ -162,8 +203,156 @@ async function getBodyCompositionLogs(sql: SqlClient): Promise<BodyCompositionLo
 }
 
 /**
+ * Helper: Fetches clinical lab reports and biomarker metrics from database,
+ * falling back gracefully to the initial Chopo preset if not yet initialized.
+ */
+async function getBiomarkersDashboardData(sql: SqlClient): Promise<BiomarkersDashboardData> {
+  try {
+    const reportRows = await sql`
+      SELECT * FROM lab_test_reports ORDER BY date DESC, created_at DESC;
+    `;
+
+    if (reportRows.length > 0) {
+      const biomarkerRows = await sql`
+        SELECT * FROM biomarker_logs ORDER BY order_index ASC, created_at ASC;
+      `;
+
+      const allBiomarkers: BiomarkerLog[] = (biomarkerRows as unknown as BiomarkerDbRow[]).map((b) => ({
+        id: b.id,
+        reportId: b.report_id || undefined,
+        date: typeof b.date === "string" ? b.date.split("T")[0] : new Date(b.date).toISOString().split("T")[0],
+        category: b.category as BiomarkerCategoryKey,
+        name: b.name,
+        code: b.code || undefined,
+        valueNumeric: b.value_numeric !== null && b.value_numeric !== undefined ? Number(b.value_numeric) : undefined,
+        valueText: b.value_text || undefined,
+        unit: b.unit || undefined,
+        refMin: b.ref_min !== null && b.ref_min !== undefined ? Number(b.ref_min) : undefined,
+        refMax: b.ref_max !== null && b.ref_max !== undefined ? Number(b.ref_max) : undefined,
+        refText: b.ref_text || undefined,
+        status: (b.status as BiomarkerStatus) || "normal",
+        notes: b.notes || undefined,
+        orderIndex: Number(b.order_index) || 0,
+      }));
+
+      const reportsHistory: LabTestReport[] = (reportRows as unknown as LabTestReportDbRow[]).map((r) => {
+        const reportBiomarkers = allBiomarkers.filter((b) => b.reportId === r.id);
+        const abnormalCount = reportBiomarkers.filter(
+          (b) => b.status === "high" || b.status === "low" || b.status === "critical"
+        ).length;
+
+        return {
+          id: r.id,
+          date: typeof r.date === "string" ? r.date.split("T")[0] : new Date(r.date).toISOString().split("T")[0],
+          labName: r.lab_name,
+          orderNumber: r.order_number || undefined,
+          patientId: r.patient_id || undefined,
+          title: r.title,
+          doctorNotes: r.doctor_notes || undefined,
+          fileUrl: r.file_url || undefined,
+          fileKey: r.file_key || undefined,
+          totalBiomarkers: reportBiomarkers.length || Number(r.total_biomarkers) || 0,
+          abnormalCount,
+          biomarkers: reportBiomarkers,
+          createdAt: r.created_at?.toString(),
+          updatedAt: r.updated_at?.toString(),
+        };
+      });
+
+      const latestReport = reportsHistory.length > 0 ? reportsHistory[0] : undefined;
+      const latestBiomarkers = latestReport && latestReport.biomarkers.length > 0 ? latestReport.biomarkers : allBiomarkers;
+
+      const categorySummaries: Record<BiomarkerCategoryKey, { total: number; abnormal: number; optimal: number }> = {
+        renal: { total: 0, abnormal: 0, optimal: 0 },
+        cardio: { total: 0, abnormal: 0, optimal: 0 },
+        hepatic: { total: 0, abnormal: 0, optimal: 0 },
+        iron: { total: 0, abnormal: 0, optimal: 0 },
+        immuno: { total: 0, abnormal: 0, optimal: 0 },
+        hematology: { total: 0, abnormal: 0, optimal: 0 },
+        urinalysis: { total: 0, abnormal: 0, optimal: 0 },
+      };
+
+      for (const b of latestBiomarkers) {
+        if (categorySummaries[b.category]) {
+          categorySummaries[b.category].total++;
+          if (b.status === "high" || b.status === "low" || b.status === "critical") {
+            categorySummaries[b.category].abnormal++;
+          } else if (b.status === "optimal") {
+            categorySummaries[b.category].optimal++;
+          }
+        }
+      }
+
+      const historicalTrends: Record<string, Array<{ date: string; value: number; unit?: string }>> = {};
+      for (const b of allBiomarkers) {
+        if (b.valueNumeric !== undefined) {
+          if (!historicalTrends[b.name]) {
+            historicalTrends[b.name] = [];
+          }
+          historicalTrends[b.name].push({
+            date: b.date,
+            value: b.valueNumeric,
+            unit: b.unit,
+          });
+        }
+      }
+
+      return {
+        latestReport,
+        reportsHistory,
+        totalBiomarkersTracked: latestBiomarkers.length,
+        abnormalCount: latestBiomarkers.filter(
+          (b) => b.status === "high" || b.status === "low" || b.status === "critical"
+        ).length,
+        categorySummaries,
+        historicalTrends,
+      };
+    }
+  } catch {
+    // Database tables might not be migrated yet; fallback to Chopo 2026 preset
+  }
+
+  const defaultSummaries: Record<BiomarkerCategoryKey, { total: number; abnormal: number; optimal: number }> = {
+    renal: { total: 0, abnormal: 0, optimal: 0 },
+    cardio: { total: 0, abnormal: 0, optimal: 0 },
+    hepatic: { total: 0, abnormal: 0, optimal: 0 },
+    iron: { total: 0, abnormal: 0, optimal: 0 },
+    immuno: { total: 0, abnormal: 0, optimal: 0 },
+    hematology: { total: 0, abnormal: 0, optimal: 0 },
+    urinalysis: { total: 0, abnormal: 0, optimal: 0 },
+  };
+
+  for (const b of INITIAL_CHOPO_2026_BIOMARKERS) {
+    if (defaultSummaries[b.category]) {
+      defaultSummaries[b.category].total++;
+      if (b.status === "high" || b.status === "low" || b.status === "critical") {
+        defaultSummaries[b.category].abnormal++;
+      } else if (b.status === "optimal") {
+        defaultSummaries[b.category].optimal++;
+      }
+    }
+  }
+
+  const trends: Record<string, Array<{ date: string; value: number; unit?: string }>> = {};
+  for (const b of INITIAL_CHOPO_2026_BIOMARKERS) {
+    if (b.valueNumeric !== undefined) {
+      trends[b.name] = [{ date: b.date, value: b.valueNumeric, unit: b.unit }];
+    }
+  }
+
+  return {
+    latestReport: INITIAL_CHOPO_2026_REPORT,
+    reportsHistory: [INITIAL_CHOPO_2026_REPORT],
+    totalBiomarkersTracked: INITIAL_CHOPO_2026_BIOMARKERS.length,
+    abnormalCount: INITIAL_CHOPO_2026_REPORT.abnormalCount,
+    categorySummaries: defaultSummaries,
+    historicalTrends: trends,
+  };
+}
+
+/**
  * Server Action: Fetches physical health metrics, hydration, workouts, sleep, and body composition.
- * Uses Promise.all to fetch supplements, body composition, health logs, hevy workouts, and nutrition concurrently.
+ * Uses Promise.all to fetch supplements, body composition, health logs, hevy workouts, nutrition, and biomarkers concurrently.
  */
 export async function fetchHealthDashboardDataAction(): Promise<HealthDashboardData> {
   const sql = getDb();
@@ -178,6 +367,7 @@ export async function fetchHealthDashboardDataAction(): Promise<HealthDashboardD
     hevyRows,
     statsRows,
     nutritionData,
+    biomarkersData,
   ] = await Promise.all([
     getSupplementsCatalog(sql),
     getBodyCompositionLogs(sql),
@@ -186,6 +376,7 @@ export async function fetchHealthDashboardDataAction(): Promise<HealthDashboardD
     sql`SELECT * FROM hevy_workouts ORDER BY date DESC, start_time DESC LIMIT 10;`,
     sql`SELECT COUNT(*)::int as count, COALESCE(SUM(total_volume_kg), 0)::float as volume, MAX(created_at) as last_sync FROM hevy_workouts;`,
     fetchNutritionDashboardDataAction(todayStr),
+    getBiomarkersDashboardData(sql),
   ]);
 
   const latestBodyComposition = bodyCompositionLogs.length > 0 ? bodyCompositionLogs[0] : undefined;
@@ -316,6 +507,7 @@ export async function fetchHealthDashboardDataAction(): Promise<HealthDashboardD
     recentHevyWorkouts,
     hevyStats,
     nutritionData,
+    biomarkersData,
   };
 }
 
@@ -909,3 +1101,166 @@ export async function fetchRecentHevyWorkoutsAction(limit = 10): Promise<HevyWor
     updatedAt: r.hevy_updated_at?.toString(),
   }));
 }
+
+/**
+ * Server Action: Fetches clinical lab reports and biomarker dashboard data.
+ */
+export async function fetchBiomarkersDashboardDataAction(): Promise<BiomarkersDashboardData> {
+  const sql = getDb();
+  return getBiomarkersDashboardData(sql);
+}
+
+/**
+ * Server Action: Creates or saves a new clinical lab report with its biomarkers.
+ */
+export async function createLabReportAction(input: {
+  date: string;
+  labName: string;
+  orderNumber?: string;
+  patientId?: string;
+  title: string;
+  doctorNotes?: string;
+  fileUrl?: string;
+  fileKey?: string;
+  biomarkers: Array<{
+    category: BiomarkerCategoryKey;
+    name: string;
+    code?: string;
+    valueNumeric?: number;
+    valueText?: string;
+    unit?: string;
+    refMin?: number;
+    refMax?: number;
+    refText?: string;
+    status: BiomarkerStatus;
+    notes?: string;
+    orderIndex?: number;
+  }>;
+}): Promise<{ success: boolean; id?: string; error?: string }> {
+  try {
+    if (!input.date || !input.title) {
+      return { success: false, error: "La fecha y el título del estudio son obligatorios." };
+    }
+
+    const sql = getDb();
+    const reportId = `report-${Date.now()}`;
+    const abnormalCount = input.biomarkers.filter(
+      (b) => b.status === "high" || b.status === "low" || b.status === "critical"
+    ).length;
+
+    // 1. Ensure tables exist (resilient DDL)
+    await sql`
+      CREATE TABLE IF NOT EXISTS lab_test_reports (
+        id VARCHAR(64) PRIMARY KEY,
+        date DATE NOT NULL,
+        lab_name VARCHAR(100) NOT NULL DEFAULT 'Laboratorio Chopo',
+        order_number VARCHAR(50),
+        patient_id VARCHAR(50),
+        title VARCHAR(150) NOT NULL,
+        doctor_notes TEXT,
+        file_url TEXT,
+        file_key TEXT,
+        total_biomarkers INT DEFAULT 0,
+        abnormal_count INT DEFAULT 0,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+        updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+      );
+    `;
+
+    await sql`
+      CREATE TABLE IF NOT EXISTS biomarker_logs (
+        id VARCHAR(64) PRIMARY KEY,
+        report_id VARCHAR(64) REFERENCES lab_test_reports(id) ON DELETE CASCADE,
+        date DATE NOT NULL,
+        category VARCHAR(50) NOT NULL,
+        name VARCHAR(100) NOT NULL,
+        code VARCHAR(50),
+        value_numeric NUMERIC,
+        value_text VARCHAR(100),
+        unit VARCHAR(30),
+        ref_min NUMERIC,
+        ref_max NUMERIC,
+        ref_text VARCHAR(150),
+        status VARCHAR(20) NOT NULL DEFAULT 'normal',
+        notes TEXT,
+        order_index INT DEFAULT 0,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+      );
+    `;
+
+    // 2. Insert report header
+    await sql`
+      INSERT INTO lab_test_reports (
+        id, date, lab_name, order_number, patient_id, title,
+        doctor_notes, file_url, file_key, total_biomarkers, abnormal_count
+      )
+      VALUES (
+        ${reportId},
+        ${input.date},
+        ${input.labName || "Laboratorio Chopo"},
+        ${input.orderNumber || null},
+        ${input.patientId || null},
+        ${input.title},
+        ${input.doctorNotes || null},
+        ${input.fileUrl || null},
+        ${input.fileKey || null},
+        ${input.biomarkers.length},
+        ${abnormalCount}
+      );
+    `;
+
+    // 3. Insert individual biomarkers
+    for (let i = 0; i < input.biomarkers.length; i++) {
+      const b = input.biomarkers[i];
+      const bioId = `bio-${reportId}-${i + 1}`;
+      await sql`
+        INSERT INTO biomarker_logs (
+          id, report_id, date, category, name, code,
+          value_numeric, value_text, unit, ref_min, ref_max, ref_text,
+          status, notes, order_index
+        )
+        VALUES (
+          ${bioId},
+          ${reportId},
+          ${input.date},
+          ${b.category},
+          ${b.name},
+          ${b.code || null},
+          ${b.valueNumeric !== undefined ? b.valueNumeric : null},
+          ${b.valueText || null},
+          ${b.unit || null},
+          ${b.refMin !== undefined ? b.refMin : null},
+          ${b.refMax !== undefined ? b.refMax : null},
+          ${b.refText || null},
+          ${b.status || "normal"},
+          ${b.notes || null},
+          ${b.orderIndex ?? i + 1}
+        );
+      `;
+    }
+
+    revalidatePath("/");
+    return { success: true, id: reportId };
+  } catch (error) {
+    console.error("[Create Lab Report Error]:", error);
+    return { success: false, error: "No se pudo guardar el reporte de laboratorio." };
+  }
+}
+
+/**
+ * Server Action: Deletes a clinical lab report and its associated biomarkers.
+ */
+export async function deleteLabReportAction(id: string): Promise<{ success: boolean; error?: string }> {
+  try {
+    const sql = getDb();
+    await sql`
+      DELETE FROM lab_test_reports WHERE id = ${id};
+    `;
+    revalidatePath("/");
+    return { success: true };
+  } catch (error) {
+    console.error("[Delete Lab Report Error]:", error);
+    return { success: false, error: "No se pudo eliminar el reporte de laboratorio." };
+  }
+}
+

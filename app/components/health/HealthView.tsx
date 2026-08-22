@@ -17,6 +17,7 @@ import {
   Dumbbell,
   FileSpreadsheet,
   Flame,
+  FlaskConical,
   Heart,
   Moon,
   Plus,
@@ -32,6 +33,7 @@ import {
   Zap,
 } from "lucide-react";
 import { useState, useTransition } from "react";
+import { BiomarkersView } from "./biomarkers/BiomarkersView";
 import { BodyCompositionWidget } from "./BodyCompositionWidget";
 import { HevyWidget } from "./HevyWidget";
 import { ManageSupplementsModal } from "./ManageSupplementsModal";
@@ -53,7 +55,7 @@ const WORKOUT_TYPES: { id: WorkoutType; label: string; icon: string }[] = [
 
 export function HealthView({ data, onRefresh }: HealthViewProps) {
   const [activeHealthTab, setActiveHealthTab] = useState<
-    "overview" | "nutrition" | "body_composition" | "hevy"
+    "overview" | "nutrition" | "body_composition" | "hevy" | "biomarkers"
   >("overview");
   const [workoutNotes, setWorkoutNotes] = useState("");
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
@@ -163,6 +165,24 @@ export function HealthView({ data, onRefresh }: HealthViewProps) {
             <Dumbbell className="h-3.5 w-3.5" />
             <span>Hevy Gym Tracker</span>
           </button>
+
+          <button
+            type="button"
+            onClick={() => setActiveHealthTab("biomarkers")}
+            className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all ${
+              activeHealthTab === "biomarkers"
+                ? "bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 shadow-sm"
+                : "text-neutral-400 hover:text-white"
+            }`}
+          >
+            <FlaskConical className="h-3.5 w-3.5 text-cyan-400" />
+            <span>Estudios & Biomarcadores</span>
+            {data.biomarkersData && (
+              <span className="ml-1 rounded-full bg-cyan-500/20 px-1.5 py-0.2 text-[9px] font-mono text-cyan-300">
+                {data.biomarkersData.totalBiomarkersTracked} pruebas
+              </span>
+            )}
+          </button>
         </div>
       </div>
 
@@ -171,6 +191,13 @@ export function HealthView({ data, onRefresh }: HealthViewProps) {
         <NutritionView
           data={data.nutritionData}
           onOpenManageSupplements={() => setIsManageSupplementsOpen(true)}
+          onRefresh={onRefresh}
+        />
+      )}
+
+      {activeHealthTab === "biomarkers" && (
+        <BiomarkersView
+          data={data.biomarkersData}
           onRefresh={onRefresh}
         />
       )}

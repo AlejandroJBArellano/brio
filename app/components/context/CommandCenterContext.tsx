@@ -34,7 +34,8 @@ export type ModalType =
   | "notificationSettings"
   | "bottomSheet"
   | "smartFit"
-  | "manageSupplements";
+  | "manageSupplements"
+  | "addLabReport";
 
 export interface ModalPayloadMap {
   bottomSheet: { tab?: "expense" | "task" | "water" | "weight" | "nutrition" };

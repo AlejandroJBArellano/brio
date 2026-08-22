@@ -13,6 +13,7 @@ import {
   CornerDownLeft,
   Dumbbell,
   Flame,
+  FlaskConical,
   Hash,
   Layers,
   ListTodo,
@@ -205,6 +206,17 @@ function CommandPaletteContent({
         subtitle: "Check-in de entrenamiento, hidratación 3L y sueño",
         icon: Activity,
         badge: "⌘5",
+        run: () => {
+          onSelectMainTab("health");
+          onClose();
+        },
+      },
+      {
+        id: "action-tab-biomarkers",
+        title: "🧪 Ver Estudios de Laboratorio & Biomarcadores",
+        subtitle: "Química Integral 45, Función Renal, Lipídica, Hepática y Hemática",
+        icon: FlaskConical,
+        badge: "Salud",
         run: () => {
           onSelectMainTab("health");
           onClose();

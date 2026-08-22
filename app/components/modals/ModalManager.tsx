@@ -79,6 +79,14 @@ const ManageSupplementsModal = dynamic(
   { ssr: false }
 );
 
+const AddLabReportModal = dynamic(
+  () =>
+    import("@/app/components/health/biomarkers/AddLabReportModal").then(
+      (mod) => mod.AddLabReportModal
+    ),
+  { ssr: false }
+);
+
 interface ModalManagerProps {
   user: HabiticaUser;
   tasks?: HabiticaTask[];
@@ -259,6 +267,14 @@ export function ModalManager({
           isOpen={true}
           onClose={closeModal}
           supplements={healthData?.supplementsCatalog || []}
+          onSuccess={refreshData}
+        />
+      )}
+
+      {activeModal === "addLabReport" && (
+        <AddLabReportModal
+          isOpen={true}
+          onClose={closeModal}
           onSuccess={refreshData}
         />
       )}
