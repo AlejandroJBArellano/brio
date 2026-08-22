@@ -4,11 +4,10 @@ import { HabiticaTask } from "@/lib/types";
 import {
   Calendar,
   CheckCircle2,
-  Filter,
   ListTodo,
   Search,
   Sparkles,
-  Zap,
+  Zap
 } from "lucide-react";
 import { useMemo, useState } from "react";
 import { TaskItem } from "./TaskItem";
@@ -67,14 +66,13 @@ export function TaskStream({ tasks }: TaskStreamProps) {
       {/* Stream Controls: Tabs & Search */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         {/* Category Tabs */}
-        <div className="flex items-center gap-1.5 overflow-x-auto rounded-xl border border-white/[0.08] bg-neutral-900/60 p-1 backdrop-blur-xl">
+        <div className="flex items-center gap-1.5 overflow-x-auto rounded-xl border border-white/8 bg-neutral-900/60 p-1 backdrop-blur-xl">
           <button
             onClick={() => setActiveTab("all")}
-            className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold transition-all ${
-              activeTab === "all"
+            className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold transition-all ${activeTab === "all"
                 ? "bg-indigo-500 text-white shadow-md shadow-indigo-500/20"
                 : "text-neutral-400 hover:bg-white/5 hover:text-white"
-            }`}
+              }`}
           >
             <span>All</span>
             <span className="rounded-full bg-black/20 px-1.5 py-0.2 text-[10px]">
@@ -84,11 +82,10 @@ export function TaskStream({ tasks }: TaskStreamProps) {
 
           <button
             onClick={() => setActiveTab("dailies")}
-            className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold transition-all ${
-              activeTab === "dailies"
+            className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold transition-all ${activeTab === "dailies"
                 ? "bg-amber-500 text-neutral-950 font-bold shadow-md shadow-amber-500/20"
                 : "text-neutral-400 hover:bg-white/5 hover:text-white"
-            }`}
+              }`}
           >
             <Calendar className="h-3 w-3" />
             <span>Dailies</span>
@@ -99,11 +96,10 @@ export function TaskStream({ tasks }: TaskStreamProps) {
 
           <button
             onClick={() => setActiveTab("todos")}
-            className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold transition-all ${
-              activeTab === "todos"
+            className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold transition-all ${activeTab === "todos"
                 ? "bg-sky-500 text-neutral-950 font-bold shadow-md shadow-sky-500/20"
                 : "text-neutral-400 hover:bg-white/5 hover:text-white"
-            }`}
+              }`}
           >
             <ListTodo className="h-3 w-3" />
             <span>To-Dos</span>
@@ -114,11 +110,10 @@ export function TaskStream({ tasks }: TaskStreamProps) {
 
           <button
             onClick={() => setActiveTab("habits")}
-            className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold transition-all ${
-              activeTab === "habits"
+            className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold transition-all ${activeTab === "habits"
                 ? "bg-emerald-500 text-neutral-950 font-bold shadow-md shadow-emerald-500/20"
                 : "text-neutral-400 hover:bg-white/5 hover:text-white"
-            }`}
+              }`}
           >
             <Zap className="h-3 w-3" />
             <span>Habits</span>
@@ -144,11 +139,10 @@ export function TaskStream({ tasks }: TaskStreamProps) {
           <button
             onClick={() => setHideCompleted((prev) => !prev)}
             title={hideCompleted ? "Show completed" : "Hide completed"}
-            className={`flex h-8 items-center gap-1.5 rounded-xl border px-2.5 text-xs transition-colors ${
-              hideCompleted
+            className={`flex h-8 items-center gap-1.5 rounded-xl border px-2.5 text-xs transition-colors ${hideCompleted
                 ? "border-indigo-500/50 bg-indigo-500/10 text-indigo-300"
                 : "border-white/10 bg-neutral-900/60 text-neutral-400 hover:text-neutral-200"
-            }`}
+              }`}
           >
             <CheckCircle2 className="h-3.5 w-3.5" />
             <span className="hidden sm:inline">Active Only</span>

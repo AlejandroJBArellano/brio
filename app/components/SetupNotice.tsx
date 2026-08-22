@@ -1,7 +1,7 @@
 "use client";
 
+import { Check, Copy, ExternalLink, KeyRound, X } from "lucide-react";
 import { useState } from "react";
-import { AlertCircle, Check, Copy, ExternalLink, KeyRound, X } from "lucide-react";
 
 interface SetupNoticeProps {
   isConfigured: boolean;
@@ -24,7 +24,7 @@ HABITICA_API_KEY=your-api-token-here`;
   };
 
   return (
-    <div className="relative overflow-hidden rounded-xl border border-amber-500/30 bg-gradient-to-r from-amber-950/40 via-amber-900/20 to-neutral-950 p-4 backdrop-blur-md transition-all">
+    <div className="relative overflow-hidden rounded-xl border border-amber-500/30 bg-linear-to-r from-amber-950/40 via-amber-900/20 to-neutral-950 p-4 backdrop-blur-md transition-all">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-start gap-3">
           <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-amber-500/20 text-amber-400">

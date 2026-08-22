@@ -5,17 +5,13 @@ import { parseBatchInput } from "@/lib/parser";
 import { BatchActionResult } from "@/lib/types";
 import {
   AlertCircle,
-  Calendar,
   CheckCircle2,
-  CornerDownLeft,
-  Hash,
   HelpCircle,
-  Plus,
   Send,
   Sparkles,
-  Trash2,
+  Trash2
 } from "lucide-react";
-import { useEffect, useMemo, useRef, useState, useTransition } from "react";
+import { useMemo, useRef, useState, useTransition } from "react";
 
 const SAMPLE_BATCH = `Design Brio system architecture #engineering !urgent // Zero-latency focus
 * Morning 20m sprint review #daily
@@ -81,7 +77,7 @@ export function BatchCaptureInput() {
   };
 
   return (
-    <section className="relative rounded-2xl border border-white/[0.08] bg-neutral-900/70 p-4 sm:p-5 backdrop-blur-xl shadow-2xl transition-all">
+    <section className="relative rounded-2xl border border-white/8 bg-neutral-900/70 p-4 sm:p-5 backdrop-blur-xl shadow-2xl transition-all">
       {/* Top Bar: Title, Live Syntax Preview, and Actions */}
       <div className="flex flex-wrap items-center justify-between gap-2 pb-3">
         <div className="flex items-center gap-2">
@@ -191,7 +187,7 @@ export function BatchCaptureInput() {
         />
 
         {/* Action Toolbar Bottom */}
-        <div className="flex flex-wrap items-center justify-between gap-2 border-t border-white/[0.06] bg-neutral-900/40 px-3 py-2">
+        <div className="flex flex-wrap items-center justify-between gap-2 border-t border-white/6 bg-neutral-900/40 px-3 py-2">
           <div className="flex items-center gap-2">
             <button
               type="button"
@@ -230,7 +226,7 @@ export function BatchCaptureInput() {
               type="button"
               onClick={handleBatchSubmit}
               disabled={!rawText.trim() || isPending}
-              className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-indigo-500 to-violet-600 px-4 py-2 text-xs font-semibold text-white shadow-lg shadow-indigo-500/25 transition-all hover:brightness-110 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40"
+              className="flex items-center gap-2 rounded-xl bg-linear-to-r from-indigo-500 to-violet-600 px-4 py-2 text-xs font-semibold text-white shadow-lg shadow-indigo-500/25 transition-all hover:brightness-110 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40"
             >
               {isPending ? (
                 <>
@@ -256,11 +252,10 @@ export function BatchCaptureInput() {
       {/* Result / Telemetry Toast Banner */}
       {lastResult && (
         <div
-          className={`mt-3 flex items-start gap-3 rounded-xl border p-3 text-xs backdrop-blur-md transition-all ${
-            lastResult.success
-              ? "border-emerald-500/30 bg-emerald-950/20 text-emerald-300"
-              : "border-rose-500/30 bg-rose-950/20 text-rose-300"
-          }`}
+          className={`mt-3 flex items-start gap-3 rounded-xl border p-3 text-xs backdrop-blur-md transition-all ${lastResult.success
+            ? "border-emerald-500/30 bg-emerald-950/20 text-emerald-300"
+            : "border-rose-500/30 bg-rose-950/20 text-rose-300"
+            }`}
         >
           {lastResult.success ? (
             <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-400 mt-0.5" />

@@ -6,12 +6,11 @@ import {
   Coins,
   Heart,
   RotateCw,
-  Shield,
   Sparkles,
-  Zap,
+  Zap
 } from "lucide-react";
-import { useTransition } from "react";
 import { useRouter } from "next/navigation";
+import { useTransition } from "react";
 
 interface HeaderStatsRibbonProps {
   user: HabiticaUser;
@@ -39,12 +38,12 @@ export function HeaderStatsRibbon({
   };
 
   return (
-    <header className="rounded-2xl border border-white/[0.08] bg-neutral-900/60 p-4 backdrop-blur-xl shadow-2xl transition-all">
+    <header className="rounded-2xl border border-white/8 bg-neutral-900/60 p-4 backdrop-blur-xl shadow-2xl transition-all">
       <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
         {/* Left: Branding & Character Identity */}
         <div className="flex items-center justify-between sm:justify-start gap-4">
           <div className="flex items-center gap-3">
-            <div className="relative flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-tr from-violet-600 to-indigo-500 font-mono font-bold text-white shadow-lg shadow-indigo-500/20">
+            <div className="relative flex h-10 w-10 items-center justify-center rounded-xl bg-linear-to-tr from-violet-600 to-indigo-500 font-mono font-bold text-white shadow-lg shadow-indigo-500/20">
               <span className="text-lg">B</span>
               <span className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full border-2 border-neutral-900 bg-emerald-400" />
             </div>
@@ -83,13 +82,12 @@ export function HeaderStatsRibbon({
         {/* Right: Interactive Stat Gauges (HP, MP, EXP, Gold) */}
         <div className="flex flex-wrap items-center gap-3 sm:gap-4">
           {/* Health Bar (HP) */}
-          <div className="min-w-[130px] flex-1 rounded-xl border border-white/[0.06] bg-neutral-950/60 px-3 py-2 sm:flex-initial">
+          <div className="min-w-32.5 flex-1 rounded-xl border border-white/6 bg-neutral-950/60 px-3 py-2 sm:flex-initial">
             <div className="flex items-center justify-between text-xs">
               <span className="flex items-center gap-1 font-semibold text-rose-400">
                 <Heart
-                  className={`h-3.5 w-3.5 fill-rose-500/20 text-rose-500 ${
-                    isLowHp ? "animate-pulse text-rose-400" : ""
-                  }`}
+                  className={`h-3.5 w-3.5 fill-rose-500/20 text-rose-500 ${isLowHp ? "animate-pulse text-rose-400" : ""
+                    }`}
                 />
                 HP
               </span>
@@ -99,18 +97,17 @@ export function HeaderStatsRibbon({
             </div>
             <div className="mt-1.5 h-1.5 w-full overflow-hidden rounded-full bg-neutral-800">
               <div
-                className={`h-full transition-all duration-500 ${
-                  isLowHp
-                    ? "bg-rose-500"
-                    : "bg-gradient-to-r from-rose-500 to-red-400"
-                }`}
+                className={`h-full transition-all duration-500 ${isLowHp
+                  ? "bg-rose-500"
+                  : "bg-linear-to-r from-rose-500 to-red-400"
+                  }`}
                 style={{ width: `${hpPercent}%` }}
               />
             </div>
           </div>
 
           {/* Mana Bar (MP) */}
-          <div className="min-w-[130px] flex-1 rounded-xl border border-white/[0.06] bg-neutral-950/60 px-3 py-2 sm:flex-initial">
+          <div className="min-w-32.5 flex-1 rounded-xl border border-white/6 bg-neutral-950/60 px-3 py-2 sm:flex-initial">
             <div className="flex items-center justify-between text-xs">
               <span className="flex items-center gap-1 font-semibold text-sky-400">
                 <Zap className="h-3.5 w-3.5 fill-sky-500/20 text-sky-400" />
@@ -122,14 +119,14 @@ export function HeaderStatsRibbon({
             </div>
             <div className="mt-1.5 h-1.5 w-full overflow-hidden rounded-full bg-neutral-800">
               <div
-                className="h-full bg-gradient-to-r from-sky-500 to-cyan-400 transition-all duration-500"
+                className="h-full bg-linear-to-r from-sky-500 to-cyan-400 transition-all duration-500"
                 style={{ width: `${mpPercent}%` }}
               />
             </div>
           </div>
 
           {/* Experience Bar (EXP) */}
-          <div className="min-w-[140px] flex-1 rounded-xl border border-white/[0.06] bg-neutral-950/60 px-3 py-2 sm:flex-initial">
+          <div className="min-w-35 flex-1 rounded-xl border border-white/6 bg-neutral-950/60 px-3 py-2 sm:flex-initial">
             <div className="flex items-center justify-between text-xs">
               <span className="flex items-center gap-1 font-semibold text-amber-400">
                 <Sparkles className="h-3.5 w-3.5 text-amber-400" />
@@ -141,14 +138,14 @@ export function HeaderStatsRibbon({
             </div>
             <div className="mt-1.5 h-1.5 w-full overflow-hidden rounded-full bg-neutral-800">
               <div
-                className="h-full bg-gradient-to-r from-amber-500 to-yellow-400 transition-all duration-500"
+                className="h-full bg-linear-to-r from-amber-500 to-yellow-400 transition-all duration-500"
                 style={{ width: `${expPercent}%` }}
               />
             </div>
           </div>
 
           {/* Gold (GP) */}
-          <div className="flex items-center gap-2 rounded-xl border border-amber-500/20 bg-amber-500/[0.05] px-3.5 py-2">
+          <div className="flex items-center gap-2 rounded-xl border border-amber-500/20 bg-amber-500/5 px-3.5 py-2">
             <div className="flex h-6 w-6 items-center justify-center rounded-full bg-amber-500/20 text-amber-400">
               <Coins className="h-3.5 w-3.5" />
             </div>

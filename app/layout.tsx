@@ -34,8 +34,8 @@ export default function RootLayout({
       <body className="min-h-full bg-[#090a0f] text-neutral-100 flex flex-col selection:bg-indigo-500/30 selection:text-white">
         {/* Ambient background glow accents */}
         <div className="fixed inset-0 pointer-events-none -z-10 overflow-hidden">
-          <div className="absolute -top-40 left-1/2 -translate-x-1/2 w-[700px] h-[350px] bg-gradient-to-tr from-indigo-600/10 via-violet-600/10 to-transparent blur-[120px]" />
-          <div className="absolute top-1/3 -left-40 w-[500px] h-[300px] bg-gradient-to-r from-sky-600/5 to-transparent blur-[100px]" />
+          <div className="absolute -top-40 left-1/2 -translate-x-1/2 w-175 h-87.5 bg-linear-to-tr from-indigo-600/10 via-violet-600/10 to-transparent blur-[120px]" />
+          <div className="absolute top-1/3 -left-40 size-125 bg-linear-to-r from-sky-600/5 to-transparent blur-[100px]" />
         </div>
         {children}
       </body>

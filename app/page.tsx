@@ -34,7 +34,7 @@ export default async function BrioDashboardPage() {
       </div>
 
       {/* Footer / System Status */}
-      <footer className="mt-auto border-t border-white/[0.06] pt-6 pb-2 text-center text-xs text-neutral-500">
+      <footer className="mt-auto border-t border-white/6 pt-6 pb-2 text-center text-xs text-neutral-500">
         <div className="flex flex-wrap items-center justify-center gap-4">
           <span>
             Brio OS v0.1.0 • Built with Next.js 16 App Router & Habitica REST API

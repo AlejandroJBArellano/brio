@@ -47,9 +47,8 @@ export function TaskItem({ task }: TaskItemProps) {
 
   return (
     <div
-      className={`group relative flex items-start gap-3 rounded-xl border border-white/[0.06] bg-neutral-900/50 p-3 sm:p-3.5 backdrop-blur-md transition-all hover:border-white/20 hover:bg-neutral-900/80 ${
-        optimisticCompleted ? "opacity-50" : ""
-      }`}
+      className={`group relative flex items-start gap-3 rounded-xl border border-white/6 bg-neutral-900/50 p-3 sm:p-3.5 backdrop-blur-md transition-all hover:border-white/20 hover:bg-neutral-900/80 ${optimisticCompleted ? "opacity-50" : ""
+        }`}
     >
       {/* Type-Specific Action Control */}
       <div className="pt-0.5">
@@ -83,13 +82,12 @@ export function TaskItem({ task }: TaskItemProps) {
             type="button"
             onClick={() => handleScore("up")}
             disabled={isPending}
-            className={`flex h-5 w-5 items-center justify-center rounded-md border transition-all ${
-              optimisticCompleted
-                ? "border-emerald-500 bg-emerald-500 text-neutral-950"
-                : "border-neutral-700 bg-neutral-800/80 hover:border-indigo-400"
-            }`}
+            className={`flex h-5 w-5 items-center justify-center rounded-md border transition-all ${optimisticCompleted
+              ? "border-emerald-500 bg-emerald-500 text-neutral-950"
+              : "border-neutral-700 bg-neutral-800/80 hover:border-indigo-400"
+              }`}
           >
-            {optimisticCompleted && <Check className="h-3.5 w-3.5 stroke-[3]" />}
+            {optimisticCompleted && <Check className="h-3.5 w-3.5 stroke-3" />}
           </button>
         )}
       </div>
@@ -98,11 +96,10 @@ export function TaskItem({ task }: TaskItemProps) {
       <div className="flex-1 min-w-0">
         <div className="flex flex-wrap items-center gap-2">
           <span
-            className={`text-sm font-medium leading-snug break-words ${
-              optimisticCompleted
-                ? "text-neutral-400 line-through"
-                : "text-neutral-100"
-            }`}
+            className={`text-sm font-medium leading-snug wrap-break-word ${optimisticCompleted
+              ? "text-neutral-400 line-through"
+              : "text-neutral-100"
+              }`}
           >
             {task.text}
           </span>
@@ -143,7 +140,7 @@ export function TaskItem({ task }: TaskItemProps) {
             {task.tags.map((tag) => (
               <span
                 key={tag}
-                className="inline-flex items-center gap-1 rounded-md bg-white/[0.04] px-1.5 py-0.5 font-mono text-[10px] text-neutral-400 border border-white/5"
+                className="inline-flex items-center gap-1 rounded-md bg-white/4 px-1.5 py-0.5 font-mono text-[10px] text-neutral-400 border border-white/5"
               >
                 <Tag className="h-2.5 w-2.5 text-neutral-500" />
                 {tag}
