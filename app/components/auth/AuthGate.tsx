@@ -1,6 +1,6 @@
 "use client";
 
-import { signIn, signUp } from "@/lib/auth-client";
+import { loginOwnerAction } from "@/app/actions/auth";
 import {
   AlertCircle,
   ArrowRight,
@@ -8,13 +8,10 @@ import {
   Mail,
   ShieldCheck,
   Sparkles,
-  User
 } from "lucide-react";
 import { useState, useTransition } from "react";
 
 export function AuthGate() {
-  const [mode, setMode] = useState<"signin" | "signup">("signin");
-  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -23,46 +20,20 @@ export function AuthGate() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!email.trim() || !password.trim()) {
-      setError("Por favor completa todos los campos requeridos");
-      return;
-    }
-
-    if (mode === "signup" && !name.trim()) {
-      setError("Por favor ingresa tu nombre");
+      setError("Por favor ingresa tu correo y contraseña");
       return;
     }
 
     setError(null);
     startTransition(async () => {
-      try {
-        if (mode === "signup") {
-          const res = await signUp.email({
-            email: email.trim(),
-            password: password.trim(),
-            name: name.trim(),
-          });
-
-          if (res.error) {
-            setError(res.error.message || "Error al registrar cuenta");
-            return;
-          }
-        } else {
-          const res = await signIn.email({
-            email: email.trim(),
-            password: password.trim(),
-          });
-
-          if (res.error) {
-            setError(res.error.message || "Credenciales incorrectas o usuario no registrado");
-            return;
-          }
-        }
-
-        // Force page reload to load user dashboard session
-        window.location.reload();
-      } catch (err: unknown) {
-        setError(err instanceof Error ? err.message : "Error de autenticación");
+      const res = await loginOwnerAction(email, password);
+      if (!res.success) {
+        setError(res.error || "Acceso denegado");
+        return;
       }
+
+      // Reload upon successful login
+      window.location.reload();
     });
   };
 
@@ -82,78 +53,41 @@ export function AuthGate() {
             Brio OS ⚡
           </h1>
           <p className="text-xs sm:text-sm text-neutral-400 max-w-sm mx-auto">
-            Sistema operativo personal de alta fidelidad. Inicia sesión para acceder a tu centro de comando.
+            Sistema operativo personal y privado. Ingresa tus credenciales para desbloquear tu centro de comando.
           </p>
         </div>
 
         {/* Auth Card */}
         <div className="rounded-3xl border border-white/8 bg-neutral-900/80 p-6 sm:p-8 shadow-2xl backdrop-blur-2xl">
-          {/* Tabs */}
-          <div className="grid grid-cols-2 gap-1.5 p-1 rounded-2xl bg-neutral-950/80 border border-white/6 mb-6">
-            <button
-              type="button"
-              onClick={() => {
-                setMode("signin");
-                setError(null);
-              }}
-              className={`py-2 rounded-xl text-xs font-bold transition-all ${mode === "signin"
-                ? "bg-indigo-600 text-white shadow-lg shadow-indigo-500/20"
-                : "text-neutral-400 hover:text-white"
-                }`}
-            >
-              Iniciar Sesión
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                setMode("signup");
-                setError(null);
-              }}
-              className={`py-2 rounded-xl text-xs font-bold transition-all ${mode === "signup"
-                ? "bg-indigo-600 text-white shadow-lg shadow-indigo-500/20"
-                : "text-neutral-400 hover:text-white"
-                }`}
-            >
-              Crear Cuenta
-            </button>
+          <div className="flex items-center justify-between pb-4 border-b border-white/6 mb-6">
+            <div className="flex items-center gap-2">
+              <ShieldCheck className="h-4 w-4 text-emerald-400" />
+              <h2 className="text-sm font-bold text-white tracking-tight">
+                Iniciar Sesión Personal
+              </h2>
+            </div>
+            <span className="text-[10px] font-mono px-2 py-0.5 rounded-md border border-amber-500/30 bg-amber-500/10 text-amber-300">
+              Instancia Privada
+            </span>
           </div>
 
           {error && (
-            <div className="mb-4 flex items-center gap-2 rounded-xl border border-rose-500/30 bg-rose-500/10 p-3 text-xs text-rose-300 animate-in fade-in duration-200">
+            <div className="mb-5 flex items-center gap-2.5 rounded-xl border border-rose-500/30 bg-rose-500/10 p-3.5 text-xs text-rose-300 animate-in fade-in duration-200">
               <AlertCircle className="h-4 w-4 shrink-0" />
               <span>{error}</span>
             </div>
           )}
 
           <form onSubmit={handleSubmit} className="space-y-4">
-            {mode === "signup" && (
-              <div>
-                <label className="block text-xs font-semibold text-neutral-300 mb-1.5">
-                  Nombre Completo
-                </label>
-                <div className="relative">
-                  <User className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-neutral-500" />
-                  <input
-                    type="text"
-                    placeholder="Alejandro"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    required={mode === "signup"}
-                    className="w-full rounded-xl border border-white/1 bg-neutral-950/80 pl-10 pr-3.5 py-2.5 text-xs text-white placeholder:text-neutral-600 focus:border-indigo-500 focus:outline-none transition-colors"
-                  />
-                </div>
-              </div>
-            )}
-
             <div>
               <label className="block text-xs font-semibold text-neutral-300 mb-1.5">
-                Correo Electrónico
+                Correo Autorizado
               </label>
               <div className="relative">
                 <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-neutral-500" />
                 <input
                   type="email"
-                  placeholder="tu@correo.com"
+                  placeholder="arellanodev2021@gmail.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
@@ -164,7 +98,7 @@ export function AuthGate() {
 
             <div>
               <label className="block text-xs font-semibold text-neutral-300 mb-1.5">
-                Contraseña
+                Contraseña / Clave de Acceso
               </label>
               <div className="relative">
                 <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-neutral-500" />
@@ -186,11 +120,7 @@ export function AuthGate() {
             >
               <Sparkles className="h-4 w-4" />
               <span>
-                {isPending
-                  ? "Verificando credenciales..."
-                  : mode === "signin"
-                    ? "Entrar a Brio OS"
-                    : "Registrar Cuenta en Neon"}
+                {isPending ? "Verificando acceso..." : "Desbloquear Brio OS"}
               </span>
               {!isPending && <ArrowRight className="h-4 w-4" />}
             </button>
@@ -199,7 +129,7 @@ export function AuthGate() {
           {/* Security Badge Footer */}
           <div className="mt-6 pt-4 border-t border-white/6 flex items-center justify-center gap-2 text-[11px] text-neutral-500 font-mono">
             <ShieldCheck className="h-3.5 w-3.5 text-emerald-400" />
-            <span>Neon Auth • Sesión Encriptada Serverless</span>
+            <span>Registro público deshabilitado • Acceso exclusivo</span>
           </div>
         </div>
       </div>

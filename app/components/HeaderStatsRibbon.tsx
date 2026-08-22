@@ -86,9 +86,12 @@ export function HeaderStatsRibbon({
     });
   };
 
-  const handleSignOut = async () => {
-    await signOut();
-    handleRefresh();
+  const handleSignOut = () => {
+    startTransition(async () => {
+      const { logoutOwnerAction } = await import("@/app/actions/auth");
+      await logoutOwnerAction();
+      window.location.reload();
+    });
   };
 
   return (
