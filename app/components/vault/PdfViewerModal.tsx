@@ -63,11 +63,13 @@ export function PdfViewerModal({
 
           <div className="flex items-center gap-1.5 shrink-0">
             <a
-              href={fileUrl}
+              href={
+                fileUrl.includes("/api/vault/file")
+                  ? `${fileUrl}${fileUrl.includes("?") ? "&" : "?"}download=true`
+                  : fileUrl
+              }
               download={fileName || title}
-              target="_blank"
-              rel="noreferrer"
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/[0.06] hover:bg-white/[0.1] text-xs font-semibold text-neutral-200 transition-all"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/[0.06] hover:bg-white/[0.1] text-xs font-semibold text-neutral-200 transition-all cursor-pointer"
               title="Descargar archivo"
             >
               <Download className="h-3.5 w-3.5 text-cyan-400" />

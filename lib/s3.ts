@@ -1,8 +1,10 @@
 import {
   DeleteObjectCommand,
+  GetObjectCommand,
   PutObjectCommand,
   S3Client,
 } from "@aws-sdk/client-s3";
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
 /**
  * Returns configured AWS S3 client for Brio Media Vault.
@@ -50,6 +52,33 @@ export function generateS3FileKey(folder: string, originalName: string): string 
 }
 
 /**
+ * Generates a presigned GET URL for secure downloading/viewing from private S3 bucket.
+ */
+export async function getPresignedDownloadUrl(
+  key: string,
+  expiresInSeconds: number = 86400 // 24 hours
+): Promise<string> {
+  try {
+    const client = getS3Client();
+    const bucket = getBucketName();
+
+    const command = new GetObjectCommand({
+      Bucket: bucket,
+      Key: key,
+    });
+
+    return await getSignedUrl(client, command, { expiresIn: expiresInSeconds });
+  } catch (error) {
+    console.error(`[S3 Presign Error] Key: ${key}`, error);
+    const bucket = getBucketName();
+    const region = process.env.AWS_REGION || "us-east-1";
+    return `https://${bucket}.s3.${region}.amazonaws.com/${encodeURIComponent(
+      key
+    ).replace(/%2F/g, "/")}`;
+  }
+}
+
+/**
  * Uploads a Buffer to AWS S3.
  */
 export async function uploadBufferToS3(params: {
@@ -59,7 +88,6 @@ export async function uploadBufferToS3(params: {
 }): Promise<{ fileUrl: string; fileKey: string }> {
   const client = getS3Client();
   const bucket = getBucketName();
-  const region = process.env.AWS_REGION || "us-east-1";
 
   const command = new PutObjectCommand({
     Bucket: bucket,
@@ -70,10 +98,8 @@ export async function uploadBufferToS3(params: {
 
   await client.send(command);
 
-  // Standard AWS S3 URL format
-  const fileUrl = `https://${bucket}.s3.${region}.amazonaws.com/${encodeURIComponent(
-    params.key
-  ).replace(/%2F/g, "/")}`;
+  // Generate secure presigned URL
+  const fileUrl = await getPresignedDownloadUrl(params.key, 86400);
 
   return {
     fileUrl,

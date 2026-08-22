@@ -1,7 +1,12 @@
 "use server";
 
 import { ensureDatabaseSchema, getDb } from "@/lib/db";
-import { generateS3FileKey, uploadBufferToS3, deleteFileFromS3 } from "@/lib/s3";
+import {
+  generateS3FileKey,
+  uploadBufferToS3,
+  deleteFileFromS3,
+  getPresignedDownloadUrl,
+} from "@/lib/s3";
 import {
   ProjectItem,
   VaultDashboardData,
@@ -163,28 +168,32 @@ export async function fetchVaultDashboardDataAction(): Promise<VaultDashboardDat
     `;
   }
 
-  const allItems: VaultItem[] = rows.map((r: any) => ({
-    id: r.id,
-    category: r.category as VaultItemCategory,
-    title: r.title,
-    authorOrCreator: r.author_or_creator || undefined,
-    status: r.status as VaultItemStatus,
-    instrument: r.instrument || undefined,
-    difficulty: r.difficulty || undefined,
-    platform: r.platform || undefined,
-    url: r.url || undefined,
-    coverUrl: r.cover_url || undefined,
-    fileUrl: r.file_url || undefined,
-    fileKey: r.file_key || undefined,
-    fileName: r.file_name || undefined,
-    fileSizeBytes: r.file_size_bytes ? Number(r.file_size_bytes) : undefined,
-    progress: Number(r.progress) || 0,
-    totalPages: r.total_pages ? Number(r.total_pages) : undefined,
-    notes: r.notes || undefined,
-    tags: Array.isArray(r.tags) ? r.tags : [],
-    createdAt: r.created_at?.toString(),
-    updatedAt: r.updated_at?.toString(),
-  }));
+  const allItems: VaultItem[] = rows.map((r: any) => {
+    const fileUrl = r.file_key ? `/api/vault/file?id=${r.id}` : r.file_url || undefined;
+
+    return {
+      id: r.id,
+      category: r.category as VaultItemCategory,
+      title: r.title,
+      authorOrCreator: r.author_or_creator || undefined,
+      status: r.status as VaultItemStatus,
+      instrument: r.instrument || undefined,
+      difficulty: r.difficulty || undefined,
+      platform: r.platform || undefined,
+      url: r.url || undefined,
+      coverUrl: r.cover_url || undefined,
+      fileUrl,
+      fileKey: r.file_key || undefined,
+      fileName: r.file_name || undefined,
+      fileSizeBytes: r.file_size_bytes ? Number(r.file_size_bytes) : undefined,
+      progress: Number(r.progress) || 0,
+      totalPages: r.total_pages ? Number(r.total_pages) : undefined,
+      notes: r.notes || undefined,
+      tags: Array.isArray(r.tags) ? r.tags : [],
+      createdAt: r.created_at?.toString(),
+      updatedAt: r.updated_at?.toString(),
+    };
+  });
 
   const books = allItems.filter((i) => i.category === "book");
   const sheetMusic = allItems.filter((i) => i.category === "sheet_music");
@@ -347,7 +356,7 @@ export async function createVaultItemAction(
         platform: platform || undefined,
         url: url || undefined,
         coverUrl: coverUrl || undefined,
-        fileUrl: fileUrl || undefined,
+        fileUrl: fileKey ? `/api/vault/file?id=${id}` : fileUrl || undefined,
         fileKey: fileKey || undefined,
         fileName: fileName || undefined,
         fileSizeBytes: fileSizeBytes || undefined,
