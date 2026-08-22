@@ -46,28 +46,27 @@ const DEFAULT_PORTIONS: Record<FoodGroupKey, number> = {
  * Ensures preset recipes from Mariana Mont's clinical plan exist in the database.
  */
 async function ensurePresetRecipes(sql: any) {
-  const existing = await sql`
-    SELECT COUNT(*)::int as count FROM nutrition_recipes;
-  `;
-
-  if (existing[0]?.count === 0) {
-    for (const rec of MARIANA_MONT_PRESET_RECIPES) {
-      await sql`
-        INSERT INTO nutrition_recipes (
-          id, title, meal_slot, week_number, option_label, portions, ingredients, prep_notes, is_preset
-        ) VALUES (
-          ${rec.id},
-          ${rec.title},
-          ${rec.mealSlot},
-          ${rec.weekNumber || 1},
-          ${rec.optionLabel || null},
-          ${JSON.stringify(rec.portions)},
-          ${JSON.stringify(rec.ingredients)},
-          ${rec.prepNotes || null},
-          true
-        ) ON CONFLICT (id) DO NOTHING;
-      `;
-    }
+  for (const rec of MARIANA_MONT_PRESET_RECIPES) {
+    await sql`
+      INSERT INTO nutrition_recipes (
+        id, title, meal_slot, week_number, option_label, portions, ingredients, prep_notes, is_preset
+      ) VALUES (
+        ${rec.id},
+        ${rec.title},
+        ${rec.mealSlot},
+        ${rec.weekNumber || 1},
+        ${rec.optionLabel || null},
+        ${JSON.stringify(rec.portions)},
+        ${JSON.stringify(rec.ingredients)},
+        ${rec.prepNotes || null},
+        true
+      ) ON CONFLICT (id) DO UPDATE SET
+        title = EXCLUDED.title,
+        meal_slot = EXCLUDED.meal_slot,
+        portions = EXCLUDED.portions,
+        ingredients = EXCLUDED.ingredients,
+        prep_notes = EXCLUDED.prep_notes;
+    `;
   }
 }
 

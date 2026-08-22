@@ -547,7 +547,11 @@ export type MealSlotType =
   | "lunch"
   | "dinner"
   | "snack"
-  | "smoothie";
+  | "smoothie"
+  | "salad"
+  | "soup"
+  | "sauce_dip"
+  | "infusion_shot";
 
 export interface MacroEstimate {
   kcal: number;
@@ -573,6 +577,8 @@ export interface NutritionRecipe {
   id: string;
   title: string;
   mealSlot: MealSlotType;
+  category?: string; // "Lechadas", "Quesos & Patés", "Sopas & Cremas", "Platos Fuertes", "Ensaladas", "Snacks & Postres", "Smoothies", "Shots & Infusiones"
+  bookSource?: string; // "La Luna Verde", "Detox 7 Días", "Detox Otoñal", "Plan Semanal"
   weekNumber?: number; // 1 to 4 for Mariana Mont plan presets
   optionLabel?: string; // "Opción 1", "Opción 2", "Opción A", etc.
   portions: Partial<Record<FoodGroupKey, number>>;
