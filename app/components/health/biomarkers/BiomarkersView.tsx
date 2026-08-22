@@ -105,21 +105,30 @@ export function BiomarkersView({ data, onRefresh }: BiomarkersViewProps) {
                 <h2 className="text-lg sm:text-xl font-bold text-white tracking-tight">
                   Estudios Clínicos & Biomarcadores
                 </h2>
-                <span className="rounded-full bg-cyan-500/10 px-2.5 py-0.5 text-[11px] font-bold text-cyan-300 border border-cyan-500/20 font-mono">
-                  {report?.labName || "Laboratorio Chopo"}
-                </span>
+                {report && (
+                  <span className="rounded-full bg-cyan-500/10 px-2.5 py-0.5 text-[11px] font-bold text-cyan-300 border border-cyan-500/20 font-mono">
+                    {report.labName}
+                  </span>
+                )}
               </div>
               <p className="text-xs text-neutral-400 mt-0.5">
-                Orden: <span className="font-mono text-neutral-300">{report?.orderNumber || "A01510965"}</span> • Fecha:{" "}
-                <strong className="text-neutral-200">
-                  {report?.date
-                    ? new Date(report.date + "T00:00:00").toLocaleDateString("es-ES", {
+                {report ? (
+                  <>
+                    {report.orderNumber && (
+                      <>Orden: <span className="font-mono text-neutral-300">{report.orderNumber}</span> • </>
+                    )}
+                    Fecha:{" "}
+                    <strong className="text-neutral-200">
+                      {new Date(report.date + "T00:00:00").toLocaleDateString("es-ES", {
                         day: "numeric",
                         month: "long",
                         year: "numeric",
-                      })
-                    : "07 de Febrero, 2026"}
-                </strong>
+                      })}
+                    </strong>
+                  </>
+                ) : (
+                  <span>Sin estudios clínicos registrados aún</span>
+                )}
               </p>
             </div>
           </div>
@@ -332,7 +341,7 @@ export function BiomarkersView({ data, onRefresh }: BiomarkersViewProps) {
           {/* Status Quick Toggle */}
           <select
             value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value as any)}
+            onChange={(e) => setStatusFilter(e.target.value as "all" | "abnormal" | "optimal")}
             className="rounded-xl border border-white/[0.08] bg-neutral-950/90 px-3 py-1.5 text-xs text-neutral-300 focus:border-cyan-500 focus:outline-none"
           >
             <option value="all">Todos los estados</option>

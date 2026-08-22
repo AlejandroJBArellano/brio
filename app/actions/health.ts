@@ -19,7 +19,6 @@ import {
   UserSupplement,
   WorkoutType,
 } from "@/lib/types";
-import { INITIAL_CHOPO_2026_BIOMARKERS, INITIAL_CHOPO_2026_REPORT } from "@/lib/labPresets";
 import { revalidatePath } from "next/cache";
 import { fetchNutritionDashboardDataAction } from "./nutrition";
 
@@ -111,36 +110,6 @@ interface HevyDbRow {
   hevy_updated_at?: Date | string;
 }
 
-const INITIAL_SMART_FIT_LOG: BodyCompositionLog = {
-  id: "smartfit-2025-11-12",
-  date: "2025-11-12",
-  weightKg: 78.6,
-  bodyFatPercentage: 24.64,
-  skeletalMuscleKg: 33.71,
-  fatFreeMassKg: 54.58,
-  visceralFatLevel: 8.0,
-  bmi: 25.67,
-  bmrKcal: 1872,
-  waterLiters: 39.95,
-  segmentalData: {
-    muscle: {
-      trunk: 27.88,
-      leftArm: 3.63,
-      rightArm: 3.57,
-      leftLeg: 9.76,
-      rightLeg: 9.74,
-    },
-    fat: {
-      trunk: 13.79,
-      leftArm: 0.72,
-      rightArm: 0.77,
-      leftLeg: 2.03,
-      rightLeg: 2.06,
-    },
-  },
-  notes: "Medición inicial Smart Fit Body (Noviembre 2025)",
-};
-
 const DEFAULT_USER_SUPPLEMENTS: UserSupplement[] = [
   { id: "creatine", name: "Creatina", dosage: "5g", timing: "Post-entreno", orderIndex: 0, isActive: true },
   { id: "multivitamin", name: "Multivitamínico", dosage: "1 cápsula", timing: "Mañana", orderIndex: 1, isActive: true },
@@ -199,119 +168,33 @@ async function getBodyCompositionLogs(sql: SqlClient): Promise<BodyCompositionLo
     }));
   }
 
-  return [INITIAL_SMART_FIT_LOG];
+  return [];
 }
 
 /**
- * Helper: Automatically seeds the database with the initial Chopo 2026 report
- * if the table is empty or newly created.
- */
-async function ensureChopoReportSeeded(sql: SqlClient) {
-  try {
-    await sql`
-      CREATE TABLE IF NOT EXISTS lab_test_reports (
-        id VARCHAR(64) PRIMARY KEY,
-        date DATE NOT NULL,
-        lab_name VARCHAR(100) NOT NULL DEFAULT 'Laboratorio Chopo',
-        order_number VARCHAR(50),
-        patient_id VARCHAR(50),
-        title VARCHAR(150) NOT NULL,
-        doctor_notes TEXT,
-        file_url TEXT,
-        file_key TEXT,
-        total_biomarkers INT DEFAULT 0,
-        abnormal_count INT DEFAULT 0,
-        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-        updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-      );
-    `;
-
-    await sql`
-      CREATE TABLE IF NOT EXISTS biomarker_logs (
-        id VARCHAR(64) PRIMARY KEY,
-        report_id VARCHAR(64) REFERENCES lab_test_reports(id) ON DELETE CASCADE,
-        date DATE NOT NULL,
-        category VARCHAR(50) NOT NULL,
-        name VARCHAR(100) NOT NULL,
-        code VARCHAR(50),
-        value_numeric NUMERIC,
-        value_text VARCHAR(100),
-        unit VARCHAR(30),
-        ref_min NUMERIC,
-        ref_max NUMERIC,
-        ref_text VARCHAR(150),
-        status VARCHAR(20) NOT NULL DEFAULT 'normal',
-        notes TEXT,
-        order_index INT DEFAULT 0,
-        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-      );
-    `;
-
-    const existing = await sql`
-      SELECT id FROM lab_test_reports WHERE id = ${INITIAL_CHOPO_2026_REPORT.id} LIMIT 1;
-    `;
-
-    if (existing.length === 0) {
-      await sql`
-        INSERT INTO lab_test_reports (
-          id, date, lab_name, order_number, patient_id, title,
-          doctor_notes, total_biomarkers, abnormal_count
-        )
-        VALUES (
-          ${INITIAL_CHOPO_2026_REPORT.id},
-          ${INITIAL_CHOPO_2026_REPORT.date},
-          ${INITIAL_CHOPO_2026_REPORT.labName},
-          ${INITIAL_CHOPO_2026_REPORT.orderNumber || null},
-          ${INITIAL_CHOPO_2026_REPORT.patientId || null},
-          ${INITIAL_CHOPO_2026_REPORT.title},
-          ${INITIAL_CHOPO_2026_REPORT.doctorNotes || null},
-          ${INITIAL_CHOPO_2026_REPORT.totalBiomarkers},
-          ${INITIAL_CHOPO_2026_REPORT.abnormalCount}
-        );
-      `;
-
-      for (let i = 0; i < INITIAL_CHOPO_2026_BIOMARKERS.length; i++) {
-        const b = INITIAL_CHOPO_2026_BIOMARKERS[i];
-        await sql`
-          INSERT INTO biomarker_logs (
-            id, report_id, date, category, name, code,
-            value_numeric, value_text, unit, ref_min, ref_max, ref_text,
-            status, notes, order_index
-          )
-          VALUES (
-            ${b.id},
-            ${INITIAL_CHOPO_2026_REPORT.id},
-            ${b.date},
-            ${b.category},
-            ${b.name},
-            ${b.code || null},
-            ${b.valueNumeric !== undefined ? b.valueNumeric : null},
-            ${b.valueText || null},
-            ${b.unit || null},
-            ${b.refMin !== undefined ? b.refMin : null},
-            ${b.refMax !== undefined ? b.refMax : null},
-            ${b.refText || null},
-            ${b.status},
-            ${b.notes || null},
-            ${b.orderIndex ?? i + 1}
-          )
-          ON CONFLICT (id) DO NOTHING;
-        `;
-      }
-    }
-  } catch (err) {
-    console.warn("[Ensure Chopo Seed Warn]:", err);
-  }
-}
-
-/**
- * Helper: Fetches clinical lab reports and biomarker metrics from database,
- * falling back gracefully to the initial Chopo preset if not yet initialized.
+ * Helper: Fetches clinical lab reports and biomarker metrics from database.
  */
 async function getBiomarkersDashboardData(sql: SqlClient): Promise<BiomarkersDashboardData> {
-  try {
-    await ensureChopoReportSeeded(sql);
+  const emptyCategorySummaries: Record<BiomarkerCategoryKey, { total: number; abnormal: number; optimal: number }> = {
+    renal: { total: 0, abnormal: 0, optimal: 0 },
+    cardio: { total: 0, abnormal: 0, optimal: 0 },
+    hepatic: { total: 0, abnormal: 0, optimal: 0 },
+    iron: { total: 0, abnormal: 0, optimal: 0 },
+    immuno: { total: 0, abnormal: 0, optimal: 0 },
+    hematology: { total: 0, abnormal: 0, optimal: 0 },
+    urinalysis: { total: 0, abnormal: 0, optimal: 0 },
+  };
 
+  const emptyDashboardData: BiomarkersDashboardData = {
+    latestReport: undefined,
+    reportsHistory: [],
+    totalBiomarkersTracked: 0,
+    abnormalCount: 0,
+    categorySummaries: emptyCategorySummaries,
+    historicalTrends: {},
+  };
+
+  try {
     const reportRows = await sql`
       SELECT * FROM lab_test_reports ORDER BY date DESC, created_at DESC;
     `;
@@ -412,46 +295,12 @@ async function getBiomarkersDashboardData(sql: SqlClient): Promise<BiomarkersDas
         historicalTrends,
       };
     }
-  } catch {
-    // Database tables might not be migrated yet; fallback to Chopo 2026 preset
+
+    return emptyDashboardData;
+  } catch (error) {
+    console.error("[getBiomarkersDashboardData Error]:", error);
+    return emptyDashboardData;
   }
-
-  const defaultSummaries: Record<BiomarkerCategoryKey, { total: number; abnormal: number; optimal: number }> = {
-    renal: { total: 0, abnormal: 0, optimal: 0 },
-    cardio: { total: 0, abnormal: 0, optimal: 0 },
-    hepatic: { total: 0, abnormal: 0, optimal: 0 },
-    iron: { total: 0, abnormal: 0, optimal: 0 },
-    immuno: { total: 0, abnormal: 0, optimal: 0 },
-    hematology: { total: 0, abnormal: 0, optimal: 0 },
-    urinalysis: { total: 0, abnormal: 0, optimal: 0 },
-  };
-
-  for (const b of INITIAL_CHOPO_2026_BIOMARKERS) {
-    if (defaultSummaries[b.category]) {
-      defaultSummaries[b.category].total++;
-      if (b.status === "high" || b.status === "low" || b.status === "critical") {
-        defaultSummaries[b.category].abnormal++;
-      } else if (b.status === "optimal") {
-        defaultSummaries[b.category].optimal++;
-      }
-    }
-  }
-
-  const trends: Record<string, Array<{ date: string; value: number; unit?: string }>> = {};
-  for (const b of INITIAL_CHOPO_2026_BIOMARKERS) {
-    if (b.valueNumeric !== undefined) {
-      trends[b.name] = [{ date: b.date, value: b.valueNumeric, unit: b.unit }];
-    }
-  }
-
-  return {
-    latestReport: INITIAL_CHOPO_2026_REPORT,
-    reportsHistory: [INITIAL_CHOPO_2026_REPORT],
-    totalBiomarkersTracked: INITIAL_CHOPO_2026_BIOMARKERS.length,
-    abnormalCount: INITIAL_CHOPO_2026_REPORT.abnormalCount,
-    categorySummaries: defaultSummaries,
-    historicalTrends: trends,
-  };
 }
 
 /**

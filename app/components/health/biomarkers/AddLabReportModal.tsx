@@ -1,19 +1,13 @@
 "use client";
 
 import { createLabReportAction } from "@/app/actions/health";
-import { BIOMARKER_CATEGORIES_META, INITIAL_CHOPO_2026_BIOMARKERS } from "@/lib/labPresets";
-import { BiomarkerCategoryKey, BiomarkerLog, BiomarkerStatus } from "@/lib/types";
+import { BIOMARKER_CATEGORIES_META, DEFAULT_BIOMARKER_TEMPLATES } from "@/lib/labPresets";
+import { BiomarkerCategoryKey, BiomarkerStatus } from "@/lib/types";
 import {
-  Activity,
   AlertCircle,
-  Calendar,
   Check,
-  FileSpreadsheet,
-  FileText,
   FlaskConical,
-  Plus,
   Sparkles,
-  Trash2,
   X,
 } from "lucide-react";
 import { useState, useTransition } from "react";
@@ -33,7 +27,7 @@ export function AddLabReportModal({
   const [labName, setLabName] = useState("Laboratorio Chopo");
   const [orderNumber, setOrderNumber] = useState("");
   const [patientId, setPatientId] = useState("");
-  const [title, setTitle] = useState("Química Integral de 45 Elementos y Biometría Hemática");
+  const [title, setTitle] = useState("Química Sanguínea y Biometría Hemática");
   const [doctorNotes, setDoctorNotes] = useState("");
   const [biomarkers, setBiomarkers] = useState<
     Array<{
@@ -50,17 +44,17 @@ export function AddLabReportModal({
       notes?: string;
     }>
   >(() =>
-    INITIAL_CHOPO_2026_BIOMARKERS.map((b) => ({
+    DEFAULT_BIOMARKER_TEMPLATES.map((b) => ({
       category: b.category,
       name: b.name,
       code: b.code,
-      valueNumeric: b.valueNumeric,
-      valueText: b.valueText,
+      valueNumeric: undefined,
+      valueText: undefined,
       unit: b.unit,
       refMin: b.refMin,
       refMax: b.refMax,
       refText: b.refText,
-      status: b.status,
+      status: "optimal" as BiomarkerStatus,
       notes: b.notes,
     }))
   );
@@ -73,17 +67,17 @@ export function AddLabReportModal({
 
   const handleLoadPreset = () => {
     setBiomarkers(
-      INITIAL_CHOPO_2026_BIOMARKERS.map((b) => ({
+      DEFAULT_BIOMARKER_TEMPLATES.map((b) => ({
         category: b.category,
         name: b.name,
         code: b.code,
-        valueNumeric: b.valueNumeric,
-        valueText: b.valueText,
+        valueNumeric: undefined,
+        valueText: undefined,
         unit: b.unit,
         refMin: b.refMin,
         refMax: b.refMax,
         refText: b.refText,
-        status: b.status,
+        status: "optimal" as BiomarkerStatus,
         notes: b.notes,
       }))
     );

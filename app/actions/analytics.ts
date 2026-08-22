@@ -93,9 +93,7 @@ export async function fetchAnalyticsDataAction(): Promise<AnalyticsDashboardData
     const dailiesCount = record ? Number(record.dailies_count) || 0 : 0;
     const todosCount = record ? Number(record.todos_count) || 0 : 0;
     const expensesCount = record ? Number(record.expenses_count) || 0 : 0;
-
-    const seedRandom = (d.getDay() % 3 === 0 ? 3 : d.getDay() % 2 === 0 ? 2 : 1);
-    const count = habitsCount + dailiesCount + todosCount + expensesCount || (i > 10 ? seedRandom : 0);
+    const count = habitsCount + dailiesCount + todosCount + expensesCount;
 
     totalActivitiesLogged += count;
 
