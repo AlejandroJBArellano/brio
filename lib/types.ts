@@ -337,6 +337,47 @@ export interface BodyCompositionLog {
   createdAt?: string;
 }
 
+export interface HevySet {
+  index: number;
+  type: "normal" | "warmup" | "failure" | "drop" | string;
+  weightKg?: number | null;
+  reps?: number | null;
+  distanceMeters?: number | null;
+  durationSeconds?: number | null;
+  rpe?: number | null;
+}
+
+export interface HevyExercise {
+  index: number;
+  title: string;
+  notes?: string | null;
+  exerciseTemplateId?: string | null;
+  supersetId?: string | null;
+  sets: HevySet[];
+}
+
+export interface HevyWorkout {
+  id: string;
+  title: string;
+  description?: string;
+  startTime: string;
+  endTime: string;
+  date: string;
+  durationSeconds: number;
+  totalVolumeKg: number;
+  exercisesCount: number;
+  setsCount: number;
+  exercises: HevyExercise[];
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface HevyStats {
+  totalWorkouts: number;
+  totalVolumeKg: number;
+  lastSyncedAt?: string;
+}
+
 export interface HealthDashboardData {
   todayHealth: HealthLog;
   waterPercent: number;
@@ -348,6 +389,8 @@ export interface HealthDashboardData {
   bodyCompositionLogs?: BodyCompositionLog[];
   latestBodyComposition?: BodyCompositionLog;
   previousBodyComposition?: BodyCompositionLog;
+  recentHevyWorkouts?: HevyWorkout[];
+  hevyStats?: HevyStats;
 }
 
 // ----------------------------------------------------

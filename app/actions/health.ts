@@ -1,11 +1,14 @@
 "use server";
 
 import { ensureDatabaseSchema, getDb } from "@/lib/db";
+import { fetchHevyWorkoutsList, saveHevyWorkoutToDb } from "@/lib/hevy";
 import {
   BodyCompositionLog,
   BodyCompositionSegmental,
   HealthDashboardData,
   HealthLog,
+  HevyStats,
+  HevyWorkout,
   SupplementItem,
   UserSupplement,
   WorkoutType,
@@ -255,6 +258,38 @@ export async function fetchHealthDashboardDataAction(): Promise<HealthDashboardD
 
   const waterPercent = Math.min(100, Math.round((todayHealth.waterMl / 3000) * 100));
 
+  // 5. Fetch recent Hevy workouts and aggregate stats
+  const hevyRows = await sql`
+    SELECT * FROM hevy_workouts ORDER BY date DESC, start_time DESC LIMIT 10;
+  `;
+
+  const recentHevyWorkouts: HevyWorkout[] = hevyRows.map((r: any) => ({
+    id: r.id,
+    title: r.title,
+    description: r.description || undefined,
+    startTime: r.start_time?.toISOString ? r.start_time.toISOString() : r.start_time?.toString(),
+    endTime: r.end_time?.toISOString ? r.end_time.toISOString() : r.end_time?.toString(),
+    date: typeof r.date === "string" ? r.date.split("T")[0] : new Date(r.date).toISOString().split("T")[0],
+    durationSeconds: Number(r.duration_seconds) || 0,
+    totalVolumeKg: Number(r.total_volume_kg) || 0,
+    exercisesCount: Number(r.exercises_count) || 0,
+    setsCount: Number(r.sets_count) || 0,
+    exercises: r.exercises || [],
+    createdAt: r.created_at?.toString(),
+    updatedAt: r.hevy_updated_at?.toString(),
+  }));
+
+  const statsRows = await sql`
+    SELECT COUNT(*)::int as count, COALESCE(SUM(total_volume_kg), 0)::float as volume, MAX(created_at) as last_sync
+    FROM hevy_workouts;
+  `;
+
+  const hevyStats: HevyStats = {
+    totalWorkouts: Number(statsRows[0]?.count || 0),
+    totalVolumeKg: Number(statsRows[0]?.volume || 0),
+    lastSyncedAt: statsRows[0]?.last_sync?.toString(),
+  };
+
   return {
     todayHealth,
     waterPercent,
@@ -266,6 +301,8 @@ export async function fetchHealthDashboardDataAction(): Promise<HealthDashboardD
     bodyCompositionLogs,
     latestBodyComposition,
     previousBodyComposition,
+    recentHevyWorkouts,
+    hevyStats,
   };
 }
 
@@ -803,5 +840,83 @@ export async function createBodyCompositionAction(input: {
     skeletalMuscleKg: input.skeletalMuscleKg,
     notes: input.notes,
   });
+}
+
+/**
+ * Server Action: Synchronizes workouts from Hevy API into Neon DB.
+ */
+export async function syncHevyWorkoutsAction(options?: {
+  maxPages?: number;
+  pageSize?: number;
+}): Promise<{
+  success: boolean;
+  syncedCount: number;
+  totalVolume: number;
+  error?: string;
+}> {
+  try {
+    await ensureDatabaseSchema();
+    const sql = getDb();
+    const maxPages = options?.maxPages || 3; // Default fetches up to 30 workouts
+    const pageSize = options?.pageSize || 10;
+
+    let totalSynced = 0;
+    let totalVolume = 0;
+
+    for (let p = 1; p <= maxPages; p++) {
+      const result = await fetchHevyWorkoutsList(p, pageSize);
+      if (!result.workouts || result.workouts.length === 0) break;
+
+      for (const workout of result.workouts) {
+        await saveHevyWorkoutToDb(sql, workout);
+        totalSynced++;
+        totalVolume += workout.totalVolumeKg;
+      }
+
+      if (p >= result.pageCount) break;
+    }
+
+    revalidatePath("/");
+    return {
+      success: true,
+      syncedCount: totalSynced,
+      totalVolume: Math.round(totalVolume),
+    };
+  } catch (error: any) {
+    console.error("[Hevy Sync Action Error]:", error);
+    return {
+      success: false,
+      syncedCount: 0,
+      totalVolume: 0,
+      error: error.message || "Failed to sync Hevy workouts",
+    };
+  }
+}
+
+/**
+ * Server Action: Fetches recent Hevy workouts from DB.
+ */
+export async function fetchRecentHevyWorkoutsAction(limit = 10): Promise<HevyWorkout[]> {
+  await ensureDatabaseSchema();
+  const sql = getDb();
+  const rows = await sql`
+    SELECT * FROM hevy_workouts ORDER BY date DESC, start_time DESC LIMIT ${limit};
+  `;
+
+  return rows.map((r: any) => ({
+    id: r.id,
+    title: r.title,
+    description: r.description || undefined,
+    startTime: r.start_time?.toISOString ? r.start_time.toISOString() : r.start_time?.toString(),
+    endTime: r.end_time?.toISOString ? r.end_time.toISOString() : r.end_time?.toString(),
+    date: typeof r.date === "string" ? r.date.split("T")[0] : new Date(r.date).toISOString().split("T")[0],
+    durationSeconds: Number(r.duration_seconds) || 0,
+    totalVolumeKg: Number(r.total_volume_kg) || 0,
+    exercisesCount: Number(r.exercises_count) || 0,
+    setsCount: Number(r.sets_count) || 0,
+    exercises: r.exercises || [],
+    createdAt: r.created_at?.toString(),
+    updatedAt: r.hevy_updated_at?.toString(),
+  }));
 }
 

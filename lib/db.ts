@@ -243,6 +243,29 @@ export async function ensureDatabaseSchema() {
       );
     `;
 
+    // 10. Hevy Workout Tracker Sessions
+    await sql`
+      CREATE TABLE IF NOT EXISTS hevy_workouts (
+        id TEXT PRIMARY KEY,
+        title VARCHAR(200) NOT NULL,
+        description TEXT,
+        start_time TIMESTAMP WITH TIME ZONE NOT NULL,
+        end_time TIMESTAMP WITH TIME ZONE NOT NULL,
+        date DATE NOT NULL,
+        duration_seconds INTEGER DEFAULT 0,
+        total_volume_kg NUMERIC(10, 2) DEFAULT 0,
+        exercises_count INTEGER DEFAULT 0,
+        sets_count INTEGER DEFAULT 0,
+        exercises JSONB DEFAULT '[]'::jsonb,
+        hevy_updated_at TIMESTAMP WITH TIME ZONE,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+      );
+    `;
+
+    await sql`
+      CREATE INDEX IF NOT EXISTS idx_hevy_workouts_date ON hevy_workouts(date DESC);
+    `;
+
     isInitialized = true;
   } catch (error) {
     console.error("[Brio DB Init Error]:", error);

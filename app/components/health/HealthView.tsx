@@ -31,6 +31,7 @@ import {
 } from "lucide-react";
 import { useState, useTransition } from "react";
 import { BodyCompositionWidget } from "./BodyCompositionWidget";
+import { HevyWidget } from "./HevyWidget";
 import { ManageSupplementsModal } from "./ManageSupplementsModal";
 import { SmartFitModal } from "./SmartFitModal";
 
@@ -163,6 +164,13 @@ export function HealthView({ data, onRefresh }: HealthViewProps) {
           </div>
         </div>
       </div>
+
+      {/* 1.5. Hevy Workout Tracker Widget */}
+      <HevyWidget
+        recentWorkouts={data.recentHevyWorkouts}
+        stats={data.hevyStats}
+        onRefresh={onRefresh}
+      />
 
       {/* 2. Workout Logger Card */}
       <div className="rounded-2xl border border-white/[0.08] bg-neutral-900/60 p-5 backdrop-blur-xl shadow-xl">

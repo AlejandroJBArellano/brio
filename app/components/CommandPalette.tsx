@@ -1,5 +1,6 @@
 "use client";
 
+import { syncHevyWorkoutsAction } from "@/app/actions/health";
 import { toggleSleepAction } from "@/app/actions/tasks";
 import { HabiticaTag, HabiticaTask } from "@/lib/types";
 import { capitalize } from "@/lib/utils";
@@ -10,6 +11,7 @@ import {
   Check,
   CheckCircle2,
   CornerDownLeft,
+  Dumbbell,
   Flame,
   Hash,
   Layers,
@@ -126,6 +128,20 @@ export function CommandPalette({
         run: () => {
           onClose();
           onOpenFinanceModal();
+        },
+      },
+      {
+        id: "action-hevy-sync",
+        title: "🏋️ Sincronizar Hevy Workout Tracker",
+        subtitle: "Descargar últimas sesiones de fuerza, ejercicios y volumen",
+        icon: Dumbbell,
+        badge: "Hevy",
+        run: () => {
+          onClose();
+          startTransition(async () => {
+            await syncHevyWorkoutsAction({ maxPages: 3 });
+            router.refresh();
+          });
         },
       },
       {
