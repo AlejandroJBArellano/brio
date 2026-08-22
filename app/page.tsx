@@ -6,6 +6,7 @@ import { fetchHealthDashboardDataAction } from "@/app/actions/health";
 import { fetchProjectsDashboardDataAction } from "@/app/actions/projects";
 import { fetchTodayRitualAction } from "@/app/actions/rituals";
 import { fetchDashboardDataAction } from "@/app/actions/tasks";
+import { fetchVaultDashboardDataAction } from "@/app/actions/vault";
 import { AuthGate } from "@/app/components/auth/AuthGate";
 import { BrioCommandCenter } from "@/app/components/BrioCommandCenter";
 
@@ -29,6 +30,7 @@ export default async function BrioDashboardPage() {
     todayRitual,
     healthData,
     projectsData,
+    vaultData,
   ] = await Promise.all([
     fetchDashboardDataAction(),
     fetchFinanceDashboardDataAction(),
@@ -37,6 +39,7 @@ export default async function BrioDashboardPage() {
     fetchTodayRitualAction(),
     fetchHealthDashboardDataAction(),
     fetchProjectsDashboardDataAction(),
+    fetchVaultDashboardDataAction(),
   ]);
 
   return (
@@ -53,6 +56,7 @@ export default async function BrioDashboardPage() {
         todayRitual={todayRitual}
         healthData={healthData}
         projectsData={projectsData}
+        vaultData={vaultData}
       />
     </main>
   );

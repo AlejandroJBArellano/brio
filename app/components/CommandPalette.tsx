@@ -212,8 +212,8 @@ export function CommandPalette({
       },
       {
         id: "action-tab-projects",
-        title: "Ir a Proyectos & Aprendizaje",
-        subtitle: "Backlog de side projects y tracker de libros/cursos",
+        title: "🏛️ Ir a Bóveda & Intereses",
+        subtitle: "Tableros Kanban de partituras (S3), libros, documentos y proyectos",
         icon: Layers,
         badge: "⌘6",
         run: () => {

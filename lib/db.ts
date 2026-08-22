@@ -266,6 +266,40 @@ export async function ensureDatabaseSchema() {
       CREATE INDEX IF NOT EXISTS idx_hevy_workouts_date ON hevy_workouts(date DESC);
     `;
 
+    // 11. Bóveda & Intereses (Books, Sheet Music & Documents)
+    await sql`
+      CREATE TABLE IF NOT EXISTS vault_items (
+        id TEXT PRIMARY KEY,
+        category VARCHAR(30) NOT NULL,
+        title VARCHAR(200) NOT NULL,
+        author_or_creator VARCHAR(150),
+        status VARCHAR(30) NOT NULL DEFAULT 'backlog',
+        instrument VARCHAR(50),
+        difficulty VARCHAR(30),
+        cover_url TEXT,
+        file_url TEXT,
+        file_key TEXT,
+        file_name VARCHAR(255),
+        file_size_bytes BIGINT,
+        progress INTEGER DEFAULT 0,
+        total_pages INTEGER,
+        notes TEXT,
+        tags JSONB DEFAULT '[]'::jsonb,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+        updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+      );
+    `;
+
+    await sql`
+      CREATE INDEX IF NOT EXISTS idx_vault_items_category ON vault_items(category);
+    `;
+    await sql`
+      CREATE INDEX IF NOT EXISTS idx_vault_items_status ON vault_items(status);
+    `;
+    await sql`
+      CREATE INDEX IF NOT EXISTS idx_vault_items_updated_at ON vault_items(updated_at DESC);
+    `;
+
     isInitialized = true;
   } catch (error) {
     console.error("[Brio DB Init Error]:", error);

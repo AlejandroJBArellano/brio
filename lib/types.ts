@@ -431,3 +431,46 @@ export interface ProjectsDashboardData {
   learningItems: LearningItem[];
   scratchpadContent: string;
 }
+
+// ----------------------------------------------------
+// Bóveda & Intereses (Vault: Books, Sheet Music & S3 Media)
+// ----------------------------------------------------
+
+export type VaultItemCategory = "book" | "sheet_music" | "document" | "project";
+export type VaultItemStatus = "backlog" | "in_progress" | "completed";
+
+export interface VaultItem {
+  id: string;
+  category: VaultItemCategory;
+  title: string;
+  authorOrCreator?: string;
+  status: VaultItemStatus;
+  instrument?: string; // Piano, Guitarra, Voz, etc.
+  difficulty?: "beginner" | "intermediate" | "advanced" | string;
+  coverUrl?: string;
+  fileUrl?: string;
+  fileKey?: string;
+  fileName?: string;
+  fileSizeBytes?: number;
+  progress?: number; // Current page or percentage
+  totalPages?: number;
+  notes?: string;
+  tags?: string[];
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface VaultDashboardData {
+  books: VaultItem[];
+  sheetMusic: VaultItem[];
+  documents: VaultItem[];
+  projects: ProjectItem[];
+  scratchpadContent: string;
+  stats: {
+    totalBooks: number;
+    booksCompleted: number;
+    totalSheetMusic: number;
+    sheetMusicMastered: number;
+    totalProjects: number;
+  };
+}

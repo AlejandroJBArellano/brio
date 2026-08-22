@@ -383,12 +383,12 @@ export function HeaderStatsRibbon({
             type="button"
             onClick={() => onTabChange("projects")}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all ${activeMainTab === "projects"
-              ? "bg-pink-600 text-white shadow-lg shadow-pink-500/20"
+              ? "bg-cyan-600 text-white shadow-lg shadow-cyan-500/20"
               : "text-neutral-400 hover:text-white hover:bg-neutral-900"
               }`}
           >
             <BookOpen className="h-3.5 w-3.5" />
-            <span>💡 Proyectos</span>
+            <span>🏛️ Bóveda</span>
             <kbd className="hidden md:inline-block rounded bg-black/30 px-1 text-[10px] font-mono opacity-60">
               ⌘6
             </kbd>

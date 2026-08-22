@@ -11,6 +11,7 @@ import {
   HealthDashboardData,
   ProjectsDashboardData,
   RitualLog,
+  VaultDashboardData,
 } from "@/lib/types";
 import { Plus } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -40,6 +41,7 @@ import { ScratchpadModal } from "./projects/ScratchpadModal";
 import { SetupNotice } from "./SetupNotice";
 import { TaskInspectorPane } from "./TaskInspectorPane";
 import { TaskStream } from "./TaskStream";
+import { VaultView } from "./vault/VaultView";
 
 interface BrioCommandCenterProps {
   user: HabiticaUser;
@@ -53,6 +55,7 @@ interface BrioCommandCenterProps {
   todayRitual: RitualLog | null;
   healthData: HealthDashboardData;
   projectsData: ProjectsDashboardData;
+  vaultData: VaultDashboardData;
 }
 
 export function BrioCommandCenter({
@@ -67,6 +70,7 @@ export function BrioCommandCenter({
   todayRitual,
   healthData,
   projectsData,
+  vaultData,
 }: BrioCommandCenterProps) {
   const router = useRouter();
   const [activeMainTab, setActiveMainTab] = useState<DashboardMainTab>("tasks");
@@ -297,8 +301,8 @@ export function BrioCommandCenter({
       )}
 
       {activeMainTab === "projects" && (
-        <ProjectsView
-          data={projectsData}
+        <VaultView
+          data={vaultData}
           onRefresh={handleRefresh}
           onOpenScratchpad={() => setIsScratchpadOpen(true)}
         />
