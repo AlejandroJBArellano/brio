@@ -1,0 +1,33 @@
+{
+  "name": "Brio OS — Command Center",
+  "short_name": "Brio",
+  "description": "Minimalist, zero-latency personal command center and life operating system.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#090a0f",
+  "theme_color": "#090a0f",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/favicon.ico",
+      "sizes": "64x64 32x32 24x24 16x16",
+      "type": "image/x-icon"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Registrar Gasto",
+      "short_name": "Gasto",
+      "description": "Registra un gasto rápidamente en Brio Finanzas",
+      "url": "/?action=expense",
+      "icons": [{ "src": "/favicon.ico", "sizes": "64x64" }]
+    },
+    {
+      "name": "Suplementos & Salud",
+      "short_name": "Salud",
+      "description": "Check-in de suplementos y salud",
+      "url": "/?action=health",
+      "icons": [{ "src": "/favicon.ico", "sizes": "64x64" }]
+    }
+  ]
+}

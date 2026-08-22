@@ -21,12 +21,15 @@ import {
   Sparkles,
   Sun,
   Wallet,
-  Zap
+  Zap,
+  Bell,
+  Smartphone
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useTransition } from "react";
 
 export type DashboardMainTab =
+  | "quick"
   | "tasks"
   | "finance"
   | "analytics"
@@ -45,6 +48,7 @@ interface HeaderStatsRibbonProps {
   onOpenAuthModal: () => void;
   onOpenFocusModal: () => void;
   onOpenScratchpad: () => void;
+  onOpenNotificationSettings: () => void;
 }
 
 export function HeaderStatsRibbon({
@@ -58,6 +62,7 @@ export function HeaderStatsRibbon({
   onOpenAuthModal,
   onOpenFocusModal,
   onOpenScratchpad,
+  onOpenNotificationSettings,
 }: HeaderStatsRibbonProps) {
   const router = useRouter();
   const { data: session } = useSession();
@@ -249,6 +254,16 @@ export function HeaderStatsRibbon({
             </button>
           )}
 
+          {/* Notification Settings Trigger */}
+          <button
+            type="button"
+            onClick={onOpenNotificationSettings}
+            title="Ajustes de Notificaciones & Recordatorios"
+            className="flex h-8 w-8 items-center justify-center rounded-xl border border-white/10 bg-neutral-800/80 text-neutral-300 hover:text-white hover:border-indigo-500/50 hover:bg-indigo-500/10 transition-all"
+          >
+            <Bell className="h-3.5 w-3.5" />
+          </button>
+
           {/* Command Palette Trigger */}
           <button
             onClick={onOpenCommandPalette}
@@ -273,14 +288,26 @@ export function HeaderStatsRibbon({
         </div>
       </div>
 
-      {/* Bottom Row: 6 Master Tabs + Ritual & Focus Launchers */}
+      {/* Bottom Row: 7 Master Tabs + Ritual & Focus Launchers */}
       <div className="flex flex-col xl:flex-row items-center justify-between gap-3 pt-3 border-t border-white/6">
         {/* Navigation Tabs */}
-        <div className="flex flex-wrap items-center gap-1 p-1 rounded-2xl bg-neutral-950/80 border border-white/8 w-full xl:w-auto">
+        <div className="flex flex-wrap items-center gap-1 p-1 rounded-2xl bg-neutral-950/80 border border-white/8 w-full xl:w-auto overflow-x-auto no-scrollbar">
+          <button
+            type="button"
+            onClick={() => onTabChange("quick")}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all shrink-0 ${activeMainTab === "quick"
+              ? "bg-linear-to-r from-indigo-600 to-violet-600 text-white shadow-lg shadow-indigo-500/20"
+              : "text-neutral-400 hover:text-white hover:bg-neutral-900"
+              }`}
+          >
+            <Smartphone className="h-3.5 w-3.5" />
+            <span>📱 Hoy (Móvil)</span>
+          </button>
+
           <button
             type="button"
             onClick={() => onTabChange("tasks")}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all ${activeMainTab === "tasks"
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all shrink-0 ${activeMainTab === "tasks"
               ? "bg-indigo-600 text-white shadow-lg shadow-indigo-500/20"
               : "text-neutral-400 hover:text-white hover:bg-neutral-900"
               }`}

@@ -563,6 +563,62 @@ export async function toggleSupplementAction(
 }
 
 /**
+ * Server Action: Batch toggles supplements by timing (e.g. 'Mañana', 'Tarde') or all.
+ */
+export async function batchToggleSupplementsByTimingAction(
+  timing: string,
+  completed: boolean = true
+): Promise<{ success: boolean; modifiedCount: number; error?: string }> {
+  try {
+    await ensureDatabaseSchema();
+    const sql = getDb();
+    const todayStr = new Date().toISOString().split("T")[0];
+
+    const current = await sql`
+      SELECT supplements FROM health_logs WHERE date = ${todayStr} LIMIT 1;
+    `;
+
+    let supplements: SupplementItem[] =
+      current.length > 0 && Array.isArray(current[0].supplements)
+        ? current[0].supplements
+        : [];
+
+    let modifiedCount = 0;
+    const normalizedTiming = timing.toLowerCase().trim();
+
+    supplements = supplements.map((s) => {
+      const itemTiming = (s.timing || "").toLowerCase().trim();
+      const matches =
+        normalizedTiming === "all" ||
+        itemTiming === normalizedTiming ||
+        (normalizedTiming === "mañana" && (itemTiming.includes("mañana") || itemTiming.includes("morning") || itemTiming.includes("desayuno"))) ||
+        (normalizedTiming === "tarde" && (itemTiming.includes("tarde") || itemTiming.includes("afternoon") || itemTiming.includes("comida")));
+
+      if (matches) {
+        modifiedCount++;
+        return { ...s, taken: completed };
+      }
+      return s;
+    });
+
+    await sql`
+      INSERT INTO health_logs (date, supplements, updated_at)
+      VALUES (${todayStr}, ${JSON.stringify(supplements)}::jsonb, NOW())
+      ON CONFLICT (date) DO UPDATE
+      SET supplements = ${JSON.stringify(supplements)}::jsonb,
+          updated_at = NOW();
+    `;
+
+    revalidatePath("/");
+    return { success: true, modifiedCount };
+  } catch (error) {
+    console.error("[Batch Toggle Supplements Error]:", error);
+    return { success: false, modifiedCount: 0, error: "Failed to batch toggle supplements" };
+  }
+}
+
+
+/**
  * Server Action: Logs sleep hours and recovery rating.
  */
 export async function logSleepAction(
@@ -726,3 +782,26 @@ export async function deleteBodyCompositionLogAction(
     return { success: false, error: "No se pudo eliminar el registro" };
   }
 }
+
+/**
+ * Convenience aliases for mobile and quick loggers
+ */
+export const logWaterAction = addWaterAction;
+
+export async function createBodyCompositionAction(input: {
+  weightKg: number;
+  date?: string;
+  bodyFatPercentage?: number;
+  skeletalMuscleKg?: number;
+  notes?: string;
+}): Promise<{ success: boolean; id?: string; error?: string }> {
+  const dateStr = input.date || new Date().toISOString().split("T")[0];
+  return createBodyCompositionLogAction({
+    date: dateStr,
+    weightKg: input.weightKg,
+    bodyFatPercentage: input.bodyFatPercentage,
+    skeletalMuscleKg: input.skeletalMuscleKg,
+    notes: input.notes,
+  });
+}
+

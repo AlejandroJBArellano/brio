@@ -18,6 +18,7 @@ import {
   Plus,
   RotateCw,
   Search,
+  Smartphone,
   Sparkles,
   Sun,
   Tag,
@@ -125,6 +126,17 @@ export function CommandPalette({
         run: () => {
           onClose();
           onOpenFinanceModal();
+        },
+      },
+      {
+        id: "action-tab-quick",
+        title: "📱 Ir a Dashboard Móvil (Hoy)",
+        subtitle: "Resumen ejecutivo con suplementos, agenda, finanzas y salud",
+        icon: Smartphone,
+        badge: "⌘0",
+        run: () => {
+          onSelectMainTab("quick");
+          onClose();
         },
       },
       {

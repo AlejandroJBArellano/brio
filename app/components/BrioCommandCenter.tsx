@@ -12,6 +12,7 @@ import {
   ProjectsDashboardData,
   RitualLog,
 } from "@/lib/types";
+import { Plus } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState, useTransition } from "react";
 import { AnalyticsView } from "./analytics/AnalyticsView";
@@ -26,8 +27,14 @@ import { TransactionModal } from "./finance/TransactionModal";
 import { FocusModal } from "./focus/FocusModal";
 import { DashboardMainTab, HeaderStatsRibbon } from "./HeaderStatsRibbon";
 import { HealthView } from "./health/HealthView";
+import { ManageSupplementsModal } from "./health/ManageSupplementsModal";
+import { SmartFitModal } from "./health/SmartFitModal";
 import { HybridOmnibar } from "./HybridOmnibar";
+import { MobileBottomSheet } from "./mobile/MobileBottomSheet";
+import { MobileQuickDashboard } from "./mobile/MobileQuickDashboard";
 import { MorningRitualModal } from "./MorningRitualModal";
+import { NotificationManager } from "./notifications/NotificationManager";
+import { NotificationSettingsModal } from "./notifications/NotificationSettingsModal";
 import { ProjectsView } from "./projects/ProjectsView";
 import { ScratchpadModal } from "./projects/ScratchpadModal";
 import { SetupNotice } from "./SetupNotice";
@@ -77,6 +84,11 @@ export function BrioCommandCenter({
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [isFocusModalOpen, setIsFocusModalOpen] = useState(false);
   const [isScratchpadOpen, setIsScratchpadOpen] = useState(false);
+  const [isNotificationModalOpen, setIsNotificationModalOpen] = useState(false);
+  const [isBottomSheetOpen, setIsBottomSheetOpen] = useState(false);
+  const [bottomSheetTab, setBottomSheetTab] = useState<"expense" | "task" | "water" | "weight">("expense");
+  const [isSmartFitModalOpen, setIsSmartFitModalOpen] = useState(false);
+  const [isManageSupplementsOpen, setIsManageSupplementsOpen] = useState(false);
 
   // Task stream filters
   const [activeTab, setActiveTab] = useState<
@@ -99,7 +111,10 @@ export function BrioCommandCenter({
         activeEl instanceof HTMLTextAreaElement;
 
       if (e.metaKey || e.ctrlKey) {
-        if (e.key === "1") {
+        if (e.key === "0") {
+          e.preventDefault();
+          setActiveMainTab("quick");
+        } else if (e.key === "1") {
           e.preventDefault();
           setActiveMainTab("tasks");
         } else if (e.key === "2") {
@@ -129,6 +144,12 @@ export function BrioCommandCenter({
         } else if (e.key.toLowerCase() === "e" && !isInputActive) {
           e.preventDefault();
           setIsEveningReviewOpen(true);
+        } else if (e.key.toLowerCase() === "f" && !isInputActive) {
+          e.preventDefault();
+          setIsFinanceModalOpen(true);
+        } else if (e.key.toLowerCase() === "b" && !isInputActive) {
+          e.preventDefault();
+          setIsBatchModalOpen(true);
         }
       }
     };
@@ -144,15 +165,25 @@ export function BrioCommandCenter({
   };
 
   const handleToggleMustWin = (taskId: string) => {
-    const task = tasks.find((t) => t.id === taskId);
-    if (!task) return;
     startTransition(async () => {
       await toggleTaskAction(taskId, "up");
     });
   };
 
+  const handleOpenBottomSheetWithTab = (tab: "expense" | "task" | "water" | "weight" = "expense") => {
+    setBottomSheetTab(tab);
+    setIsBottomSheetOpen(true);
+  };
+
   return (
-    <div className="mx-auto flex w-full max-w-7xl flex-1 flex-col gap-5 p-4 sm:p-6 lg:p-8">
+    <div className="mx-auto flex w-full max-w-7xl flex-1 flex-col gap-5 p-4 sm:p-6 lg:p-8 relative">
+      {/* Background Notification Watcher */}
+      <NotificationManager
+        healthData={healthData}
+        financeData={financeData}
+        todayRitual={todayRitual}
+      />
+
       {/* 1. Habitica RPG Stats & Master Header with Tab Switcher */}
       <HeaderStatsRibbon
         user={user}
@@ -165,6 +196,7 @@ export function BrioCommandCenter({
         onOpenAuthModal={() => setIsAuthModalOpen(true)}
         onOpenFocusModal={() => setIsFocusModalOpen(true)}
         onOpenScratchpad={() => setIsScratchpadOpen(true)}
+        onOpenNotificationSettings={() => setIsNotificationModalOpen(true)}
       />
 
       {/* 2. Setup Guide Banner (Shown only when Habitica credentials absent) */}
@@ -179,6 +211,23 @@ export function BrioCommandCenter({
       />
 
       {/* 4. Tab Views Switcher */}
+      {activeMainTab === "quick" && (
+        <MobileQuickDashboard
+          user={user}
+          tasks={tasks}
+          healthData={healthData}
+          financeData={financeData}
+          calendarSchedule={calendarSchedule}
+          todayRitual={todayRitual}
+          onOpenBottomSheet={handleOpenBottomSheetWithTab}
+          onOpenSmartFitModal={() => setIsSmartFitModalOpen(true)}
+          onOpenNotificationSettings={() => setIsNotificationModalOpen(true)}
+          onOpenMorningRitual={() => setIsMorningRitualOpen(true)}
+          onOpenEveningReview={() => setIsEveningReviewOpen(true)}
+          onOpenManageSupplements={() => setIsManageSupplementsOpen(true)}
+        />
+      )}
+
       {activeMainTab === "tasks" && (
         <div className="flex flex-col gap-5">
           {/* Daily Must-Win Focus Ribbon */}
@@ -254,6 +303,53 @@ export function BrioCommandCenter({
           onOpenScratchpad={() => setIsScratchpadOpen(true)}
         />
       )}
+
+      {/* Floating Action Button (+) for Instant Mobile/Tablet Capture */}
+      <button
+        type="button"
+        onClick={() => handleOpenBottomSheetWithTab("expense")}
+        aria-label="Captura Rápida Móvil"
+        className="fixed bottom-6 right-6 z-40 flex size-14 items-center justify-center rounded-full bg-linear-to-tr from-indigo-600 to-violet-600 text-white shadow-2xl shadow-indigo-500/40 hover:scale-105 active:scale-95 transition-all border border-white/20 bottom-safe"
+      >
+        <Plus className="size-6 stroke-3" />
+      </button>
+
+      {/* Mobile Bottom Sheet Modal */}
+      <MobileBottomSheet
+        isOpen={isBottomSheetOpen}
+        onClose={() => setIsBottomSheetOpen(false)}
+        initialTab={bottomSheetTab}
+        dailyAntRemaining={
+          financeData.remainingDailyAntBudget ??
+          Math.max(
+            0,
+            (financeData.currentBudget?.dailyAntLimit || 150) -
+              (financeData.totalAntExpensesToday || 0)
+          )
+        }
+      />
+
+      {/* Notification Settings Modal */}
+      <NotificationSettingsModal
+        isOpen={isNotificationModalOpen}
+        onClose={() => setIsNotificationModalOpen(false)}
+      />
+
+      {/* Smart Fit & Body Composition Modal */}
+      <SmartFitModal
+        isOpen={isSmartFitModalOpen}
+        onClose={() => setIsSmartFitModalOpen(false)}
+        latestLog={healthData.latestBodyComposition}
+        onSuccess={handleRefresh}
+      />
+
+      {/* Manage Supplements Modal */}
+      <ManageSupplementsModal
+        isOpen={isManageSupplementsOpen}
+        onClose={() => setIsManageSupplementsOpen(false)}
+        supplements={healthData.supplementsCatalog || []}
+        onSuccess={handleRefresh}
+      />
 
       {/* 5. Global Command Palette (⌘K) */}
       <CommandPalette
@@ -349,10 +445,10 @@ export function BrioCommandCenter({
       {/* Footer */}
       <footer className="mt-auto border-t border-white/[0.06] pt-6 pb-2 text-center text-xs text-neutral-500">
         <div className="flex flex-wrap items-center justify-center gap-3 font-mono text-[11px]">
-          <span>Brio OS v1.0 • Habitica + Neon DB + Google Calendar</span>
+          <span>Brio OS v1.1 • Habitica + Neon DB + PWA Mobile</span>
           <span>•</span>
           <span>
-            Vistas: <kbd className="rounded bg-neutral-800 px-1 py-0.5 text-neutral-300">⌘1</kbd> Tareas • <kbd className="rounded bg-neutral-800 px-1 py-0.5 text-neutral-300">⌘2</kbd> Finanzas • <kbd className="rounded bg-neutral-800 px-1 py-0.5 text-neutral-300">⌘3</kbd> Balance • <kbd className="rounded bg-neutral-800 px-1 py-0.5 text-neutral-300">⌘4</kbd> Agenda • <kbd className="rounded bg-neutral-800 px-1 py-0.5 text-neutral-300">⌘5</kbd> Salud • <kbd className="rounded bg-neutral-800 px-1 py-0.5 text-neutral-300">⌘6</kbd> Proyectos
+            Vistas: <kbd className="rounded bg-neutral-800 px-1 py-0.5 text-neutral-300">⌘0</kbd> Hoy • <kbd className="rounded bg-neutral-800 px-1 py-0.5 text-neutral-300">⌘1</kbd> Tareas • <kbd className="rounded bg-neutral-800 px-1 py-0.5 text-neutral-300">⌘2</kbd> Finanzas • <kbd className="rounded bg-neutral-800 px-1 py-0.5 text-neutral-300">⌘3</kbd> Balance • <kbd className="rounded bg-neutral-800 px-1 py-0.5 text-neutral-300">⌘4</kbd> Agenda • <kbd className="rounded bg-neutral-800 px-1 py-0.5 text-neutral-300">⌘5</kbd> Salud • <kbd className="rounded bg-neutral-800 px-1 py-0.5 text-neutral-300">⌘6</kbd> Proyectos
           </span>
           <span>•</span>
           <span>
