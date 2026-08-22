@@ -2,6 +2,11 @@
 
 import { toggleTaskAction } from "@/app/actions/tasks";
 import {
+  CommandCenterProvider,
+  useCommandCenter,
+} from "@/app/components/context/CommandCenterContext";
+import { ModalManager } from "@/app/components/modals/ModalManager";
+import {
   AnalyticsDashboardData,
   CalendarDaySchedule,
   FinanceDashboardData,
@@ -14,30 +19,16 @@ import {
   VaultDashboardData,
 } from "@/lib/types";
 import { Plus } from "lucide-react";
-import { useRouter } from "next/navigation";
-import { useEffect, useState, useTransition } from "react";
+import { useEffect, useTransition } from "react";
 import { AnalyticsView } from "./analytics/AnalyticsView";
-import { AuthModal } from "./auth/AuthModal";
-import { BatchCaptureModal } from "./BatchCaptureModal";
-import { CommandPalette } from "./CommandPalette";
 import { DailyFocusRibbon } from "./DailyFocusRibbon";
 import { DayScheduleView } from "./DayScheduleView";
-import { EveningReviewModal } from "./EveningReviewModal";
 import { FinanceView } from "./finance/FinanceView";
-import { TransactionModal } from "./finance/TransactionModal";
-import { FocusModal } from "./focus/FocusModal";
-import { DashboardMainTab, HeaderStatsRibbon } from "./HeaderStatsRibbon";
+import { HeaderStatsRibbon } from "./HeaderStatsRibbon";
 import { HealthView } from "./health/HealthView";
-import { ManageSupplementsModal } from "./health/ManageSupplementsModal";
-import { SmartFitModal } from "./health/SmartFitModal";
 import { HybridOmnibar } from "./HybridOmnibar";
-import { MobileBottomSheet } from "./mobile/MobileBottomSheet";
 import { MobileQuickDashboard } from "./mobile/MobileQuickDashboard";
-import { MorningRitualModal } from "./MorningRitualModal";
 import { NotificationManager } from "./notifications/NotificationManager";
-import { NotificationSettingsModal } from "./notifications/NotificationSettingsModal";
-import { ProjectsView } from "./projects/ProjectsView";
-import { ScratchpadModal } from "./projects/ScratchpadModal";
 import { SetupNotice } from "./SetupNotice";
 import { TaskInspectorPane } from "./TaskInspectorPane";
 import { TaskStream } from "./TaskStream";
@@ -58,7 +49,15 @@ interface BrioCommandCenterProps {
   vaultData: VaultDashboardData;
 }
 
-export function BrioCommandCenter({
+export function BrioCommandCenter(props: BrioCommandCenterProps) {
+  return (
+    <CommandCenterProvider initialMustWins={props.todayRitual?.mustWinTasks || []}>
+      <BrioCommandCenterContent {...props} />
+    </CommandCenterProvider>
+  );
+}
+
+function BrioCommandCenterContent({
   user,
   tasks,
   tags,
@@ -72,36 +71,22 @@ export function BrioCommandCenter({
   projectsData,
   vaultData,
 }: BrioCommandCenterProps) {
-  const router = useRouter();
-  const [activeMainTab, setActiveMainTab] = useState<DashboardMainTab>("tasks");
-  const [selectedTask, setSelectedTask] = useState<HabiticaTask | null>(null);
-  const [mustWinTaskIds, setMustWinTaskIds] = useState<string[]>(
-    todayRitual?.mustWinTasks || []
-  );
+  const {
+    activeMainTab,
+    setActiveMainTab,
+    activeTaskTab,
+    setActiveTaskTab,
+    activeTagFilter,
+    setActiveTagFilter,
+    selectedTask,
+    setSelectedTask,
+    mustWinTaskIds,
+    openModal,
+    refreshData,
+  } = useCommandCenter();
 
-  // Modals state
-  const [isBatchModalOpen, setIsBatchModalOpen] = useState(false);
-  const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState(false);
-  const [isMorningRitualOpen, setIsMorningRitualOpen] = useState(false);
-  const [isEveningReviewOpen, setIsEveningReviewOpen] = useState(false);
-  const [isFinanceModalOpen, setIsFinanceModalOpen] = useState(false);
-  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
-  const [isFocusModalOpen, setIsFocusModalOpen] = useState(false);
-  const [isScratchpadOpen, setIsScratchpadOpen] = useState(false);
-  const [isNotificationModalOpen, setIsNotificationModalOpen] = useState(false);
-  const [isBottomSheetOpen, setIsBottomSheetOpen] = useState(false);
-  const [bottomSheetTab, setBottomSheetTab] = useState<"expense" | "task" | "water" | "weight" | "nutrition">("expense");
-  const [isSmartFitModalOpen, setIsSmartFitModalOpen] = useState(false);
-  const [isManageSupplementsOpen, setIsManageSupplementsOpen] = useState(false);
-
-  // Task stream filters
-  const [activeTab, setActiveTab] = useState<
-    "all" | "dailies" | "todos" | "habits"
-  >("all");
-  const [activeTagFilter, setActiveTagFilter] = useState<string | null>(null);
   const [, startTransition] = useTransition();
 
-  // Keep selected task updated
   const currentSelectedTask = selectedTask
     ? tasks.find((t) => t.id === selectedTask.id) || selectedTask
     : null;
@@ -138,35 +123,29 @@ export function BrioCommandCenter({
           setActiveMainTab("projects");
         } else if (e.key.toLowerCase() === "p" && !isInputActive) {
           e.preventDefault();
-          setIsFocusModalOpen(true);
+          openModal("focus");
         } else if (e.key.toLowerCase() === "j" && !isInputActive) {
           e.preventDefault();
-          setIsScratchpadOpen(true);
+          openModal("scratchpad");
         } else if (e.key.toLowerCase() === "m" && !isInputActive) {
           e.preventDefault();
-          setIsMorningRitualOpen(true);
+          openModal("morningRitual");
         } else if (e.key.toLowerCase() === "e" && !isInputActive) {
           e.preventDefault();
-          setIsEveningReviewOpen(true);
+          openModal("eveningReview");
         } else if (e.key.toLowerCase() === "f" && !isInputActive) {
           e.preventDefault();
-          setIsFinanceModalOpen(true);
+          openModal("finance");
         } else if (e.key.toLowerCase() === "b" && !isInputActive) {
           e.preventDefault();
-          setIsBatchModalOpen(true);
+          openModal("batch");
         }
       }
     };
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, []);
-
-  const handleRefresh = () => {
-    startTransition(() => {
-      router.refresh();
-    });
-  };
+  }, [setActiveMainTab, openModal]);
 
   const handleToggleMustWin = (taskId: string) => {
     startTransition(async () => {
@@ -174,9 +153,10 @@ export function BrioCommandCenter({
     });
   };
 
-  const handleOpenBottomSheetWithTab = (tab: "expense" | "task" | "water" | "weight" = "expense") => {
-    setBottomSheetTab(tab);
-    setIsBottomSheetOpen(true);
+  const handleOpenBottomSheetWithTab = (
+    tab: "expense" | "task" | "water" | "weight" | "nutrition" = "expense"
+  ) => {
+    openModal("bottomSheet", { tab });
   };
 
   return (
@@ -189,29 +169,17 @@ export function BrioCommandCenter({
       />
 
       {/* 1. Habitica RPG Stats & Master Header with Tab Switcher */}
-      <HeaderStatsRibbon
-        user={user}
-        isConfigured={isConfigured}
-        activeMainTab={activeMainTab}
-        onTabChange={setActiveMainTab}
-        onOpenCommandPalette={() => setIsCommandPaletteOpen(true)}
-        onOpenMorningRitual={() => setIsMorningRitualOpen(true)}
-        onOpenEveningReview={() => setIsEveningReviewOpen(true)}
-        onOpenAuthModal={() => setIsAuthModalOpen(true)}
-        onOpenFocusModal={() => setIsFocusModalOpen(true)}
-        onOpenScratchpad={() => setIsScratchpadOpen(true)}
-        onOpenNotificationSettings={() => setIsNotificationModalOpen(true)}
-      />
+      <HeaderStatsRibbon user={user} isConfigured={isConfigured} />
 
       {/* 2. Setup Guide Banner (Shown only when Habitica credentials absent) */}
       <SetupNotice isConfigured={isConfigured} />
 
-      {/* 3. Global Hybrid Omnibar (Captures Tasks or Brio Finanzas with #tags and @accounts) */}
+      {/* 3. Global Hybrid Omnibar */}
       <HybridOmnibar
         tags={tags}
-        onOpenBatchModal={() => setIsBatchModalOpen(true)}
-        onOpenFinanceModal={() => setIsFinanceModalOpen(true)}
-        onRefreshFinance={handleRefresh}
+        onOpenBatchModal={() => openModal("batch")}
+        onOpenFinanceModal={() => openModal("finance")}
+        onRefreshFinance={refreshData}
       />
 
       {/* 4. Tab Views Switcher */}
@@ -224,11 +192,11 @@ export function BrioCommandCenter({
           calendarSchedule={calendarSchedule}
           todayRitual={todayRitual}
           onOpenBottomSheet={handleOpenBottomSheetWithTab}
-          onOpenSmartFitModal={() => setIsSmartFitModalOpen(true)}
-          onOpenNotificationSettings={() => setIsNotificationModalOpen(true)}
-          onOpenMorningRitual={() => setIsMorningRitualOpen(true)}
-          onOpenEveningReview={() => setIsEveningReviewOpen(true)}
-          onOpenManageSupplements={() => setIsManageSupplementsOpen(true)}
+          onOpenSmartFitModal={() => openModal("smartFit")}
+          onOpenNotificationSettings={() => openModal("notificationSettings")}
+          onOpenMorningRitual={() => openModal("morningRitual")}
+          onOpenEveningReview={() => openModal("eveningReview")}
+          onOpenManageSupplements={() => openModal("manageSupplements")}
         />
       )}
 
@@ -239,7 +207,7 @@ export function BrioCommandCenter({
             mustWinTaskIds={mustWinTaskIds}
             tasks={tasks}
             onToggleTask={handleToggleMustWin}
-            onOpenMorningRitual={() => setIsMorningRitualOpen(true)}
+            onOpenMorningRitual={() => openModal("morningRitual")}
           />
 
           {/* Split-Pane Workspace (Task Stream Left + Linear Inspector Right) */}
@@ -253,9 +221,9 @@ export function BrioCommandCenter({
                 tasks={tasks}
                 selectedTaskId={currentSelectedTask?.id || null}
                 onSelectTask={(task) => setSelectedTask(task)}
-                activeTab={activeTab}
+                activeTab={activeTaskTab}
                 onTabChange={(tab) => {
-                  setActiveTab(tab);
+                  setActiveTaskTab(tab);
                   setActiveTagFilter(null);
                 }}
                 activeTagFilter={activeTagFilter}
@@ -278,7 +246,7 @@ export function BrioCommandCenter({
       )}
 
       {activeMainTab === "finance" && (
-        <FinanceView data={financeData} onRefresh={handleRefresh} />
+        <FinanceView data={financeData} onRefresh={refreshData} />
       )}
 
       {activeMainTab === "analytics" && (
@@ -289,22 +257,22 @@ export function BrioCommandCenter({
         <DayScheduleView
           schedule={calendarSchedule}
           isConfigured={isCalendarConfigured}
-          onRefresh={handleRefresh}
-          onSaveCalendarUrl={(url) => {
-            handleRefresh();
+          onRefresh={refreshData}
+          onSaveCalendarUrl={() => {
+            refreshData();
           }}
         />
       )}
 
       {activeMainTab === "health" && (
-        <HealthView data={healthData} onRefresh={handleRefresh} />
+        <HealthView data={healthData} onRefresh={refreshData} />
       )}
 
       {activeMainTab === "projects" && (
         <VaultView
           data={vaultData}
-          onRefresh={handleRefresh}
-          onOpenScratchpad={() => setIsScratchpadOpen(true)}
+          onRefresh={refreshData}
+          onOpenScratchpad={() => openModal("scratchpad")}
         />
       )}
 
@@ -318,132 +286,15 @@ export function BrioCommandCenter({
         <Plus className="size-6 stroke-3" />
       </button>
 
-      {/* Mobile Bottom Sheet Modal */}
-      <MobileBottomSheet
-        isOpen={isBottomSheetOpen}
-        onClose={() => setIsBottomSheetOpen(false)}
-        initialTab={bottomSheetTab}
-        dailyAntRemaining={
-          financeData.remainingDailyAntBudget ??
-          Math.max(
-            0,
-            (financeData.currentBudget?.dailyAntLimit || 150) -
-              (financeData.totalAntExpensesToday || 0)
-          )
-        }
-      />
-
-      {/* Notification Settings Modal */}
-      <NotificationSettingsModal
-        isOpen={isNotificationModalOpen}
-        onClose={() => setIsNotificationModalOpen(false)}
-      />
-
-      {/* Smart Fit & Body Composition Modal */}
-      <SmartFitModal
-        isOpen={isSmartFitModalOpen}
-        onClose={() => setIsSmartFitModalOpen(false)}
-        latestLog={healthData.latestBodyComposition}
-        onSuccess={handleRefresh}
-      />
-
-      {/* Manage Supplements Modal */}
-      <ManageSupplementsModal
-        isOpen={isManageSupplementsOpen}
-        onClose={() => setIsManageSupplementsOpen(false)}
-        supplements={healthData.supplementsCatalog || []}
-        onSuccess={handleRefresh}
-      />
-
-      {/* 5. Global Command Palette (⌘K) */}
-      <CommandPalette
-        isOpen={isCommandPaletteOpen}
-        onClose={() => setIsCommandPaletteOpen(false)}
+      {/* Dynamic Modal Manager (next/dynamic lazy loading for all modals) */}
+      <ModalManager
+        user={user}
         tasks={tasks}
         tags={tags}
-        isResting={user.flags?.rest}
-        onOpenBatchCapture={() => setIsBatchModalOpen(true)}
-        onOpenMorningRitual={() => setIsMorningRitualOpen(true)}
-        onOpenEveningReview={() => setIsEveningReviewOpen(true)}
-        onOpenFinanceModal={() => setIsFinanceModalOpen(true)}
-        onSelectMainTab={setActiveMainTab}
-        onSelectTask={(task) => {
-          setActiveMainTab("tasks");
-          setSelectedTask(task);
-        }}
-        onFilterType={(type) => {
-          setActiveMainTab("tasks");
-          setActiveTab(type);
-          setActiveTagFilter(null);
-        }}
-        onFilterTag={(tagName) => {
-          setActiveMainTab("tasks");
-          setActiveTagFilter(tagName);
-          setActiveTab("all");
-        }}
-      />
-
-      {/* 6. Batch Tasks Capture Modal (⌘B) */}
-      <BatchCaptureModal
-        isOpen={isBatchModalOpen}
-        onClose={() => setIsBatchModalOpen(false)}
-      />
-
-      {/* 7. Morning Kickoff Ritual Modal (⌘M) */}
-      <MorningRitualModal
-        isOpen={isMorningRitualOpen}
-        onClose={() => setIsMorningRitualOpen(false)}
-        user={user}
-        tasks={tasks}
-        schedule={calendarSchedule}
-        currentMustWins={mustWinTaskIds}
-        onSuccess={(newMustWins) => {
-          setMustWinTaskIds(newMustWins);
-          handleRefresh();
-        }}
-      />
-
-      {/* 8. Evening Review Ritual Modal (⌘E) */}
-      <EveningReviewModal
-        isOpen={isEveningReviewOpen}
-        onClose={() => setIsEveningReviewOpen(false)}
-        user={user}
-        tasks={tasks}
-        mustWinTaskIds={mustWinTaskIds}
-        totalAntSpentToday={financeData.totalAntExpensesToday}
-        dailyAntLimit={financeData.currentBudget.dailyAntLimit}
-        onSuccess={handleRefresh}
-        onOpenNewTransaction={() => setIsFinanceModalOpen(true)}
-      />
-
-      {/* 9. Brio Finanzas Quick Transaction Modal (⌘F) */}
-      <TransactionModal
-        isOpen={isFinanceModalOpen}
-        onClose={() => setIsFinanceModalOpen(false)}
-        onSuccess={handleRefresh}
-      />
-
-      {/* 10. Neon Auth / Better Auth Modal */}
-      <AuthModal
-        isOpen={isAuthModalOpen}
-        onClose={() => setIsAuthModalOpen(false)}
-        onSuccess={handleRefresh}
-      />
-
-      {/* 11. Focus Zen & Deep Work Modal (⌘P) */}
-      <FocusModal
-        isOpen={isFocusModalOpen}
-        onClose={() => setIsFocusModalOpen(false)}
-        tasks={tasks}
-        onCompleteSession={handleRefresh}
-      />
-
-      {/* 12. Floating Scratchpad (⌘J) */}
-      <ScratchpadModal
-        isOpen={isScratchpadOpen}
-        onClose={() => setIsScratchpadOpen(false)}
-        initialContent={projectsData.scratchpadContent}
-        onSuccess={handleRefresh}
+        calendarSchedule={calendarSchedule}
+        financeData={financeData}
+        healthData={healthData}
+        projectsData={projectsData}
       />
 
       {/* Footer */}
