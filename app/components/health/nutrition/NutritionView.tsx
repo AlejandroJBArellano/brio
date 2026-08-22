@@ -75,9 +75,9 @@ export function NutritionView({
   return (
     <div className="flex flex-col gap-6 animate-in fade-in duration-300">
       {/* 1. Header Ribbon with Subtabs & Quick Summary */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 rounded-3xl border border-white/[0.08] bg-neutral-900/80 p-5 backdrop-blur-2xl shadow-2xl">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 rounded-3xl border border-white/8 bg-neutral-900/80 p-5 backdrop-blur-2xl shadow-2xl">
         <div className="flex items-center gap-3.5">
-          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-500/20 to-teal-500/20 text-emerald-400 border border-emerald-500/30 shadow-lg shadow-emerald-500/10">
+          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-linear-to-br from-emerald-500/20 to-teal-500/20 text-emerald-400 border border-emerald-500/30 shadow-lg shadow-emerald-500/10">
             <Salad className="h-6 w-6" />
           </div>
           <div>
@@ -97,7 +97,7 @@ export function NutritionView({
 
         <div className="flex flex-wrap items-center gap-2">
           {/* Sub-nav Buttons */}
-          <div className="flex items-center p-1 rounded-2xl bg-neutral-950/80 border border-white/[0.06] shadow-inner">
+          <div className="flex items-center p-1 rounded-2xl bg-neutral-950/80 border border-white/6 shadow-inner">
             <button
               type="button"
               onClick={() => setActiveSubTab("daily")}
@@ -154,7 +154,7 @@ export function NutritionView({
           <button
             type="button"
             onClick={() => setIsSettingsOpen(true)}
-            className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-neutral-950/80 border border-white/[0.08] text-neutral-300 hover:text-white hover:bg-neutral-900 text-xs font-semibold transition-all shadow-sm"
+            className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-neutral-950/80 border border-white/8 text-neutral-300 hover:text-white hover:bg-neutral-900 text-xs font-semibold transition-all shadow-sm"
             title="Configurar metas de porciones y agua"
           >
             <Settings2 className="h-4 w-4" />
@@ -222,8 +222,8 @@ export function NutritionView({
 
           {/* Today's Scheduled Meals Banner */}
           {data.scheduledMealsToday.length > 0 && (
-            <div className="rounded-2xl border border-white/[0.08] bg-neutral-900/60 p-4.5 backdrop-blur-xl shadow-xl">
-              <div className="flex items-center justify-between pb-3 border-b border-white/[0.06]">
+            <div className="rounded-2xl border border-white/8 bg-neutral-900/60 p-4.5 backdrop-blur-xl shadow-xl">
+              <div className="flex items-center justify-between pb-3 border-b border-white/6">
                 <div className="flex items-center gap-2">
                   <Utensils className="h-4 w-4 text-emerald-400" />
                   <h3 className="text-sm font-bold text-white tracking-tight">
@@ -249,7 +249,7 @@ export function NutritionView({
                       className={`flex items-center justify-between p-3 rounded-xl border transition-all ${
                         meal.isCompleted
                           ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-200"
-                          : "border-white/[0.08] bg-neutral-950/60 text-white"
+                          : "border-white/8 bg-neutral-950/60 text-white"
                       }`}
                     >
                       <div className="space-y-0.5">
@@ -266,7 +266,7 @@ export function NutritionView({
                         className={`flex h-6 px-2.5 items-center justify-center rounded-lg text-xs font-bold transition-all ${
                           meal.isCompleted
                             ? "bg-emerald-500 text-neutral-950 font-extrabold"
-                            : "bg-neutral-900 border border-white/[0.1] text-emerald-300 hover:bg-emerald-500/20"
+                            : "bg-neutral-900 border border-white/10 text-emerald-300 hover:bg-emerald-500/20"
                         }`}
                       >
                         {meal.isCompleted ? "Comido ✓" : "Comer"}

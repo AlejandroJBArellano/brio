@@ -188,7 +188,7 @@ export function HybridOmnibar({
   };
 
   return (
-    <div className="relative rounded-2xl border border-white/[0.08] bg-neutral-900/70 p-2.5 backdrop-blur-xl shadow-xl transition-all">
+    <div className="relative rounded-2xl border border-white/8 bg-neutral-900/70 p-2.5 backdrop-blur-xl shadow-xl transition-all">
       <div className="flex flex-col sm:flex-row items-center gap-2">
         {/* Rapid Capture Input */}
         <div className="relative flex-1 w-full flex items-center">

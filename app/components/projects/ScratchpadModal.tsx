@@ -78,11 +78,11 @@ function ScratchpadModalContent({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-200">
       <div
-        className="w-full max-w-2xl rounded-3xl border border-white/[0.1] bg-neutral-900/95 p-6 shadow-2xl backdrop-blur-2xl animate-in zoom-in-95 duration-200"
+        className="w-full max-w-2xl rounded-3xl border border-white/10 bg-neutral-900/95 p-6 shadow-2xl backdrop-blur-2xl animate-in zoom-in-95 duration-200"
         role="dialog"
       >
         {/* Header */}
-        <div className="flex items-center justify-between pb-3 border-b border-white/[0.08]">
+        <div className="flex items-center justify-between pb-3 border-b border-white/8">
           <div className="flex items-center gap-2.5">
             <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-violet-500/10 text-violet-400 border border-violet-500/20">
               <Edit3 className="h-4 w-4" />
@@ -128,12 +128,12 @@ function ScratchpadModalContent({
             value={content}
             onChange={(e) => setContent(e.target.value)}
             placeholder="# Mis notas del día..."
-            className="w-full rounded-2xl border border-white/[0.08] bg-neutral-950 p-4 font-mono text-xs leading-relaxed text-neutral-200 placeholder:text-neutral-600 focus:border-indigo-500 focus:outline-none"
+            className="w-full rounded-2xl border border-white/8 bg-neutral-950 p-4 font-mono text-xs leading-relaxed text-neutral-200 placeholder:text-neutral-600 focus:border-indigo-500 focus:outline-none"
           />
         </div>
 
         {/* Quick Task Extraction Helpers */}
-        <div className="mt-3 flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-white/[0.06]">
+        <div className="mt-3 flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-white/6">
           <span className="text-[11px] text-neutral-500">
             Tip: Escribe tus notas libremente. Las líneas con `-` o `*` se pueden convertir en tareas.
           </span>

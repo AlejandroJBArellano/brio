@@ -49,9 +49,9 @@ export function NutritionSettingsModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-200">
-      <div className="w-full max-w-lg rounded-3xl border border-white/[0.1] bg-neutral-900/95 p-6 shadow-2xl backdrop-blur-2xl flex flex-col max-h-[85vh]">
+      <div className="w-full max-w-lg rounded-3xl border border-white/10 bg-neutral-900/95 p-6 shadow-2xl backdrop-blur-2xl flex flex-col max-h-[85vh]">
         {/* Header */}
-        <div className="flex items-center justify-between pb-4 border-b border-white/[0.08]">
+        <div className="flex items-center justify-between pb-4 border-b border-white/8">
           <div className="flex items-center gap-2.5">
             <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-400">
               <Settings2 className="h-5 w-5" />
@@ -77,7 +77,7 @@ export function NutritionSettingsModal({
         {/* Form Body */}
         <div className="mt-4 flex-1 overflow-y-auto space-y-4 pr-1">
           {/* General Targets (Water & Week) */}
-          <div className="grid grid-cols-2 gap-3 p-3 rounded-2xl bg-neutral-950/60 border border-white/[0.06]">
+          <div className="grid grid-cols-2 gap-3 p-3 rounded-2xl bg-neutral-950/60 border border-white/6">
             <div>
               <label className="block text-[11px] font-bold text-neutral-300 mb-1">
                 Meta de Hidratación:
@@ -90,7 +90,7 @@ export function NutritionSettingsModal({
                   max="5000"
                   value={waterGoal}
                   onChange={(e) => setWaterGoal(Number(e.target.value))}
-                  className="w-full rounded-xl border border-white/[0.1] bg-neutral-900 p-2 font-mono text-xs text-white focus:outline-none focus:border-emerald-500/50"
+                  className="w-full rounded-xl border border-white/10 bg-neutral-900 p-2 font-mono text-xs text-white focus:outline-none focus:border-emerald-500/50"
                 />
                 <span className="text-xs text-neutral-500 font-mono">ml</span>
               </div>
@@ -103,7 +103,7 @@ export function NutritionSettingsModal({
               <select
                 value={activeWeek}
                 onChange={(e) => setActiveWeek(Number(e.target.value))}
-                className="w-full rounded-xl border border-white/[0.1] bg-neutral-900 p-2 text-xs text-white focus:outline-none focus:border-emerald-500/50"
+                className="w-full rounded-xl border border-white/10 bg-neutral-900 p-2 text-xs text-white focus:outline-none focus:border-emerald-500/50"
               >
                 <option value={1}>Semana 1</option>
                 <option value={2}>Semana 2</option>
@@ -127,7 +127,7 @@ export function NutritionSettingsModal({
                 return (
                   <div
                     key={key}
-                    className="flex items-center justify-between p-2.5 rounded-xl border border-white/[0.04] bg-neutral-950/40"
+                    className="flex items-center justify-between p-2.5 rounded-xl border border-white/4 bg-neutral-950/40"
                   >
                     <div className="flex items-center gap-2">
                       <span className="text-base">{meta.icon}</span>
@@ -149,7 +149,7 @@ export function NutritionSettingsModal({
                         max="20"
                         value={val}
                         onChange={(e) => handleGoalChange(key, parseFloat(e.target.value) || 0)}
-                        className="w-16 rounded-lg border border-white/[0.1] bg-neutral-900 px-2 py-1 text-center font-mono text-xs text-white focus:outline-none focus:border-emerald-500/50"
+                        className="w-16 rounded-lg border border-white/10 bg-neutral-900 px-2 py-1 text-center font-mono text-xs text-white focus:outline-none focus:border-emerald-500/50"
                       />
                       <span className="text-[11px] text-neutral-400 font-mono w-14">
                         {meta.unit}
@@ -163,7 +163,7 @@ export function NutritionSettingsModal({
         </div>
 
         {/* Footer */}
-        <div className="mt-4 pt-3 border-t border-white/[0.08] flex justify-end gap-2">
+        <div className="mt-4 pt-3 border-t border-white/8 flex justify-end gap-2">
           <button
             type="button"
             onClick={onClose}

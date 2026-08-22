@@ -123,7 +123,7 @@ function TaskInspectorPaneContent({
   return (
     <aside className="relative flex flex-col h-full w-full rounded-2xl border border-white/10 bg-neutral-900/90 shadow-2xl backdrop-blur-2xl transition-all">
       {/* Top Bar Header */}
-      <div className="flex items-center justify-between border-b border-white/[0.08] px-4 py-3">
+      <div className="flex items-center justify-between border-b border-white/8 px-4 py-3">
         <div className="flex items-center gap-2">
           <span
             className={`rounded-md border px-2 py-0.5 text-[11px] font-semibold ${
@@ -306,7 +306,7 @@ function TaskInspectorPaneContent({
                         }`}
                       >
                         {item.completed && (
-                          <Check className="h-3 w-3 stroke-[3]" />
+                          <Check className="h-3 w-3 stroke-3" />
                         )}
                       </div>
                       <span
@@ -363,7 +363,7 @@ function TaskInspectorPaneContent({
               task.tags.map((tag) => (
                 <span
                   key={tag}
-                  className="inline-flex items-center gap-1 rounded-md bg-white/[0.06] px-2 py-1 font-mono text-xs text-neutral-300 border border-white/10"
+                  className="inline-flex items-center gap-1 rounded-md bg-white/6 px-2 py-1 font-mono text-xs text-neutral-300 border border-white/10"
                 >
                   <Tag className="h-3 w-3 text-neutral-400" />
                   {tag}
@@ -379,7 +379,7 @@ function TaskInspectorPaneContent({
       </div>
 
       {/* Footer Actions */}
-      <div className="flex items-center justify-between border-t border-white/[0.08] bg-neutral-950/60 p-3">
+      <div className="flex items-center justify-between border-t border-white/8 bg-neutral-950/60 p-3">
         <button
           type="button"
           onClick={handleDeleteTask}

@@ -45,7 +45,7 @@ export function SavingsGoalsWidget({ goals, onRefresh }: SavingsGoalsWidgetProps
 
   return (
     <div className="rounded-2xl border border-indigo-500/20 bg-neutral-900/60 p-5 backdrop-blur-xl shadow-xl">
-      <div className="flex items-center justify-between pb-3 border-b border-white/[0.06]">
+      <div className="flex items-center justify-between pb-3 border-b border-white/6">
         <div className="flex items-center gap-2.5">
           <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-indigo-500/10 text-indigo-400 border border-indigo-500/30">
             <Target className="h-4 w-4" />
@@ -81,7 +81,7 @@ export function SavingsGoalsWidget({ goals, onRefresh }: SavingsGoalsWidgetProps
               value={newTitle}
               onChange={(e) => setNewTitle(e.target.value)}
               required
-              className="rounded-lg border border-white/[0.1] bg-neutral-900 px-3 py-1.5 text-xs text-white placeholder:text-neutral-500 focus:outline-none"
+              className="rounded-lg border border-white/10 bg-neutral-900 px-3 py-1.5 text-xs text-white placeholder:text-neutral-500 focus:outline-none"
             />
             <input
               type="number"
@@ -89,14 +89,14 @@ export function SavingsGoalsWidget({ goals, onRefresh }: SavingsGoalsWidgetProps
               value={newTarget}
               onChange={(e) => setNewTarget(e.target.value)}
               required
-              className="rounded-lg border border-white/[0.1] bg-neutral-900 px-3 py-1.5 text-xs font-mono text-white placeholder:text-neutral-500 focus:outline-none"
+              className="rounded-lg border border-white/10 bg-neutral-900 px-3 py-1.5 text-xs font-mono text-white placeholder:text-neutral-500 focus:outline-none"
             />
             <input
               type="number"
               placeholder="Ahorro Inicial ($)"
               value={newCurrent}
               onChange={(e) => setNewCurrent(e.target.value)}
-              className="rounded-lg border border-white/[0.1] bg-neutral-900 px-3 py-1.5 text-xs font-mono text-white placeholder:text-neutral-500 focus:outline-none"
+              className="rounded-lg border border-white/10 bg-neutral-900 px-3 py-1.5 text-xs font-mono text-white placeholder:text-neutral-500 focus:outline-none"
             />
           </div>
           <div className="flex justify-end gap-2">
@@ -127,7 +127,7 @@ export function SavingsGoalsWidget({ goals, onRefresh }: SavingsGoalsWidgetProps
           return (
             <div
               key={goal.id}
-              className="rounded-xl border border-white/[0.06] bg-neutral-950/60 p-4 transition-all hover:border-white/[0.12]"
+              className="rounded-xl border border-white/6 bg-neutral-950/60 p-4 transition-all hover:border-white/12"
             >
               <div className="flex items-center justify-between">
                 <span className="text-xs font-bold text-white tracking-tight">
@@ -160,7 +160,7 @@ export function SavingsGoalsWidget({ goals, onRefresh }: SavingsGoalsWidgetProps
               </div>
 
               {/* Quick Deposit Actions */}
-              <div className="mt-3 flex items-center gap-1.5 pt-2 border-t border-white/[0.04]">
+              <div className="mt-3 flex items-center gap-1.5 pt-2 border-t border-white/4">
                 <span className="text-[10px] text-neutral-500">Aporte rápido:</span>
                 <button
                   type="button"

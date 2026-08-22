@@ -29,10 +29,10 @@ export function CalendarSettingsModal({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-200">
       <div
-        className="w-full max-w-lg rounded-2xl border border-white/[0.1] bg-neutral-900/95 p-6 shadow-2xl backdrop-blur-xl animate-in zoom-in-95 duration-200"
+        className="w-full max-w-lg rounded-2xl border border-white/10 bg-neutral-900/95 p-6 shadow-2xl backdrop-blur-xl animate-in zoom-in-95 duration-200"
         role="dialog"
       >
-        <div className="flex items-center justify-between pb-4 border-b border-white/[0.08]">
+        <div className="flex items-center justify-between pb-4 border-b border-white/8">
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-500/10 text-blue-400 border border-blue-500/20">
               <Calendar className="h-5 w-5" />
@@ -68,12 +68,12 @@ export function CalendarSettingsModal({
                 value={url}
                 onChange={(e) => setUrl(e.target.value)}
                 required
-                className="w-full rounded-xl border border-white/[0.1] bg-neutral-950/80 pl-9 pr-4 py-2.5 text-xs text-white placeholder:text-neutral-600 focus:border-blue-500/50 focus:outline-none focus:ring-2 focus:ring-blue-500/20 font-mono"
+                className="w-full rounded-xl border border-white/10 bg-neutral-950/80 pl-9 pr-4 py-2.5 text-xs text-white placeholder:text-neutral-600 focus:border-blue-500/50 focus:outline-none focus:ring-2 focus:ring-blue-500/20 font-mono"
               />
             </div>
           </div>
 
-          <div className="rounded-xl border border-white/[0.06] bg-neutral-950/60 p-3.5 text-xs text-neutral-400 space-y-1.5">
+          <div className="rounded-xl border border-white/6 bg-neutral-950/60 p-3.5 text-xs text-neutral-400 space-y-1.5">
             <div className="flex items-center gap-1.5 font-bold text-neutral-200">
               <HelpCircle className="h-3.5 w-3.5 text-blue-400" />
               <span>¿Cómo obtener tu enlace privado iCal?</span>
@@ -86,7 +86,7 @@ export function CalendarSettingsModal({
             </ol>
           </div>
 
-          <div className="flex items-center justify-end gap-3 pt-3 border-t border-white/[0.08]">
+          <div className="flex items-center justify-end gap-3 pt-3 border-t border-white/8">
             <button
               type="button"
               onClick={onClose}

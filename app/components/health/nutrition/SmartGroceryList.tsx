@@ -90,7 +90,7 @@ export function SmartGroceryList({
   return (
     <div className="space-y-5">
       {/* Date Range & Generator Toolbar */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-2xl border border-white/[0.08] bg-neutral-900/60 p-4.5 backdrop-blur-xl shadow-xl">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-2xl border border-white/8 bg-neutral-900/60 p-4.5 backdrop-blur-xl shadow-xl">
         <div className="flex flex-wrap items-center gap-3">
           <div className="flex items-center gap-2 text-xs font-semibold text-neutral-300">
             <span>Desde:</span>
@@ -98,7 +98,7 @@ export function SmartGroceryList({
               type="date"
               value={startDate}
               onChange={(e) => setStartDate(e.target.value)}
-              className="rounded-xl border border-white/[0.1] bg-neutral-950/80 px-2.5 py-1.5 font-mono text-xs text-white focus:outline-none focus:border-emerald-500/50"
+              className="rounded-xl border border-white/10 bg-neutral-950/80 px-2.5 py-1.5 font-mono text-xs text-white focus:outline-none focus:border-emerald-500/50"
             />
           </div>
 
@@ -108,7 +108,7 @@ export function SmartGroceryList({
               type="date"
               value={endDate}
               onChange={(e) => setEndDate(e.target.value)}
-              className="rounded-xl border border-white/[0.1] bg-neutral-950/80 px-2.5 py-1.5 font-mono text-xs text-white focus:outline-none focus:border-emerald-500/50"
+              className="rounded-xl border border-white/10 bg-neutral-950/80 px-2.5 py-1.5 font-mono text-xs text-white focus:outline-none focus:border-emerald-500/50"
             />
           </div>
 
@@ -132,7 +132,7 @@ export function SmartGroceryList({
             <button
               type="button"
               onClick={handleCopyClipboard}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-white/[0.08] bg-neutral-950/80 text-xs font-semibold text-neutral-200 hover:bg-neutral-800 transition-all"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-white/8 bg-neutral-950/80 text-xs font-semibold text-neutral-200 hover:bg-neutral-800 transition-all"
               title="Copiar para WhatsApp o Notas"
             >
               {copied ? (
@@ -153,7 +153,7 @@ export function SmartGroceryList({
 
       {/* Empty State */}
       {categories.length === 0 && !isPending && (
-        <div className="p-8 text-center rounded-2xl border border-dashed border-white/[0.08] bg-neutral-950/30">
+        <div className="p-8 text-center rounded-2xl border border-dashed border-white/8 bg-neutral-950/30">
           <ShoppingCart className="h-10 w-10 text-neutral-600 mx-auto mb-2" />
           <h4 className="text-sm font-bold text-white mb-1">
             Sin comidas programadas en este rango
@@ -169,17 +169,17 @@ export function SmartGroceryList({
         {categories.map((cat) => (
           <div
             key={cat.categoryKey}
-            className="flex flex-col justify-between rounded-2xl border border-white/[0.08] bg-neutral-900/60 p-4.5 backdrop-blur-xl shadow-lg"
+            className="flex flex-col justify-between rounded-2xl border border-white/8 bg-neutral-900/60 p-4.5 backdrop-blur-xl shadow-lg"
           >
             <div>
-              <div className="flex items-center justify-between pb-3 border-b border-white/[0.06]">
+              <div className="flex items-center justify-between pb-3 border-b border-white/6">
                 <div className="flex items-center gap-2">
                   <span className="text-xl">{cat.icon}</span>
                   <h4 className="text-sm font-bold text-white tracking-tight">
                     {cat.categoryTitle}
                   </h4>
                 </div>
-                <span className="rounded-full bg-neutral-950 px-2 py-0.5 font-mono text-[10px] font-bold text-neutral-400 border border-white/[0.06]">
+                <span className="rounded-full bg-neutral-950 px-2 py-0.5 font-mono text-[10px] font-bold text-neutral-400 border border-white/6">
                   {cat.items.length}
                 </span>
               </div>
@@ -196,7 +196,7 @@ export function SmartGroceryList({
                       className={`w-full flex items-start justify-between p-2.5 rounded-xl border text-left transition-all ${
                         isChecked
                           ? "bg-emerald-500/10 border-emerald-500/20 text-neutral-400 opacity-60"
-                          : "bg-neutral-950/60 border-white/[0.04] text-neutral-200 hover:border-white/[0.1]"
+                          : "bg-neutral-950/60 border-white/4 text-neutral-200 hover:border-white/10"
                       }`}
                     >
                       <div className="space-y-0.5">
@@ -221,7 +221,7 @@ export function SmartGroceryList({
                             : "border-neutral-700 bg-neutral-900"
                         }`}
                       >
-                        {isChecked && <Check className="h-3 w-3 stroke-[3]" />}
+                        {isChecked && <Check className="h-3 w-3 stroke-3" />}
                       </div>
                     </button>
                   );

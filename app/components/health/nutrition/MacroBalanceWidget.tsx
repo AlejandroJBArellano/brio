@@ -22,9 +22,9 @@ export function MacroBalanceWidget({ macros }: MacroBalanceWidgetProps) {
   const fatPct = Math.round((fatCals / totalCalculatedCals) * 100);
 
   return (
-    <div className="rounded-2xl border border-white/[0.08] bg-neutral-900/60 p-5 backdrop-blur-xl shadow-xl">
+    <div className="rounded-2xl border border-white/8 bg-neutral-900/60 p-5 backdrop-blur-xl shadow-xl">
       {/* Header */}
-      <div className="flex items-center justify-between pb-3 border-b border-white/[0.06]">
+      <div className="flex items-center justify-between pb-3 border-b border-white/6">
         <div className="flex items-center gap-2.5">
           <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-amber-500/10 text-amber-400 border border-amber-500/20">
             <Flame className="h-4 w-4" />
@@ -58,7 +58,7 @@ export function MacroBalanceWidget({ macros }: MacroBalanceWidgetProps) {
       </div>
 
       {showInfo && (
-        <div className="mt-3 p-3 rounded-xl bg-neutral-950/80 border border-white/[0.08] text-xs text-neutral-300 leading-relaxed animate-in fade-in duration-200">
+        <div className="mt-3 p-3 rounded-xl bg-neutral-950/80 border border-white/8 text-xs text-neutral-300 leading-relaxed animate-in fade-in duration-200">
           <p>
             💡 <strong className="text-white">Estimación Nutricional:</strong> Las calorías y gramos de proteína, carbohidratos, grasas y fibra se calculan según los factores equivalentes estándar de cada grupo del plan de la nutrióloga Mariana Mont. Te permite llevar un control aproximado sin necesidad de pesar cada gramo de comida.
           </p>
@@ -136,7 +136,7 @@ export function MacroBalanceWidget({ macros }: MacroBalanceWidgetProps) {
             P: {proteinPct}% | C: {carbsPct}% | G: {fatPct}%
           </span>
         </div>
-        <div className="h-2.5 w-full flex overflow-hidden rounded-full bg-neutral-950 border border-white/[0.06]">
+        <div className="h-2.5 w-full flex overflow-hidden rounded-full bg-neutral-950 border border-white/6">
           <div
             style={{ width: `${proteinPct}%` }}
             className="bg-violet-500 transition-all duration-500"

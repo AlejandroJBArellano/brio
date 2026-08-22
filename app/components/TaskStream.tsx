@@ -167,7 +167,7 @@ export function TaskStream({
       {/* Stream Controls: Tabs, Tag pill & Search */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         {/* Category Tabs */}
-        <div className="flex items-center gap-1.5 overflow-x-auto rounded-xl border border-white/[0.08] bg-neutral-900/60 p-1 backdrop-blur-xl">
+        <div className="flex items-center gap-1.5 overflow-x-auto rounded-xl border border-white/8 bg-neutral-900/60 p-1 backdrop-blur-xl">
           <button
             onClick={() => onTabChange("all")}
             className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold transition-all ${
@@ -299,7 +299,7 @@ export function TaskStream({
       )}
 
       {/* Keyboard Shortcuts Helper Ribbon */}
-      <div className="hidden lg:flex items-center justify-between border-t border-white/[0.04] pt-2 text-[11px] font-mono text-neutral-500">
+      <div className="hidden lg:flex items-center justify-between border-t border-white/4 pt-2 text-[11px] font-mono text-neutral-500">
         <div className="flex items-center gap-3">
           <span>
             <kbd className="rounded bg-neutral-800 px-1 py-0.5 text-neutral-300">

@@ -298,7 +298,7 @@ function BrioCommandCenterContent({
       />
 
       {/* Footer */}
-      <footer className="mt-auto border-t border-white/[0.06] pt-6 pb-2 text-center text-xs text-neutral-500">
+      <footer className="mt-auto border-t border-white/6 pt-6 pb-2 text-center text-xs text-neutral-500">
         <div className="flex flex-wrap items-center justify-center gap-3 font-mono text-[11px]">
           <span>Brio OS v1.1 • Habitica + Neon DB + PWA Mobile</span>
           <span>•</span>

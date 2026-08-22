@@ -73,8 +73,8 @@ export function RecipeLibraryGuide({
   return (
     <div className="space-y-5">
       {/* 1. Sub-navigation Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-2xl border border-white/[0.08] bg-neutral-900/60 p-3 backdrop-blur-xl">
-        <div className="flex items-center gap-1.5 p-1 rounded-xl bg-neutral-950/80 border border-white/[0.06] overflow-x-auto no-scrollbar">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-2xl border border-white/8 bg-neutral-900/60 p-3 backdrop-blur-xl">
+        <div className="flex items-center gap-1.5 p-1 rounded-xl bg-neutral-950/80 border border-white/6 overflow-x-auto no-scrollbar">
           <button
             type="button"
             onClick={() => setActiveTab("recipes")}
@@ -123,7 +123,7 @@ export function RecipeLibraryGuide({
               placeholder="Buscar por nombre o ingrediente..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full rounded-xl border border-white/[0.08] bg-neutral-950/80 pl-8 pr-3 py-1.5 text-xs text-white placeholder:text-neutral-600 focus:outline-none focus:border-emerald-500/50"
+              className="w-full rounded-xl border border-white/8 bg-neutral-950/80 pl-8 pr-3 py-1.5 text-xs text-white placeholder:text-neutral-600 focus:outline-none focus:border-emerald-500/50"
             />
           </div>
         )}
@@ -142,7 +142,7 @@ export function RecipeLibraryGuide({
                 className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs font-bold transition-all shrink-0 ${
                   selectedCategory === cat.id
                     ? "bg-emerald-500/20 text-emerald-300 border-emerald-500/40 shadow-sm"
-                    : "bg-neutral-950/60 border-white/[0.06] text-neutral-400 hover:text-white hover:border-white/[0.12]"
+                    : "bg-neutral-950/60 border-white/6 text-neutral-400 hover:text-white hover:border-white/12"
                 }`}
               >
                 <span>{cat.icon}</span>
@@ -166,7 +166,7 @@ export function RecipeLibraryGuide({
                 onClick={() => setSelectedBook(b.id)}
                 className={`px-2.5 py-0.5 rounded-lg text-[11px] font-medium transition-all ${
                   selectedBook === b.id
-                    ? "bg-neutral-800 text-white font-bold border border-white/[0.1]"
+                    ? "bg-neutral-800 text-white font-bold border border-white/10"
                     : "text-neutral-500 hover:text-neutral-300"
                 }`}
               >
@@ -184,17 +184,17 @@ export function RecipeLibraryGuide({
               <div
                 key={recipe.id}
                 onClick={() => setActiveRecipeModal(recipe)}
-                className="group cursor-pointer flex flex-col justify-between rounded-2xl border border-white/[0.08] bg-neutral-900/60 p-4.5 backdrop-blur-xl shadow-lg hover:border-emerald-500/30 hover:bg-neutral-900/90 transition-all"
+                className="group cursor-pointer flex flex-col justify-between rounded-2xl border border-white/8 bg-neutral-900/60 p-4.5 backdrop-blur-xl shadow-lg hover:border-emerald-500/30 hover:bg-neutral-900/90 transition-all"
               >
                 <div>
-                  <div className="flex items-start justify-between gap-2 pb-2 border-b border-white/[0.06]">
+                  <div className="flex items-start justify-between gap-2 pb-2 border-b border-white/6">
                     <div>
                       <h4 className="text-sm font-bold text-white tracking-tight leading-snug group-hover:text-emerald-300 transition-colors">
                         {recipe.title}
                       </h4>
                       <div className="flex items-center gap-2 mt-1">
                         {recipe.category && (
-                          <span className="rounded bg-white/[0.06] px-1.5 py-0.5 text-[10px] font-semibold text-neutral-400">
+                          <span className="rounded bg-white/6 px-1.5 py-0.5 text-[10px] font-semibold text-neutral-400">
                             {recipe.category}
                           </span>
                         )}
@@ -248,7 +248,7 @@ export function RecipeLibraryGuide({
                   )}
                 </div>
 
-                <div className="mt-4 pt-2 border-t border-white/[0.04] flex items-center justify-between text-[11px] text-emerald-400 font-semibold">
+                <div className="mt-4 pt-2 border-t border-white/4 flex items-center justify-between text-[11px] text-emerald-400 font-semibold">
                   <span>Ver receta completa & preparación</span>
                   <span className="group-hover:translate-x-0.5 transition-transform">→</span>
                 </div>
@@ -262,7 +262,7 @@ export function RecipeLibraryGuide({
       {activeTab === "guidelines" && (
         <div className="space-y-6">
           {/* General Indications */}
-          <div className="rounded-2xl border border-white/[0.08] bg-neutral-900/60 p-5 backdrop-blur-xl">
+          <div className="rounded-2xl border border-white/8 bg-neutral-900/60 p-5 backdrop-blur-xl">
             <h3 className="text-sm font-bold text-white tracking-tight flex items-center gap-2 mb-4">
               <Sparkles className="h-4 w-4 text-emerald-400" />
               <span>Indicaciones Clave de Mariana Mont</span>
@@ -272,7 +272,7 @@ export function RecipeLibraryGuide({
               {MARIANA_MONT_KNOWLEDGE_BASE.indications.map((ind) => (
                 <div
                   key={ind.id}
-                  className="flex items-start gap-3 p-3.5 rounded-xl border border-white/[0.06] bg-neutral-950/60"
+                  className="flex items-start gap-3 p-3.5 rounded-xl border border-white/6 bg-neutral-950/60"
                 >
                   <span className="text-2xl mt-0.5">{ind.icon}</span>
                   <div>
@@ -289,7 +289,7 @@ export function RecipeLibraryGuide({
           </div>
 
           {/* Preparation Rules & Tips */}
-          <div className="rounded-2xl border border-white/[0.08] bg-neutral-900/60 p-5 backdrop-blur-xl">
+          <div className="rounded-2xl border border-white/8 bg-neutral-900/60 p-5 backdrop-blur-xl">
             <h3 className="text-sm font-bold text-white tracking-tight flex items-center gap-2 mb-4">
               <ChefHat className="h-4 w-4 text-amber-400" />
               <span>Reglas de Preparación & Digestibilidad</span>
@@ -299,7 +299,7 @@ export function RecipeLibraryGuide({
               {MARIANA_MONT_KNOWLEDGE_BASE.preparationTips.map((tip, i) => (
                 <div
                   key={i}
-                  className="flex items-start gap-3 p-3.5 rounded-xl border border-white/[0.06] bg-neutral-950/60"
+                  className="flex items-start gap-3 p-3.5 rounded-xl border border-white/6 bg-neutral-950/60"
                 >
                   <span className="text-2xl mt-0.5">{tip.icon}</span>
                   <div>
@@ -318,14 +318,14 @@ export function RecipeLibraryGuide({
           {/* Cooking Supplies Reference */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {/* Oils */}
-            <div className="rounded-2xl border border-white/[0.08] bg-neutral-900/60 p-4.5 backdrop-blur-xl">
+            <div className="rounded-2xl border border-white/8 bg-neutral-900/60 p-4.5 backdrop-blur-xl">
               <h4 className="text-xs font-bold text-emerald-300 tracking-tight flex items-center gap-2 mb-3">
                 <Droplets className="h-4 w-4" />
                 <span>Aceites Recomendados</span>
               </h4>
               <div className="space-y-2">
                 {MARIANA_MONT_KNOWLEDGE_BASE.cookingSupplies.oils.map((oil, i) => (
-                  <div key={i} className="p-2 rounded-lg bg-neutral-950/60 border border-white/[0.04] text-[11px]">
+                  <div key={i} className="p-2 rounded-lg bg-neutral-950/60 border border-white/4 text-[11px]">
                     <strong className="text-white block">{oil.name}</strong>
                     <span className="text-neutral-400">{oil.use}</span>
                   </div>
@@ -334,14 +334,14 @@ export function RecipeLibraryGuide({
             </div>
 
             {/* Sweeteners */}
-            <div className="rounded-2xl border border-white/[0.08] bg-neutral-900/60 p-4.5 backdrop-blur-xl">
+            <div className="rounded-2xl border border-white/8 bg-neutral-900/60 p-4.5 backdrop-blur-xl">
               <h4 className="text-xs font-bold text-amber-300 tracking-tight flex items-center gap-2 mb-3">
                 <Flame className="h-4 w-4" />
                 <span>Endulzantes Permitidos</span>
               </h4>
               <div className="space-y-2">
                 {MARIANA_MONT_KNOWLEDGE_BASE.cookingSupplies.sweeteners.map((sw, i) => (
-                  <div key={i} className="p-2 rounded-lg bg-neutral-950/60 border border-white/[0.04] text-[11px]">
+                  <div key={i} className="p-2 rounded-lg bg-neutral-950/60 border border-white/4 text-[11px]">
                     <strong className="text-white block">{sw.name}</strong>
                     <span className="text-neutral-400">{sw.notes}</span>
                   </div>
@@ -350,14 +350,14 @@ export function RecipeLibraryGuide({
             </div>
 
             {/* Seasonings & Salt */}
-            <div className="rounded-2xl border border-white/[0.08] bg-neutral-900/60 p-4.5 backdrop-blur-xl">
+            <div className="rounded-2xl border border-white/8 bg-neutral-900/60 p-4.5 backdrop-blur-xl">
               <h4 className="text-xs font-bold text-sky-300 tracking-tight flex items-center gap-2 mb-3">
                 <Sparkles className="h-4 w-4" />
                 <span>Sal & Especias</span>
               </h4>
               <div className="space-y-2">
                 {MARIANA_MONT_KNOWLEDGE_BASE.cookingSupplies.seasonings.map((sn, i) => (
-                  <div key={i} className="p-2 rounded-lg bg-neutral-950/60 border border-white/[0.04] text-[11px]">
+                  <div key={i} className="p-2 rounded-lg bg-neutral-950/60 border border-white/4 text-[11px]">
                     <strong className="text-white block">{sn.name}</strong>
                     <span className="text-neutral-400">{sn.notes}</span>
                   </div>
@@ -373,7 +373,7 @@ export function RecipeLibraryGuide({
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {/* Fruits */}
           <div className="rounded-2xl border border-rose-500/20 bg-neutral-900/60 p-4.5 backdrop-blur-xl shadow-lg">
-            <div className="flex items-center gap-2 pb-3 border-b border-white/[0.06]">
+            <div className="flex items-center gap-2 pb-3 border-b border-white/6">
               <span className="text-xl">🍎</span>
               <div>
                 <h4 className="text-sm font-bold text-white">Frutas (1 tz = 1 porción)</h4>
@@ -394,7 +394,7 @@ export function RecipeLibraryGuide({
 
           {/* Vegetables */}
           <div className="rounded-2xl border border-emerald-500/20 bg-neutral-900/60 p-4.5 backdrop-blur-xl shadow-lg">
-            <div className="flex items-center gap-2 pb-3 border-b border-white/[0.06]">
+            <div className="flex items-center gap-2 pb-3 border-b border-white/6">
               <span className="text-xl">🥦</span>
               <div>
                 <h4 className="text-sm font-bold text-white">Verduras & Hongos</h4>
@@ -415,7 +415,7 @@ export function RecipeLibraryGuide({
 
           {/* Legumes */}
           <div className="rounded-2xl border border-purple-500/20 bg-neutral-900/60 p-4.5 backdrop-blur-xl shadow-lg">
-            <div className="flex items-center gap-2 pb-3 border-b border-white/[0.06]">
+            <div className="flex items-center gap-2 pb-3 border-b border-white/6">
               <span className="text-xl">🫘</span>
               <div>
                 <h4 className="text-sm font-bold text-white">Legumbres & Tofu</h4>
@@ -436,7 +436,7 @@ export function RecipeLibraryGuide({
 
           {/* Cereals */}
           <div className="rounded-2xl border border-amber-500/20 bg-neutral-900/60 p-4.5 backdrop-blur-xl shadow-lg">
-            <div className="flex items-center gap-2 pb-3 border-b border-white/[0.06]">
+            <div className="flex items-center gap-2 pb-3 border-b border-white/6">
               <span className="text-xl">🌾</span>
               <div>
                 <h4 className="text-sm font-bold text-white">Cereales Integrales</h4>
@@ -457,7 +457,7 @@ export function RecipeLibraryGuide({
 
           {/* Seeds & Fats */}
           <div className="rounded-2xl border border-lime-500/20 bg-neutral-900/60 p-4.5 backdrop-blur-xl shadow-lg">
-            <div className="flex items-center gap-2 pb-3 border-b border-white/[0.06]">
+            <div className="flex items-center gap-2 pb-3 border-b border-white/6">
               <span className="text-xl">🥑</span>
               <div>
                 <h4 className="text-sm font-bold text-white">Grasas & Semillas</h4>
@@ -481,8 +481,8 @@ export function RecipeLibraryGuide({
       {/* 5. RECIPE DETAIL MODAL */}
       {activeRecipeModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-200">
-          <div className="w-full max-w-xl rounded-3xl border border-white/[0.1] bg-neutral-900/95 p-6 shadow-2xl backdrop-blur-2xl flex flex-col max-h-[85vh]">
-            <div className="flex items-start justify-between pb-4 border-b border-white/[0.08]">
+          <div className="w-full max-w-xl rounded-3xl border border-white/10 bg-neutral-900/95 p-6 shadow-2xl backdrop-blur-2xl flex flex-col max-h-[85vh]">
+            <div className="flex items-start justify-between pb-4 border-b border-white/8">
               <div>
                 <span className="text-xs font-bold text-emerald-400 font-mono">
                   {activeRecipeModal.bookSource || "Mariana Mont"} • {activeRecipeModal.category || activeRecipeModal.mealSlot}
@@ -540,7 +540,7 @@ export function RecipeLibraryGuide({
                   <span className="text-xs font-bold text-white block">
                     Ingredientes:
                   </span>
-                  <ul className="space-y-1.5 p-3 rounded-2xl bg-neutral-950/60 border border-white/[0.06]">
+                  <ul className="space-y-1.5 p-3 rounded-2xl bg-neutral-950/60 border border-white/6">
                     {activeRecipeModal.ingredients.map((ing, i) => (
                       <li
                         key={i}
@@ -567,7 +567,7 @@ export function RecipeLibraryGuide({
               )}
             </div>
 
-            <div className="mt-4 pt-3 border-t border-white/[0.08] flex justify-between items-center">
+            <div className="mt-4 pt-3 border-t border-white/8 flex justify-between items-center">
               <span className="text-[11px] text-neutral-500">
                 100% Plant-Based & Holístico
               </span>

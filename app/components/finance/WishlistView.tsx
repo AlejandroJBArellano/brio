@@ -132,9 +132,9 @@ export function WishlistView({ data, onRefresh }: WishlistViewProps) {
       </div>
 
       {/* 2. Top Controls & Filter Bar */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-white/[0.08]">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-white/8">
         {/* Filter Pills */}
-        <div className="flex items-center gap-1.5 p-1 bg-neutral-950/80 rounded-2xl border border-white/[0.08] overflow-x-auto">
+        <div className="flex items-center gap-1.5 p-1 bg-neutral-950/80 rounded-2xl border border-white/8 overflow-x-auto">
           {[
             { id: "all", label: `Todos (${data.items.length})` },
             { id: "cooling", label: `Enfriando 🧊 (${data.stats.coolingCount})` },
@@ -161,7 +161,7 @@ export function WishlistView({ data, onRefresh }: WishlistViewProps) {
         <button
           type="button"
           onClick={() => setIsAddModalOpen(true)}
-          className="flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-violet-600 to-indigo-600 font-bold text-xs text-white hover:from-violet-500 hover:to-indigo-500 transition-all shadow-lg shadow-violet-500/20 active:scale-95 shrink-0"
+          className="flex items-center gap-2 px-4 py-2 rounded-xl bg-linear-to-r from-violet-600 to-indigo-600 font-bold text-xs text-white hover:from-violet-500 hover:to-indigo-500 transition-all shadow-lg shadow-violet-500/20 active:scale-95 shrink-0"
         >
           <Plus className="h-4 w-4" />
           <span>Agregar Deseo (Anti-Impulso)</span>
@@ -170,7 +170,7 @@ export function WishlistView({ data, onRefresh }: WishlistViewProps) {
 
       {/* 3. Wishlist Cards Grid */}
       {filteredItems.length === 0 ? (
-        <div className="p-12 text-center rounded-3xl border border-dashed border-white/[0.08] bg-neutral-950/40 space-y-3">
+        <div className="p-12 text-center rounded-3xl border border-dashed border-white/8 bg-neutral-950/40 space-y-3">
           <ShieldCheck className="h-9 w-9 text-violet-400/40 mx-auto" />
           <p className="text-sm font-bold text-neutral-300">
             No hay artículos en esta categoría
@@ -216,15 +216,15 @@ export function WishlistView({ data, onRefresh }: WishlistViewProps) {
                     : isDismissed
                     ? "border-violet-500/20 bg-neutral-950/40 opacity-75"
                     : isPurchased
-                    ? "border-white/[0.04] bg-neutral-950/30 opacity-60"
-                    : "border-white/[0.08] bg-neutral-900/60 hover:border-white/[0.18]"
+                    ? "border-white/4 bg-neutral-950/30 opacity-60"
+                    : "border-white/8 bg-neutral-900/60 hover:border-white/18"
                 }`}
               >
                 <div className="space-y-3">
                   {/* Top Bar: Category, Priority, Delete */}
                   <div className="flex items-center justify-between text-[11px]">
                     <div className="flex items-center gap-1.5">
-                      <span className="px-2 py-0.5 rounded-md bg-neutral-950 border border-white/[0.08] text-neutral-300 font-semibold">
+                      <span className="px-2 py-0.5 rounded-md bg-neutral-950 border border-white/8 text-neutral-300 font-semibold">
                         {item.category}
                       </span>
                       <span className={`px-2 py-0.5 rounded-md border font-semibold capitalize ${priorityBadge}`}>
@@ -270,14 +270,14 @@ export function WishlistView({ data, onRefresh }: WishlistViewProps) {
 
                   {/* Justification Notes */}
                   {item.reasonOrNotes && (
-                    <p className="text-xs text-neutral-400 italic bg-neutral-950/60 p-2.5 rounded-xl border border-white/[0.04]">
+                    <p className="text-xs text-neutral-400 italic bg-neutral-950/60 p-2.5 rounded-xl border border-white/4">
                       &ldquo;{item.reasonOrNotes}&rdquo;
                     </p>
                   )}
 
                   {/* Cooling Progress Bar */}
                   {(isCooling || isReady) && (
-                    <div className="p-3 rounded-2xl bg-neutral-950/80 border border-white/[0.06] space-y-2">
+                    <div className="p-3 rounded-2xl bg-neutral-950/80 border border-white/6 space-y-2">
                       <div className="flex items-center justify-between text-[11px] font-mono">
                         <span className="text-neutral-400 flex items-center gap-1">
                           <Clock className="h-3 w-3 text-cyan-400" />
@@ -319,12 +319,12 @@ export function WishlistView({ data, onRefresh }: WishlistViewProps) {
 
                 {/* Bottom Action Controls */}
                 {(isCooling || isReady) && (
-                  <div className="mt-4 pt-3 border-t border-white/[0.06] flex items-center gap-2">
+                  <div className="mt-4 pt-3 border-t border-white/6 flex items-center gap-2">
                     <button
                       type="button"
                       onClick={() => handleDismiss(item)}
                       disabled={isPending}
-                      className="flex-1 py-2 rounded-xl bg-neutral-950 hover:bg-rose-500/10 border border-white/[0.08] hover:border-rose-500/30 text-xs font-semibold text-neutral-400 hover:text-rose-300 transition-all"
+                      className="flex-1 py-2 rounded-xl bg-neutral-950 hover:bg-rose-500/10 border border-white/8 hover:border-rose-500/30 text-xs font-semibold text-neutral-400 hover:text-rose-300 transition-all"
                       title="Descartar y sumar al contador de dinero ahorrado"
                     >
                       Descartar ❌
@@ -337,7 +337,7 @@ export function WishlistView({ data, onRefresh }: WishlistViewProps) {
                       className={`flex-1 py-2 rounded-xl font-bold text-xs transition-all shadow-md ${
                         isReady
                           ? "bg-emerald-500 text-neutral-950 hover:bg-emerald-400 shadow-emerald-500/20"
-                          : "bg-white/[0.08] text-neutral-200 hover:bg-white/[0.15]"
+                          : "bg-white/8 text-neutral-200 hover:bg-white/15"
                       }`}
                     >
                       Comprar 🛍️

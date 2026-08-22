@@ -88,8 +88,8 @@ export function FinanceView({ data, onRefresh }: FinanceViewProps) {
   return (
     <div className="flex flex-col gap-6 animate-in fade-in duration-300">
       {/* Sub-Navigation Tabs */}
-      <div className="flex items-center justify-between border-b border-white/[0.08] pb-3">
-        <div className="flex items-center gap-2 p-1 bg-neutral-950/80 rounded-2xl border border-white/[0.08]">
+      <div className="flex items-center justify-between border-b border-white/8 pb-3">
+        <div className="flex items-center gap-2 p-1 bg-neutral-950/80 rounded-2xl border border-white/8">
           <button
             type="button"
             onClick={() => setSubTab("budget")}
@@ -165,7 +165,7 @@ export function FinanceView({ data, onRefresh }: FinanceViewProps) {
         </div>
 
         {/* Net Balance */}
-        <div className="rounded-2xl border border-white/[0.08] bg-neutral-900/60 p-4 backdrop-blur-xl shadow-xl">
+        <div className="rounded-2xl border border-white/8 bg-neutral-900/60 p-4 backdrop-blur-xl shadow-xl">
           <div className="flex items-center justify-between text-xs text-neutral-400">
             <span>Balance Neto</span>
             <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-indigo-500/10 text-indigo-400">
@@ -207,14 +207,14 @@ export function FinanceView({ data, onRefresh }: FinanceViewProps) {
       </div>
 
       {/* 2. Monthly Budget Thermometer Card */}
-      <div className="rounded-2xl border border-white/[0.08] bg-neutral-900/60 p-5 backdrop-blur-xl shadow-xl">
+      <div className="rounded-2xl border border-white/8 bg-neutral-900/60 p-5 backdrop-blur-xl shadow-xl">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
             <div className="flex items-center gap-2">
               <h3 className="text-base font-bold text-white tracking-tight">
                 Termómetro de Presupuesto del Mes
               </h3>
-              <span className="rounded-md border border-white/[0.1] bg-neutral-800 px-2 py-0.5 text-xs font-mono text-neutral-300">
+              <span className="rounded-md border border-white/10 bg-neutral-800 px-2 py-0.5 text-xs font-mono text-neutral-300">
                 {budgetSpentPercent}% utilizado
               </span>
             </div>
@@ -226,7 +226,7 @@ export function FinanceView({ data, onRefresh }: FinanceViewProps) {
           <button
             type="button"
             onClick={() => setIsModalOpen(true)}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 text-neutral-950 font-bold text-xs hover:brightness-110 shadow-lg shadow-amber-500/20 transition-all"
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-linear-to-r from-amber-500 to-amber-600 text-neutral-950 font-bold text-xs hover:brightness-110 shadow-lg shadow-amber-500/20 transition-all"
           >
             <Plus className="h-4 w-4" />
             <span>Registrar Movimiento (⌘F)</span>
@@ -235,7 +235,7 @@ export function FinanceView({ data, onRefresh }: FinanceViewProps) {
 
         {/* Big Progress Bar */}
         <div className="mt-5 space-y-2">
-          <div className="relative h-4 w-full overflow-hidden rounded-full bg-neutral-950 border border-white/[0.06]">
+          <div className="relative h-4 w-full overflow-hidden rounded-full bg-neutral-950 border border-white/6">
             <div
               className={`h-full transition-all duration-700 ${
                 budgetSpentPercent > 90
@@ -272,7 +272,7 @@ export function FinanceView({ data, onRefresh }: FinanceViewProps) {
 
       {/* 4. Category Breakdown Chips */}
       {data.categoryBreakdown.length > 0 && (
-        <div className="rounded-2xl border border-white/[0.08] bg-neutral-900/60 p-5 backdrop-blur-xl">
+        <div className="rounded-2xl border border-white/8 bg-neutral-900/60 p-5 backdrop-blur-xl">
           <div className="flex items-center gap-2 mb-3">
             <PieChart className="h-4 w-4 text-indigo-400" />
             <h4 className="text-xs font-bold text-white uppercase tracking-wider">
@@ -283,7 +283,7 @@ export function FinanceView({ data, onRefresh }: FinanceViewProps) {
             {data.categoryBreakdown.map((cat) => (
               <div
                 key={cat.category}
-                className="flex items-center gap-2 px-3 py-1.5 rounded-xl border border-white/[0.06] bg-neutral-950/60 text-xs"
+                className="flex items-center gap-2 px-3 py-1.5 rounded-xl border border-white/6 bg-neutral-950/60 text-xs"
               >
                 <span className="font-semibold text-neutral-300 capitalize">
                   #{cat.category}
@@ -301,8 +301,8 @@ export function FinanceView({ data, onRefresh }: FinanceViewProps) {
       )}
 
       {/* 5. Transactions Log & Search Stream */}
-      <div className="rounded-2xl border border-white/[0.08] bg-neutral-900/60 p-5 backdrop-blur-xl shadow-xl">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-white/[0.06]">
+      <div className="rounded-2xl border border-white/8 bg-neutral-900/60 p-5 backdrop-blur-xl shadow-xl">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-white/6">
           <div className="flex items-center gap-2.5">
             <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-neutral-800 text-neutral-300">
               <Calendar className="h-4 w-4" />
@@ -326,12 +326,12 @@ export function FinanceView({ data, onRefresh }: FinanceViewProps) {
                 placeholder="Buscar por concepto o cuenta..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="rounded-xl border border-white/[0.08] bg-neutral-950/80 pl-8 pr-3 py-1.5 text-xs text-white placeholder:text-neutral-500 focus:outline-none"
+                className="rounded-xl border border-white/8 bg-neutral-950/80 pl-8 pr-3 py-1.5 text-xs text-white placeholder:text-neutral-500 focus:outline-none"
               />
             </div>
 
             {/* Filter Pills */}
-            <div className="flex items-center gap-1 p-1 rounded-xl bg-neutral-950/60 border border-white/[0.06] text-xs">
+            <div className="flex items-center gap-1 p-1 rounded-xl bg-neutral-950/60 border border-white/6 text-xs">
               <button
                 type="button"
                 onClick={() => setActiveFilter("all")}
@@ -373,7 +373,7 @@ export function FinanceView({ data, onRefresh }: FinanceViewProps) {
         </div>
 
         {/* Transactions List */}
-        <div className="mt-4 divide-y divide-white/[0.04]">
+        <div className="mt-4 divide-y divide-white/4">
           {filteredTransactions.length === 0 ? (
             <div className="py-12 text-center text-xs text-neutral-500">
               No hay movimientos registrados con los filtros seleccionados.
@@ -382,7 +382,7 @@ export function FinanceView({ data, onRefresh }: FinanceViewProps) {
             filteredTransactions.map((tx) => (
               <div
                 key={tx.id}
-                className="flex items-center justify-between py-3 px-2 rounded-xl hover:bg-white/[0.02] transition-colors group"
+                className="flex items-center justify-between py-3 px-2 rounded-xl hover:bg-white/2 transition-colors group"
               >
                 <div className="flex items-center gap-3">
                   <div

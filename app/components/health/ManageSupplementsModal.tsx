@@ -156,11 +156,11 @@ export function ManageSupplementsModal({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-200">
       <div
-        className="w-full max-w-2xl max-h-[90vh] flex flex-col rounded-2xl border border-white/[0.1] bg-neutral-900/95 shadow-2xl backdrop-blur-xl animate-in zoom-in-95 duration-200 overflow-hidden"
+        className="w-full max-w-2xl max-h-[90vh] flex flex-col rounded-2xl border border-white/10 bg-neutral-900/95 shadow-2xl backdrop-blur-xl animate-in zoom-in-95 duration-200 overflow-hidden"
         role="dialog"
       >
         {/* Header */}
-        <div className="flex items-center justify-between p-6 pb-4 border-b border-white/[0.08]">
+        <div className="flex items-center justify-between p-6 pb-4 border-b border-white/8">
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-violet-500/10 text-violet-400 border border-violet-500/20">
               <Pill className="h-5 w-5" />
@@ -193,7 +193,7 @@ export function ManageSupplementsModal({
           )}
 
           {/* Form: Add or Edit */}
-          <form onSubmit={handleSubmit} className="rounded-xl border border-white/[0.08] bg-neutral-950/60 p-4 space-y-4">
+          <form onSubmit={handleSubmit} className="rounded-xl border border-white/8 bg-neutral-950/60 p-4 space-y-4">
             <div className="flex items-center justify-between">
               <h3 className="text-xs font-bold text-white tracking-wider uppercase flex items-center gap-1.5">
                 {editingId ? (
@@ -229,7 +229,7 @@ export function ManageSupplementsModal({
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder="Ej. Citrato de Magnesio"
-                  className="w-full rounded-xl border border-white/[0.08] bg-neutral-900 px-3.5 py-2 text-xs text-white placeholder-neutral-500 focus:border-violet-500 focus:outline-none focus:ring-1 focus:ring-violet-500"
+                  className="w-full rounded-xl border border-white/8 bg-neutral-900 px-3.5 py-2 text-xs text-white placeholder-neutral-500 focus:border-violet-500 focus:outline-none focus:ring-1 focus:ring-violet-500"
                   required
                 />
               </div>
@@ -243,7 +243,7 @@ export function ManageSupplementsModal({
                   value={dosage}
                   onChange={(e) => setDosage(e.target.value)}
                   placeholder="Ej. 400mg, 5g, 2 cápsulas"
-                  className="w-full rounded-xl border border-white/[0.08] bg-neutral-900 px-3.5 py-2 text-xs text-white placeholder-neutral-500 focus:border-violet-500 focus:outline-none focus:ring-1 focus:ring-violet-500"
+                  className="w-full rounded-xl border border-white/8 bg-neutral-900 px-3.5 py-2 text-xs text-white placeholder-neutral-500 focus:border-violet-500 focus:outline-none focus:ring-1 focus:ring-violet-500"
                 />
               </div>
             </div>
@@ -261,7 +261,7 @@ export function ManageSupplementsModal({
                     className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-all ${
                       timing === opt.id
                         ? "border-violet-500/50 bg-violet-500/20 text-violet-200"
-                        : "border-white/[0.06] bg-neutral-900 text-neutral-400 hover:border-white/[0.12]"
+                        : "border-white/6 bg-neutral-900 text-neutral-400 hover:border-white/12"
                     }`}
                   >
                     {opt.label}
@@ -274,7 +274,7 @@ export function ManageSupplementsModal({
               <button
                 type="submit"
                 disabled={isPending}
-                className="px-4 py-2 rounded-xl bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white font-bold text-xs shadow-lg shadow-violet-500/20 transition-all flex items-center gap-1.5 disabled:opacity-50"
+                className="px-4 py-2 rounded-xl bg-linear-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white font-bold text-xs shadow-lg shadow-violet-500/20 transition-all flex items-center gap-1.5 disabled:opacity-50"
               >
                 {editingId ? (
                   <>
@@ -314,7 +314,7 @@ export function ManageSupplementsModal({
                       className={`px-2.5 py-1.5 rounded-lg border text-xs flex items-center gap-1.5 transition-all ${
                         alreadyAdded
                           ? "border-emerald-500/20 bg-emerald-500/5 text-emerald-400/60 opacity-60 cursor-default"
-                          : "border-white/[0.08] bg-neutral-900/80 hover:border-violet-500/40 hover:bg-violet-500/10 text-neutral-300 hover:text-violet-200"
+                          : "border-white/8 bg-neutral-900/80 hover:border-violet-500/40 hover:bg-violet-500/10 text-neutral-300 hover:text-violet-200"
                       }`}
                     >
                       <span>{preset.name}</span>
@@ -345,7 +345,7 @@ export function ManageSupplementsModal({
             </div>
 
             {supplements.length === 0 ? (
-              <div className="p-8 text-center rounded-xl border border-dashed border-white/[0.08] bg-neutral-950/30">
+              <div className="p-8 text-center rounded-xl border border-dashed border-white/8 bg-neutral-950/30">
                 <Pill className="h-8 w-8 text-neutral-600 mx-auto mb-2" />
                 <p className="text-xs text-neutral-400">
                   Aún no tienes suplementos configurados. Agrega uno arriba o usa los presets rápidos.
@@ -359,7 +359,7 @@ export function ManageSupplementsModal({
                     className={`flex items-center justify-between p-3 rounded-xl border transition-all ${
                       editingId === supp.id
                         ? "border-violet-500/50 bg-violet-500/10"
-                        : "border-white/[0.06] bg-neutral-950/40 hover:border-white/[0.12]"
+                        : "border-white/6 bg-neutral-950/40 hover:border-white/12"
                     }`}
                   >
                     <div className="flex items-center gap-3">
@@ -372,7 +372,7 @@ export function ManageSupplementsModal({
                             {supp.name}
                           </span>
                           {supp.dosage && (
-                            <span className="rounded-md bg-white/[0.06] px-1.5 py-0.5 text-[10px] font-mono text-violet-300 border border-white/[0.04]">
+                            <span className="rounded-md bg-white/6 px-1.5 py-0.5 text-[10px] font-mono text-violet-300 border border-white/4">
                               {supp.dosage}
                             </span>
                           )}
@@ -434,7 +434,7 @@ export function ManageSupplementsModal({
         </div>
 
         {/* Footer */}
-        <div className="p-4 border-t border-white/[0.08] bg-neutral-950/40 flex justify-end">
+        <div className="p-4 border-t border-white/8 bg-neutral-950/40 flex justify-end">
           <button
             type="button"
             onClick={onClose}

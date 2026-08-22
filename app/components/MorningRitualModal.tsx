@@ -82,7 +82,7 @@ export function MorningRitualModal({
         role="dialog"
       >
         {/* Header */}
-        <div className="flex items-center justify-between pb-4 border-b border-white/[0.08]">
+        <div className="flex items-center justify-between pb-4 border-b border-white/8">
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-amber-500/10 text-amber-400 border border-amber-500/20 shadow-lg shadow-amber-500/10">
               <Sun className="h-5 w-5" />
@@ -112,8 +112,8 @@ export function MorningRitualModal({
         {/* Step 1: Agenda Preview */}
         {step === 1 && (
           <div className="mt-5 space-y-4 animate-in fade-in duration-200">
-            <div className="rounded-2xl border border-white/[0.06] bg-neutral-950/60 p-4">
-              <div className="flex items-center justify-between text-xs text-neutral-400 pb-2 border-b border-white/[0.04]">
+            <div className="rounded-2xl border border-white/6 bg-neutral-950/60 p-4">
+              <div className="flex items-center justify-between text-xs text-neutral-400 pb-2 border-b border-white/4">
                 <span>¡Buenos días, <strong>{user.profile.name || "Hero"}</strong>! ⚔️</span>
                 <span>Lvl {user.stats.lvl} {user.stats.class}</span>
               </div>
@@ -125,14 +125,14 @@ export function MorningRitualModal({
             {/* Calendar list */}
             <div className="space-y-2 max-h-48 overflow-y-auto pr-1">
               {schedule.events.length === 0 ? (
-                <div className="p-4 rounded-xl border border-white/[0.04] bg-neutral-950/40 text-center text-xs text-neutral-500">
+                <div className="p-4 rounded-xl border border-white/4 bg-neutral-950/40 text-center text-xs text-neutral-500">
                   Sin reuniones en el calendario. ¡Todo el día disponible para avanzar tareas clave!
                 </div>
               ) : (
                 schedule.events.map((ev) => (
                   <div
                     key={ev.id}
-                    className="flex items-center justify-between p-3 rounded-xl border border-white/[0.06] bg-neutral-950/60 text-xs"
+                    className="flex items-center justify-between p-3 rounded-xl border border-white/6 bg-neutral-950/60 text-xs"
                   >
                     <div className="flex items-center gap-2">
                       <Clock className="h-3.5 w-3.5 text-blue-400" />
@@ -146,11 +146,11 @@ export function MorningRitualModal({
               )}
             </div>
 
-            <div className="flex justify-end pt-3 border-t border-white/[0.06]">
+            <div className="flex justify-end pt-3 border-t border-white/6">
               <button
                 type="button"
                 onClick={() => setStep(2)}
-                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 font-bold text-xs text-neutral-950 hover:brightness-110 shadow-lg shadow-amber-500/20"
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-linear-to-r from-amber-500 to-amber-600 font-bold text-xs text-neutral-950 hover:brightness-110 shadow-lg shadow-amber-500/20"
               >
                 <span>Definir 3 Must-Wins</span>
                 <ArrowRight className="h-4 w-4" />
@@ -189,7 +189,7 @@ export function MorningRitualModal({
                       className={`flex items-center justify-between p-3 rounded-xl border cursor-pointer transition-all ${
                         isSelected
                           ? "border-amber-500/50 bg-amber-500/10 text-white shadow-sm"
-                          : "border-white/[0.06] bg-neutral-950/60 text-neutral-300 hover:border-white/[0.12]"
+                          : "border-white/6 bg-neutral-950/60 text-neutral-300 hover:border-white/12"
                       }`}
                     >
                       <div className="flex items-center gap-2.5">
@@ -200,7 +200,7 @@ export function MorningRitualModal({
                               : "border-neutral-700 bg-neutral-900"
                           }`}
                         >
-                          {isSelected && <Check className="h-3 w-3 stroke-[3]" />}
+                          {isSelected && <Check className="h-3 w-3 stroke-3" />}
                         </div>
                         <span className="text-xs font-medium">{task.text}</span>
                       </div>
@@ -212,7 +212,7 @@ export function MorningRitualModal({
                 })}
             </div>
 
-            <div className="flex justify-between items-center pt-3 border-t border-white/[0.06]">
+            <div className="flex justify-between items-center pt-3 border-t border-white/6">
               <button
                 type="button"
                 onClick={() => setStep(1)}
@@ -224,7 +224,7 @@ export function MorningRitualModal({
                 type="button"
                 onClick={() => setStep(3)}
                 disabled={selectedTasks.length === 0}
-                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 font-bold text-xs text-neutral-950 hover:brightness-110 shadow-lg shadow-amber-500/20 disabled:opacity-50"
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-linear-to-r from-amber-500 to-amber-600 font-bold text-xs text-neutral-950 hover:brightness-110 shadow-lg shadow-amber-500/20 disabled:opacity-50"
               >
                 <span>Alinear Energía</span>
                 <ArrowRight className="h-4 w-4" />
@@ -249,7 +249,7 @@ export function MorningRitualModal({
                     className={`flex flex-col items-center gap-1 p-3 rounded-xl border text-center transition-all ${
                       energyLevel === lvl.level
                         ? "border-amber-500/50 bg-amber-500/20 text-white shadow-lg"
-                        : "border-white/[0.06] bg-neutral-950/60 text-neutral-400 hover:border-white/[0.12]"
+                        : "border-white/6 bg-neutral-950/60 text-neutral-400 hover:border-white/12"
                     }`}
                   >
                     <span className="text-xl">{lvl.icon}</span>
@@ -268,11 +268,11 @@ export function MorningRitualModal({
                 placeholder="Ej. Foco implacable en la mañana, cero multitarea..."
                 value={dayIntention}
                 onChange={(e) => setDayIntention(e.target.value)}
-                className="w-full rounded-xl border border-white/[0.1] bg-neutral-950/80 px-3.5 py-2.5 text-xs text-white placeholder:text-neutral-600 focus:border-amber-500/50 focus:outline-none"
+                className="w-full rounded-xl border border-white/10 bg-neutral-950/80 px-3.5 py-2.5 text-xs text-white placeholder:text-neutral-600 focus:border-amber-500/50 focus:outline-none"
               />
             </div>
 
-            <div className="flex justify-between items-center pt-3 border-t border-white/[0.06]">
+            <div className="flex justify-between items-center pt-3 border-t border-white/6">
               <button
                 type="button"
                 onClick={() => setStep(2)}
@@ -284,7 +284,7 @@ export function MorningRitualModal({
                 type="button"
                 onClick={handleFinish}
                 disabled={isPending}
-                className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 font-bold text-xs text-neutral-950 hover:brightness-110 shadow-xl shadow-amber-500/30 disabled:opacity-50"
+                className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-linear-to-r from-amber-500 to-amber-600 font-bold text-xs text-neutral-950 hover:brightness-110 shadow-xl shadow-amber-500/30 disabled:opacity-50"
               >
                 <Sparkles className="h-4 w-4" />
                 <span>{isPending ? "Activando Brio..." : "¡Iniciar el Día! 🚀"}</span>

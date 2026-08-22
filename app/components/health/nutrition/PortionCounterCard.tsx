@@ -27,13 +27,13 @@ export function PortionCounterCard({
       className={`relative flex flex-col justify-between rounded-2xl border p-4 transition-all duration-300 backdrop-blur-xl ${
         isCompleted
           ? "border-emerald-500/30 bg-neutral-900/80 shadow-lg shadow-emerald-500/5"
-          : "border-white/[0.08] bg-neutral-900/60 hover:border-white/[0.14]"
+          : "border-white/8 bg-neutral-900/60 hover:border-white/14"
       }`}
     >
       {/* Top row: Icon + Label + Target Badge */}
       <div className="flex items-start justify-between gap-2">
         <div className="flex items-center gap-2.5">
-          <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-neutral-950/80 border border-white/[0.08] text-lg shadow-inner">
+          <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-neutral-950/80 border border-white/8 text-lg shadow-inner">
             {meta.icon}
           </span>
           <div>
@@ -41,7 +41,7 @@ export function PortionCounterCard({
               <span>{meta.label}</span>
               {isCompleted && (
                 <span className="flex h-4 w-4 items-center justify-center rounded-full bg-emerald-500/20 text-emerald-400">
-                  <Check className="h-2.5 w-2.5 stroke-[3]" />
+                  <Check className="h-2.5 w-2.5 stroke-3" />
                 </span>
               )}
             </h4>
@@ -55,7 +55,7 @@ export function PortionCounterCard({
           className={`rounded-full px-2 py-0.5 text-[10px] font-bold font-mono border ${
             isCompleted
               ? "bg-emerald-500/15 border-emerald-500/30 text-emerald-300"
-              : "bg-neutral-950/60 border-white/[0.06] text-neutral-400"
+              : "bg-neutral-950/60 border-white/6 text-neutral-400"
           }`}
         >
           Meta: {target} {meta.unit}
@@ -78,7 +78,7 @@ export function PortionCounterCard({
           </span>
         </div>
 
-        <div className="relative h-2 w-full overflow-hidden rounded-full bg-neutral-950 border border-white/[0.06]">
+        <div className="relative h-2 w-full overflow-hidden rounded-full bg-neutral-950 border border-white/6">
           <div
             className="h-full rounded-full transition-all duration-500 ease-out"
             style={{
@@ -96,7 +96,7 @@ export function PortionCounterCard({
           type="button"
           onClick={() => onAdjust(-0.5)}
           disabled={disabled || current <= 0}
-          className="flex-1 py-1.5 rounded-xl border border-white/[0.06] bg-neutral-950/60 text-xs font-bold text-neutral-300 hover:bg-neutral-800 hover:text-white disabled:opacity-30 disabled:pointer-events-none transition-all active:scale-95 flex items-center justify-center gap-1"
+          className="flex-1 py-1.5 rounded-xl border border-white/6 bg-neutral-950/60 text-xs font-bold text-neutral-300 hover:bg-neutral-800 hover:text-white disabled:opacity-30 disabled:pointer-events-none transition-all active:scale-95 flex items-center justify-center gap-1"
           title="Restar 0.5 porción"
         >
           <Minus className="h-3 w-3" />
@@ -107,7 +107,7 @@ export function PortionCounterCard({
           type="button"
           onClick={() => onAdjust(0.5)}
           disabled={disabled}
-          className="flex-1 py-1.5 rounded-xl border border-white/[0.08] bg-neutral-950/80 text-xs font-bold text-neutral-200 hover:bg-neutral-800 hover:text-white disabled:opacity-40 transition-all active:scale-95 flex items-center justify-center gap-1"
+          className="flex-1 py-1.5 rounded-xl border border-white/8 bg-neutral-950/80 text-xs font-bold text-neutral-200 hover:bg-neutral-800 hover:text-white disabled:opacity-40 transition-all active:scale-95 flex items-center justify-center gap-1"
           title="Sumar 0.5 porción"
         >
           <Plus className="h-3 w-3" />
@@ -126,7 +126,7 @@ export function PortionCounterCard({
           }}
           title="Sumar 1 porción completa"
         >
-          <Plus className="h-3.5 w-3.5 stroke-[3]" />
+          <Plus className="h-3.5 w-3.5 stroke-3" />
           <span>1.0</span>
         </button>
       </div>

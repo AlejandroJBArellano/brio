@@ -141,11 +141,11 @@ export function AddVaultItemModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-200">
-      <div className="w-full max-w-xl max-h-[90vh] rounded-3xl border border-white/[0.12] bg-neutral-900 shadow-2xl overflow-hidden flex flex-col">
+      <div className="w-full max-w-xl max-h-[90vh] rounded-3xl border border-white/12 bg-neutral-900 shadow-2xl overflow-hidden flex flex-col">
         {/* Modal Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-white/[0.08] bg-neutral-950/60 shrink-0">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-white/8 bg-neutral-950/60 shrink-0">
           <div className="flex items-center gap-2.5">
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-cyan-500/20 to-blue-500/20 border border-cyan-500/30 text-cyan-400">
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-linear-to-br from-cyan-500/20 to-blue-500/20 border border-cyan-500/30 text-cyan-400">
               {category === "sheet_music" && <Music className="h-4 w-4" />}
               {category === "book" && <BookOpen className="h-4 w-4" />}
               {category === "course" && <GraduationCap className="h-4 w-4" />}
@@ -202,7 +202,7 @@ export function AddVaultItemModal({
                     className={`flex flex-col items-center justify-center p-2 rounded-xl border text-[11px] font-semibold transition-all ${
                       category === c.id
                         ? "bg-cyan-500/20 border-cyan-500/40 text-cyan-300"
-                        : "bg-neutral-950 border-white/[0.06] text-neutral-400 hover:text-white"
+                        : "bg-neutral-950 border-white/6 text-neutral-400 hover:text-white"
                     }`}
                   >
                     <Icon className="h-4 w-4 mb-1" />
@@ -233,7 +233,7 @@ export function AddVaultItemModal({
                     ? "Ej. Charla Arquitectura Distribuida"
                     : "Ej. Designing Data-Intensive Applications"
                 }
-                className="w-full rounded-xl border border-white/[0.1] bg-neutral-950 p-2.5 text-xs text-white placeholder:text-neutral-600 focus:outline-none focus:border-cyan-500"
+                className="w-full rounded-xl border border-white/10 bg-neutral-950 p-2.5 text-xs text-white placeholder:text-neutral-600 focus:outline-none focus:border-cyan-500"
               />
             </div>
 
@@ -250,7 +250,7 @@ export function AddVaultItemModal({
                 value={authorOrCreator}
                 onChange={(e) => setAuthorOrCreator(e.target.value)}
                 placeholder="Ej. Claude Debussy / Martin Kleppmann"
-                className="w-full rounded-xl border border-white/[0.1] bg-neutral-950 p-2.5 text-xs text-white placeholder:text-neutral-600 focus:outline-none focus:border-cyan-500"
+                className="w-full rounded-xl border border-white/10 bg-neutral-950 p-2.5 text-xs text-white placeholder:text-neutral-600 focus:outline-none focus:border-cyan-500"
               />
             </div>
           </div>
@@ -265,7 +265,7 @@ export function AddVaultItemModal({
                 <select
                   value={platform}
                   onChange={(e) => setPlatform(e.target.value)}
-                  className="w-full rounded-xl border border-white/[0.1] bg-neutral-950 p-2.5 text-xs text-white focus:outline-none"
+                  className="w-full rounded-xl border border-white/10 bg-neutral-950 p-2.5 text-xs text-white focus:outline-none"
                 >
                   {PLATFORMS.map((plat) => (
                     <option key={plat} value={plat}>
@@ -284,7 +284,7 @@ export function AddVaultItemModal({
                   value={url}
                   onChange={(e) => handleUrlChange(e.target.value)}
                   placeholder="https://notion.so/... o https://youtube.com/watch?v=... o https://github.com/..."
-                  className="w-full rounded-xl border border-white/[0.1] bg-neutral-950 p-2.5 text-xs text-white placeholder:text-neutral-600 focus:outline-none focus:border-cyan-500"
+                  className="w-full rounded-xl border border-white/10 bg-neutral-950 p-2.5 text-xs text-white placeholder:text-neutral-600 focus:outline-none focus:border-cyan-500"
                 />
               </div>
             </div>
@@ -300,7 +300,7 @@ export function AddVaultItemModal({
                 <select
                   value={instrument}
                   onChange={(e) => setInstrument(e.target.value)}
-                  className="w-full rounded-xl border border-white/[0.1] bg-neutral-950 p-2.5 text-xs text-white focus:outline-none"
+                  className="w-full rounded-xl border border-white/10 bg-neutral-950 p-2.5 text-xs text-white focus:outline-none"
                 >
                   {INSTRUMENTS.map((inst) => (
                     <option key={inst} value={inst}>
@@ -317,7 +317,7 @@ export function AddVaultItemModal({
                 <select
                   value={difficulty}
                   onChange={(e) => setDifficulty(e.target.value)}
-                  className="w-full rounded-xl border border-white/[0.1] bg-neutral-950 p-2.5 text-xs text-white focus:outline-none"
+                  className="w-full rounded-xl border border-white/10 bg-neutral-950 p-2.5 text-xs text-white focus:outline-none"
                 >
                   {DIFFICULTIES.map((diff) => (
                     <option key={diff.id} value={diff.id}>
@@ -341,7 +341,7 @@ export function AddVaultItemModal({
                   value={totalPages}
                   onChange={(e) => setTotalPages(e.target.value)}
                   placeholder={category === "course" ? "Ej. 48 clases" : "Ej. 320 págs"}
-                  className="w-full rounded-xl border border-white/[0.1] bg-neutral-950 p-2.5 text-xs font-mono text-white placeholder:text-neutral-600 focus:outline-none focus:border-cyan-500"
+                  className="w-full rounded-xl border border-white/10 bg-neutral-950 p-2.5 text-xs font-mono text-white placeholder:text-neutral-600 focus:outline-none focus:border-cyan-500"
                 />
               </div>
 
@@ -354,7 +354,7 @@ export function AddVaultItemModal({
                   value={progress}
                   onChange={(e) => setProgress(e.target.value)}
                   placeholder={category === "course" ? "Clases hechas" : "Págs leídas"}
-                  className="w-full rounded-xl border border-white/[0.1] bg-neutral-950 p-2.5 text-xs font-mono text-white placeholder:text-neutral-600 focus:outline-none focus:border-cyan-500"
+                  className="w-full rounded-xl border border-white/10 bg-neutral-950 p-2.5 text-xs font-mono text-white placeholder:text-neutral-600 focus:outline-none focus:border-cyan-500"
                 />
               </div>
 
@@ -365,7 +365,7 @@ export function AddVaultItemModal({
                 <select
                   value={status}
                   onChange={(e) => setStatus(e.target.value as VaultItemStatus)}
-                  className="w-full rounded-xl border border-white/[0.1] bg-neutral-950 p-2.5 text-xs text-white focus:outline-none"
+                  className="w-full rounded-xl border border-white/10 bg-neutral-950 p-2.5 text-xs text-white focus:outline-none"
                 >
                   <option value="backlog">Por Empezar / Backlog</option>
                   <option value="in_progress">En Curso / Práctica</option>
@@ -388,7 +388,7 @@ export function AddVaultItemModal({
               <span className="text-[10px] text-cyan-400 font-mono">Bucket: brio-media-vault-2026</span>
             </label>
 
-            <div className="relative rounded-2xl border-2 border-dashed border-white/[0.12] bg-neutral-950/60 p-4 text-center hover:border-cyan-500/40 transition-all">
+            <div className="relative rounded-2xl border-2 border-dashed border-white/12 bg-neutral-950/60 p-4 text-center hover:border-cyan-500/40 transition-all">
               <input
                 type="file"
                 accept=".pdf,.doc,.docx"
@@ -425,7 +425,7 @@ export function AddVaultItemModal({
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               placeholder="Apuntes rápidos sobre este recurso..."
-              className="w-full rounded-xl border border-white/[0.1] bg-neutral-950 p-2.5 text-xs text-white placeholder:text-neutral-600 focus:outline-none focus:border-cyan-500"
+              className="w-full rounded-xl border border-white/10 bg-neutral-950 p-2.5 text-xs text-white placeholder:text-neutral-600 focus:outline-none focus:border-cyan-500"
             />
           </div>
 
@@ -439,12 +439,12 @@ export function AddVaultItemModal({
               value={tags}
               onChange={(e) => setTags(e.target.value)}
               placeholder="piano, clasica, debussy o react, backend, ai"
-              className="w-full rounded-xl border border-white/[0.1] bg-neutral-950 p-2.5 text-xs text-white placeholder:text-neutral-600 focus:outline-none focus:border-cyan-500"
+              className="w-full rounded-xl border border-white/10 bg-neutral-950 p-2.5 text-xs text-white placeholder:text-neutral-600 focus:outline-none focus:border-cyan-500"
             />
           </div>
 
           {/* Submit Buttons */}
-          <div className="pt-2 flex justify-end gap-2 border-t border-white/[0.08]">
+          <div className="pt-2 flex justify-end gap-2 border-t border-white/8">
             <button
               type="button"
               onClick={onClose}
@@ -455,7 +455,7 @@ export function AddVaultItemModal({
             <button
               type="submit"
               disabled={isPending}
-              className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-cyan-600 to-blue-600 font-bold text-xs text-white hover:from-cyan-500 hover:to-blue-500 transition-all shadow-lg shadow-cyan-500/20 disabled:opacity-50 inline-flex items-center gap-2"
+              className="px-5 py-2.5 rounded-xl bg-linear-to-r from-cyan-600 to-blue-600 font-bold text-xs text-white hover:from-cyan-500 hover:to-blue-500 transition-all shadow-lg shadow-cyan-500/20 disabled:opacity-50 inline-flex items-center gap-2"
             >
               <Plus className="h-3.5 w-3.5" />
               <span>{isPending ? "Subiendo a S3..." : "Guardar en Bóveda"}</span>

@@ -146,7 +146,7 @@ export function AddLabReportModal({
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md p-4 overflow-y-auto">
       <div className="relative w-full max-w-4xl rounded-2xl border border-cyan-500/20 bg-neutral-900/95 p-6 shadow-2xl backdrop-blur-2xl max-h-[90vh] flex flex-col my-auto">
         {/* Header */}
-        <div className="flex items-center justify-between pb-4 border-b border-white/[0.08]">
+        <div className="flex items-center justify-between pb-4 border-b border-white/8">
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">
               <FlaskConical className="h-5 w-5" />
@@ -165,7 +165,7 @@ export function AddLabReportModal({
             <button
               type="button"
               onClick={handleLoadPreset}
-              className="px-3 py-1.5 rounded-lg bg-neutral-800 hover:bg-neutral-700 text-[11px] font-bold text-neutral-200 border border-white/[0.08] transition-all flex items-center gap-1.5"
+              className="px-3 py-1.5 rounded-lg bg-neutral-800 hover:bg-neutral-700 text-[11px] font-bold text-neutral-200 border border-white/8 transition-all flex items-center gap-1.5"
             >
               <Sparkles className="h-3.5 w-3.5 text-cyan-400" />
               <span>Plantilla Chopo 45</span>
@@ -191,7 +191,7 @@ export function AddLabReportModal({
         {/* Scrollable Form Content */}
         <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto space-y-6 py-4 pr-1">
           {/* Metadata Grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 p-4 rounded-xl bg-neutral-950/60 border border-white/[0.06]">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 p-4 rounded-xl bg-neutral-950/60 border border-white/6">
             <div>
               <label className="block text-[11px] font-medium text-neutral-400 mb-1">
                 Fecha del Estudio
@@ -201,7 +201,7 @@ export function AddLabReportModal({
                 value={date}
                 onChange={(e) => setDate(e.target.value)}
                 required
-                className="w-full rounded-lg border border-white/[0.08] bg-neutral-900 px-3 py-1.5 text-xs text-white focus:border-cyan-500 focus:outline-none font-mono"
+                className="w-full rounded-lg border border-white/8 bg-neutral-900 px-3 py-1.5 text-xs text-white focus:border-cyan-500 focus:outline-none font-mono"
               />
             </div>
 
@@ -214,7 +214,7 @@ export function AddLabReportModal({
                 value={labName}
                 onChange={(e) => setLabName(e.target.value)}
                 placeholder="Laboratorio Chopo"
-                className="w-full rounded-lg border border-white/[0.08] bg-neutral-900 px-3 py-1.5 text-xs text-white focus:border-cyan-500 focus:outline-none"
+                className="w-full rounded-lg border border-white/8 bg-neutral-900 px-3 py-1.5 text-xs text-white focus:border-cyan-500 focus:outline-none"
               />
             </div>
 
@@ -227,7 +227,7 @@ export function AddLabReportModal({
                 value={orderNumber}
                 onChange={(e) => setOrderNumber(e.target.value)}
                 placeholder="A01510965"
-                className="w-full rounded-lg border border-white/[0.08] bg-neutral-900 px-3 py-1.5 text-xs text-white focus:border-cyan-500 focus:outline-none font-mono"
+                className="w-full rounded-lg border border-white/8 bg-neutral-900 px-3 py-1.5 text-xs text-white focus:border-cyan-500 focus:outline-none font-mono"
               />
             </div>
 
@@ -240,7 +240,7 @@ export function AddLabReportModal({
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 placeholder="Química Integral 45 Elementos"
-                className="w-full rounded-lg border border-white/[0.08] bg-neutral-900 px-3 py-1.5 text-xs text-white focus:border-cyan-500 focus:outline-none"
+                className="w-full rounded-lg border border-white/8 bg-neutral-900 px-3 py-1.5 text-xs text-white focus:border-cyan-500 focus:outline-none"
               />
             </div>
           </div>
@@ -264,7 +264,7 @@ export function AddLabReportModal({
                     className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
                       isSelected
                         ? "bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 shadow-sm"
-                        : "bg-neutral-950/80 text-neutral-400 hover:text-white border border-white/[0.06]"
+                        : "bg-neutral-950/80 text-neutral-400 hover:text-white border border-white/6"
                     }`}
                   >
                     <span>{meta.shortLabel}</span>
@@ -278,7 +278,7 @@ export function AddLabReportModal({
           </div>
 
           {/* Biomarkers Table / Form for Active Category */}
-          <div className="space-y-2 rounded-xl border border-white/[0.06] bg-neutral-950/60 p-3 max-h-72 overflow-y-auto">
+          <div className="space-y-2 rounded-xl border border-white/6 bg-neutral-950/60 p-3 max-h-72 overflow-y-auto">
             <div className="grid grid-cols-12 text-[10px] font-bold text-neutral-500 uppercase tracking-wider px-2 py-1">
               <div className="col-span-5">Biomarcador</div>
               <div className="col-span-3 text-center">Valor Obtenido</div>
@@ -291,7 +291,7 @@ export function AddLabReportModal({
               return (
                 <div
                   key={b.name + idx}
-                  className="grid grid-cols-12 items-center gap-2 rounded-lg bg-neutral-900/60 p-2 text-xs border border-white/[0.04] hover:border-white/[0.1] transition-all"
+                  className="grid grid-cols-12 items-center gap-2 rounded-lg bg-neutral-900/60 p-2 text-xs border border-white/4 hover:border-white/10 transition-all"
                 >
                   <div className="col-span-5">
                     <div className="font-semibold text-neutral-200">{b.name}</div>
@@ -306,7 +306,7 @@ export function AddLabReportModal({
                       value={b.valueNumeric !== undefined ? b.valueNumeric : b.valueText || ""}
                       onChange={(e) => handleUpdateValue(idx, e.target.value)}
                       placeholder="Valor"
-                      className="w-full rounded-md border border-white/[0.1] bg-neutral-950 px-2 py-1 text-xs text-center font-mono font-bold text-cyan-400 focus:border-cyan-500 focus:outline-none"
+                      className="w-full rounded-md border border-white/10 bg-neutral-950 px-2 py-1 text-xs text-center font-mono font-bold text-cyan-400 focus:border-cyan-500 focus:outline-none"
                     />
                   </div>
 
@@ -342,12 +342,12 @@ export function AddLabReportModal({
               onChange={(e) => setDoctorNotes(e.target.value)}
               placeholder="Ej. Paciente masculino 22 años, excelente filtración renal, serie roja adaptada al entrenamiento y altitud..."
               rows={2}
-              className="w-full rounded-xl border border-white/[0.08] bg-neutral-950 p-3 text-xs text-white focus:border-cyan-500 focus:outline-none"
+              className="w-full rounded-xl border border-white/8 bg-neutral-950 p-3 text-xs text-white focus:border-cyan-500 focus:outline-none"
             />
           </div>
 
           {/* Footer Actions */}
-          <div className="flex items-center justify-end gap-3 pt-4 border-t border-white/[0.08]">
+          <div className="flex items-center justify-end gap-3 pt-4 border-t border-white/8">
             <button
               type="button"
               onClick={onClose}

@@ -105,7 +105,7 @@ export function EveningReviewModal({
         role="dialog"
       >
         {/* Header */}
-        <div className="flex items-center justify-between pb-4 border-b border-white/[0.08]">
+        <div className="flex items-center justify-between pb-4 border-b border-white/8">
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 shadow-lg shadow-indigo-500/10">
               <Moon className="h-5 w-5" />
@@ -175,7 +175,7 @@ export function EveningReviewModal({
                 {pendingDailies.map((daily) => (
                   <div
                     key={daily.id}
-                    className="flex items-center justify-between p-3 rounded-xl border border-white/[0.06] bg-neutral-950/60 text-xs"
+                    className="flex items-center justify-between p-3 rounded-xl border border-white/6 bg-neutral-950/60 text-xs"
                   >
                     <span className="text-white font-medium">{daily.text}</span>
                     <button
@@ -191,7 +191,7 @@ export function EveningReviewModal({
               </div>
             )}
 
-            <div className="flex justify-end pt-3 border-t border-white/[0.06]">
+            <div className="flex justify-end pt-3 border-t border-white/6">
               <button
                 type="button"
                 onClick={() => setStep(2)}
@@ -226,7 +226,7 @@ export function EveningReviewModal({
               </p>
             </div>
 
-            <div className="flex items-center justify-between p-3 rounded-xl border border-white/[0.06] bg-neutral-950/40">
+            <div className="flex items-center justify-between p-3 rounded-xl border border-white/6 bg-neutral-950/40">
               <div className="text-xs text-neutral-300">
                 ¿Registraste todos tus gastos del día?
               </div>
@@ -244,7 +244,7 @@ export function EveningReviewModal({
               )}
             </div>
 
-            <div className="flex justify-between items-center pt-3 border-t border-white/[0.06]">
+            <div className="flex justify-between items-center pt-3 border-t border-white/6">
               <button
                 type="button"
                 onClick={() => setStep(1)}
@@ -268,13 +268,13 @@ export function EveningReviewModal({
         {step === 3 && (
           <div className="mt-5 space-y-4 animate-in fade-in duration-200">
             <div className="grid grid-cols-2 gap-3">
-              <div className="rounded-2xl border border-white/[0.06] bg-neutral-950/60 p-3.5">
+              <div className="rounded-2xl border border-white/6 bg-neutral-950/60 p-3.5">
                 <div className="text-[11px] text-neutral-400">Must-Wins Completadas</div>
                 <div className="mt-1 text-lg font-bold font-mono text-emerald-400">
                   {completedFocusCount} / {focusTasks.length || 3}
                 </div>
               </div>
-              <div className="rounded-2xl border border-white/[0.06] bg-neutral-950/60 p-3.5">
+              <div className="rounded-2xl border border-white/6 bg-neutral-950/60 p-3.5">
                 <div className="text-[11px] text-neutral-400">Oro Acumulado</div>
                 <div className="mt-1 text-lg font-bold font-mono text-amber-400 flex items-center gap-1">
                   <Coins className="h-4 w-4" />
@@ -292,7 +292,7 @@ export function EveningReviewModal({
                 placeholder="Ej. Terminé la entrega a tiempo y entrené con energía..."
                 value={reflection}
                 onChange={(e) => setReflection(e.target.value)}
-                className="w-full rounded-xl border border-white/[0.1] bg-neutral-950/80 px-3.5 py-2 text-xs text-white placeholder:text-neutral-600 focus:border-indigo-500/50 focus:outline-none"
+                className="w-full rounded-xl border border-white/10 bg-neutral-950/80 px-3.5 py-2 text-xs text-white placeholder:text-neutral-600 focus:border-indigo-500/50 focus:outline-none"
               />
             </div>
 
@@ -305,11 +305,11 @@ export function EveningReviewModal({
                 placeholder="Ej. Por la salud de mi familia, por una buena tarde..."
                 value={gratitude}
                 onChange={(e) => setGratitude(e.target.value)}
-                className="w-full rounded-xl border border-white/[0.1] bg-neutral-950/80 px-3.5 py-2 text-xs text-white placeholder:text-neutral-600 focus:border-indigo-500/50 focus:outline-none"
+                className="w-full rounded-xl border border-white/10 bg-neutral-950/80 px-3.5 py-2 text-xs text-white placeholder:text-neutral-600 focus:border-indigo-500/50 focus:outline-none"
               />
             </div>
 
-            <div className="flex justify-between items-center pt-3 border-t border-white/[0.06]">
+            <div className="flex justify-between items-center pt-3 border-t border-white/6">
               <button
                 type="button"
                 onClick={() => setStep(2)}
@@ -358,11 +358,11 @@ export function EveningReviewModal({
                     placeholder={"Ej:\nTerminar pruebas de integración #trabajo !urgent\n* Rutina de estiramiento 15m #salud\nComprar despensa"}
                     value={tomorrowNotes}
                     onChange={(e) => setTomorrowNotes(e.target.value)}
-                    className="w-full rounded-xl border border-white/[0.1] bg-neutral-950/80 p-3 font-mono text-xs text-white placeholder:text-neutral-600 focus:border-indigo-500/50 focus:outline-none"
+                    className="w-full rounded-xl border border-white/10 bg-neutral-950/80 p-3 font-mono text-xs text-white placeholder:text-neutral-600 focus:border-indigo-500/50 focus:outline-none"
                   />
                 </div>
 
-                <div className="flex justify-between items-center pt-3 border-t border-white/[0.06]">
+                <div className="flex justify-between items-center pt-3 border-t border-white/6">
                   <button
                     type="button"
                     onClick={() => setStep(3)}
@@ -374,7 +374,7 @@ export function EveningReviewModal({
                     type="button"
                     onClick={handleFinish}
                     disabled={isPending}
-                    className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 font-bold text-xs text-neutral-950 hover:brightness-110 shadow-xl shadow-emerald-500/20 disabled:opacity-50"
+                    className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-linear-to-r from-emerald-500 to-teal-600 font-bold text-xs text-neutral-950 hover:brightness-110 shadow-xl shadow-emerald-500/20 disabled:opacity-50"
                   >
                     <Sparkles className="h-4 w-4" />
                     <span>{isPending ? "Cerrando jornada..." : "Work Shutdown Complete 🌙"}</span>

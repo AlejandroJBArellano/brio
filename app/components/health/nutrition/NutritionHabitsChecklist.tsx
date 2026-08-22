@@ -77,9 +77,9 @@ export function NutritionHabitsChecklist({
   const totalCompletedCount = dietaryCompletedCount + supplementsTakenCount;
 
   return (
-    <div className="rounded-2xl border border-white/[0.08] bg-neutral-900/60 p-5 backdrop-blur-xl shadow-xl space-y-5">
+    <div className="rounded-2xl border border-white/8 bg-neutral-900/60 p-5 backdrop-blur-xl shadow-xl space-y-5">
       {/* Header */}
-      <div className="flex items-center justify-between pb-3 border-b border-white/[0.06]">
+      <div className="flex items-center justify-between pb-3 border-b border-white/6">
         <div className="flex items-center gap-2.5">
           <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 shadow-sm">
             <Salad className="h-4 w-4" />
@@ -99,7 +99,7 @@ export function NutritionHabitsChecklist({
             <button
               type="button"
               onClick={onOpenManageSupplements}
-              className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-white/[0.05] hover:bg-white/[0.1] text-neutral-300 border border-white/[0.08] text-xs font-semibold transition-all shadow-sm"
+              className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-white/5 hover:bg-white/10 text-neutral-300 border border-white/8 text-xs font-semibold transition-all shadow-sm"
               title="Configurar suplementos"
             >
               <Settings2 className="h-3.5 w-3.5 text-violet-400" />
@@ -138,7 +138,7 @@ export function NutritionHabitsChecklist({
                 className={`flex flex-col justify-between p-3 rounded-xl border text-left transition-all ${
                   isDone
                     ? "border-emerald-500/30 bg-emerald-500/10 text-white shadow-sm"
-                    : "border-white/[0.06] bg-neutral-950/60 text-neutral-300 hover:border-white/[0.12] hover:bg-neutral-900/80"
+                    : "border-white/6 bg-neutral-950/60 text-neutral-300 hover:border-white/12 hover:bg-neutral-900/80"
                 }`}
               >
                 <div className="flex items-start justify-between w-full">
@@ -146,7 +146,7 @@ export function NutritionHabitsChecklist({
                     className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border ${
                       isDone
                         ? "bg-emerald-500/20 border-emerald-500/40 text-emerald-300"
-                        : "bg-neutral-900 border-white/[0.08] text-neutral-400"
+                        : "bg-neutral-900 border-white/8 text-neutral-400"
                     }`}
                   >
                     <Icon className="h-3.5 w-3.5" />
@@ -158,7 +158,7 @@ export function NutritionHabitsChecklist({
                         : "border-neutral-700 bg-neutral-900"
                     }`}
                   >
-                    {isDone && <Check className="h-3.5 w-3.5 stroke-[3]" />}
+                    {isDone && <Check className="h-3.5 w-3.5 stroke-3" />}
                   </div>
                 </div>
 
@@ -177,7 +177,7 @@ export function NutritionHabitsChecklist({
       </div>
 
       {/* 2. Bloque de Suplementos Clínicos Personalizados (Fuente de la Verdad) */}
-      <div className="space-y-2.5 pt-2 border-t border-white/[0.06]">
+      <div className="space-y-2.5 pt-2 border-t border-white/6">
         <div className="flex items-center justify-between">
           <span className="text-xs font-bold uppercase tracking-wider text-violet-400 flex items-center gap-1.5">
             <Pill className="h-3.5 w-3.5" />
@@ -189,7 +189,7 @@ export function NutritionHabitsChecklist({
         </div>
 
         {supplements.length === 0 ? (
-          <div className="p-4 text-center rounded-xl border border-dashed border-white/[0.08] bg-neutral-950/30">
+          <div className="p-4 text-center rounded-xl border border-dashed border-white/8 bg-neutral-950/30">
             <Pill className="h-6 w-6 text-neutral-600 mx-auto mb-1.5" />
             <p className="text-xs text-neutral-400 mb-2">
               No tienes suplementos configurados.
@@ -222,7 +222,7 @@ export function NutritionHabitsChecklist({
                   className={`flex items-start justify-between p-3 rounded-xl border text-left transition-all ${
                     supp.taken
                       ? "border-emerald-500/30 bg-emerald-500/10 text-white shadow-sm"
-                      : "border-white/[0.06] bg-neutral-950/60 text-neutral-300 hover:border-white/[0.12] hover:bg-neutral-900/80"
+                      : "border-white/6 bg-neutral-950/60 text-neutral-300 hover:border-white/12 hover:bg-neutral-900/80"
                   }`}
                 >
                   <div className="space-y-1 pr-2">
@@ -237,7 +237,7 @@ export function NutritionHabitsChecklist({
                       )}
                     </div>
                     {supp.timing && (
-                      <span className="inline-block text-[10px] font-medium text-neutral-400 bg-white/[0.04] px-1.5 py-0.5 rounded border border-white/[0.04]">
+                      <span className="inline-block text-[10px] font-medium text-neutral-400 bg-white/4 px-1.5 py-0.5 rounded border border-white/4">
                         {supp.timing}
                       </span>
                     )}
@@ -250,7 +250,7 @@ export function NutritionHabitsChecklist({
                         : "border-neutral-700 bg-neutral-900"
                     }`}
                   >
-                    {supp.taken && <Check className="h-3.5 w-3.5 stroke-[3]" />}
+                    {supp.taken && <Check className="h-3.5 w-3.5 stroke-3" />}
                   </div>
                 </button>
               );

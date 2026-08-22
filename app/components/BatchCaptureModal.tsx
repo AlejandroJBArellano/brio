@@ -102,7 +102,7 @@ export function BatchCaptureModal({
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-white/[0.08] px-4 py-3">
+        <div className="flex items-center justify-between border-b border-white/8 px-4 py-3">
           <div className="flex items-center gap-2">
             <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-indigo-500/20 text-indigo-400">
               <Send className="h-4 w-4 rotate-45" />
@@ -221,7 +221,7 @@ export function BatchCaptureModal({
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-between border-t border-white/[0.06] bg-neutral-950/60 px-4 py-3">
+        <div className="flex items-center justify-between border-t border-white/6 bg-neutral-950/60 px-4 py-3">
           <div className="flex items-center gap-2">
             <button
               type="button"
@@ -258,7 +258,7 @@ export function BatchCaptureModal({
               type="button"
               onClick={handleBatchSubmit}
               disabled={!rawText.trim() || isPending}
-              className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-indigo-500 to-violet-600 px-4 py-2 text-xs font-semibold text-white shadow-lg shadow-indigo-500/25 transition-all hover:brightness-110 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40"
+              className="flex items-center gap-2 rounded-xl bg-linear-to-r from-indigo-500 to-violet-600 px-4 py-2 text-xs font-semibold text-white shadow-lg shadow-indigo-500/25 transition-all hover:brightness-110 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40"
             >
               {isPending ? (
                 <>

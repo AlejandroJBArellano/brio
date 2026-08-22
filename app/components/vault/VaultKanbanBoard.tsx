@@ -191,7 +191,7 @@ export function VaultKanbanBoard({
               className={`flex flex-col rounded-3xl border ${col.borderColor} bg-neutral-900/40 p-4 backdrop-blur-xl min-h-[420px]`}
             >
               {/* Column Header */}
-              <div className="flex items-center justify-between pb-3 border-b border-white/[0.06] mb-3">
+              <div className="flex items-center justify-between pb-3 border-b border-white/6 mb-3">
                 <div className="flex items-center gap-2">
                   <span className="text-sm font-bold text-white tracking-tight">
                     {col.title}
@@ -216,7 +216,7 @@ export function VaultKanbanBoard({
               {/* Items List in Column */}
               <div className="flex-1 space-y-3">
                 {colItems.length === 0 ? (
-                  <div className="h-32 flex flex-col items-center justify-center text-center rounded-2xl border border-dashed border-white/[0.06] bg-neutral-950/20 p-4">
+                  <div className="h-32 flex flex-col items-center justify-center text-center rounded-2xl border border-dashed border-white/6 bg-neutral-950/20 p-4">
                     <span className="text-xs text-neutral-500">Sin elementos</span>
                   </div>
                 ) : (
@@ -233,7 +233,7 @@ export function VaultKanbanBoard({
                     return (
                       <div
                         key={item.id}
-                        className="group rounded-2xl border border-white/[0.08] bg-neutral-950/80 p-4 shadow-xl hover:border-white/[0.18] transition-all space-y-3"
+                        className="group rounded-2xl border border-white/8 bg-neutral-950/80 p-4 shadow-xl hover:border-white/18 transition-all space-y-3"
                       >
                         {/* Top Row: Category Badges */}
                         <div className="flex items-center justify-between text-[10px]">
@@ -297,7 +297,7 @@ export function VaultKanbanBoard({
                             href={item.url}
                             target="_blank"
                             rel="noreferrer"
-                            className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-cyan-400 hover:underline bg-neutral-900/60 px-2.5 py-1 rounded-lg border border-white/[0.04] w-fit"
+                            className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-cyan-400 hover:underline bg-neutral-900/60 px-2.5 py-1 rounded-lg border border-white/4 w-fit"
                           >
                             <span>
                               {item.platform === "Notion"
@@ -316,7 +316,7 @@ export function VaultKanbanBoard({
 
                         {/* Progress Bar & Quick Incrementers (for Courses & Books) */}
                         {(isCourse || isBook) && totalUnits > 0 && (
-                          <div className="p-2.5 rounded-xl bg-neutral-900/80 border border-white/[0.04] space-y-2">
+                          <div className="p-2.5 rounded-xl bg-neutral-900/80 border border-white/4 space-y-2">
                             <div className="flex items-center justify-between text-[11px] font-mono">
                               <span className="text-neutral-400">
                                 {isCourse ? `Clase ${currentProg} de ${totalUnits}` : `Pág ${currentProg} de ${totalUnits}`}
@@ -326,7 +326,7 @@ export function VaultKanbanBoard({
 
                             <div className="relative h-1.5 w-full overflow-hidden rounded-full bg-neutral-950">
                               <div
-                                className="h-full bg-gradient-to-r from-cyan-500 to-blue-500 transition-all duration-300"
+                                className="h-full bg-linear-to-r from-cyan-500 to-blue-500 transition-all duration-300"
                                 style={{ width: `${percent}%` }}
                               />
                             </div>
@@ -338,7 +338,7 @@ export function VaultKanbanBoard({
                                   type="button"
                                   onClick={() => handleIncrementProgress(item.id, 1)}
                                   disabled={isPending}
-                                  className="px-2 py-0.5 rounded-md bg-neutral-950 border border-white/[0.08] hover:border-cyan-500/40 text-[10px] font-mono text-neutral-300 hover:text-white transition-all"
+                                  className="px-2 py-0.5 rounded-md bg-neutral-950 border border-white/8 hover:border-cyan-500/40 text-[10px] font-mono text-neutral-300 hover:text-white transition-all"
                                 >
                                   {isCourse ? "+1 clase" : "+10 págs"}
                                 </button>
@@ -346,7 +346,7 @@ export function VaultKanbanBoard({
                                   type="button"
                                   onClick={() => handleIncrementProgress(item.id, isCourse ? 5 : 25)}
                                   disabled={isPending}
-                                  className="px-2 py-0.5 rounded-md bg-neutral-950 border border-white/[0.08] hover:border-cyan-500/40 text-[10px] font-mono text-neutral-300 hover:text-white transition-all"
+                                  className="px-2 py-0.5 rounded-md bg-neutral-950 border border-white/8 hover:border-cyan-500/40 text-[10px] font-mono text-neutral-300 hover:text-white transition-all"
                                 >
                                   {isCourse ? "+5 clases" : "+25 págs"}
                                 </button>
@@ -357,7 +357,7 @@ export function VaultKanbanBoard({
 
                         {/* Notes Preview if available */}
                         {item.notes && (
-                          <p className="text-[11px] text-neutral-400 italic line-clamp-2 bg-neutral-900/60 p-2 rounded-xl border border-white/[0.04]">
+                          <p className="text-[11px] text-neutral-400 italic line-clamp-2 bg-neutral-900/60 p-2 rounded-xl border border-white/4">
                             {item.notes}
                           </p>
                         )}
@@ -367,7 +367,7 @@ export function VaultKanbanBoard({
                           <button
                             type="button"
                             onClick={() => setViewingPdfItem(item)}
-                            className="w-full flex items-center justify-center gap-2 py-2 rounded-xl bg-gradient-to-r from-cyan-500/20 to-blue-500/20 hover:from-cyan-500/30 hover:to-blue-500/30 border border-cyan-500/30 text-xs font-bold text-cyan-300 transition-all shadow-sm"
+                            className="w-full flex items-center justify-center gap-2 py-2 rounded-xl bg-linear-to-r from-cyan-500/20 to-blue-500/20 hover:from-cyan-500/30 hover:to-blue-500/30 border border-cyan-500/30 text-xs font-bold text-cyan-300 transition-all shadow-sm"
                           >
                             <FileText className="h-3.5 w-3.5" />
                             <span>
@@ -381,7 +381,7 @@ export function VaultKanbanBoard({
                         )}
 
                         {/* Bottom Controls: Quick 1-Click State Mover */}
-                        <div className="pt-2 border-t border-white/[0.04] flex items-center justify-between gap-1 text-[11px]">
+                        <div className="pt-2 border-t border-white/4 flex items-center justify-between gap-1 text-[11px]">
                           {col.id !== "backlog" && (
                             <button
                               type="button"

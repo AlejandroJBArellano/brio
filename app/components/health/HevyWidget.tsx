@@ -87,11 +87,11 @@ export function HevyWidget({
   };
 
   return (
-    <div className="rounded-3xl border border-cyan-500/20 bg-gradient-to-b from-neutral-900/90 via-neutral-900/60 to-neutral-950/80 p-6 backdrop-blur-2xl shadow-2xl shadow-cyan-950/20">
+    <div className="rounded-3xl border border-cyan-500/20 bg-linear-to-b from-neutral-900/90 via-neutral-900/60 to-neutral-950/80 p-6 backdrop-blur-2xl shadow-2xl shadow-cyan-950/20">
       {/* 1. Header with Hevy Branding & Quick Sync */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-white/[0.08]">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-white/8">
         <div className="flex items-center gap-3">
-          <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-cyan-500/20 to-blue-600/20 border border-cyan-500/30 text-cyan-400 shadow-lg shadow-cyan-500/10">
+          <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-linear-to-br from-cyan-500/20 to-blue-600/20 border border-cyan-500/30 text-cyan-400 shadow-lg shadow-cyan-500/10">
             <Dumbbell className="h-6 w-6" />
           </div>
           <div>
@@ -114,7 +114,7 @@ export function HevyWidget({
           <button
             type="button"
             onClick={() => setShowWebhookInfo(!showWebhookInfo)}
-            className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-neutral-950/60 border border-white/[0.08] text-xs font-semibold text-neutral-300 hover:text-white hover:border-white/[0.15] transition-all"
+            className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-neutral-950/60 border border-white/8 text-xs font-semibold text-neutral-300 hover:text-white hover:border-white/15 transition-all"
             title="Configuración de Webhook en tiempo real"
           >
             <Webhook className="h-3.5 w-3.5 text-cyan-400" />
@@ -125,7 +125,7 @@ export function HevyWidget({
             type="button"
             onClick={handleSync}
             disabled={isPending}
-            className="flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 font-bold text-xs text-white hover:from-cyan-400 hover:to-blue-500 transition-all shadow-lg shadow-cyan-500/20 disabled:opacity-50 active:scale-95 cursor-pointer"
+            className="flex items-center gap-2 px-4 py-2 rounded-xl bg-linear-to-r from-cyan-500 to-blue-600 font-bold text-xs text-white hover:from-cyan-400 hover:to-blue-500 transition-all shadow-lg shadow-cyan-500/20 disabled:opacity-50 active:scale-95 cursor-pointer"
           >
             <RefreshCw
               className={`h-3.5 w-3.5 ${isPending ? "animate-spin" : ""}`}
@@ -182,7 +182,7 @@ export function HevyWidget({
           <p className="text-xs text-neutral-400 leading-relaxed">
             Pega esta URL en tu panel de Desarrollador en Hevy (sección Webhooks). Cada vez que termines un entrenamiento en la app, Brio se actualizará automáticamente:
           </p>
-          <div className="flex items-center gap-2 bg-neutral-900 border border-white/[0.08] rounded-xl p-2.5 font-mono text-xs text-neutral-300">
+          <div className="flex items-center gap-2 bg-neutral-900 border border-white/8 rounded-xl p-2.5 font-mono text-xs text-neutral-300">
             <span className="truncate flex-1">
               {typeof window !== "undefined" ? window.location.origin : "https://brio.app"}
               /api/webhooks/hevy
@@ -210,7 +210,7 @@ export function HevyWidget({
 
       {/* 3. Metrics Summary Ribbon */}
       <div className="mt-5 grid grid-cols-2 sm:grid-cols-4 gap-3">
-        <div className="rounded-2xl border border-white/[0.06] bg-neutral-950/60 p-3.5">
+        <div className="rounded-2xl border border-white/6 bg-neutral-950/60 p-3.5">
           <div className="flex items-center justify-between text-[11px] text-neutral-400">
             <span>Total Sesiones</span>
             <Layers className="h-3.5 w-3.5 text-cyan-400" />
@@ -223,7 +223,7 @@ export function HevyWidget({
           </div>
         </div>
 
-        <div className="rounded-2xl border border-white/[0.06] bg-neutral-950/60 p-3.5">
+        <div className="rounded-2xl border border-white/6 bg-neutral-950/60 p-3.5">
           <div className="flex items-center justify-between text-[11px] text-neutral-400">
             <span>Volumen Última Sesión</span>
             <TrendingUp className="h-3.5 w-3.5 text-emerald-400" />
@@ -238,7 +238,7 @@ export function HevyWidget({
           </div>
         </div>
 
-        <div className="rounded-2xl border border-white/[0.06] bg-neutral-950/60 p-3.5">
+        <div className="rounded-2xl border border-white/6 bg-neutral-950/60 p-3.5">
           <div className="flex items-center justify-between text-[11px] text-neutral-400">
             <span>Última Rutina</span>
             <Flame className="h-3.5 w-3.5 text-amber-400" />
@@ -251,7 +251,7 @@ export function HevyWidget({
           </div>
         </div>
 
-        <div className="rounded-2xl border border-white/[0.06] bg-neutral-950/60 p-3.5">
+        <div className="rounded-2xl border border-white/6 bg-neutral-950/60 p-3.5">
           <div className="flex items-center justify-between text-[11px] text-neutral-400">
             <span>Tiempo de Sesión</span>
             <Clock className="h-3.5 w-3.5 text-indigo-400" />
@@ -277,7 +277,7 @@ export function HevyWidget({
         </div>
 
         {recentWorkouts.length === 0 ? (
-          <div className="p-8 text-center rounded-2xl border border-dashed border-white/[0.08] bg-neutral-950/40">
+          <div className="p-8 text-center rounded-2xl border border-dashed border-white/8 bg-neutral-950/40">
             <Dumbbell className="h-8 w-8 text-cyan-500/40 mx-auto mb-2" />
             <p className="text-xs text-neutral-400 mb-3">
               Aún no hay entrenamientos de Hevy sincronizados localmente en Brio.
@@ -303,7 +303,7 @@ export function HevyWidget({
                   className={`rounded-2xl border transition-all overflow-hidden ${
                     isExpanded
                       ? "border-cyan-500/30 bg-neutral-950/80 shadow-lg shadow-cyan-950/20"
-                      : "border-white/[0.06] bg-neutral-950/40 hover:border-white/[0.12]"
+                      : "border-white/6 bg-neutral-950/40 hover:border-white/12"
                   }`}
                 >
                   {/* Workout Header Bar */}
@@ -312,7 +312,7 @@ export function HevyWidget({
                     onClick={() =>
                       setExpandedWorkoutId(isExpanded ? null : workout.id)
                     }
-                    className="w-full p-4 flex items-center justify-between text-left transition-colors hover:bg-white/[0.02]"
+                    className="w-full p-4 flex items-center justify-between text-left transition-colors hover:bg-white/2"
                   >
                     <div className="flex items-center gap-3">
                       <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 font-bold text-xs shrink-0">
@@ -323,7 +323,7 @@ export function HevyWidget({
                           <span className="text-sm font-bold text-white tracking-tight">
                             {workout.title}
                           </span>
-                          <span className="text-[11px] font-mono text-neutral-400 bg-white/[0.04] px-2 py-0.5 rounded-md">
+                          <span className="text-[11px] font-mono text-neutral-400 bg-white/4 px-2 py-0.5 rounded-md">
                             {workout.date}
                           </span>
                         </div>
@@ -355,9 +355,9 @@ export function HevyWidget({
 
                   {/* Expanded Exercise Breakdown */}
                   {isExpanded && (
-                    <div className="p-4 pt-0 border-t border-white/[0.06] mt-1 space-y-3 animate-in fade-in duration-200">
+                    <div className="p-4 pt-0 border-t border-white/6 mt-1 space-y-3 animate-in fade-in duration-200">
                       {workout.description && (
-                        <p className="text-xs text-neutral-400 italic bg-neutral-900/60 p-2.5 rounded-xl border border-white/[0.04]">
+                        <p className="text-xs text-neutral-400 italic bg-neutral-900/60 p-2.5 rounded-xl border border-white/4">
                           {workout.description}
                         </p>
                       )}
@@ -366,7 +366,7 @@ export function HevyWidget({
                         {workout.exercises.map((exercise, idx) => (
                           <div
                             key={idx}
-                            className="p-3 rounded-xl border border-white/[0.04] bg-neutral-900/40 space-y-2"
+                            className="p-3 rounded-xl border border-white/4 bg-neutral-900/40 space-y-2"
                           >
                             <div className="flex items-center justify-between">
                               <span className="text-xs font-bold text-neutral-200">

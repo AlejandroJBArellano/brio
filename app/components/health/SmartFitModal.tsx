@@ -152,11 +152,11 @@ export function SmartFitModal({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-200">
       <div
-        className="w-full max-w-2xl max-h-[90vh] flex flex-col rounded-2xl border border-white/[0.1] bg-neutral-900/95 shadow-2xl backdrop-blur-xl animate-in zoom-in-95 duration-200 overflow-hidden"
+        className="w-full max-w-2xl max-h-[90vh] flex flex-col rounded-2xl border border-white/10 bg-neutral-900/95 shadow-2xl backdrop-blur-xl animate-in zoom-in-95 duration-200 overflow-hidden"
         role="dialog"
       >
         {/* Header */}
-        <div className="flex items-center justify-between p-6 pb-4 border-b border-white/[0.08]">
+        <div className="flex items-center justify-between p-6 pb-4 border-b border-white/8">
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-500/10 text-amber-400 border border-amber-500/20">
               <Activity className="h-5 w-5" />
@@ -202,7 +202,7 @@ export function SmartFitModal({
                 type="date"
                 value={date}
                 onChange={(e) => setDate(e.target.value)}
-                className="w-full rounded-xl border border-white/[0.08] bg-neutral-950 px-3.5 py-2 text-xs text-white focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500"
+                className="w-full rounded-xl border border-white/8 bg-neutral-950 px-3.5 py-2 text-xs text-white focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500"
                 required
               />
             </div>
@@ -218,7 +218,7 @@ export function SmartFitModal({
                 value={weightKg}
                 onChange={(e) => setWeightKg(e.target.value)}
                 placeholder="Ej. 78.6"
-                className="w-full rounded-xl border border-white/[0.08] bg-neutral-950 px-3.5 py-2 text-xs text-white placeholder-neutral-500 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                className="w-full rounded-xl border border-white/8 bg-neutral-950 px-3.5 py-2 text-xs text-white placeholder-neutral-500 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
                 required
               />
             </div>
@@ -240,7 +240,7 @@ export function SmartFitModal({
                   value={bodyFat}
                   onChange={(e) => setBodyFat(e.target.value)}
                   placeholder="Ej. 24.64"
-                  className="w-full rounded-xl border border-white/[0.08] bg-neutral-950 px-3 py-2 text-xs text-white placeholder-neutral-500 focus:border-amber-500 focus:outline-none"
+                  className="w-full rounded-xl border border-white/8 bg-neutral-950 px-3 py-2 text-xs text-white placeholder-neutral-500 focus:border-amber-500 focus:outline-none"
                 />
               </div>
 
@@ -254,7 +254,7 @@ export function SmartFitModal({
                   value={skeletalMuscle}
                   onChange={(e) => setSkeletalMuscle(e.target.value)}
                   placeholder="Ej. 33.71"
-                  className="w-full rounded-xl border border-white/[0.08] bg-neutral-950 px-3 py-2 text-xs text-white placeholder-neutral-500 focus:border-amber-500 focus:outline-none"
+                  className="w-full rounded-xl border border-white/8 bg-neutral-950 px-3 py-2 text-xs text-white placeholder-neutral-500 focus:border-amber-500 focus:outline-none"
                 />
               </div>
 
@@ -268,7 +268,7 @@ export function SmartFitModal({
                   value={fatFreeMass}
                   onChange={(e) => setFatFreeMass(e.target.value)}
                   placeholder="Ej. 54.58"
-                  className="w-full rounded-xl border border-white/[0.08] bg-neutral-950 px-3 py-2 text-xs text-white placeholder-neutral-500 focus:border-amber-500 focus:outline-none"
+                  className="w-full rounded-xl border border-white/8 bg-neutral-950 px-3 py-2 text-xs text-white placeholder-neutral-500 focus:border-amber-500 focus:outline-none"
                 />
               </div>
 
@@ -282,7 +282,7 @@ export function SmartFitModal({
                   value={visceralFat}
                   onChange={(e) => setVisceralFat(e.target.value)}
                   placeholder="Ej. 8.0"
-                  className="w-full rounded-xl border border-white/[0.08] bg-neutral-950 px-3 py-2 text-xs text-white placeholder-neutral-500 focus:border-amber-500 focus:outline-none"
+                  className="w-full rounded-xl border border-white/8 bg-neutral-950 px-3 py-2 text-xs text-white placeholder-neutral-500 focus:border-amber-500 focus:outline-none"
                 />
               </div>
 
@@ -295,7 +295,7 @@ export function SmartFitModal({
                   value={bmr}
                   onChange={(e) => setBmr(e.target.value)}
                   placeholder="Ej. 1872"
-                  className="w-full rounded-xl border border-white/[0.08] bg-neutral-950 px-3 py-2 text-xs text-white placeholder-neutral-500 focus:border-amber-500 focus:outline-none"
+                  className="w-full rounded-xl border border-white/8 bg-neutral-950 px-3 py-2 text-xs text-white placeholder-neutral-500 focus:border-amber-500 focus:outline-none"
                 />
               </div>
 
@@ -309,14 +309,14 @@ export function SmartFitModal({
                   value={water}
                   onChange={(e) => setWater(e.target.value)}
                   placeholder="Ej. 39.95"
-                  className="w-full rounded-xl border border-white/[0.08] bg-neutral-950 px-3 py-2 text-xs text-white placeholder-neutral-500 focus:border-amber-500 focus:outline-none"
+                  className="w-full rounded-xl border border-white/8 bg-neutral-950 px-3 py-2 text-xs text-white placeholder-neutral-500 focus:border-amber-500 focus:outline-none"
                 />
               </div>
             </div>
           </div>
 
           {/* Segmental Data Accordion */}
-          <div className="rounded-xl border border-white/[0.08] bg-neutral-950/40 p-4">
+          <div className="rounded-xl border border-white/8 bg-neutral-950/40 p-4">
             <button
               type="button"
               onClick={() => setShowSegmental(!showSegmental)}
@@ -334,7 +334,7 @@ export function SmartFitModal({
             </button>
 
             {showSegmental && (
-              <div className="mt-4 space-y-4 pt-3 border-t border-white/[0.06] animate-in fade-in duration-150">
+              <div className="mt-4 space-y-4 pt-3 border-t border-white/6 animate-in fade-in duration-150">
                 <div>
                   <h4 className="text-[11px] font-bold text-violet-300 mb-2 flex items-center gap-1.5">
                     <Dumbbell className="h-3 w-3" /> Músculo Segmentario (kg)
@@ -348,7 +348,7 @@ export function SmartFitModal({
                         value={trunkMuscle}
                         onChange={(e) => setTrunkMuscle(e.target.value)}
                         placeholder="27.88"
-                        className="w-full rounded-lg border border-white/[0.08] bg-neutral-900 p-1.5 text-xs text-white"
+                        className="w-full rounded-lg border border-white/8 bg-neutral-900 p-1.5 text-xs text-white"
                       />
                     </div>
                     <div>
@@ -359,7 +359,7 @@ export function SmartFitModal({
                         value={armLMuscle}
                         onChange={(e) => setArmLMuscle(e.target.value)}
                         placeholder="3.63"
-                        className="w-full rounded-lg border border-white/[0.08] bg-neutral-900 p-1.5 text-xs text-white"
+                        className="w-full rounded-lg border border-white/8 bg-neutral-900 p-1.5 text-xs text-white"
                       />
                     </div>
                     <div>
@@ -370,7 +370,7 @@ export function SmartFitModal({
                         value={armRMuscle}
                         onChange={(e) => setArmRMuscle(e.target.value)}
                         placeholder="3.57"
-                        className="w-full rounded-lg border border-white/[0.08] bg-neutral-900 p-1.5 text-xs text-white"
+                        className="w-full rounded-lg border border-white/8 bg-neutral-900 p-1.5 text-xs text-white"
                       />
                     </div>
                     <div>
@@ -381,7 +381,7 @@ export function SmartFitModal({
                         value={legLMuscle}
                         onChange={(e) => setLegLMuscle(e.target.value)}
                         placeholder="9.76"
-                        className="w-full rounded-lg border border-white/[0.08] bg-neutral-900 p-1.5 text-xs text-white"
+                        className="w-full rounded-lg border border-white/8 bg-neutral-900 p-1.5 text-xs text-white"
                       />
                     </div>
                     <div>
@@ -392,7 +392,7 @@ export function SmartFitModal({
                         value={legRMuscle}
                         onChange={(e) => setLegRMuscle(e.target.value)}
                         placeholder="9.74"
-                        className="w-full rounded-lg border border-white/[0.08] bg-neutral-900 p-1.5 text-xs text-white"
+                        className="w-full rounded-lg border border-white/8 bg-neutral-900 p-1.5 text-xs text-white"
                       />
                     </div>
                   </div>
@@ -411,7 +411,7 @@ export function SmartFitModal({
                         value={trunkFat}
                         onChange={(e) => setTrunkFat(e.target.value)}
                         placeholder="13.79"
-                        className="w-full rounded-lg border border-white/[0.08] bg-neutral-900 p-1.5 text-xs text-white"
+                        className="w-full rounded-lg border border-white/8 bg-neutral-900 p-1.5 text-xs text-white"
                       />
                     </div>
                     <div>
@@ -422,7 +422,7 @@ export function SmartFitModal({
                         value={armLFat}
                         onChange={(e) => setArmLFat(e.target.value)}
                         placeholder="0.72"
-                        className="w-full rounded-lg border border-white/[0.08] bg-neutral-900 p-1.5 text-xs text-white"
+                        className="w-full rounded-lg border border-white/8 bg-neutral-900 p-1.5 text-xs text-white"
                       />
                     </div>
                     <div>
@@ -433,7 +433,7 @@ export function SmartFitModal({
                         value={armRFat}
                         onChange={(e) => setArmRFat(e.target.value)}
                         placeholder="0.77"
-                        className="w-full rounded-lg border border-white/[0.08] bg-neutral-900 p-1.5 text-xs text-white"
+                        className="w-full rounded-lg border border-white/8 bg-neutral-900 p-1.5 text-xs text-white"
                       />
                     </div>
                     <div>
@@ -444,7 +444,7 @@ export function SmartFitModal({
                         value={legLFat}
                         onChange={(e) => setLegLFat(e.target.value)}
                         placeholder="2.03"
-                        className="w-full rounded-lg border border-white/[0.08] bg-neutral-900 p-1.5 text-xs text-white"
+                        className="w-full rounded-lg border border-white/8 bg-neutral-900 p-1.5 text-xs text-white"
                       />
                     </div>
                     <div>
@@ -455,7 +455,7 @@ export function SmartFitModal({
                         value={legRFat}
                         onChange={(e) => setLegRFat(e.target.value)}
                         placeholder="2.06"
-                        className="w-full rounded-lg border border-white/[0.08] bg-neutral-900 p-1.5 text-xs text-white"
+                        className="w-full rounded-lg border border-white/8 bg-neutral-900 p-1.5 text-xs text-white"
                       />
                     </div>
                   </div>
@@ -474,7 +474,7 @@ export function SmartFitModal({
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               placeholder="Ej. Medición en ayunas, post-entreno o comentarios"
-              className="w-full rounded-xl border border-white/[0.08] bg-neutral-950 px-3.5 py-2 text-xs text-white placeholder-neutral-500 focus:border-amber-500 focus:outline-none"
+              className="w-full rounded-xl border border-white/8 bg-neutral-950 px-3.5 py-2 text-xs text-white placeholder-neutral-500 focus:border-amber-500 focus:outline-none"
             />
           </div>
 
@@ -490,7 +490,7 @@ export function SmartFitModal({
             <button
               type="submit"
               disabled={isPending}
-              className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-neutral-950 font-bold text-xs shadow-lg shadow-amber-500/20 transition-all flex items-center gap-2 disabled:opacity-50"
+              className="px-5 py-2.5 rounded-xl bg-linear-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-neutral-950 font-bold text-xs shadow-lg shadow-amber-500/20 transition-all flex items-center gap-2 disabled:opacity-50"
             >
               <Check className="h-4 w-4 stroke-[2.5]" />
               <span>{isPending ? "Guardando..." : "Guardar Medición"}</span>

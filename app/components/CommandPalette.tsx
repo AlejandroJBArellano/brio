@@ -374,7 +374,7 @@ function CommandPaletteContent({
         onClick={(e) => e.stopPropagation()}
       >
         {/* Search input header */}
-        <div className="relative flex items-center border-b border-white/[0.08] px-4 py-3.5">
+        <div className="relative flex items-center border-b border-white/8 px-4 py-3.5">
           <Search className="h-4 w-4 text-neutral-400" />
           <input
             ref={inputRef}
@@ -394,7 +394,7 @@ function CommandPaletteContent({
         </div>
 
         {/* List of items */}
-        <div className="max-h-[380px] overflow-y-auto p-2">
+        <div className="max-h-95 overflow-y-auto p-2">
           {/* Actions Group */}
           {filteredActions.length > 0 && (
             <div className="mb-2">
@@ -563,7 +563,7 @@ function CommandPaletteContent({
         </div>
 
         {/* Footer hints */}
-        <div className="flex items-center justify-between border-t border-white/[0.06] bg-neutral-950/60 px-4 py-2.5 text-[11px] text-neutral-400">
+        <div className="flex items-center justify-between border-t border-white/6 bg-neutral-950/60 px-4 py-2.5 text-[11px] text-neutral-400">
           <div className="flex items-center gap-3">
             <span className="flex items-center gap-1">
               <kbd className="rounded bg-neutral-800 px-1 py-0.5 font-mono text-[10px]">

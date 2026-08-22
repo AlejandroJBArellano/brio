@@ -35,7 +35,7 @@ export function DayScheduleView({
   return (
     <div className="flex flex-col gap-6 animate-in fade-in duration-300">
       {/* Top Banner */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-2xl border border-white/[0.08] bg-neutral-900/60 p-5 backdrop-blur-xl shadow-xl">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-2xl border border-white/8 bg-neutral-900/60 p-5 backdrop-blur-xl shadow-xl">
         <div className="flex items-center gap-3">
           <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-500/10 text-blue-400 border border-blue-500/20">
             <Calendar className="h-5 w-5" />
@@ -66,7 +66,7 @@ export function DayScheduleView({
             <button
               type="button"
               onClick={onRefresh}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-white/[0.08] bg-neutral-950/60 text-xs text-neutral-300 hover:text-white hover:bg-neutral-800 transition-colors"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-white/8 bg-neutral-950/60 text-xs text-neutral-300 hover:text-white hover:bg-neutral-800 transition-colors"
             >
               <RefreshCw className="h-3.5 w-3.5" />
               <span>Sincronizar</span>
@@ -85,7 +85,7 @@ export function DayScheduleView({
       </div>
 
       {/* Events Timeline */}
-      <div className="rounded-2xl border border-white/[0.08] bg-neutral-900/60 p-5 backdrop-blur-xl shadow-xl">
+      <div className="rounded-2xl border border-white/8 bg-neutral-900/60 p-5 backdrop-blur-xl shadow-xl">
         <div className="space-y-3">
           {schedule.events.length === 0 ? (
             <div className="py-16 text-center text-xs text-neutral-500">
@@ -103,8 +103,8 @@ export function DayScheduleView({
                     isNow
                       ? "border-blue-500/50 bg-blue-500/10 shadow-lg shadow-blue-500/10"
                       : isPast
-                      ? "border-white/[0.04] bg-neutral-950/30 opacity-60"
-                      : "border-white/[0.06] bg-neutral-950/60 hover:border-white/[0.12]"
+                      ? "border-white/4 bg-neutral-950/30 opacity-60"
+                      : "border-white/6 bg-neutral-950/60 hover:border-white/12"
                   }`}
                 >
                   <div className="flex items-start sm:items-center gap-3">

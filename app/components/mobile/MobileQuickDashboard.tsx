@@ -405,7 +405,7 @@ export function MobileQuickDashboard({
               </div>
             </div>
             {nextEvent.location && (
-              <span className="text-[10px] font-mono text-neutral-400 truncate max-w-[100px]">
+              <span className="text-[10px] font-mono text-neutral-400 truncate max-w-25">
                 {nextEvent.location}
               </span>
             )}

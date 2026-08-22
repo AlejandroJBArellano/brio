@@ -107,8 +107,8 @@ export function HealthView({ data, onRefresh }: HealthViewProps) {
   return (
     <div className="flex flex-col gap-6 animate-in fade-in duration-300">
       {/* 0. Health Sub-module Navigation Ribbon */}
-      <div className="flex flex-wrap items-center justify-between gap-3 p-2 rounded-2xl border border-white/[0.08] bg-neutral-900/60 backdrop-blur-xl shadow-lg">
-        <div className="flex flex-wrap items-center gap-1.5 p-1 rounded-xl bg-neutral-950/80 border border-white/[0.06]">
+      <div className="flex flex-wrap items-center justify-between gap-3 p-2 rounded-2xl border border-white/8 bg-neutral-900/60 backdrop-blur-xl shadow-lg">
+        <div className="flex flex-wrap items-center gap-1.5 p-1 rounded-xl bg-neutral-950/80 border border-white/6">
           <button
             type="button"
             onClick={() => setActiveHealthTab("overview")}
@@ -295,7 +295,7 @@ export function HealthView({ data, onRefresh }: HealthViewProps) {
 
           {/* 1.2 Nutrition Glance Summary Card */}
           {data.nutritionData && (
-            <div className="rounded-2xl border border-emerald-500/20 bg-gradient-to-r from-emerald-950/30 via-neutral-900/60 to-neutral-900/60 p-4.5 backdrop-blur-xl shadow-xl flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="rounded-2xl border border-emerald-500/20 bg-linear-to-r from-emerald-950/30 via-neutral-900/60 to-neutral-900/60 p-4.5 backdrop-blur-xl shadow-xl flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div className="flex items-center gap-3.5">
                 <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
                   <Salad className="h-5 w-5" />
@@ -336,8 +336,8 @@ export function HealthView({ data, onRefresh }: HealthViewProps) {
       />
 
       {/* 2. Workout Logger Card */}
-      <div className="rounded-2xl border border-white/[0.08] bg-neutral-900/60 p-5 backdrop-blur-xl shadow-xl">
-        <div className="flex items-center justify-between pb-3 border-b border-white/[0.06]">
+      <div className="rounded-2xl border border-white/8 bg-neutral-900/60 p-5 backdrop-blur-xl shadow-xl">
+        <div className="flex items-center justify-between pb-3 border-b border-white/6">
           <div className="flex items-center gap-2.5">
             <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
               <Dumbbell className="h-4 w-4" />
@@ -373,7 +373,7 @@ export function HealthView({ data, onRefresh }: HealthViewProps) {
                 className={`flex flex-col items-center justify-center gap-1.5 p-3.5 rounded-2xl border text-xs font-bold transition-all active:scale-95 ${
                   isSelected
                     ? "bg-emerald-500/20 border-emerald-500/40 text-emerald-300 shadow-lg shadow-emerald-500/10"
-                    : "bg-neutral-950/60 border-white/[0.06] text-neutral-300 hover:border-white/[0.12] hover:bg-neutral-900"
+                    : "bg-neutral-950/60 border-white/6 text-neutral-300 hover:border-white/12 hover:bg-neutral-900"
                 }`}
               >
                 <span className="text-xl">{w.icon}</span>
@@ -388,7 +388,7 @@ export function HealthView({ data, onRefresh }: HealthViewProps) {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
         {/* Hydration Tracker */}
         <div className="rounded-2xl border border-sky-500/20 bg-neutral-900/60 p-5 backdrop-blur-xl shadow-xl">
-          <div className="flex items-center justify-between pb-3 border-b border-white/[0.06]">
+          <div className="flex items-center justify-between pb-3 border-b border-white/6">
             <div className="flex items-center gap-2">
               <Droplet className="h-4 w-4 text-sky-400" />
               <h3 className="text-sm font-bold text-white tracking-tight">
@@ -402,9 +402,9 @@ export function HealthView({ data, onRefresh }: HealthViewProps) {
 
           <div className="mt-4 space-y-3">
             {/* Progress bar */}
-            <div className="relative h-4 w-full overflow-hidden rounded-full bg-neutral-950 border border-white/[0.06]">
+            <div className="relative h-4 w-full overflow-hidden rounded-full bg-neutral-950 border border-white/6">
               <div
-                className="h-full bg-gradient-to-r from-sky-500 to-cyan-400 transition-all duration-500"
+                className="h-full bg-linear-to-r from-sky-500 to-cyan-400 transition-all duration-500"
                 style={{ width: `${data.waterPercent}%` }}
               />
             </div>
@@ -440,8 +440,8 @@ export function HealthView({ data, onRefresh }: HealthViewProps) {
         </div>
 
         {/* Supplements Checklist */}
-        <div className="rounded-2xl border border-white/[0.08] bg-neutral-900/60 p-5 backdrop-blur-xl shadow-xl">
-          <div className="flex items-center justify-between pb-3 border-b border-white/[0.06]">
+        <div className="rounded-2xl border border-white/8 bg-neutral-900/60 p-5 backdrop-blur-xl shadow-xl">
+          <div className="flex items-center justify-between pb-3 border-b border-white/6">
             <div className="flex items-center gap-2">
               <Pill className="h-4 w-4 text-violet-400" />
               <h3 className="text-sm font-bold text-white tracking-tight">
@@ -466,7 +466,7 @@ export function HealthView({ data, onRefresh }: HealthViewProps) {
           </div>
 
           {data.todayHealth.supplements.length === 0 ? (
-            <div className="mt-4 p-6 text-center rounded-xl border border-dashed border-white/[0.08] bg-neutral-950/30">
+            <div className="mt-4 p-6 text-center rounded-xl border border-dashed border-white/8 bg-neutral-950/30">
               <Pill className="h-7 w-7 text-neutral-600 mx-auto mb-2" />
               <p className="text-xs text-neutral-400 mb-3">
                 No tienes suplementos configurados en tu checklist diario.
@@ -491,7 +491,7 @@ export function HealthView({ data, onRefresh }: HealthViewProps) {
                   className={`flex items-center justify-between p-3 rounded-xl border transition-all text-xs font-semibold ${
                     supp.taken
                       ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-300"
-                      : "border-white/[0.06] bg-neutral-950/60 text-neutral-300 hover:border-white/[0.12]"
+                      : "border-white/6 bg-neutral-950/60 text-neutral-300 hover:border-white/12"
                   }`}
                 >
                   <div className="flex flex-col items-start text-left">
@@ -509,7 +509,7 @@ export function HealthView({ data, onRefresh }: HealthViewProps) {
                         : "border-neutral-700 bg-neutral-900"
                     }`}
                   >
-                    {supp.taken && <Check className="h-3.5 w-3.5 stroke-[3]" />}
+                    {supp.taken && <Check className="h-3.5 w-3.5 stroke-3" />}
                   </div>
                 </button>
               ))}
@@ -520,7 +520,7 @@ export function HealthView({ data, onRefresh }: HealthViewProps) {
 
       {/* 4. Sleep & Recovery Editor */}
       <div className="rounded-2xl border border-indigo-500/20 bg-neutral-900/60 p-5 backdrop-blur-xl shadow-xl">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-3 border-b border-white/[0.06]">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-3 border-b border-white/6">
           <div className="flex items-center gap-2.5">
             <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
               <Moon className="h-4 w-4" />
@@ -579,7 +579,7 @@ export function HealthView({ data, onRefresh }: HealthViewProps) {
                   className={`flex-1 py-2 rounded-xl border text-xs font-bold transition-all ${
                     sleepQuality === q
                       ? "bg-amber-500/20 border-amber-500/40 text-amber-300"
-                      : "bg-neutral-950/60 border-white/[0.06] text-neutral-400 hover:text-white"
+                      : "bg-neutral-950/60 border-white/6 text-neutral-400 hover:text-white"
                   }`}
                 >
                   {q} ⭐
@@ -604,8 +604,8 @@ export function HealthView({ data, onRefresh }: HealthViewProps) {
       {/* Samsung Health Import Modal */}
       {isImportModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-200">
-          <div className="w-full max-w-lg rounded-3xl border border-white/[0.1] bg-neutral-900/95 p-6 shadow-2xl backdrop-blur-2xl">
-            <div className="flex items-center justify-between pb-4 border-b border-white/[0.08]">
+          <div className="w-full max-w-lg rounded-3xl border border-white/10 bg-neutral-900/95 p-6 shadow-2xl backdrop-blur-2xl">
+            <div className="flex items-center justify-between pb-4 border-b border-white/8">
               <div className="flex items-center gap-2.5">
                 <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-violet-500/10 text-violet-400">
                   <UploadCloud className="h-5 w-5" />
@@ -634,7 +634,7 @@ export function HealthView({ data, onRefresh }: HealthViewProps) {
                 placeholder={'[{"date": "2026-08-22", "steps": 8500, "sleep_hours": 7.8}]'}
                 value={importJson}
                 onChange={(e) => setImportJson(e.target.value)}
-                className="w-full rounded-xl border border-white/[0.1] bg-neutral-950/80 p-3 font-mono text-xs text-white placeholder:text-neutral-600 focus:outline-none"
+                className="w-full rounded-xl border border-white/10 bg-neutral-950/80 p-3 font-mono text-xs text-white placeholder:text-neutral-600 focus:outline-none"
               />
               <div className="flex justify-end gap-2">
                 <button

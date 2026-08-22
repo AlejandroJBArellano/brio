@@ -190,8 +190,8 @@ export function MealPlannerCalendar({
   return (
     <div className="space-y-6">
       {/* 1. Week Ribbon Navigator */}
-      <div className="rounded-2xl border border-white/[0.08] bg-neutral-900/60 p-4 backdrop-blur-xl shadow-xl">
-        <div className="flex items-center justify-between pb-3 border-b border-white/[0.06]">
+      <div className="rounded-2xl border border-white/8 bg-neutral-900/60 p-4 backdrop-blur-xl shadow-xl">
+        <div className="flex items-center justify-between pb-3 border-b border-white/6">
           <div className="flex items-center gap-2">
             <CalendarIcon className="h-4 w-4 text-emerald-400" />
             <h3 className="text-sm font-bold text-white tracking-tight">
@@ -203,7 +203,7 @@ export function MealPlannerCalendar({
             <button
               type="button"
               onClick={handlePrevWeek}
-              className="p-1.5 rounded-lg border border-white/[0.06] bg-neutral-950/60 text-neutral-400 hover:text-white hover:bg-neutral-800 transition-all"
+              className="p-1.5 rounded-lg border border-white/6 bg-neutral-950/60 text-neutral-400 hover:text-white hover:bg-neutral-800 transition-all"
               title="Semana anterior"
             >
               <ChevronLeft className="h-4 w-4" />
@@ -218,7 +218,7 @@ export function MealPlannerCalendar({
             <button
               type="button"
               onClick={handleNextWeek}
-              className="p-1.5 rounded-lg border border-white/[0.06] bg-neutral-950/60 text-neutral-400 hover:text-white hover:bg-neutral-800 transition-all"
+              className="p-1.5 rounded-lg border border-white/6 bg-neutral-950/60 text-neutral-400 hover:text-white hover:bg-neutral-800 transition-all"
               title="Semana siguiente"
             >
               <ChevronRight className="h-4 w-4" />
@@ -241,7 +241,7 @@ export function MealPlannerCalendar({
                     ? "bg-emerald-500/20 border-emerald-500/50 text-white shadow-lg shadow-emerald-500/10"
                     : day.isToday
                     ? "bg-neutral-950/80 border-emerald-500/30 text-emerald-300"
-                    : "bg-neutral-950/40 border-white/[0.06] text-neutral-400 hover:border-white/[0.12] hover:text-neutral-200"
+                    : "bg-neutral-950/40 border-white/6 text-neutral-400 hover:border-white/12 hover:text-neutral-200"
                 }`}
               >
                 <span className="text-[10px] font-semibold uppercase">{day.dayName}</span>
@@ -263,9 +263,9 @@ export function MealPlannerCalendar({
           return (
             <div
               key={slot.id}
-              className="rounded-2xl border border-white/[0.08] bg-neutral-900/60 p-4 backdrop-blur-xl shadow-lg transition-all"
+              className="rounded-2xl border border-white/8 bg-neutral-900/60 p-4 backdrop-blur-xl shadow-lg transition-all"
             >
-              <div className="flex items-center justify-between pb-2.5 border-b border-white/[0.04]">
+              <div className="flex items-center justify-between pb-2.5 border-b border-white/4">
                 <div className="flex items-center gap-2.5">
                   <span className="text-lg">{slot.icon}</span>
                   <div>
@@ -279,7 +279,7 @@ export function MealPlannerCalendar({
                 <button
                   type="button"
                   onClick={() => openScheduleModal(slot.id)}
-                  className="flex items-center gap-1 px-2.5 py-1 rounded-lg border border-white/[0.08] bg-neutral-950/60 text-xs font-semibold text-neutral-300 hover:bg-neutral-800 hover:text-white transition-all shadow-sm"
+                  className="flex items-center gap-1 px-2.5 py-1 rounded-lg border border-white/8 bg-neutral-950/60 text-xs font-semibold text-neutral-300 hover:bg-neutral-800 hover:text-white transition-all shadow-sm"
                 >
                   <Plus className="h-3.5 w-3.5" />
                   <span>Asignar</span>
@@ -288,7 +288,7 @@ export function MealPlannerCalendar({
 
               {/* Meals in this slot */}
               {slotMeals.length === 0 ? (
-                <div className="mt-3 py-4 text-center rounded-xl border border-dashed border-white/[0.06] bg-neutral-950/20">
+                <div className="mt-3 py-4 text-center rounded-xl border border-dashed border-white/6 bg-neutral-950/20">
                   <p className="text-xs text-neutral-500">
                     No has programado comida para este tiempo.
                   </p>
@@ -305,7 +305,7 @@ export function MealPlannerCalendar({
                         className={`flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3.5 rounded-xl border transition-all ${
                           meal.isCompleted
                             ? "border-emerald-500/30 bg-emerald-500/10"
-                            : "border-white/[0.08] bg-neutral-950/70"
+                            : "border-white/8 bg-neutral-950/70"
                         }`}
                       >
                         <div className="space-y-1.5">
@@ -320,7 +320,7 @@ export function MealPlannerCalendar({
                               {title}
                             </span>
                             {meal.recipe?.optionLabel && (
-                              <span className="rounded bg-white/[0.06] px-1.5 py-0.5 text-[10px] font-semibold text-neutral-400">
+                              <span className="rounded bg-white/6 px-1.5 py-0.5 text-[10px] font-semibold text-neutral-400">
                                 {meal.recipe.optionLabel}
                               </span>
                             )}
@@ -370,10 +370,10 @@ export function MealPlannerCalendar({
                             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs font-bold transition-all active:scale-95 ${
                               meal.isCompleted
                                 ? "bg-emerald-500 border-emerald-400 text-neutral-950 shadow-md shadow-emerald-500/20"
-                                : "bg-neutral-900 border-white/[0.1] text-emerald-300 hover:bg-emerald-500/20 hover:border-emerald-500/40"
+                                : "bg-neutral-900 border-white/10 text-emerald-300 hover:bg-emerald-500/20 hover:border-emerald-500/40"
                             }`}
                           >
-                            <Check className="h-3.5 w-3.5 stroke-[3]" />
+                            <Check className="h-3.5 w-3.5 stroke-3" />
                             <span>{meal.isCompleted ? "¡Consumido!" : "Marcar Comido"}</span>
                           </button>
 
@@ -400,8 +400,8 @@ export function MealPlannerCalendar({
       {/* Schedule Meal Modal */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-200">
-          <div className="w-full max-w-xl rounded-3xl border border-white/[0.1] bg-neutral-900/95 p-6 shadow-2xl backdrop-blur-2xl flex flex-col max-h-[85vh]">
-            <div className="flex items-center justify-between pb-4 border-b border-white/[0.08]">
+          <div className="w-full max-w-xl rounded-3xl border border-white/10 bg-neutral-900/95 p-6 shadow-2xl backdrop-blur-2xl flex flex-col max-h-[85vh]">
+            <div className="flex items-center justify-between pb-4 border-b border-white/8">
               <div className="flex items-center gap-2.5">
                 <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-400">
                   <Utensils className="h-5 w-5" />
@@ -437,7 +437,7 @@ export function MealPlannerCalendar({
                     placeholder="Buscar receta o ingrediente..."
                     value={recipeSearch}
                     onChange={(e) => setRecipeSearch(e.target.value)}
-                    className="w-full rounded-xl border border-white/[0.1] bg-neutral-950/80 pl-9 pr-3 py-2 text-xs text-white placeholder:text-neutral-600 focus:outline-none focus:border-emerald-500/50"
+                    className="w-full rounded-xl border border-white/10 bg-neutral-950/80 pl-9 pr-3 py-2 text-xs text-white placeholder:text-neutral-600 focus:outline-none focus:border-emerald-500/50"
                   />
                 </div>
 
@@ -456,7 +456,7 @@ export function MealPlannerCalendar({
                         className={`w-full flex flex-col items-start p-3 rounded-xl border text-left transition-all ${
                           isSelected
                             ? "bg-emerald-500/20 border-emerald-500/60 shadow-md shadow-emerald-500/10 text-white"
-                            : "bg-neutral-950/60 border-white/[0.06] text-neutral-300 hover:border-white/[0.12]"
+                            : "bg-neutral-950/60 border-white/6 text-neutral-300 hover:border-white/12"
                         }`}
                       >
                         <div className="flex items-center justify-between w-full">
@@ -482,7 +482,7 @@ export function MealPlannerCalendar({
               </div>
 
               {/* Option B: Or Custom meal title */}
-              <div className="pt-2 border-t border-white/[0.06]">
+              <div className="pt-2 border-t border-white/6">
                 <label className="block text-xs font-bold text-neutral-300 mb-1.5">
                   O escribe un platillo personalizado:
                 </label>
@@ -494,12 +494,12 @@ export function MealPlannerCalendar({
                     setCustomTitle(e.target.value);
                     if (e.target.value) setSelectedRecipeId(null);
                   }}
-                  className="w-full rounded-xl border border-white/[0.1] bg-neutral-950/80 p-3 text-xs text-white placeholder:text-neutral-600 focus:outline-none focus:border-emerald-500/50"
+                  className="w-full rounded-xl border border-white/10 bg-neutral-950/80 p-3 text-xs text-white placeholder:text-neutral-600 focus:outline-none focus:border-emerald-500/50"
                 />
               </div>
             </div>
 
-            <div className="mt-4 pt-3 border-t border-white/[0.08] flex justify-end gap-2">
+            <div className="mt-4 pt-3 border-t border-white/8 flex justify-end gap-2">
               <button
                 type="button"
                 onClick={() => setIsModalOpen(false)}

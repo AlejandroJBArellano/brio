@@ -103,7 +103,7 @@ export function BiomarkerPanelCard({
           ? "border-rose-500/25 bg-rose-950/10 hover:border-rose-500/40"
           : isLow
           ? "border-amber-500/25 bg-amber-950/10 hover:border-amber-500/40"
-          : "border-white/[0.08] bg-neutral-900/50 hover:border-white/[0.15] hover:bg-neutral-900/80"
+          : "border-white/8 bg-neutral-900/50 hover:border-white/15 hover:bg-neutral-900/80"
       } backdrop-blur-xl shadow-lg`}
     >
       {/* 1. Header: Name, Code & Badge */}
@@ -114,7 +114,7 @@ export function BiomarkerPanelCard({
               {name}
             </h4>
             {code && (
-              <span className="rounded bg-white/[0.06] px-1.5 py-0.2 text-[9px] font-mono text-neutral-400">
+              <span className="rounded bg-white/6 px-1.5 py-0.2 text-[9px] font-mono text-neutral-400">
                 {code}
               </span>
             )}
@@ -141,7 +141,7 @@ export function BiomarkerPanelCard({
               className={`p-1 rounded-lg transition-colors ${
                 showNotes
                   ? "bg-white/10 text-white"
-                  : "text-neutral-500 hover:text-neutral-300 hover:bg-white/[0.05]"
+                  : "text-neutral-500 hover:text-neutral-300 hover:bg-white/5"
               }`}
               title="Ver notas clínicas y contexto deportivo"
             >
@@ -181,8 +181,8 @@ export function BiomarkerPanelCard({
 
       {/* 3. Range Gauge Semáforo (for numerical biomarkers) */}
       {valueNumeric !== undefined && refMin !== undefined && refMax !== undefined && (
-        <div className="mt-3 pt-2 border-t border-white/[0.05]">
-          <div className="relative h-2 w-full rounded-full bg-neutral-950/80 border border-white/[0.06] overflow-hidden">
+        <div className="mt-3 pt-2 border-t border-white/5">
+          <div className="relative h-2 w-full rounded-full bg-neutral-950/80 border border-white/6 overflow-hidden">
             {/* Optimal reference target zone */}
             <div
               className="absolute top-0 bottom-0 bg-emerald-500/20 border-x border-emerald-500/40"
@@ -211,7 +211,7 @@ export function BiomarkerPanelCard({
 
       {/* 4. Qualitative / Descriptive notes banner */}
       {showNotes && notes && (
-        <div className="mt-3 p-2.5 rounded-xl bg-neutral-950/90 border border-white/[0.08] text-[11px] text-neutral-300 leading-relaxed animate-in fade-in slide-in-from-top-1 duration-200">
+        <div className="mt-3 p-2.5 rounded-xl bg-neutral-950/90 border border-white/8 text-[11px] text-neutral-300 leading-relaxed animate-in fade-in slide-in-from-top-1 duration-200">
           <div className="flex items-start gap-1.5">
             <Info className="h-3.5 w-3.5 text-amber-400 shrink-0 mt-0.5" />
             <p>{notes}</p>

@@ -170,7 +170,7 @@ export function DashboardSkeleton() {
         </div>
 
         {/* Right Column: Inspector Pane Skeleton */}
-        <div className="hidden lg:flex w-full lg:w-[40%] sticky top-6 rounded-2xl border border-neutral-800/80 bg-neutral-900/60 p-5 backdrop-blur-xl flex-col gap-4 min-h-[480px]">
+        <div className="hidden lg:flex w-full lg:w-[40%] sticky top-6 rounded-2xl border border-neutral-800/80 bg-neutral-900/60 p-5 backdrop-blur-xl flex-col gap-4 min-h-120">
           <div className="flex items-center justify-between border-b border-neutral-800/60 pb-3">
             <div className="h-4 w-32 rounded bg-neutral-800" />
             <div className="size-6 rounded bg-neutral-800/60" />

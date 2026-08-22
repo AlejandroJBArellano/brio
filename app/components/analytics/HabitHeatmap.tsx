@@ -12,7 +12,7 @@ interface HabitHeatmapProps {
 }
 
 const LEVEL_CLASSES = [
-  "bg-neutral-900 border-white/[0.04]", // Level 0
+  "bg-neutral-900 border-white/4", // Level 0
   "bg-indigo-950/80 border-indigo-800/40 text-indigo-300", // Level 1
   "bg-indigo-800/80 border-indigo-600/50 text-white", // Level 2
   "bg-indigo-600 border-indigo-400 text-white shadow-sm shadow-indigo-500/20", // Level 3
@@ -40,8 +40,8 @@ export function HabitHeatmap({
   }
 
   return (
-    <div className="rounded-2xl border border-white/[0.08] bg-neutral-900/60 p-5 backdrop-blur-xl shadow-xl">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-white/[0.06]">
+    <div className="rounded-2xl border border-white/8 bg-neutral-900/60 p-5 backdrop-blur-xl shadow-xl">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-white/6">
         <div>
           <div className="flex items-center gap-2">
             <Sparkles className="h-4 w-4 text-emerald-400" />
@@ -90,8 +90,8 @@ export function HabitHeatmap({
       </div>
 
       {/* Footer / Tooltip & Legend */}
-      <div className="mt-4 flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-white/[0.06] text-xs">
-        <div className="text-neutral-400 min-h-[20px] font-mono">
+      <div className="mt-4 flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-white/6 text-xs">
+        <div className="text-neutral-400 min-h-5 font-mono">
           {hoveredDay ? (
             <span className="text-white">
               📅 <strong>{hoveredDay.date}</strong>: {hoveredDay.count} actividades (
@@ -104,7 +104,7 @@ export function HabitHeatmap({
 
         <div className="flex items-center gap-1.5 text-[11px] text-neutral-500">
           <span>Menos</span>
-          <span className="h-3 w-3 rounded-sm bg-neutral-900 border border-white/[0.04]" />
+          <span className="h-3 w-3 rounded-sm bg-neutral-900 border border-white/4" />
           <span className="h-3 w-3 rounded-sm bg-indigo-950 border border-indigo-800/40" />
           <span className="h-3 w-3 rounded-sm bg-indigo-800 border border-indigo-600" />
           <span className="h-3 w-3 rounded-sm bg-indigo-600 border border-indigo-400" />

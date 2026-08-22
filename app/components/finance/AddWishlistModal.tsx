@@ -86,11 +86,11 @@ export function AddWishlistModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-200">
-      <div className="w-full max-w-lg rounded-3xl border border-white/[0.12] bg-neutral-900 shadow-2xl overflow-hidden">
+      <div className="w-full max-w-lg rounded-3xl border border-white/12 bg-neutral-900 shadow-2xl overflow-hidden">
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-white/[0.08] bg-neutral-950/60">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-white/8 bg-neutral-950/60">
           <div className="flex items-center gap-2.5">
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-violet-500/20 to-indigo-500/20 border border-violet-500/30 text-violet-400">
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-linear-to-br from-violet-500/20 to-indigo-500/20 border border-violet-500/30 text-violet-400">
               <ShieldCheck className="h-4 w-4" />
             </div>
             <div>
@@ -131,7 +131,7 @@ export function AddWishlistModal({
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 placeholder="Ej. Audífonos Sony WH-1000XM5"
-                className="w-full rounded-xl border border-white/[0.1] bg-neutral-950 p-2.5 text-xs text-white placeholder:text-neutral-600 focus:outline-none focus:border-violet-500"
+                className="w-full rounded-xl border border-white/10 bg-neutral-950 p-2.5 text-xs text-white placeholder:text-neutral-600 focus:outline-none focus:border-violet-500"
               />
             </div>
 
@@ -146,7 +146,7 @@ export function AddWishlistModal({
                 value={priceEstimated}
                 onChange={(e) => setPriceEstimated(e.target.value)}
                 placeholder="$4,500.00"
-                className="w-full rounded-xl border border-white/[0.1] bg-neutral-950 p-2.5 text-xs font-mono text-emerald-400 placeholder:text-neutral-600 focus:outline-none focus:border-violet-500"
+                className="w-full rounded-xl border border-white/10 bg-neutral-950 p-2.5 text-xs font-mono text-emerald-400 placeholder:text-neutral-600 focus:outline-none focus:border-violet-500"
               />
             </div>
           </div>
@@ -160,7 +160,7 @@ export function AddWishlistModal({
               <select
                 value={category}
                 onChange={(e) => setCategory(e.target.value)}
-                className="w-full rounded-xl border border-white/[0.1] bg-neutral-950 p-2.5 text-xs text-white focus:outline-none"
+                className="w-full rounded-xl border border-white/10 bg-neutral-950 p-2.5 text-xs text-white focus:outline-none"
               >
                 {CATEGORIES.map((cat) => (
                   <option key={cat} value={cat}>
@@ -187,7 +187,7 @@ export function AddWishlistModal({
                     className={`py-2 rounded-xl border text-[11px] font-semibold transition-all ${
                       priority === pr.id
                         ? "bg-violet-500/20 border-violet-500/40 text-violet-300"
-                        : "bg-neutral-950 border-white/[0.06] text-neutral-400"
+                        : "bg-neutral-950 border-white/6 text-neutral-400"
                     }`}
                   >
                     {pr.label}
@@ -226,7 +226,7 @@ export function AddWishlistModal({
               value={url}
               onChange={(e) => setUrl(e.target.value)}
               placeholder="https://amazon.com.mx/dp/..."
-              className="w-full rounded-xl border border-white/[0.1] bg-neutral-950 p-2.5 text-xs text-white placeholder:text-neutral-600 focus:outline-none focus:border-violet-500"
+              className="w-full rounded-xl border border-white/10 bg-neutral-950 p-2.5 text-xs text-white placeholder:text-neutral-600 focus:outline-none focus:border-violet-500"
             />
           </div>
 
@@ -240,12 +240,12 @@ export function AddWishlistModal({
               value={reasonOrNotes}
               onChange={(e) => setReasonOrNotes(e.target.value)}
               placeholder="Escribe la justificación para evaluar tu autocontrol cuando pasen los 30 días..."
-              className="w-full rounded-xl border border-white/[0.1] bg-neutral-950 p-2.5 text-xs text-white placeholder:text-neutral-600 focus:outline-none focus:border-violet-500"
+              className="w-full rounded-xl border border-white/10 bg-neutral-950 p-2.5 text-xs text-white placeholder:text-neutral-600 focus:outline-none focus:border-violet-500"
             />
           </div>
 
           {/* Footer Submit */}
-          <div className="pt-2 flex justify-end gap-2 border-t border-white/[0.08]">
+          <div className="pt-2 flex justify-end gap-2 border-t border-white/8">
             <button
               type="button"
               onClick={onClose}
@@ -256,7 +256,7 @@ export function AddWishlistModal({
             <button
               type="submit"
               disabled={isPending}
-              className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-violet-600 to-indigo-600 font-bold text-xs text-white hover:from-violet-500 hover:to-indigo-500 transition-all shadow-lg shadow-violet-500/20 disabled:opacity-50 inline-flex items-center gap-2"
+              className="px-5 py-2.5 rounded-xl bg-linear-to-r from-violet-600 to-indigo-600 font-bold text-xs text-white hover:from-violet-500 hover:to-indigo-500 transition-all shadow-lg shadow-violet-500/20 disabled:opacity-50 inline-flex items-center gap-2"
             >
               <Plus className="h-3.5 w-3.5" />
               <span>{isPending ? "Guardando..." : "Iniciar Enfriamiento (30d)"}</span>

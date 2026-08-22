@@ -175,7 +175,7 @@ export function FocusModal({
             <select
               value={selectedTaskId}
               onChange={(e) => setSelectedTaskId(e.target.value)}
-              className="w-full rounded-xl border border-white/[0.1] bg-neutral-900 px-3 py-2 text-xs font-semibold text-white focus:border-indigo-500 focus:outline-none"
+              className="w-full rounded-xl border border-white/10 bg-neutral-900 px-3 py-2 text-xs font-semibold text-white focus:border-indigo-500 focus:outline-none"
             >
               {tasks.map((task) => (
                 <option key={task.id} value={task.id}>
@@ -201,9 +201,9 @@ export function FocusModal({
             </div>
 
             {/* Progress bar */}
-            <div className="mt-4 h-2 w-64 overflow-hidden rounded-full bg-neutral-900 border border-white/[0.06]">
+            <div className="mt-4 h-2 w-64 overflow-hidden rounded-full bg-neutral-900 border border-white/6">
               <div
-                className="h-full bg-gradient-to-r from-indigo-500 to-emerald-400 transition-all duration-500"
+                className="h-full bg-linear-to-r from-indigo-500 to-emerald-400 transition-all duration-500"
                 style={{ width: `${progressPercent}%` }}
               />
             </div>
@@ -226,7 +226,7 @@ export function FocusModal({
                 className={`px-3 py-1.5 rounded-xl text-xs font-medium transition-all ${
                   selectedMinutes === dur.minutes
                     ? "bg-indigo-600 text-white font-bold shadow-lg shadow-indigo-500/20"
-                    : "bg-neutral-900/80 text-neutral-400 hover:text-white border border-white/[0.06]"
+                    : "bg-neutral-900/80 text-neutral-400 hover:text-white border border-white/6"
                 }`}
               >
                 {dur.label}
@@ -240,7 +240,7 @@ export function FocusModal({
               type="button"
               onClick={handleReset}
               title="Reiniciar temporizador"
-              className="flex h-12 w-12 items-center justify-center rounded-2xl border border-white/[0.1] bg-neutral-900 text-neutral-400 hover:text-white hover:bg-neutral-800 transition-all active:scale-95"
+              className="flex h-12 w-12 items-center justify-center rounded-2xl border border-white/10 bg-neutral-900 text-neutral-400 hover:text-white hover:bg-neutral-800 transition-all active:scale-95"
             >
               <RotateCcw className="h-5 w-5" />
             </button>
@@ -269,7 +269,7 @@ export function FocusModal({
           </div>
 
           {/* Ambient Sound Selector */}
-          <div className="w-full pt-4 border-t border-white/[0.06] flex flex-col sm:flex-row items-center justify-between gap-3">
+          <div className="w-full pt-4 border-t border-white/6 flex flex-col sm:flex-row items-center justify-between gap-3">
             <div className="flex items-center gap-2 text-xs text-neutral-400">
               <Headphones className="h-4 w-4 text-indigo-400" />
               <span>Audio Ambiental (Web Audio):</span>

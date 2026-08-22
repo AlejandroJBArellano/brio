@@ -174,9 +174,9 @@ export function VaultView({ data, onRefresh, onOpenScratchpad }: VaultViewProps)
       </div>
 
       {/* 2. Top Navigation Bar: Sub-Tabs & Action Buttons */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-white/[0.08] pb-3">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-white/8 pb-3">
         {/* Navigation Tabs */}
-        <div className="flex items-center gap-1.5 p-1 bg-neutral-950/80 rounded-2xl border border-white/[0.08] overflow-x-auto">
+        <div className="flex items-center gap-1.5 p-1 bg-neutral-950/80 rounded-2xl border border-white/8 overflow-x-auto">
           <button
             type="button"
             onClick={() => setActiveTab("courses")}
@@ -264,7 +264,7 @@ export function VaultView({ data, onRefresh, onOpenScratchpad }: VaultViewProps)
             <button
               type="button"
               onClick={onOpenScratchpad}
-              className="flex items-center gap-1.5 px-3 py-2 rounded-xl border border-white/[0.08] bg-neutral-900 hover:bg-neutral-800 text-xs font-semibold text-neutral-300 transition-all"
+              className="flex items-center gap-1.5 px-3 py-2 rounded-xl border border-white/8 bg-neutral-900 hover:bg-neutral-800 text-xs font-semibold text-neutral-300 transition-all"
             >
               <span>📝 Scratchpad</span>
               <kbd className="text-[10px] font-mono opacity-60">⌘J</kbd>
@@ -275,7 +275,7 @@ export function VaultView({ data, onRefresh, onOpenScratchpad }: VaultViewProps)
             <button
               type="button"
               onClick={() => setIsNewProjectModalOpen(true)}
-              className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-gradient-to-r from-pink-600 to-rose-600 text-xs font-bold text-white hover:brightness-110 shadow-lg shadow-pink-500/20 transition-all"
+              className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-linear-to-r from-pink-600 to-rose-600 text-xs font-bold text-white hover:brightness-110 shadow-lg shadow-pink-500/20 transition-all"
             >
               <Plus className="h-4 w-4" />
               <span>Nuevo Proyecto</span>
@@ -294,7 +294,7 @@ export function VaultView({ data, onRefresh, onOpenScratchpad }: VaultViewProps)
                     : "sheet_music"
                 )
               }
-              className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-gradient-to-r from-cyan-600 to-blue-600 text-xs font-bold text-white hover:brightness-110 shadow-lg shadow-cyan-500/20 transition-all"
+              className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-linear-to-r from-cyan-600 to-blue-600 text-xs font-bold text-white hover:brightness-110 shadow-lg shadow-cyan-500/20 transition-all"
             >
               <Plus className="h-4 w-4" />
               <span>
@@ -352,7 +352,7 @@ export function VaultView({ data, onRefresh, onOpenScratchpad }: VaultViewProps)
         <div className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {data.projects.length === 0 ? (
-              <div className="col-span-full p-12 text-center rounded-3xl border border-dashed border-white/[0.08] bg-neutral-950/40">
+              <div className="col-span-full p-12 text-center rounded-3xl border border-dashed border-white/8 bg-neutral-950/40">
                 <Code2 className="h-8 w-8 text-neutral-600 mx-auto mb-2" />
                 <p className="text-sm font-semibold text-neutral-400">
                   Aún no tienes proyectos registrados
@@ -367,7 +367,7 @@ export function VaultView({ data, onRefresh, onOpenScratchpad }: VaultViewProps)
                 return (
                   <div
                     key={proj.id}
-                    className="group rounded-3xl border border-white/[0.08] bg-neutral-900/60 p-5 backdrop-blur-xl shadow-xl hover:border-white/[0.18] transition-all flex flex-col justify-between"
+                    className="group rounded-3xl border border-white/8 bg-neutral-900/60 p-5 backdrop-blur-xl shadow-xl hover:border-white/18 transition-all flex flex-col justify-between"
                   >
                     <div className="space-y-3">
                       {/* Status and Action delete */}
@@ -412,7 +412,7 @@ export function VaultView({ data, onRefresh, onOpenScratchpad }: VaultViewProps)
                           {proj.techStack.map((tech) => (
                             <span
                               key={tech}
-                              className="px-2 py-0.5 rounded-md bg-neutral-950 border border-white/[0.06] text-[10px] font-mono text-neutral-300"
+                              className="px-2 py-0.5 rounded-md bg-neutral-950 border border-white/6 text-[10px] font-mono text-neutral-300"
                             >
                               {tech}
                             </span>
@@ -423,7 +423,7 @@ export function VaultView({ data, onRefresh, onOpenScratchpad }: VaultViewProps)
 
                     {/* Links */}
                     {(proj.repoUrl || proj.liveUrl) && (
-                      <div className="pt-4 mt-4 border-t border-white/[0.04] flex items-center gap-3 text-xs">
+                      <div className="pt-4 mt-4 border-t border-white/4 flex items-center gap-3 text-xs">
                         {proj.repoUrl && (
                           <a
                             href={proj.repoUrl}
@@ -467,8 +467,8 @@ export function VaultView({ data, onRefresh, onOpenScratchpad }: VaultViewProps)
       {/* New Project Modal */}
       {isNewProjectModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-200">
-          <div className="w-full max-w-lg rounded-3xl border border-white/[0.12] bg-neutral-900 shadow-2xl p-6 space-y-4">
-            <div className="flex items-center justify-between border-b border-white/[0.08] pb-3">
+          <div className="w-full max-w-lg rounded-3xl border border-white/12 bg-neutral-900 shadow-2xl p-6 space-y-4">
+            <div className="flex items-center justify-between border-b border-white/8 pb-3">
               <h3 className="text-base font-bold text-white">Nuevo Proyecto Técnico</h3>
               <button
                 type="button"
@@ -490,7 +490,7 @@ export function VaultView({ data, onRefresh, onOpenScratchpad }: VaultViewProps)
                   value={projectTitle}
                   onChange={(e) => setProjectTitle(e.target.value)}
                   placeholder="Ej. Brio OS"
-                  className="w-full rounded-xl border border-white/[0.1] bg-neutral-950 p-2.5 text-xs text-white focus:outline-none focus:border-pink-500"
+                  className="w-full rounded-xl border border-white/10 bg-neutral-950 p-2.5 text-xs text-white focus:outline-none focus:border-pink-500"
                 />
               </div>
 
@@ -503,7 +503,7 @@ export function VaultView({ data, onRefresh, onOpenScratchpad }: VaultViewProps)
                   value={projectDesc}
                   onChange={(e) => setProjectDesc(e.target.value)}
                   placeholder="Objetivo principal del proyecto..."
-                  className="w-full rounded-xl border border-white/[0.1] bg-neutral-950 p-2.5 text-xs text-white focus:outline-none focus:border-pink-500"
+                  className="w-full rounded-xl border border-white/10 bg-neutral-950 p-2.5 text-xs text-white focus:outline-none focus:border-pink-500"
                 />
               </div>
 
@@ -516,7 +516,7 @@ export function VaultView({ data, onRefresh, onOpenScratchpad }: VaultViewProps)
                   value={projectTech}
                   onChange={(e) => setProjectTech(e.target.value)}
                   placeholder="Next.js, TypeScript, Tailwind, Neon"
-                  className="w-full rounded-xl border border-white/[0.1] bg-neutral-950 p-2.5 text-xs text-white focus:outline-none focus:border-pink-500"
+                  className="w-full rounded-xl border border-white/10 bg-neutral-950 p-2.5 text-xs text-white focus:outline-none focus:border-pink-500"
                 />
               </div>
 

@@ -149,7 +149,7 @@ export function ProjectsView({
     <div className="flex flex-col gap-8 animate-in fade-in duration-300">
       {/* 1. Projects Section */}
       <div className="space-y-4">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-white/[0.08]">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-white/8">
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
               <Rocket className="h-5 w-5" />
@@ -192,7 +192,7 @@ export function ProjectsView({
             return (
               <div
                 key={project.id}
-                className="rounded-2xl border border-white/[0.08] bg-neutral-900/60 p-5 backdrop-blur-xl shadow-xl flex flex-col justify-between group hover:border-indigo-500/40 transition-all"
+                className="rounded-2xl border border-white/8 bg-neutral-900/60 p-5 backdrop-blur-xl shadow-xl flex flex-col justify-between group hover:border-indigo-500/40 transition-all"
               >
                 <div>
                   <div className="flex items-center justify-between gap-2">
@@ -228,7 +228,7 @@ export function ProjectsView({
                       {project.techStack.map((tech) => (
                         <span
                           key={tech}
-                          className="px-2 py-0.5 rounded bg-neutral-950/80 border border-white/[0.06] text-[10px] font-mono text-neutral-300"
+                          className="px-2 py-0.5 rounded bg-neutral-950/80 border border-white/6 text-[10px] font-mono text-neutral-300"
                         >
                           {tech}
                         </span>
@@ -237,7 +237,7 @@ export function ProjectsView({
                   )}
                 </div>
 
-                <div className="mt-5 pt-3 border-t border-white/[0.06] flex items-center justify-between">
+                <div className="mt-5 pt-3 border-t border-white/6 flex items-center justify-between">
                   {/* Progress */}
                   <div className="flex items-center gap-2">
                     <div className="h-1.5 w-20 overflow-hidden rounded-full bg-neutral-950">
@@ -260,7 +260,7 @@ export function ProjectsView({
                         e.target.value as ProjectStatus
                       )
                     }
-                    className="rounded-lg border border-white/[0.08] bg-neutral-950 px-2 py-1 text-[11px] text-neutral-300 focus:outline-none"
+                    className="rounded-lg border border-white/8 bg-neutral-950 px-2 py-1 text-[11px] text-neutral-300 focus:outline-none"
                   >
                     <option value="idea">Idea</option>
                     <option value="in_progress">En Desarrollo</option>
@@ -276,7 +276,7 @@ export function ProjectsView({
 
       {/* 2. Reading & Learning Section */}
       <div className="space-y-4">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-white/[0.08]">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-white/8">
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-amber-500/10 text-amber-400 border border-amber-500/20">
               <BookOpen className="h-5 w-5" />
@@ -311,7 +311,7 @@ export function ProjectsView({
             return (
               <div
                 key={item.id}
-                className="rounded-2xl border border-white/[0.08] bg-neutral-900/60 p-5 backdrop-blur-xl shadow-xl flex flex-col justify-between group"
+                className="rounded-2xl border border-white/8 bg-neutral-900/60 p-5 backdrop-blur-xl shadow-xl flex flex-col justify-between group"
               >
                 <div>
                   <div className="flex items-center justify-between">
@@ -337,13 +337,13 @@ export function ProjectsView({
                   )}
 
                   {item.keyTakeaways && (
-                    <div className="mt-3 rounded-xl bg-neutral-950/80 p-3 border border-white/[0.04] text-xs text-neutral-300 italic">
+                    <div className="mt-3 rounded-xl bg-neutral-950/80 p-3 border border-white/4 text-xs text-neutral-300 italic">
                       &ldquo;{item.keyTakeaways}&rdquo;
                     </div>
                   )}
                 </div>
 
-                <div className="mt-5 space-y-3 pt-3 border-t border-white/[0.06]">
+                <div className="mt-5 space-y-3 pt-3 border-t border-white/6">
                   {/* Progress bar */}
                   <div>
                     <div className="flex items-center justify-between text-[11px] mb-1 font-mono">
@@ -366,7 +366,7 @@ export function ProjectsView({
                       type="button"
                       onClick={() => handleIncrementBookProgress(item, 10)}
                       disabled={isPending}
-                      className="flex-1 py-1.5 rounded-lg bg-neutral-950 border border-white/[0.06] text-xs font-mono text-neutral-300 hover:text-white"
+                      className="flex-1 py-1.5 rounded-lg bg-neutral-950 border border-white/6 text-xs font-mono text-neutral-300 hover:text-white"
                     >
                       +10 págs
                     </button>
@@ -374,7 +374,7 @@ export function ProjectsView({
                       type="button"
                       onClick={() => handleIncrementBookProgress(item, 25)}
                       disabled={isPending}
-                      className="flex-1 py-1.5 rounded-lg bg-neutral-950 border border-white/[0.06] text-xs font-mono text-neutral-300 hover:text-white"
+                      className="flex-1 py-1.5 rounded-lg bg-neutral-950 border border-white/6 text-xs font-mono text-neutral-300 hover:text-white"
                     >
                       +25 págs
                     </button>
@@ -389,8 +389,8 @@ export function ProjectsView({
       {/* New Project Modal */}
       {isNewProjectModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-200">
-          <div className="w-full max-w-md rounded-3xl border border-white/[0.1] bg-neutral-900/95 p-6 shadow-2xl backdrop-blur-2xl">
-            <div className="flex items-center justify-between pb-3 border-b border-white/[0.08]">
+          <div className="w-full max-w-md rounded-3xl border border-white/10 bg-neutral-900/95 p-6 shadow-2xl backdrop-blur-2xl">
+            <div className="flex items-center justify-between pb-3 border-b border-white/8">
               <h3 className="text-base font-bold text-white">Nuevo Proyecto</h3>
               <button
                 type="button"
@@ -412,7 +412,7 @@ export function ProjectsView({
                   value={projectTitle}
                   onChange={(e) => setProjectTitle(e.target.value)}
                   required
-                  className="w-full rounded-xl border border-white/[0.1] bg-neutral-950 px-3 py-2 text-xs text-white focus:outline-none"
+                  className="w-full rounded-xl border border-white/10 bg-neutral-950 px-3 py-2 text-xs text-white focus:outline-none"
                 />
               </div>
 
@@ -425,7 +425,7 @@ export function ProjectsView({
                   placeholder="Sistema operativo personal..."
                   value={projectDesc}
                   onChange={(e) => setProjectDesc(e.target.value)}
-                  className="w-full rounded-xl border border-white/[0.1] bg-neutral-950 px-3 py-2 text-xs text-white focus:outline-none"
+                  className="w-full rounded-xl border border-white/10 bg-neutral-950 px-3 py-2 text-xs text-white focus:outline-none"
                 />
               </div>
 
@@ -438,7 +438,7 @@ export function ProjectsView({
                   placeholder="Next.js, Tailwind, Neon DB"
                   value={projectTech}
                   onChange={(e) => setProjectTech(e.target.value)}
-                  className="w-full rounded-xl border border-white/[0.1] bg-neutral-950 px-3 py-2 text-xs text-white focus:outline-none"
+                  className="w-full rounded-xl border border-white/10 bg-neutral-950 px-3 py-2 text-xs text-white focus:outline-none"
                 />
               </div>
 
@@ -466,8 +466,8 @@ export function ProjectsView({
       {/* New Book Modal */}
       {isNewBookModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-200">
-          <div className="w-full max-w-md rounded-3xl border border-white/[0.1] bg-neutral-900/95 p-6 shadow-2xl backdrop-blur-2xl">
-            <div className="flex items-center justify-between pb-3 border-b border-white/[0.08]">
+          <div className="w-full max-w-md rounded-3xl border border-white/10 bg-neutral-900/95 p-6 shadow-2xl backdrop-blur-2xl">
+            <div className="flex items-center justify-between pb-3 border-b border-white/8">
               <h3 className="text-base font-bold text-white">Nuevo Libro o Curso</h3>
               <button
                 type="button"
@@ -489,7 +489,7 @@ export function ProjectsView({
                   value={bookTitle}
                   onChange={(e) => setBookTitle(e.target.value)}
                   required
-                  className="w-full rounded-xl border border-white/[0.1] bg-neutral-950 px-3 py-2 text-xs text-white focus:outline-none"
+                  className="w-full rounded-xl border border-white/10 bg-neutral-950 px-3 py-2 text-xs text-white focus:outline-none"
                 />
               </div>
 
@@ -502,7 +502,7 @@ export function ProjectsView({
                   placeholder="James Clear"
                   value={bookAuthor}
                   onChange={(e) => setBookAuthor(e.target.value)}
-                  className="w-full rounded-xl border border-white/[0.1] bg-neutral-950 px-3 py-2 text-xs text-white focus:outline-none"
+                  className="w-full rounded-xl border border-white/10 bg-neutral-950 px-3 py-2 text-xs text-white focus:outline-none"
                 />
               </div>
 
@@ -514,7 +514,7 @@ export function ProjectsView({
                   type="number"
                   value={bookTotal}
                   onChange={(e) => setBookTotal(parseInt(e.target.value) || 100)}
-                  className="w-full rounded-xl border border-white/[0.1] bg-neutral-950 px-3 py-2 text-xs text-white focus:outline-none"
+                  className="w-full rounded-xl border border-white/10 bg-neutral-950 px-3 py-2 text-xs text-white focus:outline-none"
                 />
               </div>
 

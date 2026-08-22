@@ -9,8 +9,8 @@ interface LifeBalanceRadarProps {
 
 export function LifeBalanceRadar({ tagDistributions }: LifeBalanceRadarProps) {
   return (
-    <div className="rounded-2xl border border-white/[0.08] bg-neutral-900/60 p-5 backdrop-blur-xl shadow-xl">
-      <div className="flex items-center gap-2.5 pb-4 border-b border-white/[0.06]">
+    <div className="rounded-2xl border border-white/8 bg-neutral-900/60 p-5 backdrop-blur-xl shadow-xl">
+      <div className="flex items-center gap-2.5 pb-4 border-b border-white/6">
         <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-violet-500/10 text-violet-400 border border-violet-500/20">
           <Compass className="h-4 w-4" />
         </div>

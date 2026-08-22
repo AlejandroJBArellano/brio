@@ -18,7 +18,7 @@ export function DailyFocusRibbon({
 }: DailyFocusRibbonProps) {
   if (!mustWinTaskIds || mustWinTaskIds.length === 0) {
     return (
-      <div className="rounded-2xl border border-amber-500/20 bg-gradient-to-r from-amber-500/10 via-neutral-900/60 to-neutral-900/60 p-4 backdrop-blur-xl shadow-xl flex items-center justify-between">
+      <div className="rounded-2xl border border-amber-500/20 bg-linear-to-r from-amber-500/10 via-neutral-900/60 to-neutral-900/60 p-4 backdrop-blur-xl shadow-xl flex items-center justify-between">
         <div className="flex items-center gap-3">
           <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-amber-500/20 text-amber-300">
             <Target className="h-4 w-4" />
@@ -36,7 +36,7 @@ export function DailyFocusRibbon({
         <button
           type="button"
           onClick={onOpenMorningRitual}
-          className="px-3 py-1.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 font-bold text-xs text-neutral-950 hover:brightness-110 shadow-lg shadow-amber-500/20 transition-all"
+          className="px-3 py-1.5 rounded-xl bg-linear-to-r from-amber-500 to-amber-600 font-bold text-xs text-neutral-950 hover:brightness-110 shadow-lg shadow-amber-500/20 transition-all"
         >
           🌅 Ritual Matutino (⌘M)
         </button>
@@ -49,7 +49,7 @@ export function DailyFocusRibbon({
   const isAllDone = focusTasks.length > 0 && completedCount === focusTasks.length;
 
   return (
-    <div className="rounded-2xl border border-indigo-500/30 bg-gradient-to-r from-indigo-950/40 via-neutral-900/80 to-neutral-900/80 p-4 backdrop-blur-xl shadow-xl space-y-3">
+    <div className="rounded-2xl border border-indigo-500/30 bg-linear-to-r from-indigo-950/40 via-neutral-900/80 to-neutral-900/80 p-4 backdrop-blur-xl shadow-xl space-y-3">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-indigo-500/20 text-indigo-300">
@@ -92,7 +92,7 @@ export function DailyFocusRibbon({
               className={`flex items-center gap-2.5 p-2.5 rounded-xl border cursor-pointer transition-all ${
                 isDone
                   ? "border-emerald-500/30 bg-emerald-500/10 text-neutral-400"
-                  : "border-white/[0.08] bg-neutral-950/60 hover:border-indigo-500/40 text-white"
+                  : "border-white/8 bg-neutral-950/60 hover:border-indigo-500/40 text-white"
               }`}
             >
               {isDone ? (

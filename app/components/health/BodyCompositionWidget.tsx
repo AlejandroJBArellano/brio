@@ -71,7 +71,7 @@ export function BodyCompositionWidget({
 
   if (!current) {
     return (
-      <div className="rounded-2xl border border-white/[0.08] bg-neutral-900/60 p-6 backdrop-blur-xl shadow-xl text-center">
+      <div className="rounded-2xl border border-white/8 bg-neutral-900/60 p-6 backdrop-blur-xl shadow-xl text-center">
         <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-amber-500/10 text-amber-400 border border-amber-500/20 mx-auto mb-3">
           <Activity className="h-6 w-6" />
         </div>
@@ -96,7 +96,7 @@ export function BodyCompositionWidget({
   return (
     <div className="rounded-2xl border border-amber-500/20 bg-neutral-900/60 p-5 backdrop-blur-xl shadow-xl space-y-6">
       {/* 1. Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-white/[0.06]">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-white/6">
         <div className="flex items-center gap-3">
           <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-500/10 text-amber-400 border border-amber-500/20">
             <Activity className="h-5 w-5" />
@@ -138,7 +138,7 @@ export function BodyCompositionWidget({
       {/* 2. Key Metrics Cards with Deltas */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         {/* Peso Total */}
-        <div className="rounded-xl border border-white/[0.06] bg-neutral-950/60 p-4 transition-all hover:border-white/[0.12]">
+        <div className="rounded-xl border border-white/6 bg-neutral-950/60 p-4 transition-all hover:border-white/12">
           <div className="flex items-center justify-between text-xs text-neutral-400 mb-1">
             <span className="flex items-center gap-1.5">
               <Scale className="h-3.5 w-3.5 text-emerald-400" />
@@ -166,7 +166,7 @@ export function BodyCompositionWidget({
         </div>
 
         {/* Grasa Corporal */}
-        <div className="rounded-xl border border-white/[0.06] bg-neutral-950/60 p-4 transition-all hover:border-white/[0.12]">
+        <div className="rounded-xl border border-white/6 bg-neutral-950/60 p-4 transition-all hover:border-white/12">
           <div className="flex items-center justify-between text-xs text-neutral-400 mb-1">
             <span className="flex items-center gap-1.5">
               <Flame className="h-3.5 w-3.5 text-rose-400" />
@@ -207,7 +207,7 @@ export function BodyCompositionWidget({
         </div>
 
         {/* Masa Muscular Esquelética */}
-        <div className="rounded-xl border border-white/[0.06] bg-neutral-950/60 p-4 transition-all hover:border-white/[0.12]">
+        <div className="rounded-xl border border-white/6 bg-neutral-950/60 p-4 transition-all hover:border-white/12">
           <div className="flex items-center justify-between text-xs text-neutral-400 mb-1">
             <span className="flex items-center gap-1.5">
               <Dumbbell className="h-3.5 w-3.5 text-indigo-400" />
@@ -245,7 +245,7 @@ export function BodyCompositionWidget({
         </div>
 
         {/* Grasa Visceral & TMB */}
-        <div className="rounded-xl border border-white/[0.06] bg-neutral-950/60 p-4 transition-all hover:border-white/[0.12]">
+        <div className="rounded-xl border border-white/6 bg-neutral-950/60 p-4 transition-all hover:border-white/12">
           <div className="flex items-center justify-between text-xs text-neutral-400 mb-1">
             <span className="flex items-center gap-1.5">
               <Zap className="h-3.5 w-3.5 text-amber-400" />
@@ -269,7 +269,7 @@ export function BodyCompositionWidget({
 
       {/* 3. Segmental Muscle & Fat Map */}
       {current.segmentalData && (
-        <div className="rounded-xl border border-white/[0.06] bg-neutral-950/40 p-4">
+        <div className="rounded-xl border border-white/6 bg-neutral-950/40 p-4">
           <div className="flex items-center justify-between mb-3">
             <h4 className="text-xs font-bold text-neutral-300 uppercase tracking-wider flex items-center gap-2">
               <User className="h-3.5 w-3.5 text-violet-400" />
@@ -279,7 +279,7 @@ export function BodyCompositionWidget({
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             {/* Tronco */}
-            <div className="p-3 rounded-lg bg-neutral-900/80 border border-white/[0.04]">
+            <div className="p-3 rounded-lg bg-neutral-900/80 border border-white/4">
               <span className="text-xs font-semibold text-neutral-200 block mb-1.5">
                 🏛️ Tronco (Core & Espalda)
               </span>
@@ -296,7 +296,7 @@ export function BodyCompositionWidget({
             </div>
 
             {/* Brazos */}
-            <div className="p-3 rounded-lg bg-neutral-900/80 border border-white/[0.04]">
+            <div className="p-3 rounded-lg bg-neutral-900/80 border border-white/4">
               <span className="text-xs font-semibold text-neutral-200 block mb-1.5">
                 💪 Brazos (Izq / Der)
               </span>
@@ -319,7 +319,7 @@ export function BodyCompositionWidget({
             </div>
 
             {/* Piernas */}
-            <div className="p-3 rounded-lg bg-neutral-900/80 border border-white/[0.04]">
+            <div className="p-3 rounded-lg bg-neutral-900/80 border border-white/4">
               <span className="text-xs font-semibold text-neutral-200 block mb-1.5">
                 🦵 Piernas (Izq / Der)
               </span>
@@ -351,7 +351,7 @@ export function BodyCompositionWidget({
             <h4 className="text-xs font-bold text-neutral-300 tracking-tight flex items-center gap-1.5">
               <Calendar className="h-3.5 w-3.5 text-neutral-400" />
               <span>Historial de Mediciones Mensuales</span>
-              <span className="rounded-full bg-white/[0.06] px-2 py-0.5 text-[10px] text-neutral-400 font-mono ml-1">
+              <span className="rounded-full bg-white/6 px-2 py-0.5 text-[10px] text-neutral-400 font-mono ml-1">
                 {logs.length}
               </span>
             </h4>
@@ -367,11 +367,11 @@ export function BodyCompositionWidget({
                   className={`flex items-center justify-between p-3 rounded-xl border transition-all cursor-pointer ${
                     isSelected
                       ? "border-amber-500/40 bg-amber-500/10 text-white"
-                      : "border-white/[0.04] bg-neutral-950/40 text-neutral-300 hover:border-white/[0.1] hover:bg-neutral-950/80"
+                      : "border-white/4 bg-neutral-950/40 text-neutral-300 hover:border-white/10 hover:bg-neutral-950/80"
                   }`}
                 >
                   <div className="flex items-center gap-3">
-                    <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-white/[0.06] text-neutral-300 text-xs font-mono">
+                    <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-white/6 text-neutral-300 text-xs font-mono">
                       📅
                     </div>
                     <div>
@@ -383,7 +383,7 @@ export function BodyCompositionWidget({
                         })}
                       </span>
                       {log.notes && (
-                        <span className="text-[10px] text-neutral-500 block truncate max-w-[200px]">
+                        <span className="text-[10px] text-neutral-500 block truncate max-w-50">
                           {log.notes}
                         </span>
                       )}

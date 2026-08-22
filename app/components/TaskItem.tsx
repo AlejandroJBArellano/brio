@@ -72,7 +72,7 @@ export function TaskItem({
       className={`group relative flex items-center justify-between rounded-2xl border p-3.5 sm:p-4 transition-all cursor-pointer select-none ${
         isSelected
           ? "border-indigo-500/80 bg-neutral-900 shadow-lg shadow-indigo-500/10 ring-1 ring-indigo-500/50"
-          : "border-white/[0.06] bg-neutral-900/60 hover:border-white/20 hover:bg-neutral-900/90"
+          : "border-white/6 bg-neutral-900/60 hover:border-white/20 hover:bg-neutral-900/90"
       } ${optimisticState.completed ? "opacity-40" : "opacity-100"}`}
     >
       {/* Left Column: Checkbox / Counter + Text & Meta */}

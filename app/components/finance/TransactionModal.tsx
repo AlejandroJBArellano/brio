@@ -108,11 +108,11 @@ export function TransactionModal({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-200">
       <div
-        className="w-full max-w-lg rounded-2xl border border-white/[0.1] bg-neutral-900/95 p-6 shadow-2xl backdrop-blur-xl animate-in zoom-in-95 duration-200"
+        className="w-full max-w-lg rounded-2xl border border-white/10 bg-neutral-900/95 p-6 shadow-2xl backdrop-blur-xl animate-in zoom-in-95 duration-200"
         role="dialog"
       >
         {/* Header */}
-        <div className="flex items-center justify-between pb-4 border-b border-white/[0.08]">
+        <div className="flex items-center justify-between pb-4 border-b border-white/8">
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-500/10 text-amber-400 border border-amber-500/20">
               <Wallet className="h-5 w-5" />
@@ -144,7 +144,7 @@ export function TransactionModal({
 
         <form onSubmit={handleSubmit} className="mt-5 space-y-4">
           {/* Type Toggle: Gasto vs Ingreso */}
-          <div className="grid grid-cols-2 gap-2 p-1 rounded-xl bg-neutral-950/60 border border-white/[0.06]">
+          <div className="grid grid-cols-2 gap-2 p-1 rounded-xl bg-neutral-950/60 border border-white/6">
             <button
               type="button"
               onClick={() => setType("expense")}
@@ -188,7 +188,7 @@ export function TransactionModal({
                 onChange={(e) => setAmount(e.target.value)}
                 autoFocus
                 required
-                className="w-full rounded-xl border border-white/[0.1] bg-neutral-950/80 pl-8 pr-4 py-2.5 font-mono text-lg font-bold text-white placeholder:text-neutral-600 focus:border-amber-500/50 focus:outline-none focus:ring-2 focus:ring-amber-500/20"
+                className="w-full rounded-xl border border-white/10 bg-neutral-950/80 pl-8 pr-4 py-2.5 font-mono text-lg font-bold text-white placeholder:text-neutral-600 focus:border-amber-500/50 focus:outline-none focus:ring-2 focus:ring-amber-500/20"
               />
             </div>
           </div>
@@ -204,7 +204,7 @@ export function TransactionModal({
               value={concept}
               onChange={(e) => setConcept(e.target.value)}
               required
-              className="w-full rounded-xl border border-white/[0.1] bg-neutral-950/80 px-3.5 py-2.5 text-sm text-white placeholder:text-neutral-600 focus:border-amber-500/50 focus:outline-none focus:ring-2 focus:ring-amber-500/20"
+              className="w-full rounded-xl border border-white/10 bg-neutral-950/80 px-3.5 py-2.5 text-sm text-white placeholder:text-neutral-600 focus:border-amber-500/50 focus:outline-none focus:ring-2 focus:ring-amber-500/20"
             />
           </div>
 
@@ -217,7 +217,7 @@ export function TransactionModal({
               <select
                 value={category}
                 onChange={(e) => handleCategoryChange(e.target.value)}
-                className="w-full rounded-xl border border-white/[0.1] bg-neutral-950/80 px-3 py-2.5 text-xs text-white focus:border-amber-500/50 focus:outline-none focus:ring-2 focus:ring-amber-500/20"
+                className="w-full rounded-xl border border-white/10 bg-neutral-950/80 px-3 py-2.5 text-xs text-white focus:border-amber-500/50 focus:outline-none focus:ring-2 focus:ring-amber-500/20"
               >
                 {COMMON_CATEGORIES.map((cat) => (
                   <option key={cat.id} value={cat.id}>
@@ -234,7 +234,7 @@ export function TransactionModal({
               <select
                 value={account}
                 onChange={(e) => setAccount(e.target.value)}
-                className="w-full rounded-xl border border-white/[0.1] bg-neutral-950/80 px-3 py-2.5 text-xs text-white focus:border-amber-500/50 focus:outline-none focus:ring-2 focus:ring-amber-500/20"
+                className="w-full rounded-xl border border-white/10 bg-neutral-950/80 px-3 py-2.5 text-xs text-white focus:border-amber-500/50 focus:outline-none focus:ring-2 focus:ring-amber-500/20"
               >
                 {COMMON_ACCOUNTS.map((acc) => (
                   <option key={acc.id} value={acc.id}>
@@ -278,7 +278,7 @@ export function TransactionModal({
                 type="date"
                 value={date}
                 onChange={(e) => setDate(e.target.value)}
-                className="w-full rounded-xl border border-white/[0.1] bg-neutral-950/80 px-3 py-2 text-xs text-white focus:border-amber-500/50 focus:outline-none"
+                className="w-full rounded-xl border border-white/10 bg-neutral-950/80 px-3 py-2 text-xs text-white focus:border-amber-500/50 focus:outline-none"
               />
             </div>
             <div>
@@ -290,13 +290,13 @@ export function TransactionModal({
                 placeholder="Detalle o lugar..."
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
-                className="w-full rounded-xl border border-white/[0.1] bg-neutral-950/80 px-3 py-2 text-xs text-white focus:border-amber-500/50 focus:outline-none"
+                className="w-full rounded-xl border border-white/10 bg-neutral-950/80 px-3 py-2 text-xs text-white focus:border-amber-500/50 focus:outline-none"
               />
             </div>
           </div>
 
           {/* Actions */}
-          <div className="flex items-center justify-end gap-3 pt-3 border-t border-white/[0.08]">
+          <div className="flex items-center justify-end gap-3 pt-3 border-t border-white/8">
             <button
               type="button"
               onClick={onClose}
@@ -307,7 +307,7 @@ export function TransactionModal({
             <button
               type="submit"
               disabled={isPending}
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 font-semibold text-xs text-neutral-950 hover:brightness-110 shadow-lg shadow-amber-500/20 disabled:opacity-50 transition-all"
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-linear-to-r from-amber-500 to-amber-600 font-semibold text-xs text-neutral-950 hover:brightness-110 shadow-lg shadow-amber-500/20 disabled:opacity-50 transition-all"
             >
               <Plus className="h-4 w-4" />
               <span>{isPending ? "Guardando..." : "Registrar en Neon DB"}</span>

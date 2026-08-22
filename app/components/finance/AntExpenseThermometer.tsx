@@ -68,7 +68,7 @@ export function AntExpenseThermometer({
           </span>
         </div>
 
-        <div className="relative h-3 w-full overflow-hidden rounded-full bg-neutral-950/80 border border-white/[0.06]">
+        <div className="relative h-3 w-full overflow-hidden rounded-full bg-neutral-950/80 border border-white/6">
           <div
             className={`h-full transition-all duration-500 ${
               isExceeded
@@ -83,7 +83,7 @@ export function AntExpenseThermometer({
       </div>
 
       {/* Month context & tip */}
-      <div className="mt-4 flex flex-wrap items-center justify-between gap-2 pt-3 border-t border-white/[0.06] text-xs">
+      <div className="mt-4 flex flex-wrap items-center justify-between gap-2 pt-3 border-t border-white/6 text-xs">
         <div className="text-neutral-400">
           Acumulado del mes: <span className="font-mono font-semibold text-white">${spentThisMonth.toFixed(2)} MXN</span>
         </div>

@@ -94,8 +94,8 @@ export function BiomarkersView({ data, onRefresh }: BiomarkersViewProps) {
   return (
     <div className="space-y-6 animate-in fade-in duration-300">
       {/* 1. Header Overview Banner */}
-      <div className="rounded-2xl border border-cyan-500/20 bg-gradient-to-br from-neutral-900/90 via-neutral-900/60 to-cyan-950/20 p-5 sm:p-6 backdrop-blur-xl shadow-xl space-y-5">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-white/[0.08]">
+      <div className="rounded-2xl border border-cyan-500/20 bg-linear-to-br from-neutral-900/90 via-neutral-900/60 to-cyan-950/20 p-5 sm:p-6 backdrop-blur-xl shadow-xl space-y-5">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-white/8">
           <div className="flex items-center gap-3.5">
             <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-cyan-500/10 text-cyan-400 border border-cyan-500/25 shadow-lg shadow-cyan-500/10">
               <FlaskConical className="h-6 w-6" />
@@ -237,7 +237,7 @@ export function BiomarkersView({ data, onRefresh }: BiomarkersViewProps) {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
             {/* 1. Muscular & Enzyme Turn-over */}
-            <div className="rounded-xl bg-neutral-950/70 border border-white/[0.06] p-3 space-y-1.5">
+            <div className="rounded-xl bg-neutral-950/70 border border-white/6 p-3 space-y-1.5">
               <div className="flex items-center gap-1.5 font-bold text-amber-300">
                 <Dumbbell className="h-3.5 w-3.5 text-amber-400" />
                 <span>Recambio Muscular (LDH & Albúmina)</span>
@@ -248,7 +248,7 @@ export function BiomarkersView({ data, onRefresh }: BiomarkersViewProps) {
             </div>
 
             {/* 2. Altitude & Oxygen Delivery */}
-            <div className="rounded-xl bg-neutral-950/70 border border-white/[0.06] p-3 space-y-1.5">
+            <div className="rounded-xl bg-neutral-950/70 border border-white/6 p-3 space-y-1.5">
               <div className="flex items-center gap-1.5 font-bold text-rose-300">
                 <Mountain className="h-3.5 w-3.5 text-rose-400" />
                 <span>Oxigenación & Altitud (CDMX 2,240m)</span>
@@ -259,7 +259,7 @@ export function BiomarkersView({ data, onRefresh }: BiomarkersViewProps) {
             </div>
 
             {/* 3. Renal & Lipid Balance */}
-            <div className="rounded-xl bg-neutral-950/70 border border-white/[0.06] p-3 space-y-1.5">
+            <div className="rounded-xl bg-neutral-950/70 border border-white/6 p-3 space-y-1.5">
               <div className="flex items-center gap-1.5 font-bold text-cyan-300">
                 <Activity className="h-3.5 w-3.5 text-cyan-400" />
                 <span>Salud Renal & Metabolismo</span>
@@ -273,9 +273,9 @@ export function BiomarkersView({ data, onRefresh }: BiomarkersViewProps) {
       )}
 
       {/* 3. Filters & Category Navigation Ribbon */}
-      <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3 p-2 rounded-2xl border border-white/[0.08] bg-neutral-900/60 backdrop-blur-xl shadow-lg">
+      <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3 p-2 rounded-2xl border border-white/8 bg-neutral-900/60 backdrop-blur-xl shadow-lg">
         {/* Category Filter Pills */}
-        <div className="flex flex-wrap items-center gap-1 p-1 rounded-xl bg-neutral-950/80 border border-white/[0.06] overflow-x-auto">
+        <div className="flex flex-wrap items-center gap-1 p-1 rounded-xl bg-neutral-950/80 border border-white/6 overflow-x-auto">
           <button
             type="button"
             onClick={() => setActiveCategory("all")}
@@ -334,7 +334,7 @@ export function BiomarkersView({ data, onRefresh }: BiomarkersViewProps) {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Buscar biomarcador..."
-              className="w-full rounded-xl border border-white/[0.08] bg-neutral-950/90 pl-8 pr-3 py-1.5 text-xs text-white placeholder-neutral-500 focus:border-cyan-500 focus:outline-none"
+              className="w-full rounded-xl border border-white/8 bg-neutral-950/90 pl-8 pr-3 py-1.5 text-xs text-white placeholder-neutral-500 focus:border-cyan-500 focus:outline-none"
             />
           </div>
 
@@ -342,7 +342,7 @@ export function BiomarkersView({ data, onRefresh }: BiomarkersViewProps) {
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value as "all" | "abnormal" | "optimal")}
-            className="rounded-xl border border-white/[0.08] bg-neutral-950/90 px-3 py-1.5 text-xs text-neutral-300 focus:border-cyan-500 focus:outline-none"
+            className="rounded-xl border border-white/8 bg-neutral-950/90 px-3 py-1.5 text-xs text-neutral-300 focus:border-cyan-500 focus:outline-none"
           >
             <option value="all">Todos los estados</option>
             <option value="abnormal">Solo fuera de rango ({abnormalCount})</option>
@@ -380,7 +380,7 @@ export function BiomarkersView({ data, onRefresh }: BiomarkersViewProps) {
           ))}
         </div>
       ) : (
-        <div className="rounded-2xl border border-white/[0.08] bg-neutral-900/40 p-8 text-center backdrop-blur-xl">
+        <div className="rounded-2xl border border-white/8 bg-neutral-900/40 p-8 text-center backdrop-blur-xl">
           <FlaskConical className="h-8 w-8 text-neutral-500 mx-auto mb-2 opacity-50" />
           <h4 className="text-sm font-bold text-neutral-300">No se encontraron biomarcadores</h4>
           <p className="text-xs text-neutral-500 mt-1 max-w-sm mx-auto">
