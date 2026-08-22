@@ -1,14 +1,13 @@
 "use client";
 
-import { loginOwnerAction, logoutOwnerAction } from "@/app/actions/auth";
+import { loginOwnerAction } from "@/app/actions/auth";
 import {
   AlertCircle,
-  CheckCircle2,
   Lock,
   Mail,
   ShieldCheck,
   Sparkles,
-  X,
+  X
 } from "lucide-react";
 import { useState, useTransition } from "react";
 
@@ -124,7 +123,7 @@ export function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps) {
             <button
               type="submit"
               disabled={isPending}
-              className="w-full py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 font-bold text-xs text-neutral-950 hover:brightness-110 shadow-lg shadow-emerald-500/20 disabled:opacity-50 transition-all flex items-center justify-center gap-2"
+              className="w-full py-2.5 rounded-xl bg-linear-to-r from-emerald-500 to-teal-600 font-bold text-xs text-neutral-950 hover:brightness-110 shadow-lg shadow-emerald-500/20 disabled:opacity-50 transition-all flex items-center justify-center gap-2"
             >
               <Sparkles className="h-4 w-4" />
               <span>{isPending ? "Verificando..." : "Acceder a Brio"}</span>
