@@ -283,6 +283,18 @@ export interface SupplementItem {
   id: string;
   name: string;
   taken: boolean;
+  dosage?: string;
+  timing?: string;
+}
+
+export interface UserSupplement {
+  id: string;
+  name: string;
+  dosage?: string;
+  timing?: string;
+  orderIndex?: number;
+  isActive?: boolean;
+  createdAt?: string;
 }
 
 export interface HealthLog {
@@ -303,6 +315,7 @@ export interface HealthDashboardData {
   workoutStreak: number;
   averageSleepHours: number;
   recentLogs: HealthLog[];
+  supplementsCatalog?: UserSupplement[];
 }
 
 // ----------------------------------------------------

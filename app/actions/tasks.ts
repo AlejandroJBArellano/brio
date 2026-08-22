@@ -1,7 +1,7 @@
 "use server";
 
 import { isHabiticaConfigured } from "@/lib/env";
-import { habiticaClient } from "@/lib/habitica";
+import { habiticaClient, MOCK_TASKS, MOCK_USER } from "@/lib/habitica";
 import { parseBatchInput, parseTaskLine, toHabiticaPayload } from "@/lib/parser";
 import {
   BatchActionResult,
@@ -284,14 +284,10 @@ export async function fetchDashboardDataAction(): Promise<{
       isConfigured,
     };
   } catch (error: unknown) {
-    console.error("Dashboard data fetch error:", error);
-    const [user, tasks] = await Promise.all([
-      habiticaClient.getUserProfile(),
-      habiticaClient.getUserTasks(),
-    ]);
+    console.error("[Dashboard Habitica Fetch Warning]:", error);
     return {
-      user,
-      tasks,
+      user: MOCK_USER,
+      tasks: MOCK_TASKS,
       tags: [],
       isConfigured: false,
     };

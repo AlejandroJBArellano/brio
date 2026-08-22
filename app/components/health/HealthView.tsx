@@ -21,6 +21,7 @@ import {
   Moon,
   Plus,
   Pill,
+  Settings2,
   Sparkles,
   Star,
   Upload,
@@ -29,6 +30,7 @@ import {
   Zap,
 } from "lucide-react";
 import { useState, useTransition } from "react";
+import { ManageSupplementsModal } from "./ManageSupplementsModal";
 
 interface HealthViewProps {
   data: HealthDashboardData;
@@ -46,6 +48,7 @@ const WORKOUT_TYPES: { id: WorkoutType; label: string; icon: string }[] = [
 export function HealthView({ data, onRefresh }: HealthViewProps) {
   const [workoutNotes, setWorkoutNotes] = useState("");
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
+  const [isManageSupplementsOpen, setIsManageSupplementsOpen] = useState(false);
   const [importJson, setImportJson] = useState("");
   const [sleepHours, setSleepHours] = useState(data.todayHealth.sleepHours || 7.5);
   const [sleepQuality, setSleepQuality] = useState(data.todayHealth.sleepQuality || 4);
@@ -271,38 +274,73 @@ export function HealthView({ data, onRefresh }: HealthViewProps) {
                 Checklist de Suplementos Diarios
               </h3>
             </div>
-            <span className="text-xs text-neutral-400">
-              {data.todayHealth.supplements.filter((s) => s.taken).length}/
-              {data.todayHealth.supplements.length} tomados
-            </span>
+            <div className="flex items-center gap-3">
+              <span className="text-xs text-neutral-400">
+                {data.todayHealth.supplements.filter((s) => s.taken).length}/
+                {data.todayHealth.supplements.length} tomados
+              </span>
+              <button
+                type="button"
+                onClick={() => setIsManageSupplementsOpen(true)}
+                className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-violet-500/10 hover:bg-violet-500/20 text-violet-300 border border-violet-500/20 text-xs font-semibold transition-all shadow-sm"
+                title="Configurar y gestionar suplementos"
+              >
+                <Settings2 className="h-3.5 w-3.5" />
+                <span>Configurar</span>
+              </button>
+            </div>
           </div>
 
-          <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-2">
-            {data.todayHealth.supplements.map((supp) => (
+          {data.todayHealth.supplements.length === 0 ? (
+            <div className="mt-4 p-6 text-center rounded-xl border border-dashed border-white/[0.08] bg-neutral-950/30">
+              <Pill className="h-7 w-7 text-neutral-600 mx-auto mb-2" />
+              <p className="text-xs text-neutral-400 mb-3">
+                No tienes suplementos configurados en tu checklist diario.
+              </p>
               <button
-                key={supp.id}
                 type="button"
-                onClick={() => handleToggleSupplement(supp.id)}
-                disabled={isPending}
-                className={`flex items-center justify-between p-3 rounded-xl border transition-all text-xs font-semibold ${
-                  supp.taken
-                    ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-300"
-                    : "border-white/[0.06] bg-neutral-950/60 text-neutral-300 hover:border-white/[0.12]"
-                }`}
+                onClick={() => setIsManageSupplementsOpen(true)}
+                className="px-3 py-1.5 rounded-lg bg-violet-600 hover:bg-violet-500 text-white font-semibold text-xs transition-all inline-flex items-center gap-1.5"
               >
-                <span>{supp.name}</span>
-                <div
-                  className={`flex h-5 w-5 items-center justify-center rounded-md border ${
+                <Plus className="h-3.5 w-3.5" />
+                <span>Configurar Suplementos</span>
+              </button>
+            </div>
+          ) : (
+            <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-2">
+              {data.todayHealth.supplements.map((supp) => (
+                <button
+                  key={supp.id}
+                  type="button"
+                  onClick={() => handleToggleSupplement(supp.id)}
+                  disabled={isPending}
+                  className={`flex items-center justify-between p-3 rounded-xl border transition-all text-xs font-semibold ${
                     supp.taken
-                      ? "bg-emerald-500 border-emerald-400 text-neutral-950"
-                      : "border-neutral-700 bg-neutral-900"
+                      ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-300"
+                      : "border-white/[0.06] bg-neutral-950/60 text-neutral-300 hover:border-white/[0.12]"
                   }`}
                 >
-                  {supp.taken && <Check className="h-3.5 w-3.5 stroke-[3]" />}
-                </div>
-              </button>
-            ))}
-          </div>
+                  <div className="flex flex-col items-start text-left">
+                    <span>{supp.name}</span>
+                    {supp.timing && (
+                      <span className="text-[10px] font-normal text-neutral-400 mt-0.5">
+                        {supp.timing}
+                      </span>
+                    )}
+                  </div>
+                  <div
+                    className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-md border ml-2 ${
+                      supp.taken
+                        ? "bg-emerald-500 border-emerald-400 text-neutral-950"
+                        : "border-neutral-700 bg-neutral-900"
+                    }`}
+                  >
+                    {supp.taken && <Check className="h-3.5 w-3.5 stroke-[3]" />}
+                  </div>
+                </button>
+              ))}
+            </div>
+          )}
         </div>
       </div>
 
@@ -434,6 +472,16 @@ export function HealthView({ data, onRefresh }: HealthViewProps) {
           </div>
         </div>
       )}
+
+      {/* Manage Supplements Modal */}
+      <ManageSupplementsModal
+        isOpen={isManageSupplementsOpen}
+        onClose={() => setIsManageSupplementsOpen(false)}
+        supplements={data.supplementsCatalog || []}
+        onSuccess={() => {
+          if (onRefresh) onRefresh();
+        }}
+      />
     </div>
   );
 }

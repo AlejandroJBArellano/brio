@@ -25,9 +25,9 @@ export class HabiticaApiError extends Error {
 }
 
 /**
- * Mock data used for preview / demo mode when credentials are not configured.
+ * Mock data used for preview / demo mode when credentials are not configured or rate limited.
  */
-const MOCK_USER: HabiticaUser = {
+export const MOCK_USER: HabiticaUser = {
   id: "demo-user-id",
   profile: {
     name: "Hero of Brio",
@@ -46,7 +46,7 @@ const MOCK_USER: HabiticaUser = {
   },
 };
 
-const MOCK_TASKS: HabiticaTask[] = [
+export const MOCK_TASKS: HabiticaTask[] = [
   {
     id: "mock-daily-1",
     text: "Deep work session (90m)",
@@ -117,6 +117,15 @@ const MOCK_TASKS: HabiticaTask[] = [
 let inMemoryMockTasks: HabiticaTask[] = [...MOCK_TASKS];
 let inMemoryMockUser: HabiticaUser = { ...MOCK_USER };
 
+// In-memory cache to prevent Habitica 429 Rate Limits
+interface CacheEntry<T> {
+  data: T;
+  timestamp: number;
+}
+const apiCache = new Map<string, CacheEntry<any>>();
+const lastKnownData = new Map<string, any>();
+const CACHE_TTL_MS = 20000; // 20 seconds TTL
+
 /**
  * Habitica REST API Client.
  * Follows Single Responsibility Principle and encapsulates HTTP transport, authentication, and error formatting.
@@ -165,12 +174,23 @@ export class HabiticaClient {
   }
 
   /**
-   * Internal generic fetch handler with consistent error handling and timeout protection.
+   * Internal generic fetch handler with consistent error handling, in-memory caching, and rate-limit fallback.
    */
   private async request<T>(
     endpoint: string,
     options: RequestInit = {}
   ): Promise<T> {
+    const method = (options.method || "GET").toUpperCase();
+    const cacheKey = `${this.customUserId || "default"}:${endpoint}`;
+
+    // 1. Check in-memory cache for GET requests
+    if (method === "GET") {
+      const cached = apiCache.get(cacheKey);
+      if (cached && Date.now() - cached.timestamp < CACHE_TTL_MS) {
+        return cached.data;
+      }
+    }
+
     const baseUrl = this.getBaseUrl();
     const url = `${baseUrl}${endpoint.startsWith("/") ? "" : "/"}${endpoint}`;
     const headers = {
@@ -185,6 +205,23 @@ export class HabiticaClient {
         cache: "no-store",
       });
 
+      // 2. Gracefully handle Habitica 429 Rate Limit
+      if (response.status === 429) {
+        console.warn(`[Habitica 429 Rate Limit]: Hit on ${endpoint}. Serving cached/fallback data.`);
+        if (lastKnownData.has(cacheKey)) {
+          return lastKnownData.get(cacheKey);
+        }
+        if (endpoint.includes("/user")) {
+          return MOCK_USER as unknown as T;
+        }
+        if (endpoint.includes("/tasks/user")) {
+          return MOCK_TASKS as unknown as T;
+        }
+        if (endpoint.includes("/tags")) {
+          return [] as unknown as T;
+        }
+      }
+
       const json = (await response.json()) as HabiticaApiResponse<T>;
 
       if (!response.ok || !json.success) {
@@ -194,11 +231,31 @@ export class HabiticaClient {
             ? json.errors.map((e) => e.message).join(", ")
             : `Habitica API request failed with status ${response.status}`);
 
+        // Fallback to stale data if available
+        if (method === "GET" && lastKnownData.has(cacheKey)) {
+          console.warn(`[Habitica Error]: ${errorMsg}. Falling back to cached data.`);
+          return lastKnownData.get(cacheKey);
+        }
+
         throw new HabiticaApiError(errorMsg, response.status, json);
+      }
+
+      // 3. Cache successful GET responses
+      if (method === "GET") {
+        apiCache.set(cacheKey, { data: json.data, timestamp: Date.now() });
+        lastKnownData.set(cacheKey, json.data);
+      } else {
+        // Clear GET cache on mutations
+        apiCache.clear();
       }
 
       return json.data;
     } catch (error: unknown) {
+      if (method === "GET" && lastKnownData.has(cacheKey)) {
+        console.warn(`[Habitica Error]: Network failure. Serving cached data.`);
+        return lastKnownData.get(cacheKey);
+      }
+
       if (error instanceof HabiticaApiError) {
         throw error;
       }

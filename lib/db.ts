@@ -171,6 +171,19 @@ export async function ensureDatabaseSchema() {
       );
     `;
 
+    // 6.1 User Supplements Catalog (Master configuration)
+    await sql`
+      CREATE TABLE IF NOT EXISTS user_supplements (
+        id TEXT PRIMARY KEY,
+        name VARCHAR(100) NOT NULL,
+        dosage VARCHAR(50),
+        timing VARCHAR(50),
+        order_index INTEGER DEFAULT 0,
+        is_active BOOLEAN DEFAULT true,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+      );
+    `;
+
     // 7. Projects Backlog
     await sql`
       CREATE TABLE IF NOT EXISTS projects (

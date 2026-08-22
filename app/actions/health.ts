@@ -5,16 +5,49 @@ import {
   HealthDashboardData,
   HealthLog,
   SupplementItem,
+  UserSupplement,
   WorkoutType,
 } from "@/lib/types";
 import { revalidatePath } from "next/cache";
 
-const DEFAULT_SUPPLEMENTS: SupplementItem[] = [
-  { id: "creatine", name: "Creatina (5g)", taken: false },
-  { id: "multivitamin", name: "Multivitamínico", taken: false },
-  { id: "omega3", name: "Omega 3", taken: false },
-  { id: "protein", name: "Proteína / Shake", taken: false },
+const DEFAULT_USER_SUPPLEMENTS: UserSupplement[] = [
+  { id: "creatine", name: "Creatina", dosage: "5g", timing: "Post-entreno", orderIndex: 0, isActive: true },
+  { id: "multivitamin", name: "Multivitamínico", dosage: "1 cápsula", timing: "Mañana", orderIndex: 1, isActive: true },
+  { id: "omega3", name: "Omega 3", dosage: "2 cápsulas", timing: "Con comida", orderIndex: 2, isActive: true },
+  { id: "protein", name: "Proteína / Shake", dosage: "30g", timing: "Post-entreno", orderIndex: 3, isActive: true },
 ];
+
+/**
+ * Helper: Fetches and ensures the master supplements catalog from database.
+ */
+async function getOrSeedSupplementsCatalog(sql: any): Promise<UserSupplement[]> {
+  const rows = await sql`
+    SELECT * FROM user_supplements WHERE is_active = true ORDER BY order_index ASC, created_at ASC;
+  `;
+
+  if (rows.length > 0) {
+    return rows.map((r: any) => ({
+      id: r.id,
+      name: r.name,
+      dosage: r.dosage || undefined,
+      timing: r.timing || undefined,
+      orderIndex: Number(r.order_index) || 0,
+      isActive: r.is_active ?? true,
+      createdAt: r.created_at?.toString(),
+    }));
+  }
+
+  // Seed default catalog if empty
+  for (const s of DEFAULT_USER_SUPPLEMENTS) {
+    await sql`
+      INSERT INTO user_supplements (id, name, dosage, timing, order_index, is_active)
+      VALUES (${s.id}, ${s.name}, ${s.dosage || null}, ${s.timing || null}, ${s.orderIndex || 0}, true)
+      ON CONFLICT (id) DO NOTHING;
+    `;
+  }
+
+  return DEFAULT_USER_SUPPLEMENTS;
+}
 
 /**
  * Server Action: Fetches physical health metrics, hydration, workouts, and sleep.
@@ -24,7 +57,10 @@ export async function fetchHealthDashboardDataAction(): Promise<HealthDashboardD
   const sql = getDb();
   const todayStr = new Date().toISOString().split("T")[0];
 
-  // 1. Fetch today's health record
+  // 1. Fetch master supplements catalog
+  const catalog = await getOrSeedSupplementsCatalog(sql);
+
+  // 2. Fetch today's health record
   const todayRows = await sql`
     SELECT * FROM health_logs WHERE date = ${todayStr} LIMIT 1;
   `;
@@ -32,21 +68,50 @@ export async function fetchHealthDashboardDataAction(): Promise<HealthDashboardD
   let todayHealth: HealthLog;
   if (todayRows.length > 0) {
     const row = todayRows[0];
+    const existingSupplements: SupplementItem[] = Array.isArray(row.supplements) ? row.supplements : [];
+
+    // Sync today's supplements list with active catalog
+    const syncedSupplements: SupplementItem[] = catalog.map((catItem) => {
+      const match = existingSupplements.find((s) => s.id === catItem.id);
+      return {
+        id: catItem.id,
+        name: catItem.dosage ? `${catItem.name} (${catItem.dosage})` : catItem.name,
+        dosage: catItem.dosage,
+        timing: catItem.timing,
+        taken: match ? Boolean(match.taken) : false,
+      };
+    });
+
     todayHealth = {
       date: todayStr,
       workoutType: row.workout_type || undefined,
       workoutNotes: row.workout_notes || undefined,
       waterMl: Number(row.water_ml) || 0,
-      supplements: Array.isArray(row.supplements) && row.supplements.length > 0 ? row.supplements : DEFAULT_SUPPLEMENTS,
+      supplements: syncedSupplements,
       sleepHours: Number(row.sleep_hours) || 7.5,
       sleepQuality: Number(row.sleep_quality) || 4,
       stepsCount: Number(row.steps_count) || 0,
     };
+
+    // Keep DB in sync with active catalog
+    await sql`
+      UPDATE health_logs
+      SET supplements = ${JSON.stringify(syncedSupplements)}::jsonb, updated_at = NOW()
+      WHERE date = ${todayStr};
+    `;
   } else {
+    const initialSupplements: SupplementItem[] = catalog.map((catItem) => ({
+      id: catItem.id,
+      name: catItem.dosage ? `${catItem.name} (${catItem.dosage})` : catItem.name,
+      dosage: catItem.dosage,
+      timing: catItem.timing,
+      taken: false,
+    }));
+
     todayHealth = {
       date: todayStr,
       waterMl: 0,
-      supplements: DEFAULT_SUPPLEMENTS,
+      supplements: initialSupplements,
       sleepHours: 7.5,
       sleepQuality: 4,
       stepsCount: 0,
@@ -54,12 +119,12 @@ export async function fetchHealthDashboardDataAction(): Promise<HealthDashboardD
 
     await sql`
       INSERT INTO health_logs (date, water_ml, supplements, sleep_hours, sleep_quality, steps_count)
-      VALUES (${todayStr}, 0, ${JSON.stringify(DEFAULT_SUPPLEMENTS)}::jsonb, 7.5, 4, 0)
+      VALUES (${todayStr}, 0, ${JSON.stringify(initialSupplements)}::jsonb, 7.5, 4, 0)
       ON CONFLICT (date) DO NOTHING;
     `;
   }
 
-  // 2. Fetch recent 14 days logs for streaks & averages
+  // 3. Fetch recent 14 days logs for streaks & averages
   const recentRows = await sql`
     SELECT * FROM health_logs ORDER BY date DESC LIMIT 14;
   `;
@@ -107,6 +172,7 @@ export async function fetchHealthDashboardDataAction(): Promise<HealthDashboardD
     workoutStreak,
     averageSleepHours,
     recentLogs,
+    supplementsCatalog: catalog,
   };
 }
 
@@ -176,7 +242,195 @@ export async function addWaterAction(
 }
 
 /**
- * Server Action: Toggles supplement item.
+ * Server Action: Fetches the master supplements catalog.
+ */
+export async function fetchUserSupplementsAction(): Promise<UserSupplement[]> {
+  await ensureDatabaseSchema();
+  const sql = getDb();
+  return getOrSeedSupplementsCatalog(sql);
+}
+
+/**
+ * Server Action: Creates a new supplement in the catalog and syncs it with today's log.
+ */
+export async function createSupplementAction(input: {
+  name: string;
+  dosage?: string;
+  timing?: string;
+}): Promise<{ success: boolean; supplement?: UserSupplement; error?: string }> {
+  try {
+    if (!input.name || !input.name.trim()) {
+      return { success: false, error: "El nombre del suplemento es requerido." };
+    }
+
+    await ensureDatabaseSchema();
+    const sql = getDb();
+    const id = `supp-${Date.now()}`;
+    const name = input.name.trim();
+    const dosage = input.dosage?.trim() || null;
+    const timing = input.timing?.trim() || null;
+
+    // 1. Insert into catalog
+    await sql`
+      INSERT INTO user_supplements (id, name, dosage, timing, order_index, is_active)
+      VALUES (${id}, ${name}, ${dosage}, ${timing}, 0, true);
+    `;
+
+    // 2. Add to today's log
+    const todayStr = new Date().toISOString().split("T")[0];
+    const todayRows = await sql`
+      SELECT supplements FROM health_logs WHERE date = ${todayStr} LIMIT 1;
+    `;
+
+    const displayName = dosage ? `${name} (${dosage})` : name;
+    const newItem: SupplementItem = {
+      id,
+      name: displayName,
+      dosage: dosage || undefined,
+      timing: timing || undefined,
+      taken: false,
+    };
+
+    if (todayRows.length > 0) {
+      const currentList: SupplementItem[] = Array.isArray(todayRows[0].supplements)
+        ? todayRows[0].supplements
+        : [];
+      const updatedList = [...currentList, newItem];
+      await sql`
+        UPDATE health_logs
+        SET supplements = ${JSON.stringify(updatedList)}::jsonb, updated_at = NOW()
+        WHERE date = ${todayStr};
+      `;
+    } else {
+      await sql`
+        INSERT INTO health_logs (date, supplements, updated_at)
+        VALUES (${todayStr}, ${JSON.stringify([newItem])}::jsonb, NOW())
+        ON CONFLICT (date) DO UPDATE
+        SET supplements = ${JSON.stringify([newItem])}::jsonb, updated_at = NOW();
+      `;
+    }
+
+    revalidatePath("/");
+    return {
+      success: true,
+      supplement: {
+        id,
+        name,
+        dosage: dosage || undefined,
+        timing: timing || undefined,
+        isActive: true,
+      },
+    };
+  } catch (error) {
+    console.error("[Create Supplement Error]:", error);
+    return { success: false, error: "No se pudo crear el suplemento" };
+  }
+}
+
+/**
+ * Server Action: Updates an existing supplement in catalog and today's log.
+ */
+export async function updateSupplementAction(
+  id: string,
+  input: {
+    name: string;
+    dosage?: string;
+    timing?: string;
+  }
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    if (!input.name || !input.name.trim()) {
+      return { success: false, error: "El nombre del suplemento es requerido." };
+    }
+
+    await ensureDatabaseSchema();
+    const sql = getDb();
+    const name = input.name.trim();
+    const dosage = input.dosage?.trim() || null;
+    const timing = input.timing?.trim() || null;
+
+    // 1. Update in catalog
+    await sql`
+      UPDATE user_supplements
+      SET name = ${name},
+          dosage = ${dosage},
+          timing = ${timing}
+      WHERE id = ${id};
+    `;
+
+    // 2. Update in today's log if present
+    const todayStr = new Date().toISOString().split("T")[0];
+    const todayRows = await sql`
+      SELECT supplements FROM health_logs WHERE date = ${todayStr} LIMIT 1;
+    `;
+
+    if (todayRows.length > 0 && Array.isArray(todayRows[0].supplements)) {
+      const displayName = dosage ? `${name} (${dosage})` : name;
+      const updatedList = todayRows[0].supplements.map((s: SupplementItem) =>
+        s.id === id
+          ? {
+              ...s,
+              name: displayName,
+              dosage: dosage || undefined,
+              timing: timing || undefined,
+            }
+          : s
+      );
+      await sql`
+        UPDATE health_logs
+        SET supplements = ${JSON.stringify(updatedList)}::jsonb, updated_at = NOW()
+        WHERE date = ${todayStr};
+      `;
+    }
+
+    revalidatePath("/");
+    return { success: true };
+  } catch (error) {
+    console.error("[Update Supplement Error]:", error);
+    return { success: false, error: "No se pudo actualizar el suplemento" };
+  }
+}
+
+/**
+ * Server Action: Deletes a supplement from catalog and today's log.
+ */
+export async function deleteSupplementAction(
+  id: string
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    await ensureDatabaseSchema();
+    const sql = getDb();
+
+    // 1. Delete from catalog
+    await sql`
+      DELETE FROM user_supplements WHERE id = ${id};
+    `;
+
+    // 2. Remove from today's log
+    const todayStr = new Date().toISOString().split("T")[0];
+    const todayRows = await sql`
+      SELECT supplements FROM health_logs WHERE date = ${todayStr} LIMIT 1;
+    `;
+
+    if (todayRows.length > 0 && Array.isArray(todayRows[0].supplements)) {
+      const updatedList = todayRows[0].supplements.filter((s: SupplementItem) => s.id !== id);
+      await sql`
+        UPDATE health_logs
+        SET supplements = ${JSON.stringify(updatedList)}::jsonb, updated_at = NOW()
+        WHERE date = ${todayStr};
+      `;
+    }
+
+    revalidatePath("/");
+    return { success: true };
+  } catch (error) {
+    console.error("[Delete Supplement Error]:", error);
+    return { success: false, error: "No se pudo eliminar el suplemento" };
+  }
+}
+
+/**
+ * Server Action: Toggles supplement item taken status for today.
  */
 export async function toggleSupplementAction(
   supplementId: string
@@ -193,7 +447,7 @@ export async function toggleSupplementAction(
     let supplements: SupplementItem[] =
       current.length > 0 && Array.isArray(current[0].supplements)
         ? current[0].supplements
-        : DEFAULT_SUPPLEMENTS;
+        : [];
 
     supplements = supplements.map((s) =>
       s.id === supplementId ? { ...s, taken: !s.taken } : s
