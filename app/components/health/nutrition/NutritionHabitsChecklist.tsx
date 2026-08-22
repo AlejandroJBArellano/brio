@@ -6,6 +6,7 @@ import { NutritionHabitLog, SupplementItem, UserSupplement } from "@/lib/types";
 import {
   Check,
   Droplet,
+  LucideIcon,
   Pill,
   Plus,
   Salad,
@@ -51,7 +52,7 @@ export function NutritionHabitsChecklist({
     key: "dailySalad" | "noUltraProcessed";
     title: string;
     description: string;
-    icon: any;
+    icon: LucideIcon;
   }> = [
     {
       key: "dailySalad",

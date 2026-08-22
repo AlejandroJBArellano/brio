@@ -29,7 +29,7 @@ import {
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState, useTransition } from "react";
-import { DashboardMainTab } from "./HeaderStatsRibbon";
+import { DashboardMainTab } from "./context/CommandCenterContext";
 
 interface CommandPaletteProps {
   isOpen: boolean;
@@ -47,8 +47,12 @@ interface CommandPaletteProps {
   onFilterTag: (tag: string) => void;
 }
 
-export function CommandPalette({
-  isOpen,
+export function CommandPalette(props: CommandPaletteProps) {
+  if (!props.isOpen) return null;
+  return <CommandPaletteContent {...props} />;
+}
+
+function CommandPaletteContent({
   onClose,
   tasks,
   tags,
@@ -68,31 +72,27 @@ export function CommandPalette({
   const [isPending, startTransition] = useTransition();
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // Focus on open
+  // Focus on mount
   useEffect(() => {
-    if (isOpen) {
-      setQuery("");
-      setSelectedIndex(0);
-      setTimeout(() => inputRef.current?.focus(), 50);
-    }
-  }, [isOpen]);
+    const timer = setTimeout(() => inputRef.current?.focus(), 50);
+    return () => clearTimeout(timer);
+  }, []);
 
-  // Global shortcut Cmd+K / Ctrl+K
+  // Global shortcut Cmd+K / Ctrl+K & Escape
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
         e.preventDefault();
-        if (isOpen) onClose();
-        else onClose();
+        onClose();
       }
-      if (e.key === "Escape" && isOpen) {
+      if (e.key === "Escape") {
         e.preventDefault();
         onClose();
       }
     };
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [isOpen, onClose]);
+  }, [onClose]);
 
   // Command items
   const staticActions = useMemo(() => {
@@ -354,8 +354,6 @@ export function CommandPalette({
       }
     }
   };
-
-  if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 z-50 flex items-start justify-center p-4 pt-16 sm:pt-24 backdrop-blur-md bg-black/70 animate-in fade-in duration-150">

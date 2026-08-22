@@ -63,30 +63,31 @@ export function FocusModal({
 
   // Timer interval
   useEffect(() => {
-    let interval: NodeJS.Timeout | null = null;
+    if (!isActive) return;
 
-    if (isActive && timeLeft > 0) {
-      interval = setInterval(() => {
-        setTimeLeft((prev) => prev - 1);
-      }, 1000);
-    } else if (isActive && timeLeft === 0) {
-      setIsActive(false);
-      setIsCompleted(true);
-      ambientAudio.stop();
+    const interval = setInterval(() => {
+      setTimeLeft((prev) => {
+        if (prev <= 1) {
+          clearInterval(interval);
+          setIsActive(false);
+          setIsCompleted(true);
+          ambientAudio.stop();
 
-      // Award Habitica XP/GP upon completing deep work
-      startTransition(async () => {
-        if (selectedTaskId) {
-          await toggleTaskAction(selectedTaskId, "up");
+          // Award Habitica XP/GP upon completing deep work
+          startTransition(async () => {
+            if (selectedTaskId) {
+              await toggleTaskAction(selectedTaskId, "up");
+            }
+            if (onCompleteSession) onCompleteSession();
+          });
+          return 0;
         }
-        if (onCompleteSession) onCompleteSession();
+        return prev - 1;
       });
-    }
+    }, 1000);
 
-    return () => {
-      if (interval) clearInterval(interval);
-    };
-  }, [isActive, timeLeft, selectedTaskId, onCompleteSession]);
+    return () => clearInterval(interval);
+  }, [isActive, selectedTaskId, onCompleteSession]);
 
   // Audio control
   useEffect(() => {

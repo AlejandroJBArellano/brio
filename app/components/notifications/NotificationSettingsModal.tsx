@@ -34,24 +34,21 @@ export function NotificationSettingsModal({
   isOpen,
   onClose,
 }: NotificationSettingsModalProps) {
-  const [settings, setSettings] = useState<NotificationSettings>(
-    DEFAULT_NOTIFICATION_SETTINGS
+  if (!isOpen) return null;
+  return <NotificationSettingsModalContent onClose={onClose} />;
+}
+
+function NotificationSettingsModalContent({ onClose }: { onClose: () => void }) {
+  const [settings, setSettings] = useState<NotificationSettings>(() =>
+    getNotificationSettings()
   );
-  const [permission, setPermission] =
-    useState<NotificationPermission>("default");
+  const [permission, setPermission] = useState<NotificationPermission>(() =>
+    typeof window !== "undefined" && "Notification" in window
+      ? Notification.permission
+      : "default"
+  );
   const [savedSuccess, setSavedSuccess] = useState(false);
   const [testSent, setTestSent] = useState(false);
-
-  useEffect(() => {
-    if (isOpen) {
-      setSettings(getNotificationSettings());
-      if (typeof window !== "undefined" && "Notification" in window) {
-        setPermission(Notification.permission);
-      }
-    }
-  }, [isOpen]);
-
-  if (!isOpen) return null;
 
   const handleRequestPermission = async () => {
     const perm = await requestNotificationPermission();

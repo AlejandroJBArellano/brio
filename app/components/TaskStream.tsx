@@ -38,7 +38,6 @@ export function TaskStream({
 }: TaskStreamProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [hideCompleted, setHideCompleted] = useState(false);
-  const [selectedIndex, setSelectedIndex] = useState<number>(-1);
   const [isPending, startTransition] = useTransition();
 
   const dailies = useMemo(
@@ -71,12 +70,14 @@ export function TaskStream({
         return false;
       }
 
-      // Completed filter
-      if (hideCompleted && task.completed) return false;
+      // Hide completed dailies
+      if (hideCompleted && task.type === "daily" && task.completed) {
+        return false;
+      }
 
-      // Search query filter
+      // Search query
       if (searchQuery.trim()) {
-        const query = searchQuery.toLowerCase().trim();
+        const query = searchQuery.toLowerCase();
         const matchesText = task.text.toLowerCase().includes(query);
         const matchesNotes = task.notes?.toLowerCase().includes(query);
         const matchesTags = task.tags?.some((tag) =>
@@ -89,13 +90,10 @@ export function TaskStream({
     });
   }, [tasks, activeTab, activeTagFilter, hideCompleted, searchQuery]);
 
-  // Maintain selected index in bounds
-  useEffect(() => {
-    if (selectedTaskId) {
-      const idx = filteredTasks.findIndex((t) => t.id === selectedTaskId);
-      if (idx !== -1) setSelectedIndex(idx);
-    }
-  }, [selectedTaskId, filteredTasks]);
+  // Derived selected index from selectedTaskId
+  const selectedIndex = selectedTaskId
+    ? Math.max(0, filteredTasks.findIndex((t) => t.id === selectedTaskId))
+    : -1;
 
   // Vim-style keyboard navigation: j/k, Space/x, +/-, Enter, d
   useEffect(() => {
@@ -112,18 +110,12 @@ export function TaskStream({
 
       if (e.key === "j" || e.key === "ArrowDown") {
         e.preventDefault();
-        setSelectedIndex((prev) => {
-          const next = prev < filteredTasks.length - 1 ? prev + 1 : 0;
-          onSelectTask(filteredTasks[next] || null);
-          return next;
-        });
+        const next = selectedIndex < filteredTasks.length - 1 ? selectedIndex + 1 : 0;
+        onSelectTask(filteredTasks[next] || null);
       } else if (e.key === "k" || e.key === "ArrowUp") {
         e.preventDefault();
-        setSelectedIndex((prev) => {
-          const next = prev > 0 ? prev - 1 : filteredTasks.length - 1;
-          onSelectTask(filteredTasks[next] || null);
-          return next;
-        });
+        const next = selectedIndex > 0 ? selectedIndex - 1 : filteredTasks.length - 1;
+        onSelectTask(filteredTasks[next] || null);
       } else if (e.key === " " || e.key === "x") {
         e.preventDefault();
         const curTask = filteredTasks[selectedIndex];
@@ -285,10 +277,7 @@ export function TaskStream({
               key={task.id}
               task={task}
               isSelected={selectedTaskId === task.id || selectedIndex === idx}
-              onSelect={() => {
-                setSelectedIndex(idx);
-                onSelectTask(task);
-              }}
+              onSelect={() => onSelectTask(task)}
             />
           ))}
         </div>

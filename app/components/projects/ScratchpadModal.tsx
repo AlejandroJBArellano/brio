@@ -2,17 +2,7 @@
 
 import { saveScratchpadAction } from "@/app/actions/projects";
 import { submitBatchCaptureAction } from "@/app/actions/tasks";
-import {
-  Check,
-  CheckCircle2,
-  Copy,
-  Edit3,
-  FileText,
-  Save,
-  Sparkles,
-  X,
-  Zap,
-} from "lucide-react";
+import { Check, Edit3, X, Zap } from "lucide-react";
 import { useEffect, useState, useTransition } from "react";
 
 interface ScratchpadModalProps {
@@ -28,18 +18,33 @@ export function ScratchpadModal({
   initialContent,
   onSuccess,
 }: ScratchpadModalProps) {
+  if (!isOpen) return null;
+
+  return (
+    <ScratchpadModalContent
+      key={initialContent}
+      onClose={onClose}
+      initialContent={initialContent}
+      onSuccess={onSuccess}
+    />
+  );
+}
+
+function ScratchpadModalContent({
+  onClose,
+  initialContent,
+  onSuccess,
+}: {
+  onClose: () => void;
+  initialContent: string;
+  onSuccess?: () => void;
+}) {
   const [content, setContent] = useState(initialContent);
   const [isSaved, setIsSaved] = useState(false);
   const [isPending, startTransition] = useTransition();
 
-  useEffect(() => {
-    setContent(initialContent);
-  }, [initialContent]);
-
   // Debounced auto-save to Neon DB
   useEffect(() => {
-    if (!isOpen) return;
-
     const timer = setTimeout(() => {
       startTransition(async () => {
         await saveScratchpadAction(content);
@@ -49,12 +54,16 @@ export function ScratchpadModal({
     }, 1200);
 
     return () => clearTimeout(timer);
-  }, [content, isOpen]);
+  }, [content]);
 
   const handleConvertTasks = () => {
     const lines = content.split("\n");
     const taskLines = lines.filter(
-      (l) => l.trim().startsWith("- [ ]") || l.trim().startsWith("-") || l.trim().startsWith("*") || l.trim().startsWith("+")
+      (l) =>
+        l.trim().startsWith("- [ ]") ||
+        l.trim().startsWith("-") ||
+        l.trim().startsWith("*") ||
+        l.trim().startsWith("+")
     );
 
     if (taskLines.length === 0) return;
@@ -65,8 +74,6 @@ export function ScratchpadModal({
       onClose();
     });
   };
-
-  if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-200">

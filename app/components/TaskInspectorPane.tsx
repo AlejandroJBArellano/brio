@@ -38,25 +38,33 @@ export function TaskInspectorPane({
   tags,
   onClose,
 }: TaskInspectorPaneProps) {
-  const [title, setTitle] = useState("");
-  const [notes, setNotes] = useState("");
-  const [priority, setPriority] = useState<number>(1);
+  if (!task) return null;
+
+  return (
+    <TaskInspectorPaneContent
+      key={task.id}
+      task={task}
+      tags={tags}
+      onClose={onClose}
+    />
+  );
+}
+
+function TaskInspectorPaneContent({
+  task,
+  tags,
+  onClose,
+}: {
+  task: HabiticaTask;
+  tags: HabiticaTag[];
+  onClose: () => void;
+}) {
+  const [title, setTitle] = useState(task.text || "");
+  const [notes, setNotes] = useState(task.notes || "");
+  const [priority, setPriority] = useState<number>(task.priority || 1);
   const [newChecklistText, setNewChecklistText] = useState("");
   const [isPending, startTransition] = useTransition();
   const [hasSaved, setHasSaved] = useState(false);
-
-  // Sync state when selected task changes
-  useEffect(() => {
-    if (task) {
-      setTitle(task.text || "");
-      setNotes(task.notes || "");
-      setPriority(task.priority || 1);
-      setNewChecklistText("");
-      setHasSaved(false);
-    }
-  }, [task]);
-
-  if (!task) return null;
 
   const valueStyle = getTaskValueColor(task.value || 0);
 

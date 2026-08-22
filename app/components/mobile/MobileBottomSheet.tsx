@@ -421,7 +421,7 @@ export function MobileBottomSheet({
                 <button
                   key={p.id}
                   type="button"
-                  onClick={() => setTaskPriority(p.id as any)}
+                  onClick={() => setTaskPriority(p.id as "normal" | "urgent" | "habit")}
                   className={`flex-1 py-1.5 rounded-xl text-xs font-semibold transition-all ${
                     taskPriority === p.id
                       ? "bg-indigo-500/20 text-indigo-300 border border-indigo-500/40"

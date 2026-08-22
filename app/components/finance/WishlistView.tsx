@@ -145,7 +145,7 @@ export function WishlistView({ data, onRefresh }: WishlistViewProps) {
             <button
               key={tab.id}
               type="button"
-              onClick={() => setFilterStatus(tab.id as any)}
+              onClick={() => setFilterStatus(tab.id as WishlistStatus | "all")}
               className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all shrink-0 ${
                 filterStatus === tab.id
                   ? "bg-violet-600 text-white shadow-lg shadow-violet-500/20"
