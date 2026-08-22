@@ -1,7 +1,7 @@
 "use client";
 
 import { toggleSleepAction } from "@/app/actions/tasks";
-import { signOut, useSession } from "@/lib/auth-client";
+import { useSession } from "@/lib/auth-client";
 import { HabiticaUser } from "@/lib/types";
 import { calculatePercentage, capitalize } from "@/lib/utils";
 import {
@@ -12,9 +12,7 @@ import {
   Coins,
   Dumbbell,
   Edit3,
-  Flame,
   Heart,
-  Layers,
   LogOut,
   Moon,
   RotateCw,
@@ -22,9 +20,8 @@ import {
   ShieldCheck,
   Sparkles,
   Sun,
-  User,
   Wallet,
-  Zap,
+  Zap
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useTransition } from "react";
@@ -95,18 +92,17 @@ export function HeaderStatsRibbon({
   };
 
   return (
-    <header className="rounded-3xl border border-white/[0.08] bg-neutral-900/70 p-4 sm:p-5 backdrop-blur-xl shadow-2xl transition-all space-y-4">
+    <header className="rounded-3xl border border-white/8 bg-neutral-900/70 p-4 sm:p-5 backdrop-blur-xl shadow-2xl transition-all space-y-4">
       {/* Top Row: Character ID & Gauges */}
       <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
         {/* Left: Branding, Identity & Inn */}
         <div className="flex items-center justify-between sm:justify-start gap-4">
           <div className="flex items-center gap-3">
-            <div className="relative flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-tr from-violet-600 to-indigo-500 font-mono font-bold text-white shadow-lg shadow-indigo-500/20">
+            <div className="relative flex h-11 w-11 items-center justify-center rounded-2xl bg-linear-to-tr from-violet-600 to-indigo-500 font-mono font-bold text-white shadow-lg shadow-indigo-500/20">
               <span className="text-xl">B</span>
               <span
-                className={`absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full border-2 border-neutral-900 ${
-                  isResting ? "bg-amber-400 animate-pulse" : "bg-emerald-400"
-                }`}
+                className={`absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full border-2 border-neutral-900 ${isResting ? "bg-amber-400 animate-pulse" : "bg-emerald-400"
+                  }`}
               />
             </div>
             <div>
@@ -127,11 +123,10 @@ export function HeaderStatsRibbon({
                   onClick={handleToggleRest}
                   disabled={isPending}
                   title={isResting ? "Wake from Inn" : "Rest at Inn (pause daily damage)"}
-                  className={`inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-[11px] font-semibold transition-all ${
-                    isResting
-                      ? "border border-amber-500/40 bg-amber-500/20 text-amber-300 animate-pulse"
-                      : "border border-neutral-800 bg-neutral-900/60 text-neutral-400 hover:text-neutral-200"
-                  }`}
+                  className={`inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-[11px] font-semibold transition-all ${isResting
+                    ? "border border-amber-500/40 bg-amber-500/20 text-amber-300 animate-pulse"
+                    : "border border-neutral-800 bg-neutral-900/60 text-neutral-400 hover:text-neutral-200"
+                    }`}
                 >
                   <Bed className="h-3 w-3" />
                   <span>{isResting ? "En la Posada" : "Posada"}</span>
@@ -157,13 +152,12 @@ export function HeaderStatsRibbon({
         {/* Right: RPG Stat Gauges + Auth Status */}
         <div className="flex flex-wrap items-center gap-2.5 sm:gap-3">
           {/* Health Bar (HP) */}
-          <div className="min-w-[115px] flex-1 rounded-xl border border-white/[0.06] bg-neutral-950/60 px-3 py-1.5 sm:flex-initial">
+          <div className="min-w-28.75 flex-1 rounded-xl border border-white/6 bg-neutral-950/60 px-3 py-1.5 sm:flex-initial">
             <div className="flex items-center justify-between text-xs">
               <span className="flex items-center gap-1 font-semibold text-rose-400 text-[11px]">
                 <Heart
-                  className={`h-3 w-3 fill-rose-500/20 text-rose-500 ${
-                    isLowHp ? "animate-pulse text-rose-400" : ""
-                  }`}
+                  className={`h-3 w-3 fill-rose-500/20 text-rose-500 ${isLowHp ? "animate-pulse text-rose-400" : ""
+                    }`}
                 />
                 HP
               </span>
@@ -173,16 +167,15 @@ export function HeaderStatsRibbon({
             </div>
             <div className="mt-1 h-1.5 w-full overflow-hidden rounded-full bg-neutral-800">
               <div
-                className={`h-full transition-all duration-500 ${
-                  isLowHp ? "bg-rose-500" : "bg-gradient-to-r from-rose-500 to-red-400"
-                }`}
+                className={`h-full transition-all duration-500 ${isLowHp ? "bg-rose-500" : "bg-linear-to-r from-rose-500 to-red-400"
+                  }`}
                 style={{ width: `${hpPercent}%` }}
               />
             </div>
           </div>
 
           {/* Mana Bar (MP) */}
-          <div className="min-w-[115px] flex-1 rounded-xl border border-white/[0.06] bg-neutral-950/60 px-3 py-1.5 sm:flex-initial">
+          <div className="min-w-28.75 flex-1 rounded-xl border border-white/6 bg-neutral-950/60 px-3 py-1.5 sm:flex-initial">
             <div className="flex items-center justify-between text-xs">
               <span className="flex items-center gap-1 font-semibold text-sky-400 text-[11px]">
                 <Zap className="h-3 w-3 fill-sky-500/20 text-sky-400" />
@@ -194,14 +187,14 @@ export function HeaderStatsRibbon({
             </div>
             <div className="mt-1 h-1.5 w-full overflow-hidden rounded-full bg-neutral-800">
               <div
-                className="h-full bg-gradient-to-r from-sky-500 to-cyan-400 transition-all duration-500"
+                className="h-full bg-linear-to-r from-sky-500 to-cyan-400 transition-all duration-500"
                 style={{ width: `${mpPercent}%` }}
               />
             </div>
           </div>
 
           {/* EXP */}
-          <div className="min-w-[115px] flex-1 rounded-xl border border-white/[0.06] bg-neutral-950/60 px-3 py-1.5 sm:flex-initial">
+          <div className="min-w-28.75 flex-1 rounded-xl border border-white/6 bg-neutral-950/60 px-3 py-1.5 sm:flex-initial">
             <div className="flex items-center justify-between text-xs">
               <span className="flex items-center gap-1 font-semibold text-amber-400 text-[11px]">
                 <Sparkles className="h-3 w-3 text-amber-400" />
@@ -213,14 +206,14 @@ export function HeaderStatsRibbon({
             </div>
             <div className="mt-1 h-1.5 w-full overflow-hidden rounded-full bg-neutral-800">
               <div
-                className="h-full bg-gradient-to-r from-amber-500 to-yellow-400 transition-all duration-500"
+                className="h-full bg-linear-to-r from-amber-500 to-yellow-400 transition-all duration-500"
                 style={{ width: `${expPercent}%` }}
               />
             </div>
           </div>
 
           {/* Gold (GP) */}
-          <div className="flex items-center gap-1.5 rounded-xl border border-amber-500/20 bg-amber-500/[0.05] px-3 py-1.5">
+          <div className="flex items-center gap-1.5 rounded-xl border border-amber-500/20 bg-amber-500/5 px-3 py-1.5">
             <div className="flex h-5 w-5 items-center justify-center rounded-full bg-amber-500/20 text-amber-400">
               <Coins className="h-3 w-3" />
             </div>
@@ -281,17 +274,16 @@ export function HeaderStatsRibbon({
       </div>
 
       {/* Bottom Row: 6 Master Tabs + Ritual & Focus Launchers */}
-      <div className="flex flex-col xl:flex-row items-center justify-between gap-3 pt-3 border-t border-white/[0.06]">
+      <div className="flex flex-col xl:flex-row items-center justify-between gap-3 pt-3 border-t border-white/6">
         {/* Navigation Tabs */}
-        <div className="flex flex-wrap items-center gap-1 p-1 rounded-2xl bg-neutral-950/80 border border-white/[0.08] w-full xl:w-auto">
+        <div className="flex flex-wrap items-center gap-1 p-1 rounded-2xl bg-neutral-950/80 border border-white/8 w-full xl:w-auto">
           <button
             type="button"
             onClick={() => onTabChange("tasks")}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all ${
-              activeMainTab === "tasks"
-                ? "bg-indigo-600 text-white shadow-lg shadow-indigo-500/20"
-                : "text-neutral-400 hover:text-white hover:bg-neutral-900"
-            }`}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all ${activeMainTab === "tasks"
+              ? "bg-indigo-600 text-white shadow-lg shadow-indigo-500/20"
+              : "text-neutral-400 hover:text-white hover:bg-neutral-900"
+              }`}
           >
             <Zap className="h-3.5 w-3.5" />
             <span>⚡ Tareas</span>
@@ -303,11 +295,10 @@ export function HeaderStatsRibbon({
           <button
             type="button"
             onClick={() => onTabChange("finance")}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all ${
-              activeMainTab === "finance"
-                ? "bg-amber-500 text-neutral-950 shadow-lg shadow-amber-500/20"
-                : "text-neutral-400 hover:text-white hover:bg-neutral-900"
-            }`}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all ${activeMainTab === "finance"
+              ? "bg-amber-500 text-neutral-950 shadow-lg shadow-amber-500/20"
+              : "text-neutral-400 hover:text-white hover:bg-neutral-900"
+              }`}
           >
             <Wallet className="h-3.5 w-3.5" />
             <span>💰 Finanzas</span>
@@ -319,11 +310,10 @@ export function HeaderStatsRibbon({
           <button
             type="button"
             onClick={() => onTabChange("analytics")}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all ${
-              activeMainTab === "analytics"
-                ? "bg-violet-600 text-white shadow-lg shadow-violet-500/20"
-                : "text-neutral-400 hover:text-white hover:bg-neutral-900"
-            }`}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all ${activeMainTab === "analytics"
+              ? "bg-violet-600 text-white shadow-lg shadow-violet-500/20"
+              : "text-neutral-400 hover:text-white hover:bg-neutral-900"
+              }`}
           >
             <Activity className="h-3.5 w-3.5" />
             <span>📊 Balance</span>
@@ -335,11 +325,10 @@ export function HeaderStatsRibbon({
           <button
             type="button"
             onClick={() => onTabChange("calendar")}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all ${
-              activeMainTab === "calendar"
-                ? "bg-blue-600 text-white shadow-lg shadow-blue-500/20"
-                : "text-neutral-400 hover:text-white hover:bg-neutral-900"
-            }`}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all ${activeMainTab === "calendar"
+              ? "bg-blue-600 text-white shadow-lg shadow-blue-500/20"
+              : "text-neutral-400 hover:text-white hover:bg-neutral-900"
+              }`}
           >
             <Calendar className="h-3.5 w-3.5" />
             <span>📅 Agenda</span>
@@ -351,11 +340,10 @@ export function HeaderStatsRibbon({
           <button
             type="button"
             onClick={() => onTabChange("health")}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all ${
-              activeMainTab === "health"
-                ? "bg-emerald-600 text-white shadow-lg shadow-emerald-500/20"
-                : "text-neutral-400 hover:text-white hover:bg-neutral-900"
-            }`}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all ${activeMainTab === "health"
+              ? "bg-emerald-600 text-white shadow-lg shadow-emerald-500/20"
+              : "text-neutral-400 hover:text-white hover:bg-neutral-900"
+              }`}
           >
             <Dumbbell className="h-3.5 w-3.5" />
             <span>🏋️ Salud</span>
@@ -367,11 +355,10 @@ export function HeaderStatsRibbon({
           <button
             type="button"
             onClick={() => onTabChange("projects")}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all ${
-              activeMainTab === "projects"
-                ? "bg-pink-600 text-white shadow-lg shadow-pink-500/20"
-                : "text-neutral-400 hover:text-white hover:bg-neutral-900"
-            }`}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all ${activeMainTab === "projects"
+              ? "bg-pink-600 text-white shadow-lg shadow-pink-500/20"
+              : "text-neutral-400 hover:text-white hover:bg-neutral-900"
+              }`}
           >
             <BookOpen className="h-3.5 w-3.5" />
             <span>💡 Proyectos</span>
