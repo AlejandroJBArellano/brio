@@ -308,6 +308,35 @@ export interface HealthLog {
   stepsCount: number;
 }
 
+export interface SegmentalDistribution {
+  trunk: number;
+  leftArm: number;
+  rightArm: number;
+  leftLeg: number;
+  rightLeg: number;
+}
+
+export interface BodyCompositionSegmental {
+  muscle?: SegmentalDistribution;
+  fat?: SegmentalDistribution;
+}
+
+export interface BodyCompositionLog {
+  id: string;
+  date: string;
+  weightKg: number;
+  bodyFatPercentage?: number;
+  skeletalMuscleKg?: number;
+  fatFreeMassKg?: number;
+  visceralFatLevel?: number;
+  bmi?: number;
+  bmrKcal?: number;
+  waterLiters?: number;
+  segmentalData?: BodyCompositionSegmental;
+  notes?: string;
+  createdAt?: string;
+}
+
 export interface HealthDashboardData {
   todayHealth: HealthLog;
   waterPercent: number;
@@ -316,6 +345,9 @@ export interface HealthDashboardData {
   averageSleepHours: number;
   recentLogs: HealthLog[];
   supplementsCatalog?: UserSupplement[];
+  bodyCompositionLogs?: BodyCompositionLog[];
+  latestBodyComposition?: BodyCompositionLog;
+  previousBodyComposition?: BodyCompositionLog;
 }
 
 // ----------------------------------------------------

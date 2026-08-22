@@ -184,6 +184,25 @@ export async function ensureDatabaseSchema() {
       );
     `;
 
+    // 6.2 Body Composition Logs (Smart Fit Body / InBody scans)
+    await sql`
+      CREATE TABLE IF NOT EXISTS body_composition_logs (
+        id TEXT PRIMARY KEY,
+        date DATE NOT NULL UNIQUE,
+        weight_kg NUMERIC(5, 2) NOT NULL,
+        body_fat_percentage NUMERIC(4, 2),
+        skeletal_muscle_kg NUMERIC(5, 2),
+        fat_free_mass_kg NUMERIC(5, 2),
+        visceral_fat_level NUMERIC(4, 1),
+        bmi NUMERIC(4, 2),
+        bmr_kcal INTEGER,
+        water_liters NUMERIC(5, 2),
+        segmental_data JSONB DEFAULT '{}'::jsonb,
+        notes TEXT,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+      );
+    `;
+
     // 7. Projects Backlog
     await sql`
       CREATE TABLE IF NOT EXISTS projects (

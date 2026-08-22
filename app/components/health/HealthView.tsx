@@ -30,7 +30,9 @@ import {
   Zap,
 } from "lucide-react";
 import { useState, useTransition } from "react";
+import { BodyCompositionWidget } from "./BodyCompositionWidget";
 import { ManageSupplementsModal } from "./ManageSupplementsModal";
+import { SmartFitModal } from "./SmartFitModal";
 
 interface HealthViewProps {
   data: HealthDashboardData;
@@ -49,6 +51,7 @@ export function HealthView({ data, onRefresh }: HealthViewProps) {
   const [workoutNotes, setWorkoutNotes] = useState("");
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
   const [isManageSupplementsOpen, setIsManageSupplementsOpen] = useState(false);
+  const [isSmartFitModalOpen, setIsSmartFitModalOpen] = useState(false);
   const [importJson, setImportJson] = useState("");
   const [sleepHours, setSleepHours] = useState(data.todayHealth.sleepHours || 7.5);
   const [sleepQuality, setSleepQuality] = useState(data.todayHealth.sleepQuality || 4);
@@ -416,6 +419,15 @@ export function HealthView({ data, onRefresh }: HealthViewProps) {
         </div>
       </div>
 
+      {/* 5. Body Composition & Smart Fit Evolution */}
+      <BodyCompositionWidget
+        logs={data.bodyCompositionLogs || []}
+        latest={data.latestBodyComposition}
+        previous={data.previousBodyComposition}
+        onOpenModal={() => setIsSmartFitModalOpen(true)}
+        onRefresh={onRefresh}
+      />
+
       {/* Samsung Health Import Modal */}
       {isImportModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-200">
@@ -478,6 +490,16 @@ export function HealthView({ data, onRefresh }: HealthViewProps) {
         isOpen={isManageSupplementsOpen}
         onClose={() => setIsManageSupplementsOpen(false)}
         supplements={data.supplementsCatalog || []}
+        onSuccess={() => {
+          if (onRefresh) onRefresh();
+        }}
+      />
+
+      {/* Smart Fit Body Composition Modal */}
+      <SmartFitModal
+        isOpen={isSmartFitModalOpen}
+        onClose={() => setIsSmartFitModalOpen(false)}
+        latestLog={data.latestBodyComposition}
         onSuccess={() => {
           if (onRefresh) onRefresh();
         }}

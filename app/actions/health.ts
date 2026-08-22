@@ -2,6 +2,8 @@
 
 import { ensureDatabaseSchema, getDb } from "@/lib/db";
 import {
+  BodyCompositionLog,
+  BodyCompositionSegmental,
   HealthDashboardData,
   HealthLog,
   SupplementItem,
@@ -9,6 +11,36 @@ import {
   WorkoutType,
 } from "@/lib/types";
 import { revalidatePath } from "next/cache";
+
+const INITIAL_SMART_FIT_LOG: BodyCompositionLog = {
+  id: "smartfit-2025-11-12",
+  date: "2025-11-12",
+  weightKg: 78.6,
+  bodyFatPercentage: 24.64,
+  skeletalMuscleKg: 33.71,
+  fatFreeMassKg: 54.58,
+  visceralFatLevel: 8.0,
+  bmi: 25.67,
+  bmrKcal: 1872,
+  waterLiters: 39.95,
+  segmentalData: {
+    muscle: {
+      trunk: 27.88,
+      leftArm: 3.63,
+      rightArm: 3.57,
+      leftLeg: 9.76,
+      rightLeg: 9.74,
+    },
+    fat: {
+      trunk: 13.79,
+      leftArm: 0.72,
+      rightArm: 0.77,
+      leftLeg: 2.03,
+      rightLeg: 2.06,
+    },
+  },
+  notes: "Medición inicial Smart Fit Body (Noviembre 2025)",
+};
 
 const DEFAULT_USER_SUPPLEMENTS: UserSupplement[] = [
   { id: "creatine", name: "Creatina", dosage: "5g", timing: "Post-entreno", orderIndex: 0, isActive: true },
@@ -50,7 +82,60 @@ async function getOrSeedSupplementsCatalog(sql: any): Promise<UserSupplement[]> 
 }
 
 /**
- * Server Action: Fetches physical health metrics, hydration, workouts, and sleep.
+ * Helper: Fetches and ensures the body composition logs (Smart Fit Body) from database.
+ */
+async function getOrSeedBodyCompositionLogs(sql: any): Promise<BodyCompositionLog[]> {
+  const rows = await sql`
+    SELECT * FROM body_composition_logs ORDER BY date DESC;
+  `;
+
+  if (rows.length > 0) {
+    return rows.map((r: any) => ({
+      id: r.id,
+      date: typeof r.date === "string" ? r.date.split("T")[0] : new Date(r.date).toISOString().split("T")[0],
+      weightKg: Number(r.weight_kg),
+      bodyFatPercentage: r.body_fat_percentage !== null ? Number(r.body_fat_percentage) : undefined,
+      skeletalMuscleKg: r.skeletal_muscle_kg !== null ? Number(r.skeletal_muscle_kg) : undefined,
+      fatFreeMassKg: r.fat_free_mass_kg !== null ? Number(r.fat_free_mass_kg) : undefined,
+      visceralFatLevel: r.visceral_fat_level !== null ? Number(r.visceral_fat_level) : undefined,
+      bmi: r.bmi !== null ? Number(r.bmi) : undefined,
+      bmrKcal: r.bmr_kcal !== null ? Number(r.bmr_kcal) : undefined,
+      waterLiters: r.water_liters !== null ? Number(r.water_liters) : undefined,
+      segmentalData: r.segmental_data || undefined,
+      notes: r.notes || undefined,
+      createdAt: r.created_at?.toString(),
+    }));
+  }
+
+  // Seed initial Smart Fit scan
+  await sql`
+    INSERT INTO body_composition_logs (
+      id, date, weight_kg, body_fat_percentage, skeletal_muscle_kg,
+      fat_free_mass_kg, visceral_fat_level, bmi, bmr_kcal,
+      water_liters, segmental_data, notes
+    )
+    VALUES (
+      ${INITIAL_SMART_FIT_LOG.id},
+      ${INITIAL_SMART_FIT_LOG.date},
+      ${INITIAL_SMART_FIT_LOG.weightKg},
+      ${INITIAL_SMART_FIT_LOG.bodyFatPercentage ?? null},
+      ${INITIAL_SMART_FIT_LOG.skeletalMuscleKg ?? null},
+      ${INITIAL_SMART_FIT_LOG.fatFreeMassKg ?? null},
+      ${INITIAL_SMART_FIT_LOG.visceralFatLevel ?? null},
+      ${INITIAL_SMART_FIT_LOG.bmi ?? null},
+      ${INITIAL_SMART_FIT_LOG.bmrKcal ?? null},
+      ${INITIAL_SMART_FIT_LOG.waterLiters ?? null},
+      ${JSON.stringify(INITIAL_SMART_FIT_LOG.segmentalData)}::jsonb,
+      ${INITIAL_SMART_FIT_LOG.notes ?? null}
+    )
+    ON CONFLICT (date) DO NOTHING;
+  `;
+
+  return [INITIAL_SMART_FIT_LOG];
+}
+
+/**
+ * Server Action: Fetches physical health metrics, hydration, workouts, sleep, and body composition.
  */
 export async function fetchHealthDashboardDataAction(): Promise<HealthDashboardData> {
   await ensureDatabaseSchema();
@@ -60,7 +145,12 @@ export async function fetchHealthDashboardDataAction(): Promise<HealthDashboardD
   // 1. Fetch master supplements catalog
   const catalog = await getOrSeedSupplementsCatalog(sql);
 
-  // 2. Fetch today's health record
+  // 2. Fetch body composition records (Smart Fit Body)
+  const bodyCompositionLogs = await getOrSeedBodyCompositionLogs(sql);
+  const latestBodyComposition = bodyCompositionLogs.length > 0 ? bodyCompositionLogs[0] : undefined;
+  const previousBodyComposition = bodyCompositionLogs.length > 1 ? bodyCompositionLogs[1] : undefined;
+
+  // 3. Fetch today's health record
   const todayRows = await sql`
     SELECT * FROM health_logs WHERE date = ${todayStr} LIMIT 1;
   `;
@@ -124,7 +214,7 @@ export async function fetchHealthDashboardDataAction(): Promise<HealthDashboardD
     `;
   }
 
-  // 3. Fetch recent 14 days logs for streaks & averages
+  // 4. Fetch recent 14 days logs for streaks & averages
   const recentRows = await sql`
     SELECT * FROM health_logs ORDER BY date DESC LIMIT 14;
   `;
@@ -173,6 +263,9 @@ export async function fetchHealthDashboardDataAction(): Promise<HealthDashboardD
     averageSleepHours,
     recentLogs,
     supplementsCatalog: catalog,
+    bodyCompositionLogs,
+    latestBodyComposition,
+    previousBodyComposition,
   };
 }
 
@@ -535,5 +628,101 @@ export async function importSamsungHealthDataAction(
   } catch (error) {
     console.error("[Samsung Health Import Error]:", error);
     return { success: false, importedCount: 0, error: "Failed to parse Samsung Health data" };
+  }
+}
+
+/**
+ * Server Action: Fetches all body composition logs.
+ */
+export async function fetchBodyCompositionLogsAction(): Promise<BodyCompositionLog[]> {
+  await ensureDatabaseSchema();
+  const sql = getDb();
+  return getOrSeedBodyCompositionLogs(sql);
+}
+
+/**
+ * Server Action: Creates or updates a body composition log (Smart Fit Body scan).
+ */
+export async function createBodyCompositionLogAction(input: {
+  date: string;
+  weightKg: number;
+  bodyFatPercentage?: number;
+  skeletalMuscleKg?: number;
+  fatFreeMassKg?: number;
+  visceralFatLevel?: number;
+  bmi?: number;
+  bmrKcal?: number;
+  waterLiters?: number;
+  segmentalData?: BodyCompositionSegmental;
+  notes?: string;
+}): Promise<{ success: boolean; id?: string; error?: string }> {
+  try {
+    if (!input.date || !input.weightKg) {
+      return { success: false, error: "La fecha y el peso son requeridos." };
+    }
+
+    await ensureDatabaseSchema();
+    const sql = getDb();
+    const id = `smartfit-${input.date}`;
+
+    await sql`
+      INSERT INTO body_composition_logs (
+        id, date, weight_kg, body_fat_percentage, skeletal_muscle_kg,
+        fat_free_mass_kg, visceral_fat_level, bmi, bmr_kcal,
+        water_liters, segmental_data, notes
+      )
+      VALUES (
+        ${id},
+        ${input.date},
+        ${input.weightKg},
+        ${input.bodyFatPercentage ?? null},
+        ${input.skeletalMuscleKg ?? null},
+        ${input.fatFreeMassKg ?? null},
+        ${input.visceralFatLevel ?? null},
+        ${input.bmi ?? null},
+        ${input.bmrKcal ?? null},
+        ${input.waterLiters ?? null},
+        ${JSON.stringify(input.segmentalData || {})}::jsonb,
+        ${input.notes?.trim() || null}
+      )
+      ON CONFLICT (date) DO UPDATE
+      SET weight_kg = ${input.weightKg},
+          body_fat_percentage = ${input.bodyFatPercentage ?? null},
+          skeletal_muscle_kg = ${input.skeletalMuscleKg ?? null},
+          fat_free_mass_kg = ${input.fatFreeMassKg ?? null},
+          visceral_fat_level = ${input.visceralFatLevel ?? null},
+          bmi = ${input.bmi ?? null},
+          bmr_kcal = ${input.bmrKcal ?? null},
+          water_liters = ${input.waterLiters ?? null},
+          segmental_data = ${JSON.stringify(input.segmentalData || {})}::jsonb,
+          notes = ${input.notes?.trim() || null};
+    `;
+
+    revalidatePath("/");
+    return { success: true, id };
+  } catch (error) {
+    console.error("[Create Body Composition Error]:", error);
+    return { success: false, error: "No se pudo guardar el registro de composición corporal" };
+  }
+}
+
+/**
+ * Server Action: Deletes a body composition log.
+ */
+export async function deleteBodyCompositionLogAction(
+  id: string
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    await ensureDatabaseSchema();
+    const sql = getDb();
+    await sql`
+      DELETE FROM body_composition_logs WHERE id = ${id};
+    `;
+
+    revalidatePath("/");
+    return { success: true };
+  } catch (error) {
+    console.error("[Delete Body Composition Error]:", error);
+    return { success: false, error: "No se pudo eliminar el registro" };
   }
 }
