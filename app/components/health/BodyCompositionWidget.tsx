@@ -4,16 +4,11 @@ import { deleteBodyCompositionLogAction } from "@/app/actions/health";
 import { BodyCompositionLog } from "@/lib/types";
 import {
   Activity,
-  ArrowDownRight,
-  ArrowUpRight,
   Calendar,
-  ChevronRight,
   Dumbbell,
   Flame,
-  Minus,
   Plus,
   Scale,
-  Sparkles,
   Trash2,
   TrendingDown,
   TrendingUp,

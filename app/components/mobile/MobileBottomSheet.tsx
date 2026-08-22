@@ -11,8 +11,6 @@ import {
   Loader2,
   Salad,
   Scale,
-  Sparkles,
-  Wallet,
   X,
   Zap,
 } from "lucide-react";

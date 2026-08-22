@@ -5,7 +5,6 @@ import { toggleSupplementAction } from "@/app/actions/health";
 import { NutritionHabitLog, SupplementItem, UserSupplement } from "@/lib/types";
 import {
   Check,
-  Droplet,
   LucideIcon,
   Pill,
   Plus,

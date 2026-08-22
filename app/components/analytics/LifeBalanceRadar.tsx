@@ -1,7 +1,7 @@
 "use client";
 
 import { LifeTagDistribution } from "@/lib/types";
-import { Compass, Sparkles } from "lucide-react";
+import { Compass } from "lucide-react";
 
 interface LifeBalanceRadarProps {
   tagDistributions: LifeTagDistribution[];

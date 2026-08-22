@@ -1,7 +1,7 @@
 "use client";
 
 import { HeatmapDay } from "@/lib/types";
-import { Flame, Sparkles, Trophy, Zap } from "lucide-react";
+import { Flame, Sparkles, Trophy } from "lucide-react";
 import { useState } from "react";
 
 interface HabitHeatmapProps {

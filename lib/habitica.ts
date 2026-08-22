@@ -6,7 +6,6 @@ import {
   HabiticaTask,
   HabiticaTaskPayload,
   HabiticaUser,
-  TaskType,
 } from "./types";
 
 /**

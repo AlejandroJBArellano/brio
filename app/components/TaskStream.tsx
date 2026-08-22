@@ -5,8 +5,6 @@ import { HabiticaTask } from "@/lib/types";
 import {
   Calendar,
   CheckCircle2,
-  Filter,
-  Flame,
   Hash,
   ListTodo,
   Search,

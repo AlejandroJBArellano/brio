@@ -12,22 +12,13 @@ import {
   LearningItem,
   LearningItemType,
   LearningStatus,
-  ProjectItem,
   ProjectsDashboardData,
   ProjectStatus,
 } from "@/lib/types";
 import {
   BookOpen,
-  CheckCircle2,
-  Code2,
-  ExternalLink,
-  GitBranch,
-  GraduationCap,
-  Layers,
-  Lightbulb,
   Plus,
   Rocket,
-  Sparkles,
   Trash2,
   X,
 } from "lucide-react";

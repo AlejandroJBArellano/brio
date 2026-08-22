@@ -7,20 +7,15 @@ import {
 } from "@/app/actions/wishlist";
 import { WishlistDashboardData, WishlistItem, WishlistStatus } from "@/lib/types";
 import {
-  AlertCircle,
   Check,
   CheckCircle2,
   Clock,
   ExternalLink,
-  Flame,
   Plus,
   ShieldCheck,
   ShoppingBag,
   Sparkles,
-  Tag,
   Trash2,
-  Wallet,
-  XCircle,
 } from "lucide-react";
 import { useState, useTransition } from "react";
 import { AddWishlistModal } from "./AddWishlistModal";

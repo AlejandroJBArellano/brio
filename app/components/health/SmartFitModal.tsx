@@ -12,7 +12,6 @@ import {
   Dumbbell,
   Flame,
   Scale,
-  Sparkles,
   User,
   X,
 } from "lucide-react";

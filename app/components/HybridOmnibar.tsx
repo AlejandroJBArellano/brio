@@ -5,14 +5,10 @@ import { createSingleTaskAction } from "@/app/actions/tasks";
 import { parseFinancialInput } from "@/lib/parser";
 import { HabiticaTag } from "@/lib/types";
 import {
-  ArrowDownRight,
-  ArrowUpRight,
   CheckCircle2,
-  DollarSign,
   Layers,
   Plus,
   Send,
-  Sparkles,
   Wallet,
 } from "lucide-react";
 import { useEffect, useMemo, useRef, useState, useTransition } from "react";

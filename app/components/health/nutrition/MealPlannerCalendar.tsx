@@ -15,13 +15,10 @@ import {
 import {
   Calendar as CalendarIcon,
   Check,
-  CheckCircle2,
   ChevronLeft,
   ChevronRight,
-  Clock,
   Plus,
   Search,
-  Sparkles,
   Trash2,
   Utensils,
   X,

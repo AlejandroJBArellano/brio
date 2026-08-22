@@ -1,15 +1,12 @@
 "use client";
 
-import { CalendarDaySchedule, CalendarEvent } from "@/lib/types";
+import { CalendarDaySchedule } from "@/lib/types";
 import {
   Calendar,
   Clock,
-  ExternalLink,
   MapPin,
   RefreshCw,
   Settings,
-  Sparkles,
-  Video,
 } from "lucide-react";
 import { useState } from "react";
 import { CalendarSettingsModal } from "./CalendarSettingsModal";

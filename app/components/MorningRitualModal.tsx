@@ -4,16 +4,11 @@ import { saveMorningRitualAction } from "@/app/actions/rituals";
 import { CalendarDaySchedule, HabiticaTask, HabiticaUser } from "@/lib/types";
 import {
   ArrowRight,
-  Calendar,
   Check,
-  CheckCircle2,
   Clock,
-  Flame,
   Sparkles,
   Sun,
-  Target,
   X,
-  Zap,
 } from "lucide-react";
 import { useState, useTransition } from "react";
 

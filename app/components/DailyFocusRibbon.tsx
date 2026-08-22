@@ -1,7 +1,7 @@
 "use client";
 
 import { HabiticaTask } from "@/lib/types";
-import { CheckCircle2, Circle, Flame, Sparkles, Target, Zap } from "lucide-react";
+import { CheckCircle2, Circle, Target } from "lucide-react";
 
 interface DailyFocusRibbonProps {
   mustWinTaskIds: string[];

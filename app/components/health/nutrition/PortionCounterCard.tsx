@@ -1,7 +1,7 @@
 "use client";
 
 import { FoodGroupMeta } from "@/lib/types";
-import { Check, Minus, Plus, Sparkles } from "lucide-react";
+import { Check, Minus, Plus } from "lucide-react";
 
 interface PortionCounterCardProps {
   meta: FoodGroupMeta;

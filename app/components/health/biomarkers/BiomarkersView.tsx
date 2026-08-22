@@ -11,30 +11,16 @@ import {
 } from "@/lib/types";
 import {
   Activity,
-  AlertCircle,
   AlertTriangle,
-  ArrowRight,
-  Calendar,
-  CheckCircle2,
-  ChevronRight,
-  Download,
   Dumbbell,
-  FileCheck,
-  FileSpreadsheet,
-  FileText,
-  Filter,
-  Flame,
   FlaskConical,
   Heart,
-  Info,
   Layers,
   Mountain,
   Plus,
   Search,
   ShieldCheck,
   Sparkles,
-  TrendingUp,
-  Zap,
 } from "lucide-react";
 import { useMemo, useState } from "react";
 

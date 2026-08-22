@@ -3,7 +3,6 @@
 import { syncHevyWorkoutsAction } from "@/app/actions/health";
 import { HevyStats, HevyWorkout } from "@/lib/types";
 import {
-  Activity,
   Check,
   ChevronDown,
   ChevronUp,

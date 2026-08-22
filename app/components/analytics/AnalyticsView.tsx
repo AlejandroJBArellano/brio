@@ -1,7 +1,7 @@
 "use client";
 
 import { AnalyticsDashboardData } from "@/lib/types";
-import { Activity, BarChart3, Flame, Shield, Sparkles, Trophy } from "lucide-react";
+import { Activity, Flame, Sparkles } from "lucide-react";
 import { HabitHeatmap } from "./HabitHeatmap";
 import { LifeBalanceRadar } from "./LifeBalanceRadar";
 

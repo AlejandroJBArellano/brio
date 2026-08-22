@@ -1,6 +1,6 @@
 "use client";
 
-import { AlertTriangle, CheckCircle2, Coffee, Flame, Sparkles } from "lucide-react";
+import { AlertTriangle, CheckCircle2, Coffee, Flame } from "lucide-react";
 
 interface AntExpenseThermometerProps {
   spentToday: number;

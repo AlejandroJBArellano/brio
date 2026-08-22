@@ -2,7 +2,6 @@ import { getDb } from "@/lib/db";
 import { getBucketName, getS3Client } from "@/lib/s3";
 import { GetObjectCommand } from "@aws-sdk/client-s3";
 import { NextRequest, NextResponse } from "next/server";
-import { Readable } from "stream";
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);

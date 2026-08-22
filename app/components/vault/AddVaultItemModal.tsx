@@ -4,16 +4,12 @@ import { createVaultItemAction } from "@/app/actions/vault";
 import { VaultItemCategory, VaultItemStatus } from "@/lib/types";
 import {
   BookOpen,
-  CheckCircle2,
   FileText,
   FolderGit2,
   GraduationCap,
-  Image as ImageIcon,
   Link as LinkIcon,
   Music,
   Plus,
-  Sparkles,
-  Tv,
   UploadCloud,
   Video,
   X,

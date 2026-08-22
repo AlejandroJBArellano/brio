@@ -6,27 +6,18 @@ import {
   updateProjectStatusAction,
 } from "@/app/actions/projects";
 import {
-  ProjectItem,
   ProjectStatus,
   VaultDashboardData,
   VaultItemCategory,
 } from "@/lib/types";
 import {
   BookOpen,
-  CheckCircle2,
   Code2,
   ExternalLink,
-  Flame,
-  FolderGit2,
   GraduationCap,
-  Layers,
   Music,
   Plus,
-  Rocket,
-  ShieldCheck,
-  Sparkles,
   Trash2,
-  Tv,
   UploadCloud,
   Video,
   X,

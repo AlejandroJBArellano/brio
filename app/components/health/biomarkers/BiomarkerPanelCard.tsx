@@ -2,11 +2,9 @@
 
 import { BiomarkerLog } from "@/lib/types";
 import {
-  AlertCircle,
   ArrowDownRight,
   ArrowUpRight,
   CheckCircle2,
-  HelpCircle,
   Info,
 } from "lucide-react";
 import { useState } from "react";

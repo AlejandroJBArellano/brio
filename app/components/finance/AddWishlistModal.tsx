@@ -4,13 +4,8 @@ import { createWishlistItemAction } from "@/app/actions/wishlist";
 import { WishlistPriority } from "@/lib/types";
 import {
   Clock,
-  ExternalLink,
-  Flame,
   Plus,
   ShieldCheck,
-  Sparkles,
-  Tag,
-  Wallet,
   X,
 } from "lucide-react";
 import { useState, useTransition } from "react";

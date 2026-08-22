@@ -7,25 +7,18 @@ import {
   toggleChecklistItemAction,
   updateTaskAction,
 } from "@/app/actions/tasks";
-import { HabiticaTag, HabiticaTask, TaskType } from "@/lib/types";
+import { HabiticaTag, HabiticaTask } from "@/lib/types";
 import { capitalize, getTaskValueColor } from "@/lib/utils";
 import {
-  AlertTriangle,
-  Calendar,
   Check,
-  CheckSquare,
-  Clock,
   Flame,
-  Hash,
-  Minus,
-  Plus,
   Save,
   Tag,
   Trash2,
   X,
   Zap,
 } from "lucide-react";
-import { useEffect, useState, useTransition } from "react";
+import { useState, useTransition } from "react";
 
 interface TaskInspectorPaneProps {
   task: HabiticaTask | null;

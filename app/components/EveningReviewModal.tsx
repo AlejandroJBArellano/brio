@@ -4,20 +4,15 @@ import { saveEveningReviewAction } from "@/app/actions/rituals";
 import { toggleSleepAction, toggleTaskAction } from "@/app/actions/tasks";
 import { HabiticaTask, HabiticaUser } from "@/lib/types";
 import {
-  AlertTriangle,
   ArrowRight,
   Bed,
-  CheckCircle2,
   Coffee,
   Coins,
   Heart,
   Moon,
   ShieldCheck,
-  Smile,
   Sparkles,
-  Trophy,
   X,
-  Zap,
 } from "lucide-react";
 import { useState, useTransition } from "react";
 

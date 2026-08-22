@@ -6,11 +6,8 @@ import {
   Check,
   ClipboardCheck,
   Copy,
-  ListOrdered,
   RefreshCw,
-  ShoppingBag,
   ShoppingCart,
-  Sparkles,
 } from "lucide-react";
 import { useEffect, useState, useTransition } from "react";
 

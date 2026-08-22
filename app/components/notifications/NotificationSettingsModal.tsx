@@ -1,7 +1,6 @@
 "use client";
 
 import {
-  DEFAULT_NOTIFICATION_SETTINGS,
   getNotificationSettings,
   NotificationSettings,
   playNotificationChime,
@@ -23,7 +22,7 @@ import {
   VolumeX,
   X,
 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 interface NotificationSettingsModalProps {
   isOpen: boolean;

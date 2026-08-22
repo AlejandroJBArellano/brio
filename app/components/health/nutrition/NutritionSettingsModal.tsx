@@ -3,7 +3,7 @@
 import { updateNutritionSettingsAction } from "@/app/actions/nutrition";
 import { FOOD_GROUPS_CATALOG } from "@/lib/nutritionPresets";
 import { FoodGroupKey, NutritionSettings } from "@/lib/types";
-import { Droplet, RotateCcw, Settings2, Sparkles, X } from "lucide-react";
+import { Settings2, X } from "lucide-react";
 import { useState, useTransition } from "react";
 
 interface NutritionSettingsModalProps {

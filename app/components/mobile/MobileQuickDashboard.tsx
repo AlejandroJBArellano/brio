@@ -13,12 +13,9 @@ import {
   HabiticaUser,
   HealthDashboardData,
   RitualLog,
-  SupplementItem,
 } from "@/lib/types";
 import { calculatePercentage } from "@/lib/utils";
 import {
-  Activity,
-  AlertTriangle,
   Bell,
   Calendar,
   Check,
@@ -26,18 +23,13 @@ import {
   ChevronRight,
   Clock,
   Coins,
-  DollarSign,
   Droplet,
   Heart,
-  Moon,
   Pill,
   Plus,
   Scale,
-  Settings2,
   Sparkles,
   Sun,
-  TrendingDown,
-  TrendingUp,
   Wallet,
   Zap,
 } from "lucide-react";

@@ -2,7 +2,6 @@
 
 import { HabiticaTag } from "@/lib/types";
 import { Hash } from "lucide-react";
-import { useEffect, useRef } from "react";
 
 interface TagAutocompleteProps {
   tags: HabiticaTag[];

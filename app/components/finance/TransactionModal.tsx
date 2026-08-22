@@ -7,10 +7,7 @@ import {
   ArrowDownRight,
   ArrowUpRight,
   Coffee,
-  DollarSign,
   Plus,
-  Sparkles,
-  Tag,
   Wallet,
   X,
 } from "lucide-react";

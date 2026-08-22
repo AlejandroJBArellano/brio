@@ -3,7 +3,6 @@
 import { getDb } from "@/lib/db";
 import {
   DEFAULT_NUTRITION_SETTINGS,
-  FOOD_GROUPS_CATALOG,
   MARIANA_MONT_PRESET_RECIPES,
   calculateMacrosFromPortions,
 } from "@/lib/nutritionPresets";

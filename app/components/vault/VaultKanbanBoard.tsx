@@ -7,21 +7,12 @@ import {
 } from "@/app/actions/vault";
 import { VaultItem, VaultItemCategory, VaultItemStatus } from "@/lib/types";
 import {
-  BookOpen,
-  Check,
-  CheckCircle2,
   ChevronLeft,
   ChevronRight,
   ExternalLink,
   FileText,
-  FolderGit2,
-  GraduationCap,
-  Music,
-  Play,
   Plus,
-  Sparkles,
   Trash2,
-  Video,
 } from "lucide-react";
 import { useState, useTransition } from "react";
 import { PdfViewerModal } from "./PdfViewerModal";

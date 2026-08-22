@@ -1,7 +1,7 @@
 "use client";
 
 import { MacroEstimate } from "@/lib/types";
-import { Flame, Info, Leaf, PieChart, ShieldCheck, Zap } from "lucide-react";
+import { Flame, Info, Leaf } from "lucide-react";
 import { useState } from "react";
 
 interface MacroBalanceWidgetProps {

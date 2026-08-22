@@ -2,7 +2,7 @@
 
 import { contributeToSavingsGoalAction, createSavingsGoalAction } from "@/app/actions/finance";
 import { SavingsGoal } from "@/lib/types";
-import { Plus, ShieldCheck, Sparkles, Target, TrendingUp } from "lucide-react";
+import { Plus, Target } from "lucide-react";
 import { useState, useTransition } from "react";
 
 interface SavingsGoalsWidgetProps {

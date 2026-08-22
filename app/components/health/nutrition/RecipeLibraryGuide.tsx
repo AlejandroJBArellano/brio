@@ -1,22 +1,16 @@
 "use client";
 
 import { FOOD_GROUPS_CATALOG, MARIANA_MONT_KNOWLEDGE_BASE } from "@/lib/nutritionPresets";
-import { FoodGroupKey, MealSlotType, NutritionRecipe } from "@/lib/types";
+import { FoodGroupKey, NutritionRecipe } from "@/lib/types";
 import {
   BookOpen,
   CalendarPlus,
-  Check,
   ChefHat,
   Droplets,
   Flame,
-  Info,
   Layers,
-  Leaf,
-  Plus,
   Search,
   Sparkles,
-  Utensils,
-  Wheat,
   X,
 } from "lucide-react";
 import { useState } from "react";

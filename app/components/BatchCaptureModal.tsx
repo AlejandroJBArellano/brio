@@ -6,7 +6,6 @@ import { BatchActionResult } from "@/lib/types";
 import {
   AlertCircle,
   CheckCircle2,
-  HelpCircle,
   Send,
   Sparkles,
   Trash2,

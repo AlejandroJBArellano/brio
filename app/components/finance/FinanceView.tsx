@@ -1,22 +1,16 @@
 "use client";
 
 import { deleteTransactionAction } from "@/app/actions/finance";
-import { FinanceDashboardData, Transaction } from "@/lib/types";
+import { FinanceDashboardData } from "@/lib/types";
 import {
-  AlertCircle,
   ArrowDownRight,
   ArrowUpRight,
   Calendar,
-  CheckCircle2,
-  Filter,
-  Flame,
   PieChart,
   Plus,
   Search,
   Sparkles,
-  Tag,
   Trash2,
-  TrendingDown,
   TrendingUp,
   Wallet,
 } from "lucide-react";
