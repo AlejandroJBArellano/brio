@@ -9,6 +9,12 @@
   "orientation": "portrait",
   "icons": [
     {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
       "src": "/favicon.ico",
       "sizes": "64x64 32x32 24x24 16x16",
       "type": "image/x-icon"
@@ -20,14 +26,14 @@
       "short_name": "Gasto",
       "description": "Registra un gasto rápidamente en Brio Finanzas",
       "url": "/?action=expense",
-      "icons": [{ "src": "/favicon.ico", "sizes": "64x64" }]
+      "icons": [{ "src": "/icon.svg", "sizes": "any" }]
     },
     {
       "name": "Suplementos & Salud",
       "short_name": "Salud",
       "description": "Check-in de suplementos y salud",
       "url": "/?action=health",
-      "icons": [{ "src": "/favicon.ico", "sizes": "64x64" }]
+      "icons": [{ "src": "/icon.svg", "sizes": "any" }]
     }
   ]
 }

@@ -1,0 +1,61 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
+  <defs>
+    <!-- Background Gradient -->
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0d0f17" />
+      <stop offset="50%" stop-color="#08090d" />
+      <stop offset="100%" stop-color="#040508" />
+    </linearGradient>
+
+    <!-- Border Glow Gradient -->
+    <linearGradient id="borderGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#6366f1" stop-opacity="0.8" />
+      <stop offset="50%" stop-color="#38bdf8" stop-opacity="0.3" />
+      <stop offset="100%" stop-color="#a855f7" stop-opacity="0.6" />
+    </linearGradient>
+
+    <!-- Electric Bolt Core Gradient -->
+    <linearGradient id="boltGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#38bdf8" />
+      <stop offset="40%" stop-color="#6366f1" />
+      <stop offset="100%" stop-color="#a855f7" />
+    </linearGradient>
+
+    <!-- Inner Ambient Glow -->
+    <radialGradient id="ambientGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#6366f1" stop-opacity="0.35" />
+      <stop offset="60%" stop-color="#38bdf8" stop-opacity="0.1" />
+      <stop offset="100%" stop-color="#08090d" stop-opacity="0" />
+    </radialGradient>
+
+    <!-- Drop Shadow Filter -->
+    <filter id="neonGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="16" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+  </defs>
+
+  <!-- Background Squircle -->
+  <rect width="512" height="512" rx="128" fill="url(#bgGrad)" />
+  
+  <!-- Subtle Border Stroke -->
+  <rect width="506" height="506" x="3" y="3" rx="125" fill="none" stroke="url(#borderGrad)" stroke-width="6" opacity="0.6" />
+
+  <!-- Ambient Center Glow Circle -->
+  <circle cx="256" cy="256" r="180" fill="url(#ambientGlow)" />
+
+  <!-- Geometric Brio Energy Bolt (⚡ Monogram) -->
+  <g filter="url(#neonGlow)" transform="translate(0, 0)">
+    <!-- Main Angular Lightning Path with Precision Bevels -->
+    <path 
+      d="M280 64 L136 264 L244 264 L216 448 L376 232 L264 232 Z" 
+      fill="url(#boltGrad)" 
+    />
+    <!-- Sharp Core Specular Highlight -->
+    <path 
+      d="M276 80 L156 252 L248 252 L228 412 L356 244 L260 244 Z" 
+      fill="#ffffff" 
+      opacity="0.25" 
+    />
+  </g>
+</svg>

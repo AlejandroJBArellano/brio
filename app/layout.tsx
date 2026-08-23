@@ -32,8 +32,15 @@ export const metadata: Metadata = {
     title: "Brio OS",
   },
   icons: {
-    icon: "/favicon.ico",
-    apple: "/favicon.ico",
+    icon: [
+      { url: "/icon.svg", type: "image/svg+xml" },
+      { url: "/favicon.ico" },
+    ],
+    shortcut: "/icon.svg",
+    apple: [
+      { url: "/icon.svg", type: "image/svg+xml" },
+      { url: "/apple-icon.svg", type: "image/svg+xml" },
+    ],
   },
 };
 
