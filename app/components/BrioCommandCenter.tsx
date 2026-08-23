@@ -192,7 +192,6 @@ function BrioCommandCenterContent({
           calendarSchedule={calendarSchedule}
           todayRitual={todayRitual}
           onOpenBottomSheet={handleOpenBottomSheetWithTab}
-          onOpenSmartFitModal={() => openModal("smartFit")}
           onOpenNotificationSettings={() => openModal("notificationSettings")}
           onOpenMorningRitual={() => openModal("morningRitual")}
           onOpenEveningReview={() => openModal("eveningReview")}

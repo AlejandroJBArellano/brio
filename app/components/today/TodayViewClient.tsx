@@ -39,7 +39,6 @@ export function TodayViewClient({
       calendarSchedule={calendarSchedule}
       todayRitual={todayRitual}
       onOpenBottomSheet={(tab) => openModal("bottomSheet", { tab })}
-      onOpenSmartFitModal={() => openModal("smartFit")}
       onOpenNotificationSettings={() => openModal("notificationSettings")}
       onOpenMorningRitual={() => openModal("morningRitual")}
       onOpenEveningReview={() => openModal("eveningReview")}
