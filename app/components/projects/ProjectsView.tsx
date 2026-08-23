@@ -32,10 +32,10 @@ interface ProjectsViewProps {
 }
 
 const STATUS_LABELS: Record<ProjectStatus, { label: string; color: string }> = {
-  idea: { label: "💡 Idea", color: "border-amber-500/30 bg-amber-500/10 text-amber-300" },
-  in_progress: { label: "⚡ En Desarrollo", color: "border-indigo-500/30 bg-indigo-500/10 text-indigo-300" },
-  paused: { label: "⏸️ Pausado", color: "border-neutral-700 bg-neutral-800 text-neutral-400" },
-  launched: { label: "🚀 Lanzado", color: "border-emerald-500/30 bg-emerald-500/10 text-emerald-300" },
+  idea: { label: "💡 Idea", color: "border-[#D99B43]/30 bg-[#221D16] text-[#D99B43]" },
+  in_progress: { label: "⚡ En Desarrollo", color: "border-[#4EAB9E]/30 bg-[#162121] text-[#4EAB9E]" },
+  paused: { label: "⏸️ Pausado", color: "border-[#2A2723] bg-[#181715] text-[#8E867B]" },
+  launched: { label: "🚀 Lanzado", color: "border-[#7EA35A]/30 bg-[#1C2219] text-[#7EA35A]" },
 };
 
 export function ProjectsView({
@@ -141,35 +141,36 @@ export function ProjectsView({
     <div className="flex flex-col gap-8 animate-in fade-in duration-300">
       {/* 1. Projects Section */}
       <div className="space-y-4">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-white/8">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-[#2A2723]">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#221D16] text-[#D99B43] border border-[#D99B43]/30">
               <Rocket className="h-5 w-5" />
             </div>
             <div>
-              <h2 className="text-base font-bold text-white tracking-tight">
+              <h2 className="font-serif text-base font-bold text-[#F5F2EB] tracking-tight">
                 Backlog de Proyectos & Side Hustles
               </h2>
-              <p className="text-xs text-neutral-400">
+              <p className="text-xs text-[#8E867B]">
                 Ideas, prototipos en desarrollo y proyectos lanzados
               </p>
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 font-sans">
             {onOpenScratchpad && (
               <button
                 type="button"
                 onClick={onOpenScratchpad}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-white/10 bg-neutral-900 text-xs font-semibold text-neutral-300 hover:text-white transition-all"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-[#2A2723] bg-[#181715] text-xs font-semibold text-[#DDD6C9] hover:text-[#F5F2EB] hover:bg-[#22201D] transition-all cursor-pointer"
               >
-                <span>📝 Scratchpad (⌘J)</span>
+                <span>📝 Scratchpad</span>
+                <kbd className="text-[10px] font-mono text-[#8E867B]">⌘J</kbd>
               </button>
             )}
             <button
               type="button"
               onClick={() => setIsNewProjectModalOpen(true)}
-              className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-indigo-600 font-bold text-xs text-white hover:bg-indigo-500 shadow-lg shadow-indigo-500/20 transition-all"
+              className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-[#D99B43] font-bold text-xs text-[#121110] hover:bg-[#E8AF59] shadow-xs transition-all cursor-pointer"
             >
               <Plus className="h-4 w-4" />
               <span>Nuevo Proyecto</span>
@@ -184,10 +185,10 @@ export function ProjectsView({
             return (
               <div
                 key={project.id}
-                className="rounded-2xl border border-white/8 bg-neutral-900/60 p-5 backdrop-blur-xl shadow-xl flex flex-col justify-between group hover:border-indigo-500/40 transition-all"
+                className="rounded-xl border border-[#2A2723] bg-[#181715] p-5 shadow-sm flex flex-col justify-between group hover:border-[#38332D] transition-all"
               >
                 <div>
-                  <div className="flex items-center justify-between gap-2">
+                  <div className="flex items-center justify-between gap-2 font-mono">
                     <span
                       className={`px-2 py-0.5 rounded-md border text-[11px] font-bold ${statusConfig.color}`}
                     >
@@ -198,18 +199,18 @@ export function ProjectsView({
                       type="button"
                       onClick={() => handleDeleteProject(project.id)}
                       title="Eliminar proyecto"
-                      className="opacity-0 group-hover:opacity-100 text-neutral-500 hover:text-rose-400 transition-opacity"
+                      className="opacity-0 group-hover:opacity-100 text-[#8E867B] hover:text-[#E05D52] transition-opacity cursor-pointer"
                     >
                       <Trash2 className="h-3.5 w-3.5" />
                     </button>
                   </div>
 
-                  <h3 className="mt-3 text-base font-bold text-white tracking-tight">
+                  <h3 className="mt-3 font-serif text-base font-bold text-[#F5F2EB] tracking-tight">
                     {project.title}
                   </h3>
 
                   {project.description && (
-                    <p className="mt-1 text-xs text-neutral-400 line-clamp-2">
+                    <p className="mt-1 text-xs text-[#8E867B] line-clamp-2">
                       {project.description}
                     </p>
                   )}
@@ -220,7 +221,7 @@ export function ProjectsView({
                       {project.techStack.map((tech) => (
                         <span
                           key={tech}
-                          className="px-2 py-0.5 rounded bg-neutral-950/80 border border-white/6 text-[10px] font-mono text-neutral-300"
+                          className="px-2 py-0.5 rounded bg-[#121110] border border-[#2A2723] text-[10px] font-mono text-[#DDD6C9]"
                         >
                           {tech}
                         </span>
@@ -230,16 +231,16 @@ export function ProjectsView({
 
                   {/* External links */}
                   {(project.liveUrl || project.repoUrl) && (
-                    <div className="mt-3.5 flex items-center gap-2">
+                    <div className="mt-3.5 flex items-center gap-2 font-mono">
                       {project.liveUrl && (
                         <a
                           href={project.liveUrl}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white/5 hover:bg-white/10 border border-white/8 text-[11px] font-medium text-neutral-300 hover:text-white transition-all"
+                          className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-[#121110] hover:bg-[#22201D] border border-[#2A2723] text-[11px] font-medium text-[#4EAB9E] hover:underline transition-all"
                         >
                           <span>🌐 Sitio Web</span>
-                          <ExternalLink className="h-3 w-3 text-neutral-400" />
+                          <ExternalLink className="h-3 w-3 text-[#4EAB9E]" />
                         </a>
                       )}
                       {project.repoUrl && (
@@ -247,26 +248,26 @@ export function ProjectsView({
                           href={project.repoUrl}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white/5 hover:bg-white/10 border border-white/8 text-[11px] font-medium text-neutral-300 hover:text-white transition-all"
+                          className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-[#121110] hover:bg-[#22201D] border border-[#2A2723] text-[11px] font-medium text-[#DDD6C9] hover:text-[#F5F2EB] transition-all"
                         >
-                          <span>🔗 Repo / Enlace</span>
-                          <ExternalLink className="h-3 w-3 text-neutral-400" />
+                          <span>🔗 Repo</span>
+                          <ExternalLink className="h-3 w-3 text-[#8E867B]" />
                         </a>
                       )}
                     </div>
                   )}
                 </div>
 
-                <div className="mt-5 pt-3 border-t border-white/6 flex items-center justify-between">
+                <div className="mt-5 pt-3 border-t border-[#2A2723] flex items-center justify-between font-mono">
                   {/* Progress */}
                   <div className="flex items-center gap-2">
-                    <div className="h-1.5 w-20 overflow-hidden rounded-full bg-neutral-950">
+                    <div className="h-1.5 w-20 overflow-hidden rounded-full bg-[#121110]">
                       <div
-                        className="h-full bg-indigo-500"
+                        className="h-full bg-[#D99B43]"
                         style={{ width: `${project.progress}%` }}
                       />
                     </div>
-                    <span className="font-mono text-[10px] text-neutral-400">
+                    <span className="font-mono text-[10px] text-[#8E867B]">
                       {project.progress}%
                     </span>
                   </div>
@@ -280,7 +281,7 @@ export function ProjectsView({
                         e.target.value as ProjectStatus
                       )
                     }
-                    className="rounded-lg border border-white/8 bg-neutral-950 px-2 py-1 text-[11px] text-neutral-300 focus:outline-none"
+                    className="rounded-md border border-[#2A2723] bg-[#121110] px-2 py-1 text-[11px] text-[#DDD6C9] focus:outline-none cursor-pointer"
                   >
                     <option value="idea">Idea</option>
                     <option value="in_progress">En Desarrollo</option>
@@ -296,16 +297,16 @@ export function ProjectsView({
 
       {/* 2. Reading & Learning Section */}
       <div className="space-y-4">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-white/8">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-[#2A2723]">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-amber-500/10 text-amber-400 border border-amber-500/20">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#221D16] text-[#D99B43] border border-[#D99B43]/30">
               <BookOpen className="h-5 w-5" />
             </div>
             <div>
-              <h2 className="text-base font-bold text-white tracking-tight">
+              <h2 className="font-serif text-base font-bold text-[#F5F2EB] tracking-tight">
                 Tracker de Cursos, Certificaciones & Universidad
               </h2>
-              <p className="text-xs text-neutral-400">
+              <p className="text-xs text-[#8E867B]">
                 Rutas de aprendizaje activas, certificaciones cloud y materias universitarias
               </p>
             </div>
@@ -314,7 +315,7 @@ export function ProjectsView({
           <button
             type="button"
             onClick={() => setIsNewBookModalOpen(true)}
-            className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-amber-500 font-bold text-xs text-neutral-950 hover:bg-amber-400 shadow-lg shadow-amber-500/20 transition-all"
+            className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-[#D99B43] font-bold text-xs text-[#121110] hover:bg-[#E8AF59] shadow-xs transition-all cursor-pointer font-sans"
           >
             <Plus className="h-4 w-4" />
             <span>Nuevo Curso / Libro</span>
@@ -332,11 +333,11 @@ export function ProjectsView({
             return (
               <div
                 key={item.id}
-                className="rounded-2xl border border-white/8 bg-neutral-900/60 p-5 backdrop-blur-xl shadow-xl flex flex-col justify-between group"
+                className="rounded-xl border border-[#2A2723] bg-[#181715] p-5 shadow-sm flex flex-col justify-between group"
               >
                 <div>
-                  <div className="flex items-center justify-between">
-                    <span className="px-2 py-0.5 rounded-md border border-amber-500/30 bg-amber-500/10 text-amber-300 text-[11px] font-bold">
+                  <div className="flex items-center justify-between font-mono">
+                    <span className="px-2 py-0.5 rounded-md border border-[#D99B43]/30 bg-[#221D16] text-[#D99B43] text-[11px] font-bold">
                       {item.type.toUpperCase()}
                     </span>
 
@@ -344,38 +345,38 @@ export function ProjectsView({
                       type="button"
                       onClick={() => handleDeleteBook(item.id)}
                       title="Eliminar registro"
-                      className="opacity-0 group-hover:opacity-100 text-neutral-500 hover:text-rose-400 transition-opacity"
+                      className="opacity-0 group-hover:opacity-100 text-[#8E867B] hover:text-[#E05D52] transition-opacity cursor-pointer"
                     >
                       <Trash2 className="h-3.5 w-3.5" />
                     </button>
                   </div>
 
-                  <h3 className="mt-3 text-base font-bold text-white tracking-tight">
+                  <h3 className="mt-3 font-serif text-base font-bold text-[#F5F2EB] tracking-tight">
                     {item.title}
                   </h3>
                   {item.author && (
-                    <p className="text-xs text-neutral-400">Por {item.author}</p>
+                    <p className="text-xs text-[#8E867B]">Por {item.author}</p>
                   )}
 
                   {item.keyTakeaways && (
-                    <div className="mt-3 rounded-xl bg-neutral-950/80 p-3 border border-white/4 text-xs text-neutral-300 italic">
+                    <div className="mt-3 rounded-lg bg-[#121110] p-3 border border-[#2A2723] text-xs text-[#DDD6C9] italic font-sans">
                       &ldquo;{item.keyTakeaways}&rdquo;
                     </div>
                   )}
                 </div>
 
-                <div className="mt-5 space-y-3 pt-3 border-t border-white/6">
+                <div className="mt-5 space-y-3 pt-3 border-t border-[#2A2723] font-mono">
                   {/* Progress bar */}
                   <div>
                     <div className="flex items-center justify-between text-[11px] mb-1 font-mono">
-                      <span className="text-neutral-400">
+                      <span className="text-[#8E867B]">
                         {item.currentProgress} / {item.totalProgress} {unitLabel}
                       </span>
-                      <span className="text-amber-400 font-bold">{percent}%</span>
+                      <span className="text-[#D99B43] font-bold">{percent}%</span>
                     </div>
-                    <div className="h-2 w-full overflow-hidden rounded-full bg-neutral-950">
+                    <div className="h-2 w-full overflow-hidden rounded-full bg-[#121110]">
                       <div
-                        className="h-full bg-amber-400 transition-all duration-500"
+                        className="h-full bg-[#D99B43] transition-all duration-500"
                         style={{ width: `${percent}%` }}
                       />
                     </div>
@@ -387,7 +388,7 @@ export function ProjectsView({
                       type="button"
                       onClick={() => handleIncrementBookProgress(item, item.totalProgress <= 20 ? 1 : 10)}
                       disabled={isPending}
-                      className="flex-1 py-1.5 rounded-lg bg-neutral-950 border border-white/6 text-xs font-mono text-neutral-300 hover:text-white"
+                      className="flex-1 py-1.5 rounded-md bg-[#121110] border border-[#2A2723] text-xs font-mono text-[#DDD6C9] hover:text-[#F5F2EB] hover:bg-[#22201D] cursor-pointer"
                     >
                       +{item.totalProgress <= 20 ? "1 u." : "10"}
                     </button>
@@ -395,7 +396,7 @@ export function ProjectsView({
                       type="button"
                       onClick={() => handleIncrementBookProgress(item, item.totalProgress <= 20 ? 2 : 25)}
                       disabled={isPending}
-                      className="flex-1 py-1.5 rounded-lg bg-neutral-950 border border-white/6 text-xs font-mono text-neutral-300 hover:text-white"
+                      className="flex-1 py-1.5 rounded-md bg-[#121110] border border-[#2A2723] text-xs font-mono text-[#DDD6C9] hover:text-[#F5F2EB] hover:bg-[#22201D] cursor-pointer"
                     >
                       +{item.totalProgress <= 20 ? "2 u." : "25"}
                     </button>
@@ -409,22 +410,22 @@ export function ProjectsView({
 
       {/* New Project Modal */}
       {isNewProjectModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-200">
-          <div className="w-full max-w-md rounded-3xl border border-white/10 bg-neutral-900/95 p-6 shadow-2xl backdrop-blur-2xl">
-            <div className="flex items-center justify-between pb-3 border-b border-white/8">
-              <h3 className="text-base font-bold text-white">Nuevo Proyecto</h3>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-xs animate-in fade-in duration-200 font-sans">
+          <div className="w-full max-w-md rounded-xl border border-[#2A2723] bg-[#181715] p-6 shadow-2xl">
+            <div className="flex items-center justify-between pb-3 border-b border-[#2A2723]">
+              <h3 className="font-serif text-base font-bold text-[#F5F2EB]">Nuevo Proyecto</h3>
               <button
                 type="button"
                 onClick={() => setIsNewProjectModalOpen(false)}
-                className="text-neutral-400 hover:text-white"
+                className="text-[#8E867B] hover:text-[#F5F2EB] cursor-pointer"
               >
                 <X className="h-5 w-5" />
               </button>
             </div>
 
-            <form onSubmit={handleCreateProject} className="mt-4 space-y-3">
+            <form onSubmit={handleCreateProject} className="mt-4 space-y-3 font-mono">
               <div>
-                <label className="block text-xs font-medium text-neutral-300 mb-1">
+                <label className="block text-xs font-sans font-medium text-[#DDD6C9] mb-1">
                   Nombre del Proyecto
                 </label>
                 <input
@@ -433,12 +434,12 @@ export function ProjectsView({
                   value={projectTitle}
                   onChange={(e) => setProjectTitle(e.target.value)}
                   required
-                  className="w-full rounded-xl border border-white/10 bg-neutral-950 px-3 py-2 text-xs text-white focus:outline-none"
+                  className="w-full rounded-lg border border-[#2A2723] bg-[#121110] px-3 py-2 text-xs text-[#F5F2EB] placeholder:text-[#8E867B]/50 focus:outline-none focus:border-[#D99B43]"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-neutral-300 mb-1">
+                <label className="block text-xs font-sans font-medium text-[#DDD6C9] mb-1">
                   Descripción
                 </label>
                 <textarea
@@ -446,12 +447,12 @@ export function ProjectsView({
                   placeholder="Sistema operativo personal..."
                   value={projectDesc}
                   onChange={(e) => setProjectDesc(e.target.value)}
-                  className="w-full rounded-xl border border-white/10 bg-neutral-950 px-3 py-2 text-xs text-white focus:outline-none"
+                  className="w-full rounded-lg border border-[#2A2723] bg-[#121110] px-3 py-2 text-xs text-[#F5F2EB] placeholder:text-[#8E867B]/50 focus:outline-none focus:border-[#D99B43]"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-neutral-300 mb-1">
+                <label className="block text-xs font-sans font-medium text-[#DDD6C9] mb-1">
                   Tech Stack (separado por comas)
                 </label>
                 <input
@@ -459,22 +460,22 @@ export function ProjectsView({
                   placeholder="Next.js, Tailwind, Neon DB"
                   value={projectTech}
                   onChange={(e) => setProjectTech(e.target.value)}
-                  className="w-full rounded-xl border border-white/10 bg-neutral-950 px-3 py-2 text-xs text-white focus:outline-none"
+                  className="w-full rounded-lg border border-[#2A2723] bg-[#121110] px-3 py-2 text-xs text-[#F5F2EB] placeholder:text-[#8E867B]/50 focus:outline-none focus:border-[#D99B43]"
                 />
               </div>
 
-              <div className="pt-2 flex justify-end gap-2">
+              <div className="pt-2 flex justify-end gap-2 font-sans">
                 <button
                   type="button"
                   onClick={() => setIsNewProjectModalOpen(false)}
-                  className="px-3 py-2 text-xs text-neutral-400 hover:text-white"
+                  className="px-3 py-2 text-xs text-[#8E867B] hover:text-[#DDD6C9] cursor-pointer"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
                   disabled={isPending}
-                  className="px-4 py-2 rounded-xl bg-indigo-600 font-bold text-xs text-white hover:bg-indigo-500"
+                  className="px-4 py-2 rounded-lg bg-[#D99B43] font-bold text-xs text-[#121110] hover:bg-[#E8AF59] cursor-pointer"
                 >
                   {isPending ? "Guardando..." : "Crear Proyecto"}
                 </button>
@@ -486,22 +487,22 @@ export function ProjectsView({
 
       {/* New Book Modal */}
       {isNewBookModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-200">
-          <div className="w-full max-w-md rounded-3xl border border-white/10 bg-neutral-900/95 p-6 shadow-2xl backdrop-blur-2xl">
-            <div className="flex items-center justify-between pb-3 border-b border-white/8">
-              <h3 className="text-base font-bold text-white">Nuevo Libro o Curso</h3>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-xs animate-in fade-in duration-200 font-sans">
+          <div className="w-full max-w-md rounded-xl border border-[#2A2723] bg-[#181715] p-6 shadow-2xl">
+            <div className="flex items-center justify-between pb-3 border-b border-[#2A2723]">
+              <h3 className="font-serif text-base font-bold text-[#F5F2EB]">Nuevo Libro o Curso</h3>
               <button
                 type="button"
                 onClick={() => setIsNewBookModalOpen(false)}
-                className="text-neutral-400 hover:text-white"
+                className="text-[#8E867B] hover:text-[#F5F2EB] cursor-pointer"
               >
                 <X className="h-5 w-5" />
               </button>
             </div>
 
-            <form onSubmit={handleCreateBook} className="mt-4 space-y-3">
+            <form onSubmit={handleCreateBook} className="mt-4 space-y-3 font-mono">
               <div>
-                <label className="block text-xs font-medium text-neutral-300 mb-1">
+                <label className="block text-xs font-sans font-medium text-[#DDD6C9] mb-1">
                   Título
                 </label>
                 <input
@@ -510,12 +511,12 @@ export function ProjectsView({
                   value={bookTitle}
                   onChange={(e) => setBookTitle(e.target.value)}
                   required
-                  className="w-full rounded-xl border border-white/10 bg-neutral-950 px-3 py-2 text-xs text-white focus:outline-none"
+                  className="w-full rounded-lg border border-[#2A2723] bg-[#121110] px-3 py-2 text-xs text-[#F5F2EB] placeholder:text-[#8E867B]/50 focus:outline-none focus:border-[#D99B43]"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-neutral-300 mb-1">
+                <label className="block text-xs font-sans font-medium text-[#DDD6C9] mb-1">
                   Autor / Instructor
                 </label>
                 <input
@@ -523,34 +524,34 @@ export function ProjectsView({
                   placeholder="James Clear"
                   value={bookAuthor}
                   onChange={(e) => setBookAuthor(e.target.value)}
-                  className="w-full rounded-xl border border-white/10 bg-neutral-950 px-3 py-2 text-xs text-white focus:outline-none"
+                  className="w-full rounded-lg border border-[#2A2723] bg-[#121110] px-3 py-2 text-xs text-[#F5F2EB] placeholder:text-[#8E867B]/50 focus:outline-none focus:border-[#D99B43]"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-neutral-300 mb-1">
+                <label className="block text-xs font-sans font-medium text-[#DDD6C9] mb-1">
                   Total de Páginas / Módulos
                 </label>
                 <input
                   type="number"
                   value={bookTotal}
                   onChange={(e) => setBookTotal(parseInt(e.target.value) || 100)}
-                  className="w-full rounded-xl border border-white/10 bg-neutral-950 px-3 py-2 text-xs text-white focus:outline-none"
+                  className="w-full rounded-lg border border-[#2A2723] bg-[#121110] px-3 py-2 text-xs text-[#F5F2EB] placeholder:text-[#8E867B]/50 focus:outline-none focus:border-[#D99B43]"
                 />
               </div>
 
-              <div className="pt-2 flex justify-end gap-2">
+              <div className="pt-2 flex justify-end gap-2 font-sans">
                 <button
                   type="button"
                   onClick={() => setIsNewBookModalOpen(false)}
-                  className="px-3 py-2 text-xs text-neutral-400 hover:text-white"
+                  className="px-3 py-2 text-xs text-[#8E867B] hover:text-[#DDD6C9] cursor-pointer"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
                   disabled={isPending}
-                  className="px-4 py-2 rounded-xl bg-amber-500 font-bold text-xs text-neutral-950 hover:bg-amber-400"
+                  className="px-4 py-2 rounded-lg bg-[#D99B43] font-bold text-xs text-[#121110] hover:bg-[#E8AF59] cursor-pointer"
                 >
                   {isPending ? "Guardando..." : "Guardar Libro"}
                 </button>

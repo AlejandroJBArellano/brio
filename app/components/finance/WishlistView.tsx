@@ -70,66 +70,66 @@ export function WishlistView({ data, onRefresh }: WishlistViewProps) {
       {/* 1. Header Metrics Ribbon */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         {/* Cooling Count */}
-        <div className="rounded-2xl border border-cyan-500/20 bg-neutral-900/60 p-4 backdrop-blur-xl shadow-xl">
-          <div className="flex items-center justify-between text-xs text-neutral-400">
+        <div className="rounded-xl border border-[#2A2723] bg-[#181715] p-4 shadow-sm">
+          <div className="flex items-center justify-between text-xs text-[#8E867B] font-mono">
             <span>En Enfriamiento</span>
-            <Clock className="h-4 w-4 text-cyan-400" />
+            <Clock className="h-4 w-4 text-[#4EAB9E]" />
           </div>
-          <div className="mt-2 text-2xl font-bold font-mono text-cyan-400">
+          <div className="mt-2 text-2xl font-bold font-mono text-[#4EAB9E]">
             {data.stats.coolingCount} items
           </div>
-          <div className="mt-1 text-[11px] text-neutral-500">
+          <div className="mt-1 text-[11px] text-[#8E867B]">
             Filtrando impulsos de dopamina
           </div>
         </div>
 
         {/* Ready to Buy */}
-        <div className="rounded-2xl border border-emerald-500/20 bg-neutral-900/60 p-4 backdrop-blur-xl shadow-xl">
-          <div className="flex items-center justify-between text-xs text-neutral-400">
+        <div className="rounded-xl border border-[#2A2723] bg-[#181715] p-4 shadow-sm">
+          <div className="flex items-center justify-between text-xs text-[#8E867B] font-mono">
             <span>Listos para Comprar</span>
-            <CheckCircle2 className="h-4 w-4 text-emerald-400" />
+            <CheckCircle2 className="h-4 w-4 text-[#7EA35A]" />
           </div>
-          <div className="mt-2 text-2xl font-bold font-mono text-emerald-400">
+          <div className="mt-2 text-2xl font-bold font-mono text-[#7EA35A]">
             {data.stats.readyCount} items
           </div>
-          <div className="mt-1 text-[11px] text-neutral-500">
+          <div className="mt-1 text-[11px] text-[#8E867B]">
             Superaron los 30 días de reflexión
           </div>
         </div>
 
         {/* Total Saved in Dismissed Impulses */}
-        <div className="rounded-2xl border border-violet-500/20 bg-neutral-900/60 p-4 backdrop-blur-xl shadow-xl">
-          <div className="flex items-center justify-between text-xs text-neutral-400">
+        <div className="rounded-xl border border-[#2A2723] bg-[#181715] p-4 shadow-sm">
+          <div className="flex items-center justify-between text-xs text-[#8E867B] font-mono">
             <span>Dinero Ahorrado</span>
-            <Sparkles className="h-4 w-4 text-violet-400" />
+            <Sparkles className="h-4 w-4 text-[#D99B43]" />
           </div>
-          <div className="mt-2 text-2xl font-bold font-mono text-violet-400">
+          <div className="mt-2 text-2xl font-bold font-mono text-[#D99B43]">
             ${Math.round(data.stats.totalSavedImpulseValue).toLocaleString("es-MX")} MXN
           </div>
-          <div className="mt-1 text-[11px] text-neutral-500">
+          <div className="mt-1 text-[11px] text-[#8E867B]">
             {data.stats.dismissedCount} caprichos evitados con éxito 🎉
           </div>
         </div>
 
         {/* Total Active Wishlist Value */}
-        <div className="rounded-2xl border border-amber-500/20 bg-neutral-900/60 p-4 backdrop-blur-xl shadow-xl">
-          <div className="flex items-center justify-between text-xs text-neutral-400">
+        <div className="rounded-xl border border-[#2A2723] bg-[#181715] p-4 shadow-sm">
+          <div className="flex items-center justify-between text-xs text-[#8E867B] font-mono">
             <span>Valor en Lista</span>
-            <ShoppingBag className="h-4 w-4 text-amber-400" />
+            <ShoppingBag className="h-4 w-4 text-[#DDD6C9]" />
           </div>
-          <div className="mt-2 text-2xl font-bold font-mono text-amber-400">
+          <div className="mt-2 text-2xl font-bold font-mono text-[#F5F2EB]">
             ${Math.round(data.stats.totalWishlistValue).toLocaleString("es-MX")} MXN
           </div>
-          <div className="mt-1 text-[11px] text-neutral-500">
+          <div className="mt-1 text-[11px] text-[#8E867B]">
             Deseos activos presupuestados
           </div>
         </div>
       </div>
 
       {/* 2. Top Controls & Filter Bar */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-white/8">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-[#2A2723]">
         {/* Filter Pills */}
-        <div className="flex items-center gap-1.5 p-1 bg-neutral-950/80 rounded-2xl border border-white/8 overflow-x-auto">
+        <div className="flex items-center gap-1.5 p-1 bg-[#181715] rounded-lg border border-[#2A2723] overflow-x-auto">
           {[
             { id: "all", label: `Todos (${data.items.length})` },
             { id: "cooling", label: `Enfriando 🧊 (${data.stats.coolingCount})` },
@@ -141,10 +141,10 @@ export function WishlistView({ data, onRefresh }: WishlistViewProps) {
               key={tab.id}
               type="button"
               onClick={() => setFilterStatus(tab.id as WishlistStatus | "all")}
-              className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all shrink-0 ${
+              className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-all shrink-0 cursor-pointer ${
                 filterStatus === tab.id
-                  ? "bg-violet-600 text-white shadow-lg shadow-violet-500/20"
-                  : "text-neutral-400 hover:text-white"
+                  ? "bg-[#D99B43] text-[#121110] font-bold shadow-xs"
+                  : "text-[#8E867B] hover:text-[#DDD6C9] hover:bg-[#22201D]"
               }`}
             >
               {tab.label}
@@ -156,7 +156,7 @@ export function WishlistView({ data, onRefresh }: WishlistViewProps) {
         <button
           type="button"
           onClick={() => setIsAddModalOpen(true)}
-          className="flex items-center gap-2 px-4 py-2 rounded-xl bg-linear-to-r from-violet-600 to-indigo-600 font-bold text-xs text-white hover:from-violet-500 hover:to-indigo-500 transition-all shadow-lg shadow-violet-500/20 active:scale-95 shrink-0"
+          className="flex items-center gap-2 px-4 py-2 rounded-lg bg-[#D99B43] font-bold text-xs text-[#121110] hover:bg-[#E8AF59] transition-all shadow-xs shrink-0 cursor-pointer"
         >
           <Plus className="h-4 w-4" />
           <span>Agregar Deseo (Anti-Impulso)</span>
@@ -165,18 +165,18 @@ export function WishlistView({ data, onRefresh }: WishlistViewProps) {
 
       {/* 3. Wishlist Cards Grid */}
       {filteredItems.length === 0 ? (
-        <div className="p-12 text-center rounded-3xl border border-dashed border-white/8 bg-neutral-950/40 space-y-3">
-          <ShieldCheck className="h-9 w-9 text-violet-400/40 mx-auto" />
-          <p className="text-sm font-bold text-neutral-300">
+        <div className="p-12 text-center rounded-xl border border-dashed border-[#2A2723] bg-[#181715] space-y-3">
+          <ShieldCheck className="h-9 w-9 text-[#8E867B] mx-auto" />
+          <p className="text-sm font-bold text-[#F5F2EB] font-serif">
             No hay artículos en esta categoría
           </p>
-          <p className="text-xs text-neutral-500 max-w-sm mx-auto">
+          <p className="text-xs text-[#8E867B] max-w-sm mx-auto">
             Usa la Wishlist Anti-Impulso cada vez que veas un gadget o capricho en internet antes de pagar.
           </p>
           <button
             type="button"
             onClick={() => setIsAddModalOpen(true)}
-            className="px-4 py-2 rounded-xl bg-violet-600 hover:bg-violet-500 text-white font-bold text-xs transition-all inline-flex items-center gap-2"
+            className="px-4 py-2 rounded-lg bg-[#D99B43] hover:bg-[#E8AF59] text-[#121110] font-bold text-xs transition-all inline-flex items-center gap-2 cursor-pointer"
           >
             <Plus className="h-4 w-4" />
             <span>Registrar primer deseo</span>
@@ -197,32 +197,32 @@ export function WishlistView({ data, onRefresh }: WishlistViewProps) {
 
             const priorityBadge =
               item.priority === "high"
-                ? "bg-rose-500/10 border-rose-500/20 text-rose-300"
+                ? "bg-[#221716] border-[#E05D52]/40 text-[#E05D52]"
                 : item.priority === "medium"
-                ? "bg-amber-500/10 border-amber-500/20 text-amber-300"
-                : "bg-emerald-500/10 border-emerald-500/20 text-emerald-300";
+                ? "bg-[#221D16] border-[#D99B43]/40 text-[#D99B43]"
+                : "bg-[#1C2219] border-[#7EA35A]/40 text-[#7EA35A]";
 
             return (
               <div
                 key={item.id}
-                className={`rounded-3xl border p-5 backdrop-blur-xl shadow-xl flex flex-col justify-between transition-all group ${
+                className={`rounded-xl border p-5 shadow-sm flex flex-col justify-between transition-all group ${
                   isReady
-                    ? "border-emerald-500/40 bg-neutral-900/80 shadow-emerald-950/20"
+                    ? "border-[#7EA35A]/40 bg-[#181715]"
                     : isDismissed
-                    ? "border-violet-500/20 bg-neutral-950/40 opacity-75"
+                    ? "border-[#2A2723] bg-[#181715] opacity-75"
                     : isPurchased
-                    ? "border-white/4 bg-neutral-950/30 opacity-60"
-                    : "border-white/8 bg-neutral-900/60 hover:border-white/18"
+                    ? "border-[#2A2723] bg-[#181715]/60 opacity-60"
+                    : "border-[#2A2723] bg-[#181715] hover:border-[#38332D]"
                 }`}
               >
                 <div className="space-y-3">
                   {/* Top Bar: Category, Priority, Delete */}
-                  <div className="flex items-center justify-between text-[11px]">
+                  <div className="flex items-center justify-between text-[11px] font-mono">
                     <div className="flex items-center gap-1.5">
-                      <span className="px-2 py-0.5 rounded-md bg-neutral-950 border border-white/8 text-neutral-300 font-semibold">
+                      <span className="px-2 py-0.5 rounded bg-[#121110] border border-[#2A2723] text-[#DDD6C9] font-medium">
                         {item.category}
                       </span>
-                      <span className={`px-2 py-0.5 rounded-md border font-semibold capitalize ${priorityBadge}`}>
+                      <span className={`px-2 py-0.5 rounded border font-medium capitalize ${priorityBadge}`}>
                         {item.priority}
                       </span>
                     </div>
@@ -230,7 +230,7 @@ export function WishlistView({ data, onRefresh }: WishlistViewProps) {
                     <button
                       type="button"
                       onClick={() => handleDelete(item.id, item.title)}
-                      className="opacity-0 group-hover:opacity-100 p-1 text-neutral-500 hover:text-rose-400 transition-all"
+                      className="opacity-0 group-hover:opacity-100 p-1 text-[#8E867B] hover:text-[#E05D52] transition-all cursor-pointer"
                       title="Eliminar de la lista"
                     >
                       <Trash2 className="h-3.5 w-3.5" />
@@ -239,14 +239,14 @@ export function WishlistView({ data, onRefresh }: WishlistViewProps) {
 
                   {/* Title & Price */}
                   <div>
-                    <h4 className="text-base font-bold text-white tracking-tight leading-snug">
+                    <h4 className="font-serif text-base font-bold text-[#F5F2EB] tracking-tight leading-snug">
                       {item.title}
                     </h4>
                     <div className="mt-1 flex items-baseline gap-2">
-                      <span className="text-lg font-bold font-mono text-emerald-400">
+                      <span className="text-lg font-bold font-mono text-[#7EA35A]">
                         ${item.priceEstimated.toLocaleString("es-MX", { minimumFractionDigits: 2 })}
                       </span>
-                      <span className="text-[10px] text-neutral-500 font-mono">MXN</span>
+                      <span className="text-[10px] text-[#8E867B] font-mono">MXN</span>
                     </div>
                   </div>
 
@@ -256,7 +256,7 @@ export function WishlistView({ data, onRefresh }: WishlistViewProps) {
                       href={item.url}
                       target="_blank"
                       rel="noreferrer"
-                      className="inline-flex items-center gap-1 text-[11px] font-semibold text-cyan-400 hover:underline"
+                      className="inline-flex items-center gap-1 text-[11px] font-mono text-[#4EAB9E] hover:underline"
                     >
                       <span>Ver en tienda</span>
                       <ExternalLink className="h-3 w-3" />
@@ -265,30 +265,30 @@ export function WishlistView({ data, onRefresh }: WishlistViewProps) {
 
                   {/* Justification Notes */}
                   {item.reasonOrNotes && (
-                    <p className="text-xs text-neutral-400 italic bg-neutral-950/60 p-2.5 rounded-xl border border-white/4">
+                    <p className="text-xs text-[#DDD6C9] italic bg-[#121110] p-2.5 rounded-lg border border-[#2A2723]">
                       &ldquo;{item.reasonOrNotes}&rdquo;
                     </p>
                   )}
 
                   {/* Cooling Progress Bar */}
                   {(isCooling || isReady) && (
-                    <div className="p-3 rounded-2xl bg-neutral-950/80 border border-white/6 space-y-2">
+                    <div className="p-3 rounded-lg bg-[#121110] border border-[#2A2723] space-y-2">
                       <div className="flex items-center justify-between text-[11px] font-mono">
-                        <span className="text-neutral-400 flex items-center gap-1">
-                          <Clock className="h-3 w-3 text-cyan-400" />
+                        <span className="text-[#8E867B] flex items-center gap-1">
+                          <Clock className="h-3 w-3 text-[#4EAB9E]" />
                           <span>Día {item.daysElapsed} de {item.coolingDaysTotal}</span>
                         </span>
-                        <span className={isReady ? "text-emerald-400 font-bold" : "text-cyan-400 font-bold"}>
+                        <span className={isReady ? "text-[#7EA35A] font-bold" : "text-[#4EAB9E] font-bold"}>
                           {isReady ? "¡30d Superados!" : `${item.daysRemaining}d restantes`}
                         </span>
                       </div>
 
-                      <div className="relative h-2 w-full overflow-hidden rounded-full bg-neutral-900">
+                      <div className="relative h-2 w-full overflow-hidden rounded-full bg-[#181715] border border-[#2A2723]">
                         <div
                           className={`h-full transition-all duration-500 ${
                             isReady
-                              ? "bg-gradient-to-r from-emerald-500 to-teal-400"
-                              : "bg-gradient-to-r from-cyan-500 to-blue-500"
+                              ? "bg-[#7EA35A]"
+                              : "bg-[#4EAB9E]"
                           }`}
                           style={{ width: `${percentCooling}%` }}
                         />
@@ -298,15 +298,15 @@ export function WishlistView({ data, onRefresh }: WishlistViewProps) {
 
                   {/* Status Banner for Completed/Dismissed */}
                   {isPurchased && (
-                    <div className="p-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-xs font-bold text-emerald-300 flex items-center gap-1.5">
-                      <Check className="h-4 w-4 text-emerald-400" />
+                    <div className="p-2.5 rounded-lg bg-[#1C2219] border border-[#7EA35A]/30 text-xs font-mono font-bold text-[#7EA35A] flex items-center gap-1.5">
+                      <Check className="h-4 w-4 text-[#7EA35A]" />
                       <span>Comprado y registrado en gastos</span>
                     </div>
                   )}
 
                   {isDismissed && (
-                    <div className="p-2.5 rounded-xl bg-violet-500/10 border border-violet-500/20 text-xs font-bold text-violet-300 flex items-center gap-1.5">
-                      <Sparkles className="h-4 w-4 text-violet-400" />
+                    <div className="p-2.5 rounded-lg bg-[#221D16] border border-[#D99B43]/30 text-xs font-mono font-bold text-[#D99B43] flex items-center gap-1.5">
+                      <Sparkles className="h-4 w-4 text-[#D99B43]" />
                       <span>Capricho evitado (+${item.priceEstimated.toLocaleString("es-MX")} ahorrados)</span>
                     </div>
                   )}
@@ -314,12 +314,12 @@ export function WishlistView({ data, onRefresh }: WishlistViewProps) {
 
                 {/* Bottom Action Controls */}
                 {(isCooling || isReady) && (
-                  <div className="mt-4 pt-3 border-t border-white/6 flex items-center gap-2">
+                  <div className="mt-4 pt-3 border-t border-[#2A2723] flex items-center gap-2 font-mono">
                     <button
                       type="button"
                       onClick={() => handleDismiss(item)}
                       disabled={isPending}
-                      className="flex-1 py-2 rounded-xl bg-neutral-950 hover:bg-rose-500/10 border border-white/8 hover:border-rose-500/30 text-xs font-semibold text-neutral-400 hover:text-rose-300 transition-all"
+                      className="flex-1 py-1.5 rounded-md bg-[#121110] hover:bg-[#221716] border border-[#2A2723] hover:border-[#E05D52]/40 text-xs font-semibold text-[#8E867B] hover:text-[#E05D52] transition-all cursor-pointer"
                       title="Descartar y sumar al contador de dinero ahorrado"
                     >
                       Descartar ❌
@@ -329,10 +329,10 @@ export function WishlistView({ data, onRefresh }: WishlistViewProps) {
                       type="button"
                       onClick={() => handlePurchase(item)}
                       disabled={isPending}
-                      className={`flex-1 py-2 rounded-xl font-bold text-xs transition-all shadow-md ${
+                      className={`flex-1 py-1.5 rounded-md font-bold text-xs transition-all cursor-pointer ${
                         isReady
-                          ? "bg-emerald-500 text-neutral-950 hover:bg-emerald-400 shadow-emerald-500/20"
-                          : "bg-white/8 text-neutral-200 hover:bg-white/15"
+                          ? "bg-[#7EA35A] text-[#121110] hover:bg-[#8FBA66]"
+                          : "bg-[#22201D] text-[#DDD6C9] hover:bg-[#2E2B27] border border-[#2A2723]"
                       }`}
                     >
                       Comprar 🛍️

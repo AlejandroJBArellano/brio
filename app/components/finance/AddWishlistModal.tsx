@@ -80,19 +80,19 @@ export function AddWishlistModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-200">
-      <div className="w-full max-w-lg rounded-3xl border border-white/12 bg-neutral-900 shadow-2xl overflow-hidden">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/80 backdrop-blur-xs animate-in fade-in duration-200">
+      <div className="w-full max-w-lg rounded-xl border border-[#2A2723] bg-[#181715] shadow-2xl overflow-hidden">
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-white/8 bg-neutral-950/60">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-[#2A2723] bg-[#121110]">
           <div className="flex items-center gap-2.5">
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-linear-to-br from-violet-500/20 to-indigo-500/20 border border-violet-500/30 text-violet-400">
+            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#221D16] border border-[#D99B43]/30 text-[#D99B43]">
               <ShieldCheck className="h-4 w-4" />
             </div>
             <div>
-              <h3 className="text-base font-bold text-white tracking-tight">
+              <h3 className="font-serif text-base font-bold text-[#F5F2EB] tracking-tight">
                 Agregar a Wishlist Anti-Impulso
               </h3>
-              <p className="text-xs text-neutral-400">
+              <p className="text-xs text-[#8E867B]">
                 Aplica la regla de 30 días de enfriamiento antes de comprar
               </p>
             </div>
@@ -100,16 +100,16 @@ export function AddWishlistModal({
           <button
             type="button"
             onClick={onClose}
-            className="p-1.5 rounded-lg text-neutral-400 hover:text-white hover:bg-neutral-800 transition-all"
+            className="p-1.5 rounded-lg text-[#8E867B] hover:text-[#F5F2EB] hover:bg-[#22201D] transition-all cursor-pointer"
           >
             <X className="h-5 w-5" />
           </button>
         </div>
 
         {/* Form */}
-        <form onSubmit={handleSubmit} className="p-6 space-y-4">
+        <form onSubmit={handleSubmit} className="p-6 space-y-4 font-mono">
           {errorMessage && (
-            <div className="p-3 rounded-xl border border-rose-500/30 bg-rose-500/10 text-xs font-semibold text-rose-300">
+            <div className="p-3 rounded-lg border border-[#E05D52]/40 bg-[#221716] text-xs font-semibold text-[#E05D52]">
               {errorMessage}
             </div>
           )}
@@ -117,7 +117,7 @@ export function AddWishlistModal({
           {/* Title & Price */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div className="sm:col-span-2">
-              <label className="block text-xs font-medium text-neutral-300 mb-1.5">
+              <label className="block text-xs font-sans font-medium text-[#DDD6C9] mb-1.5">
                 Artículo / Deseo *
               </label>
               <input
@@ -126,12 +126,12 @@ export function AddWishlistModal({
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 placeholder="Ej. Audífonos Sony WH-1000XM5"
-                className="w-full rounded-xl border border-white/10 bg-neutral-950 p-2.5 text-xs text-white placeholder:text-neutral-600 focus:outline-none focus:border-violet-500"
+                className="w-full rounded-lg border border-[#2A2723] bg-[#121110] p-2.5 text-xs text-[#F5F2EB] placeholder:text-[#8E867B] focus:outline-none focus:border-[#D99B43]"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-medium text-neutral-300 mb-1.5">
+              <label className="block text-xs font-sans font-medium text-[#DDD6C9] mb-1.5">
                 Precio Estimado (MXN) *
               </label>
               <input
@@ -141,7 +141,7 @@ export function AddWishlistModal({
                 value={priceEstimated}
                 onChange={(e) => setPriceEstimated(e.target.value)}
                 placeholder="$4,500.00"
-                className="w-full rounded-xl border border-white/10 bg-neutral-950 p-2.5 text-xs font-mono text-emerald-400 placeholder:text-neutral-600 focus:outline-none focus:border-violet-500"
+                className="w-full rounded-lg border border-[#2A2723] bg-[#121110] p-2.5 text-xs font-mono text-[#7EA35A] placeholder:text-[#8E867B] focus:outline-none focus:border-[#D99B43]"
               />
             </div>
           </div>
@@ -149,16 +149,16 @@ export function AddWishlistModal({
           {/* Category & Priority */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-medium text-neutral-300 mb-1.5">
+              <label className="block text-xs font-sans font-medium text-[#DDD6C9] mb-1.5">
                 Categoría
               </label>
               <select
                 value={category}
                 onChange={(e) => setCategory(e.target.value)}
-                className="w-full rounded-xl border border-white/10 bg-neutral-950 p-2.5 text-xs text-white focus:outline-none"
+                className="w-full rounded-lg border border-[#2A2723] bg-[#121110] p-2.5 text-xs text-[#F5F2EB] focus:outline-none focus:border-[#D99B43]"
               >
                 {CATEGORIES.map((cat) => (
-                  <option key={cat} value={cat}>
+                  <option key={cat} value={cat} className="bg-[#181715] text-[#F5F2EB]">
                     {cat}
                   </option>
                 ))}
@@ -166,7 +166,7 @@ export function AddWishlistModal({
             </div>
 
             <div>
-              <label className="block text-xs font-medium text-neutral-300 mb-1.5">
+              <label className="block text-xs font-sans font-medium text-[#DDD6C9] mb-1.5">
                 Nivel de Prioridad
               </label>
               <div className="grid grid-cols-3 gap-1.5">
@@ -179,10 +179,10 @@ export function AddWishlistModal({
                     key={pr.id}
                     type="button"
                     onClick={() => setPriority(pr.id as WishlistPriority)}
-                    className={`py-2 rounded-xl border text-[11px] font-semibold transition-all ${
+                    className={`py-2 rounded-md border text-[11px] font-semibold transition-all cursor-pointer ${
                       priority === pr.id
-                        ? "bg-violet-500/20 border-violet-500/40 text-violet-300"
-                        : "bg-neutral-950 border-white/6 text-neutral-400"
+                        ? "bg-[#221D16] border-[#D99B43]/40 text-[#D99B43] font-bold"
+                        : "bg-[#121110] border-[#2A2723] text-[#8E867B] hover:text-[#DDD6C9]"
                     }`}
                   >
                     {pr.label}
@@ -194,17 +194,17 @@ export function AddWishlistModal({
 
           {/* Cooling Period Selector */}
           <div>
-            <label className="block text-xs font-medium text-neutral-300 mb-1.5 flex items-center gap-1.5">
-              <Clock className="h-3.5 w-3.5 text-cyan-400" />
+            <label className="block text-xs font-sans font-medium text-[#DDD6C9] mb-1.5 flex items-center gap-1.5">
+              <Clock className="h-3.5 w-3.5 text-[#4EAB9E]" />
               <span>Período de Enfriamiento (Anti-Impulso)</span>
             </label>
             <select
               value={coolingDays}
               onChange={(e) => setCoolingDays(parseInt(e.target.value, 10))}
-              className="w-full rounded-xl border border-cyan-500/30 bg-neutral-950 p-2.5 text-xs text-cyan-300 focus:outline-none"
+              className="w-full rounded-lg border border-[#2A2723] bg-[#121110] p-2.5 text-xs text-[#4EAB9E] focus:outline-none focus:border-[#D99B43]"
             >
               {COOLING_OPTIONS.map((opt) => (
-                <option key={opt.days} value={opt.days}>
+                <option key={opt.days} value={opt.days} className="bg-[#181715] text-[#F5F2EB]">
                   {opt.label}
                 </option>
               ))}
@@ -213,7 +213,7 @@ export function AddWishlistModal({
 
           {/* Store URL */}
           <div>
-            <label className="block text-xs font-medium text-neutral-300 mb-1.5">
+            <label className="block text-xs font-sans font-medium text-[#DDD6C9] mb-1.5">
               Enlace de Tienda (Amazon, MercadoLibre, etc.)
             </label>
             <input
@@ -221,13 +221,13 @@ export function AddWishlistModal({
               value={url}
               onChange={(e) => setUrl(e.target.value)}
               placeholder="https://amazon.com.mx/dp/..."
-              className="w-full rounded-xl border border-white/10 bg-neutral-950 p-2.5 text-xs text-white placeholder:text-neutral-600 focus:outline-none focus:border-violet-500"
+              className="w-full rounded-lg border border-[#2A2723] bg-[#121110] p-2.5 text-xs text-[#F5F2EB] placeholder:text-[#8E867B] focus:outline-none focus:border-[#D99B43]"
             />
           </div>
 
           {/* Justification Notes */}
           <div>
-            <label className="block text-xs font-medium text-neutral-300 mb-1.5">
+            <label className="block text-xs font-sans font-medium text-[#DDD6C9] mb-1.5">
               ¿Por qué lo quieres? ¿Qué problema real resuelve?
             </label>
             <textarea
@@ -235,23 +235,23 @@ export function AddWishlistModal({
               value={reasonOrNotes}
               onChange={(e) => setReasonOrNotes(e.target.value)}
               placeholder="Escribe la justificación para evaluar tu autocontrol cuando pasen los 30 días..."
-              className="w-full rounded-xl border border-white/10 bg-neutral-950 p-2.5 text-xs text-white placeholder:text-neutral-600 focus:outline-none focus:border-violet-500"
+              className="w-full rounded-lg border border-[#2A2723] bg-[#121110] p-2.5 text-xs text-[#F5F2EB] placeholder:text-[#8E867B] focus:outline-none focus:border-[#D99B43]"
             />
           </div>
 
           {/* Footer Submit */}
-          <div className="pt-2 flex justify-end gap-2 border-t border-white/8">
+          <div className="pt-2 flex justify-end gap-2 border-t border-[#2A2723]">
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 rounded-xl text-xs text-neutral-400 hover:text-white transition-all"
+              className="px-4 py-2 rounded-lg text-xs font-sans text-[#8E867B] hover:text-[#F5F2EB] hover:bg-[#22201D] transition-all cursor-pointer"
             >
               Cancelar
             </button>
             <button
               type="submit"
               disabled={isPending}
-              className="px-5 py-2.5 rounded-xl bg-linear-to-r from-violet-600 to-indigo-600 font-bold text-xs text-white hover:from-violet-500 hover:to-indigo-500 transition-all shadow-lg shadow-violet-500/20 disabled:opacity-50 inline-flex items-center gap-2"
+              className="px-5 py-2.5 rounded-lg bg-[#D99B43] font-bold text-xs text-[#121110] hover:bg-[#E8AF59] transition-all shadow-xs disabled:opacity-50 inline-flex items-center gap-2 cursor-pointer"
             >
               <Plus className="h-3.5 w-3.5" />
               <span>{isPending ? "Guardando..." : "Iniciar Enfriamiento (30d)"}</span>

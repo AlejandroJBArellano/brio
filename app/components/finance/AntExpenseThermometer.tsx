@@ -21,34 +21,34 @@ export function AntExpenseThermometer({
   const isClose = !isExceeded && percentUsed >= 75;
 
   return (
-    <div className="rounded-2xl border border-amber-500/20 bg-neutral-900/60 p-5 backdrop-blur-xl shadow-xl">
+    <div className="rounded-xl border border-[#2A2723] bg-[#181715] p-5 shadow-sm">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2.5">
-          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-amber-500/10 text-amber-400 border border-amber-500/30">
+          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#221D16] text-[#D99B43] border border-[#D99B43]/30">
             <Coffee className="h-4 w-4" />
           </div>
           <div>
-            <h3 className="text-sm font-bold text-white tracking-tight">
+            <h3 className="font-serif text-sm font-bold text-[#F5F2EB] tracking-tight">
               Detector de Gastos Hormiga & Antojos
             </h3>
-            <p className="text-xs text-neutral-400">
-              Límite diario: <span className="font-mono font-semibold text-neutral-200">${dailyLimit.toFixed(2)} MXN</span>
+            <p className="text-xs text-[#8E867B]">
+              Límite diario: <span className="font-mono font-semibold text-[#DDD6C9]">${dailyLimit.toFixed(2)} MXN</span>
             </p>
           </div>
         </div>
 
         {isExceeded ? (
-          <span className="inline-flex items-center gap-1 rounded-full border border-rose-500/30 bg-rose-500/10 px-2.5 py-1 text-[11px] font-bold text-rose-400 animate-pulse">
+          <span className="inline-flex items-center gap-1 rounded border border-[#E05D52]/40 bg-[#221716] px-2.5 py-0.5 text-[11px] font-mono font-bold text-[#E05D52]">
             <AlertTriangle className="h-3 w-3" />
             Límite Excedido
           </span>
         ) : isClose ? (
-          <span className="inline-flex items-center gap-1 rounded-full border border-amber-500/30 bg-amber-500/10 px-2.5 py-1 text-[11px] font-bold text-amber-400">
+          <span className="inline-flex items-center gap-1 rounded border border-[#D99B43]/40 bg-[#221D16] px-2.5 py-0.5 text-[11px] font-mono font-bold text-[#D99B43]">
             <Flame className="h-3 w-3" />
             Alerta 75%
           </span>
         ) : (
-          <span className="inline-flex items-center gap-1 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2.5 py-1 text-[11px] font-semibold text-emerald-400">
+          <span className="inline-flex items-center gap-1 rounded border border-[#7EA35A]/40 bg-[#1C2219] px-2.5 py-0.5 text-[11px] font-mono font-semibold text-[#7EA35A]">
             <CheckCircle2 className="h-3 w-3" />
             Bajo Control
           </span>
@@ -58,24 +58,24 @@ export function AntExpenseThermometer({
       {/* Thermometer Bar */}
       <div className="mt-4 space-y-1.5">
         <div className="flex justify-between text-xs font-mono">
-          <span className="text-neutral-400">
-            Gastado hoy: <strong className="text-white">${spentToday.toFixed(2)}</strong>
+          <span className="text-[#8E867B]">
+            Gastado hoy: <strong className="text-[#F5F2EB]">${spentToday.toFixed(2)}</strong>
           </span>
-          <span className={isExceeded ? "text-rose-400 font-bold" : "text-amber-400 font-bold"}>
+          <span className={isExceeded ? "text-[#E05D52] font-bold" : "text-[#D99B43] font-bold"}>
             {isExceeded
               ? `+$${(spentToday - dailyLimit).toFixed(2)} excedido`
               : `$${remaining.toFixed(2)} disponible`}
           </span>
         </div>
 
-        <div className="relative h-3 w-full overflow-hidden rounded-full bg-neutral-950/80 border border-white/6">
+        <div className="relative h-2.5 w-full overflow-hidden rounded-full bg-[#121110] border border-[#2A2723]">
           <div
             className={`h-full transition-all duration-500 ${
               isExceeded
-                ? "bg-gradient-to-r from-amber-500 to-rose-500"
+                ? "bg-[#E05D52]"
                 : isClose
-                ? "bg-gradient-to-r from-amber-400 to-amber-500"
-                : "bg-gradient-to-r from-emerald-500 to-amber-400"
+                ? "bg-[#D99B43]"
+                : "bg-[#7EA35A]"
             }`}
             style={{ width: `${percentUsed}%` }}
           />
@@ -83,12 +83,12 @@ export function AntExpenseThermometer({
       </div>
 
       {/* Month context & tip */}
-      <div className="mt-4 flex flex-wrap items-center justify-between gap-2 pt-3 border-t border-white/6 text-xs">
-        <div className="text-neutral-400">
-          Acumulado del mes: <span className="font-mono font-semibold text-white">${spentThisMonth.toFixed(2)} MXN</span>
+      <div className="mt-4 flex flex-wrap items-center justify-between gap-2 pt-3 border-t border-[#2A2723] text-xs">
+        <div className="text-[#8E867B] font-mono">
+          Acumulado del mes: <span className="font-semibold text-[#F5F2EB]">${spentThisMonth.toFixed(2)} MXN</span>
         </div>
-        <div className="text-[11px] text-neutral-500 italic">
-          💡 Usa <code className="rounded bg-neutral-800 px-1 py-0.5 text-amber-300 font-mono">-$50 Café #antojo @nu</code> en el Omnibar
+        <div className="text-[11px] text-[#8E867B]">
+          💡 Usa <code className="rounded bg-[#121110] border border-[#2A2723] px-1 py-0.5 text-[#D99B43] font-mono">-$50 Café #antojo @nu</code> en el Omnibar
         </div>
       </div>
     </div>

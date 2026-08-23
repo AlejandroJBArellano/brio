@@ -215,22 +215,22 @@ export function ManageFinanceCatalogModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-200">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-xs animate-in fade-in duration-200">
       <div
-        className="w-full max-w-2xl rounded-3xl border border-white/10 bg-neutral-900/95 shadow-2xl backdrop-blur-2xl animate-in zoom-in-95 duration-200 overflow-hidden flex flex-col max-h-[90vh]"
+        className="w-full max-w-2xl rounded-xl border border-[#2A2723] bg-[#181715] shadow-2xl animate-in zoom-in-95 duration-200 overflow-hidden flex flex-col max-h-[90vh]"
         role="dialog"
       >
         {/* Header */}
-        <div className="flex items-center justify-between p-5 border-b border-white/8 bg-neutral-950/40">
+        <div className="flex items-center justify-between p-5 border-b border-[#2A2723] bg-[#121110]">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-linear-to-tr from-amber-500 to-amber-600 font-bold text-neutral-950 shadow-md">
+            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[#221D16] border border-[#D99B43]/30 text-[#D99B43] font-bold shadow-xs">
               <Settings className="h-5 w-5" />
             </div>
             <div>
-              <h2 className="text-base font-bold text-white tracking-tight flex items-center gap-2">
+              <h2 className="font-serif text-base font-bold text-[#F5F2EB] tracking-tight flex items-center gap-2">
                 <span>Catálogos de Brio Finanzas</span>
               </h2>
-              <p className="text-xs text-neutral-400">
+              <p className="text-xs text-[#8E867B]">
                 Personaliza tus cuentas, tarjetas y categorías de gastos
               </p>
             </div>
@@ -239,24 +239,24 @@ export function ManageFinanceCatalogModal({
           <button
             type="button"
             onClick={onClose}
-            className="rounded-xl p-2 text-neutral-400 hover:bg-neutral-800 hover:text-white transition-colors"
+            className="rounded-lg p-2 text-[#8E867B] hover:bg-[#22201D] hover:text-[#F5F2EB] transition-colors cursor-pointer"
           >
             <X className="h-5 w-5" />
           </button>
         </div>
 
         {/* Tab switcher */}
-        <div className="flex items-center gap-2 p-3 border-b border-white/6 bg-neutral-950/20">
+        <div className="flex items-center gap-2 p-3 border-b border-[#2A2723] bg-[#121110]">
           <button
             type="button"
             onClick={() => {
               setActiveTab("accounts");
               setError(null);
             }}
-            className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-xl text-xs font-bold transition-all ${
+            className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
               activeTab === "accounts"
-                ? "bg-amber-500 text-neutral-950 shadow-md shadow-amber-500/20"
-                : "text-neutral-400 hover:text-white hover:bg-white/5"
+                ? "bg-[#D99B43] text-[#121110] font-bold shadow-xs"
+                : "text-[#8E867B] hover:text-[#DDD6C9] hover:bg-[#22201D]"
             }`}
           >
             <CreditCard className="h-4 w-4" />
@@ -269,10 +269,10 @@ export function ManageFinanceCatalogModal({
               setActiveTab("categories");
               setError(null);
             }}
-            className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-xl text-xs font-bold transition-all ${
+            className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
               activeTab === "categories"
-                ? "bg-amber-500 text-neutral-950 shadow-md shadow-amber-500/20"
-                : "text-neutral-400 hover:text-white hover:bg-white/5"
+                ? "bg-[#D99B43] text-[#121110] font-bold shadow-xs"
+                : "text-[#8E867B] hover:text-[#DDD6C9] hover:bg-[#22201D]"
             }`}
           >
             <Tag className="h-4 w-4" />
@@ -281,7 +281,7 @@ export function ManageFinanceCatalogModal({
         </div>
 
         {error && (
-          <div className="mx-5 mt-4 flex items-center gap-2 rounded-xl border border-rose-500/30 bg-rose-500/10 p-3 text-xs text-rose-300">
+          <div className="mx-5 mt-4 flex items-center gap-2 rounded-lg border border-[#E05D52]/40 bg-[#221716] p-3 text-xs text-[#E05D52] font-mono">
             <AlertCircle className="h-4 w-4 shrink-0" />
             <span>{error}</span>
           </div>
@@ -293,9 +293,9 @@ export function ManageFinanceCatalogModal({
           {activeTab === "accounts" && (
             <div className="space-y-6">
               {/* Add / Edit Form */}
-              <div className="rounded-2xl border border-white/8 bg-neutral-950/60 p-4 space-y-4">
+              <div className="rounded-xl border border-[#2A2723] bg-[#121110] p-4 space-y-4 font-mono">
                 <div className="flex items-center justify-between">
-                  <h3 className="text-xs font-bold uppercase tracking-wider text-amber-400 flex items-center gap-1.5">
+                  <h3 className="text-xs font-bold uppercase tracking-wider text-[#D99B43] flex items-center gap-1.5 font-mono">
                     <Plus className="h-3.5 w-3.5" />
                     <span>{editingAccountId ? "Editar Tarjeta / Cuenta" : "Nueva Tarjeta o Cuenta"}</span>
                   </h3>
@@ -303,7 +303,7 @@ export function ManageFinanceCatalogModal({
                     <button
                       type="button"
                       onClick={resetAccountForm}
-                      className="text-[11px] text-neutral-400 hover:text-white underline"
+                      className="text-[11px] text-[#8E867B] hover:text-[#DDD6C9] underline cursor-pointer"
                     >
                       Cancelar edición
                     </button>
@@ -313,7 +313,7 @@ export function ManageFinanceCatalogModal({
                 <form onSubmit={handleSaveAccount} className="space-y-3">
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div>
-                      <label className="block text-[11px] font-medium text-neutral-300 mb-1">
+                      <label className="block text-[11px] font-sans font-medium text-[#DDD6C9] mb-1">
                         Nombre de la tarjeta / cuenta
                       </label>
                       <input
@@ -332,16 +332,16 @@ export function ManageFinanceCatalogModal({
                           }
                         }}
                         required
-                        className="w-full rounded-xl border border-white/10 bg-neutral-900 px-3 py-2 text-xs text-white placeholder:text-neutral-600 focus:border-amber-500 focus:outline-none"
+                        className="w-full rounded-lg border border-[#2A2723] bg-[#181715] px-3 py-2 text-xs text-[#F5F2EB] placeholder:text-[#8E867B] focus:border-[#D99B43] focus:outline-none"
                       />
                     </div>
 
                     <div>
-                      <label className="block text-[11px] font-medium text-neutral-300 mb-1">
+                      <label className="block text-[11px] font-sans font-medium text-[#DDD6C9] mb-1">
                         ID / Atajo Rápido (@slug)
                       </label>
                       <div className="relative">
-                        <span className="absolute left-3 top-1/2 -translate-y-1/2 font-mono text-neutral-500 text-xs">
+                        <span className="absolute left-3 top-1/2 -translate-y-1/2 font-mono text-[#8E867B] text-xs">
                           @
                         </span>
                         <input
@@ -356,7 +356,7 @@ export function ManageFinanceCatalogModal({
                                 .replace(/[^a-z0-9-_]/g, "")
                             )
                           }
-                          className="w-full rounded-xl border border-white/10 bg-neutral-900 pl-7 pr-3 py-2 font-mono text-xs text-white placeholder:text-neutral-600 focus:border-amber-500 focus:outline-none disabled:opacity-50"
+                          className="w-full rounded-lg border border-[#2A2723] bg-[#181715] pl-7 pr-3 py-2 font-mono text-xs text-[#F5F2EB] placeholder:text-[#8E867B] focus:border-[#D99B43] focus:outline-none disabled:opacity-50"
                         />
                       </div>
                     </div>
@@ -364,7 +364,7 @@ export function ManageFinanceCatalogModal({
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div>
-                      <label className="block text-[11px] font-medium text-neutral-300 mb-1">
+                      <label className="block text-[11px] font-sans font-medium text-[#DDD6C9] mb-1">
                         Tipo de Cuenta
                       </label>
                       <select
@@ -375,10 +375,10 @@ export function ManageFinanceCatalogModal({
                           else if (e.target.value === "debit" || e.target.value === "bank") setAccountIcon("🏦");
                           else setAccountIcon("💳");
                         }}
-                        className="w-full rounded-xl border border-white/10 bg-neutral-900 px-3 py-2 text-xs text-white focus:border-amber-500 focus:outline-none"
+                        className="w-full rounded-lg border border-[#2A2723] bg-[#181715] px-3 py-2 text-xs text-[#F5F2EB] focus:border-[#D99B43] focus:outline-none"
                       >
                         {ACCOUNT_TYPES.map((t) => (
-                          <option key={t.id} value={t.id}>
+                          <option key={t.id} value={t.id} className="bg-[#181715] text-[#F5F2EB]">
                             {t.icon} {t.label}
                           </option>
                         ))}
@@ -386,7 +386,7 @@ export function ManageFinanceCatalogModal({
                     </div>
 
                     <div>
-                      <label className="block text-[11px] font-medium text-neutral-300 mb-1">
+                      <label className="block text-[11px] font-sans font-medium text-[#DDD6C9] mb-1">
                         Ícono Emoji
                       </label>
                       <div className="flex items-center gap-2">
@@ -394,7 +394,7 @@ export function ManageFinanceCatalogModal({
                           type="text"
                           value={accountIcon}
                           onChange={(e) => setAccountIcon(e.target.value)}
-                          className="w-14 text-center rounded-xl border border-white/10 bg-neutral-900 py-1.5 text-base text-white focus:border-amber-500 focus:outline-none"
+                          className="w-14 text-center rounded-lg border border-[#2A2723] bg-[#181715] py-1.5 text-base text-[#F5F2EB] focus:border-[#D99B43] focus:outline-none"
                         />
                         <div className="flex items-center gap-1.5">
                           {["💳", "🏦", "💵", "🏢", "💼"].map((ic) => (
@@ -402,8 +402,8 @@ export function ManageFinanceCatalogModal({
                               key={ic}
                               type="button"
                               onClick={() => setAccountIcon(ic)}
-                              className={`p-1.5 rounded-lg text-sm transition-transform hover:scale-110 ${
-                                accountIcon === ic ? "bg-white/20 scale-110" : "bg-white/5"
+                              className={`p-1.5 rounded-md text-sm transition-transform hover:scale-110 cursor-pointer ${
+                                accountIcon === ic ? "bg-[#221D16] border border-[#D99B43]/40 scale-110" : "bg-[#181715] border border-[#2A2723]"
                               }`}
                             >
                               {ic}
@@ -418,7 +418,7 @@ export function ManageFinanceCatalogModal({
                     <button
                       type="submit"
                       disabled={isPending}
-                      className="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-neutral-950 font-bold text-xs shadow-md transition-all disabled:opacity-50 flex items-center gap-1.5"
+                      className="px-4 py-2 rounded-lg bg-[#D99B43] hover:bg-[#E8AF59] text-[#121110] font-bold text-xs shadow-xs transition-all disabled:opacity-50 flex items-center gap-1.5 cursor-pointer"
                     >
                       <Check className="h-3.5 w-3.5" />
                       <span>{editingAccountId ? "Actualizar Tarjeta" : "Guardar Tarjeta"}</span>
@@ -428,8 +428,8 @@ export function ManageFinanceCatalogModal({
               </div>
 
               {/* List of current accounts */}
-              <div className="space-y-2">
-                <div className="flex items-center justify-between text-xs text-neutral-400 px-1">
+              <div className="space-y-2 font-mono">
+                <div className="flex items-center justify-between text-xs text-[#8E867B] px-1">
                   <span>Cuentas y Tarjetas Activas ({accounts.length})</span>
                 </div>
 
@@ -437,16 +437,16 @@ export function ManageFinanceCatalogModal({
                   {accounts.map((acc) => (
                     <div
                       key={acc.id}
-                      className="flex items-center justify-between p-3 rounded-2xl border border-white/6 bg-neutral-950/60 hover:border-white/15 transition-all group"
+                      className="flex items-center justify-between p-3 rounded-lg border border-[#2A2723] bg-[#121110] hover:border-[#38332D] transition-all group"
                     >
                       <div className="flex items-center gap-3">
                         <span className="text-xl shrink-0">{acc.icon || "💳"}</span>
                         <div>
-                          <div className="text-xs font-bold text-white flex items-center gap-1.5">
+                          <div className="text-xs font-bold text-[#F5F2EB] flex items-center gap-1.5">
                             <span>{acc.name}</span>
                           </div>
-                          <div className="flex items-center gap-1.5 text-[10px] text-neutral-400 mt-0.5">
-                            <span className="font-mono text-indigo-400">@{acc.id}</span>
+                          <div className="flex items-center gap-1.5 text-[10px] text-[#8E867B] mt-0.5">
+                            <span className="font-mono text-[#D99B43]">@{acc.id}</span>
                             <span>•</span>
                             <span className="capitalize">
                               {ACCOUNT_TYPES.find((t) => t.id === acc.type)?.label || acc.type || "Cuenta"}
@@ -459,7 +459,7 @@ export function ManageFinanceCatalogModal({
                         <button
                           type="button"
                           onClick={() => handleStartEditAccount(acc)}
-                          className="p-1.5 rounded-lg text-neutral-400 hover:text-amber-400 hover:bg-white/5 transition-colors"
+                          className="p-1.5 rounded-md text-[#8E867B] hover:text-[#D99B43] hover:bg-[#181715] transition-colors cursor-pointer"
                           title="Editar cuenta"
                         >
                           <Edit2 className="h-3.5 w-3.5" />
@@ -468,7 +468,7 @@ export function ManageFinanceCatalogModal({
                           type="button"
                           onClick={() => handleDeleteAccount(acc.id)}
                           disabled={isPending}
-                          className="p-1.5 rounded-lg text-neutral-400 hover:text-rose-400 hover:bg-white/5 transition-colors"
+                          className="p-1.5 rounded-md text-[#8E867B] hover:text-[#E05D52] hover:bg-[#221716] transition-colors cursor-pointer"
                           title="Eliminar cuenta"
                         >
                           <Trash2 className="h-3.5 w-3.5" />
@@ -485,9 +485,9 @@ export function ManageFinanceCatalogModal({
           {activeTab === "categories" && (
             <div className="space-y-6">
               {/* Add / Edit Category Form */}
-              <div className="rounded-2xl border border-white/8 bg-neutral-950/60 p-4 space-y-4">
+              <div className="rounded-xl border border-[#2A2723] bg-[#121110] p-4 space-y-4 font-mono">
                 <div className="flex items-center justify-between">
-                  <h3 className="text-xs font-bold uppercase tracking-wider text-amber-400 flex items-center gap-1.5">
+                  <h3 className="text-xs font-bold uppercase tracking-wider text-[#D99B43] flex items-center gap-1.5 font-mono">
                     <Plus className="h-3.5 w-3.5" />
                     <span>{editingCategoryId ? "Editar Categoría" : "Nueva Categoría"}</span>
                   </h3>
@@ -495,7 +495,7 @@ export function ManageFinanceCatalogModal({
                     <button
                       type="button"
                       onClick={resetCategoryForm}
-                      className="text-[11px] text-neutral-400 hover:text-white underline"
+                      className="text-[11px] text-[#8E867B] hover:text-[#DDD6C9] underline cursor-pointer"
                     >
                       Cancelar edición
                     </button>
@@ -505,7 +505,7 @@ export function ManageFinanceCatalogModal({
                 <form onSubmit={handleSaveCategory} className="space-y-3">
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div>
-                      <label className="block text-[11px] font-medium text-neutral-300 mb-1">
+                      <label className="block text-[11px] font-sans font-medium text-[#DDD6C9] mb-1">
                         Nombre de la Categoría
                       </label>
                       <input
@@ -524,16 +524,16 @@ export function ManageFinanceCatalogModal({
                           }
                         }}
                         required
-                        className="w-full rounded-xl border border-white/10 bg-neutral-900 px-3 py-2 text-xs text-white placeholder:text-neutral-600 focus:border-amber-500 focus:outline-none"
+                        className="w-full rounded-lg border border-[#2A2723] bg-[#181715] px-3 py-2 text-xs text-[#F5F2EB] placeholder:text-[#8E867B] focus:border-[#D99B43] focus:outline-none"
                       />
                     </div>
 
                     <div>
-                      <label className="block text-[11px] font-medium text-neutral-300 mb-1">
+                      <label className="block text-[11px] font-sans font-medium text-[#DDD6C9] mb-1">
                         ID / Tag Rápido (#slug)
                       </label>
                       <div className="relative">
-                        <span className="absolute left-3 top-1/2 -translate-y-1/2 font-mono text-neutral-500 text-xs">
+                        <span className="absolute left-3 top-1/2 -translate-y-1/2 font-mono text-[#8E867B] text-xs">
                           #
                         </span>
                         <input
@@ -548,7 +548,7 @@ export function ManageFinanceCatalogModal({
                                 .replace(/[^a-z0-9-_]/g, "")
                             )
                           }
-                          className="w-full rounded-xl border border-white/10 bg-neutral-900 pl-7 pr-3 py-2 font-mono text-xs text-white placeholder:text-neutral-600 focus:border-amber-500 focus:outline-none disabled:opacity-50"
+                          className="w-full rounded-lg border border-[#2A2723] bg-[#181715] pl-7 pr-3 py-2 font-mono text-xs text-[#F5F2EB] placeholder:text-[#8E867B] focus:border-[#D99B43] focus:outline-none disabled:opacity-50"
                         />
                       </div>
                     </div>
@@ -556,23 +556,23 @@ export function ManageFinanceCatalogModal({
 
                   {/* Icon presets */}
                   <div>
-                    <label className="block text-[11px] font-medium text-neutral-300 mb-1">
+                    <label className="block text-[11px] font-sans font-medium text-[#DDD6C9] mb-1">
                       Ícono Emoji
                     </label>
-                    <div className="flex flex-wrap items-center gap-1.5 p-2 rounded-xl bg-neutral-900/80 border border-white/6">
+                    <div className="flex flex-wrap items-center gap-1.5 p-2 rounded-lg bg-[#181715] border border-[#2A2723]">
                       <input
                         type="text"
                         value={categoryIcon}
                         onChange={(e) => setCategoryIcon(e.target.value)}
-                        className="w-12 text-center rounded-lg border border-white/10 bg-neutral-800 py-1 text-base text-white focus:outline-none mr-2"
+                        className="w-12 text-center rounded-md border border-[#2A2723] bg-[#121110] py-1 text-base text-[#F5F2EB] focus:outline-none mr-2"
                       />
                       {PRESET_ICONS.map((ic) => (
                         <button
                           key={ic}
                           type="button"
                           onClick={() => setCategoryIcon(ic)}
-                          className={`p-1.5 rounded-lg text-sm transition-transform hover:scale-125 ${
-                            categoryIcon === ic ? "bg-amber-500/20 border border-amber-500/40 scale-110" : "hover:bg-white/10"
+                          className={`p-1.5 rounded-md text-sm transition-transform hover:scale-125 cursor-pointer ${
+                            categoryIcon === ic ? "bg-[#221D16] border border-[#D99B43]/40 scale-110" : "hover:bg-[#22201D]"
                           }`}
                         >
                           {ic}
@@ -583,29 +583,29 @@ export function ManageFinanceCatalogModal({
 
                   {/* Checkboxes: Ant Expense / Fixed Expense */}
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
-                    <label className="flex items-center gap-2.5 p-2.5 rounded-xl border border-white/6 bg-neutral-900/50 cursor-pointer hover:bg-neutral-900">
+                    <label className="flex items-center gap-2.5 p-2.5 rounded-lg border border-[#2A2723] bg-[#181715] cursor-pointer hover:bg-[#22201D]">
                       <input
                         type="checkbox"
                         checked={categoryIsAnt}
                         onChange={(e) => setCategoryIsAnt(e.target.checked)}
-                        className="h-4 w-4 rounded border-neutral-700 bg-neutral-900 text-amber-500 focus:ring-amber-500/20"
+                        className="h-4 w-4 rounded border-[#2A2723] bg-[#121110] text-[#D99B43] focus:ring-[#D99B43]/20 cursor-pointer"
                       />
                       <div>
-                        <div className="text-xs font-semibold text-amber-300">Gasto Hormiga 🐜</div>
-                        <div className="text-[10px] text-neutral-400">Marca gastos en esta categoría como antojos</div>
+                        <div className="text-xs font-semibold text-[#D99B43]">Gasto Hormiga 🐜</div>
+                        <div className="text-[10px] text-[#8E867B]">Marca gastos en esta categoría como antojos</div>
                       </div>
                     </label>
 
-                    <label className="flex items-center gap-2.5 p-2.5 rounded-xl border border-white/6 bg-neutral-900/50 cursor-pointer hover:bg-neutral-900">
+                    <label className="flex items-center gap-2.5 p-2.5 rounded-lg border border-[#2A2723] bg-[#181715] cursor-pointer hover:bg-[#22201D]">
                       <input
                         type="checkbox"
                         checked={categoryIsFixed}
                         onChange={(e) => setCategoryIsFixed(e.target.checked)}
-                        className="h-4 w-4 rounded border-neutral-700 bg-neutral-900 text-indigo-500 focus:ring-indigo-500/20"
+                        className="h-4 w-4 rounded border-[#2A2723] bg-[#121110] text-[#4EAB9E] focus:ring-[#4EAB9E]/20 cursor-pointer"
                       />
                       <div>
-                        <div className="text-xs font-semibold text-indigo-300">Gasto Fijo Mensual 🏠</div>
-                        <div className="text-[10px] text-neutral-400">Se contabiliza en el presupuesto fijo del mes</div>
+                        <div className="text-xs font-semibold text-[#4EAB9E]">Gasto Fijo Mensual 🏠</div>
+                        <div className="text-[10px] text-[#8E867B]">Se contabiliza en el presupuesto fijo del mes</div>
                       </div>
                     </label>
                   </div>
@@ -614,7 +614,7 @@ export function ManageFinanceCatalogModal({
                     <button
                       type="submit"
                       disabled={isPending}
-                      className="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-neutral-950 font-bold text-xs shadow-md transition-all disabled:opacity-50 flex items-center gap-1.5"
+                      className="px-4 py-2 rounded-lg bg-[#D99B43] hover:bg-[#E8AF59] text-[#121110] font-bold text-xs shadow-xs transition-all disabled:opacity-50 flex items-center gap-1.5 cursor-pointer"
                     >
                       <Check className="h-3.5 w-3.5" />
                       <span>{editingCategoryId ? "Actualizar Categoría" : "Guardar Categoría"}</span>
@@ -624,8 +624,8 @@ export function ManageFinanceCatalogModal({
               </div>
 
               {/* List of current categories */}
-              <div className="space-y-2">
-                <div className="flex items-center justify-between text-xs text-neutral-400 px-1">
+              <div className="space-y-2 font-mono">
+                <div className="flex items-center justify-between text-xs text-[#8E867B] px-1">
                   <span>Categorías Activas ({categories.length})</span>
                 </div>
 
@@ -633,23 +633,23 @@ export function ManageFinanceCatalogModal({
                   {categories.map((cat) => (
                     <div
                       key={cat.id}
-                      className="flex items-center justify-between p-3 rounded-2xl border border-white/6 bg-neutral-950/60 hover:border-white/15 transition-all group"
+                      className="flex items-center justify-between p-3 rounded-lg border border-[#2A2723] bg-[#121110] hover:border-[#38332D] transition-all group"
                     >
                       <div className="flex items-center gap-3">
                         <span className="text-xl shrink-0">{cat.icon || "🏷️"}</span>
                         <div>
-                          <div className="text-xs font-bold text-white flex items-center gap-1.5">
+                          <div className="text-xs font-bold text-[#F5F2EB] flex items-center gap-1.5">
                             <span>{cat.name}</span>
                           </div>
-                          <div className="flex items-center gap-1.5 text-[10px] text-neutral-400 mt-0.5">
-                            <span className="font-mono text-amber-400">#{cat.id}</span>
+                          <div className="flex items-center gap-1.5 text-[10px] text-[#8E867B] mt-0.5">
+                            <span className="font-mono text-[#D99B43]">#{cat.id}</span>
                             {cat.isAntDefault && (
-                              <span className="rounded bg-amber-500/10 border border-amber-500/20 text-amber-300 px-1.5 py-0.2 text-[9px] font-bold">
+                              <span className="rounded bg-[#221D16] border border-[#D99B43]/30 text-[#D99B43] px-1.5 py-0.2 text-[9px] font-bold">
                                 Hormiga 🐜
                               </span>
                             )}
                             {cat.isFixed && (
-                              <span className="rounded bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 px-1.5 py-0.2 text-[9px] font-bold">
+                              <span className="rounded bg-[#162121] border border-[#4EAB9E]/30 text-[#4EAB9E] px-1.5 py-0.2 text-[9px] font-bold">
                                 Fijo 🏠
                               </span>
                             )}
@@ -661,7 +661,7 @@ export function ManageFinanceCatalogModal({
                         <button
                           type="button"
                           onClick={() => handleStartEditCategory(cat)}
-                          className="p-1.5 rounded-lg text-neutral-400 hover:text-amber-400 hover:bg-white/5 transition-colors"
+                          className="p-1.5 rounded-md text-[#8E867B] hover:text-[#D99B43] hover:bg-[#181715] transition-colors cursor-pointer"
                           title="Editar categoría"
                         >
                           <Edit2 className="h-3.5 w-3.5" />
@@ -670,7 +670,7 @@ export function ManageFinanceCatalogModal({
                           type="button"
                           onClick={() => handleDeleteCategory(cat.id)}
                           disabled={isPending}
-                          className="p-1.5 rounded-lg text-neutral-400 hover:text-rose-400 hover:bg-white/5 transition-colors"
+                          className="p-1.5 rounded-md text-[#8E867B] hover:text-[#E05D52] hover:bg-[#221716] transition-colors cursor-pointer"
                           title="Eliminar categoría"
                         >
                           <Trash2 className="h-3.5 w-3.5" />
@@ -685,15 +685,15 @@ export function ManageFinanceCatalogModal({
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-between p-4 border-t border-white/8 bg-neutral-950/60 text-xs text-neutral-400">
+        <div className="flex items-center justify-between p-4 border-t border-[#2A2723] bg-[#121110] text-xs text-[#8E867B] font-mono">
           <div className="flex items-center gap-1.5">
-            <Layers className="h-3.5 w-3.5 text-amber-400" />
-            <span className="font-mono text-[11px]">Brio Neon DB Storage</span>
+            <Layers className="h-3.5 w-3.5 text-[#D99B43]" />
+            <span className="text-[11px]">Brio Neon DB Storage</span>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="px-4 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-neutral-300 text-xs font-semibold transition-colors"
+            className="px-4 py-1.5 rounded-md bg-[#181715] hover:bg-[#22201D] text-[#DDD6C9] hover:text-[#F5F2EB] text-xs font-semibold transition-colors cursor-pointer border border-[#2A2723]"
           >
             Cerrar
           </button>

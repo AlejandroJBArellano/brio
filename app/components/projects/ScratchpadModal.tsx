@@ -76,33 +76,33 @@ function ScratchpadModalContent({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-200">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md animate-in fade-in duration-200">
       <div
-        className="w-full max-w-2xl rounded-3xl border border-white/10 bg-neutral-900/95 p-6 shadow-2xl backdrop-blur-2xl animate-in zoom-in-95 duration-200"
+        className="w-full max-w-2xl rounded-xl border border-[#2A2723] bg-[#181715] p-6 shadow-2xl animate-in zoom-in-95 duration-200"
         role="dialog"
       >
         {/* Header */}
-        <div className="flex items-center justify-between pb-3 border-b border-white/8">
+        <div className="flex items-center justify-between pb-3 border-b border-[#2A2723]">
           <div className="flex items-center gap-2.5">
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-violet-500/10 text-violet-400 border border-violet-500/20">
+            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#4EAB9E]/15 text-[#4EAB9E] border border-[#4EAB9E]/30">
               <Edit3 className="h-4 w-4" />
             </div>
             <div>
-              <h3 className="text-base font-bold text-white tracking-tight">
+              <h3 className="font-serif text-base font-bold text-[#F5F2EB] tracking-tight">
                 Scratchpad & Brain Vault (⌘J)
               </h3>
-              <p className="text-xs text-neutral-400">
+              <p className="text-xs text-[#8E867B]">
                 Bloc de notas rápido con autoguardado en Neon PostgreSQL
               </p>
             </div>
           </div>
 
           <div className="flex items-center gap-3">
-            <span className="text-[11px] font-mono text-neutral-400 flex items-center gap-1">
+            <span className="text-[11px] font-mono text-[#8E867B] flex items-center gap-1">
               {isSaved ? (
                 <>
-                  <Check className="h-3.5 w-3.5 text-emerald-400" />
-                  <span className="text-emerald-400 font-semibold">Guardado</span>
+                  <Check className="h-3.5 w-3.5 text-[#7EA35A]" />
+                  <span className="text-[#7EA35A] font-semibold">Guardado</span>
                 </>
               ) : isPending ? (
                 "Guardando..."
@@ -114,7 +114,7 @@ function ScratchpadModalContent({
             <button
               type="button"
               onClick={onClose}
-              className="rounded-xl p-1.5 text-neutral-400 hover:bg-neutral-800 hover:text-white"
+              className="rounded-lg p-1.5 text-[#8E867B] hover:bg-[#22201D] hover:text-[#F5F2EB] transition-colors"
             >
               <X className="h-5 w-5" />
             </button>
@@ -128,13 +128,13 @@ function ScratchpadModalContent({
             value={content}
             onChange={(e) => setContent(e.target.value)}
             placeholder="# Mis notas del día..."
-            className="w-full rounded-2xl border border-white/8 bg-neutral-950 p-4 font-mono text-xs leading-relaxed text-neutral-200 placeholder:text-neutral-600 focus:border-indigo-500 focus:outline-none"
+            className="w-full rounded-lg border border-[#2A2723] bg-[#121110] p-4 font-mono text-xs leading-relaxed text-[#F5F2EB] placeholder:text-[#8E867B] focus:border-[#D99B43] focus:outline-none transition-all"
           />
         </div>
 
         {/* Quick Task Extraction Helpers */}
-        <div className="mt-3 flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-white/6">
-          <span className="text-[11px] text-neutral-500">
+        <div className="mt-3 flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-[#2A2723]">
+          <span className="text-[11px] text-[#8E867B]">
             Tip: Escribe tus notas libremente. Las líneas con `-` o `*` se pueden convertir en tareas.
           </span>
 
@@ -142,7 +142,7 @@ function ScratchpadModalContent({
             type="button"
             onClick={handleConvertTasks}
             disabled={isPending}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-indigo-600/20 border border-indigo-500/30 text-xs font-bold text-indigo-300 hover:bg-indigo-600/30 transition-all"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#D99B43] hover:bg-[#E8AF59] text-xs font-semibold text-[#121110] transition-all shadow-xs disabled:opacity-50"
           >
             <Zap className="h-3.5 w-3.5" />
             <span>Convertir líneas a Habitica</span>

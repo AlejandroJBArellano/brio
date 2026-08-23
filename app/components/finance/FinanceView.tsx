@@ -85,15 +85,15 @@ export function FinanceView({ data, onRefresh }: FinanceViewProps) {
   return (
     <div className="flex flex-col gap-6 animate-in fade-in duration-300">
       {/* Sub-Navigation Tabs */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-white/8 pb-3">
-        <div className="flex items-center gap-2 p-1 bg-neutral-950/80 rounded-2xl border border-white/8">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#2A2723] pb-3">
+        <div className="flex items-center gap-1.5 p-1 bg-[#181715] rounded-lg border border-[#2A2723]">
           <button
             type="button"
             onClick={() => setSubTab("budget")}
-            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all ${
+            className={`flex items-center gap-2 px-3.5 py-1.5 rounded-md text-xs font-semibold transition-all cursor-pointer ${
               subTab === "budget"
-                ? "bg-amber-500 text-neutral-950 shadow-lg shadow-amber-500/20"
-                : "text-neutral-400 hover:text-white hover:bg-neutral-900"
+                ? "bg-[#D99B43] text-[#121110] shadow-xs font-bold"
+                : "text-[#8E867B] hover:text-[#DDD6C9] hover:bg-[#22201D]"
             }`}
           >
             <Wallet className="h-3.5 w-3.5" />
@@ -103,16 +103,16 @@ export function FinanceView({ data, onRefresh }: FinanceViewProps) {
           <button
             type="button"
             onClick={() => setSubTab("wishlist")}
-            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all ${
+            className={`flex items-center gap-2 px-3.5 py-1.5 rounded-md text-xs font-semibold transition-all cursor-pointer ${
               subTab === "wishlist"
-                ? "bg-violet-600 text-white shadow-lg shadow-violet-500/20"
-                : "text-neutral-400 hover:text-white hover:bg-neutral-900"
+                ? "bg-[#4EAB9E] text-[#121110] shadow-xs font-bold"
+                : "text-[#8E867B] hover:text-[#DDD6C9] hover:bg-[#22201D]"
             }`}
           >
             <Sparkles className="h-3.5 w-3.5" />
             <span>Wishlist Anti-Impulso</span>
             {data.wishlistData?.stats.coolingCount ? (
-              <span className="px-1.5 py-0.2 rounded-full bg-cyan-500/30 text-cyan-200 text-[10px] font-mono">
+              <span className="px-1.5 py-0.2 rounded font-mono text-[10px] bg-[#121110] text-[#4EAB9E] border border-[#4EAB9E]/30">
                 {data.wishlistData.stats.coolingCount}
               </span>
             ) : null}
@@ -122,9 +122,9 @@ export function FinanceView({ data, onRefresh }: FinanceViewProps) {
         <button
           type="button"
           onClick={() => setIsManageCatalogOpen(true)}
-          className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-white/10 bg-neutral-950/80 hover:bg-white/5 text-xs font-semibold text-neutral-300 hover:text-white transition-all shadow-sm self-start sm:self-auto"
+          className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg border border-[#2A2723] bg-[#181715] hover:bg-[#22201D] text-xs font-semibold text-[#DDD6C9] hover:text-[#F5F2EB] transition-all shadow-xs self-start sm:self-auto cursor-pointer"
         >
-          <Settings className="size-3.5 text-amber-400" />
+          <Settings className="size-3.5 text-[#D99B43]" />
           <span>Configurar Cuentas & Categorías</span>
         </button>
       </div>
@@ -139,315 +139,315 @@ export function FinanceView({ data, onRefresh }: FinanceViewProps) {
           {/* 1. Header Metrics Row */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {/* Total Incomes */}
-            <div className="rounded-2xl border border-emerald-500/20 bg-neutral-900/60 p-4 backdrop-blur-xl shadow-xl">
-              <div className="flex items-center justify-between text-xs text-neutral-400">
+            <div className="rounded-xl border border-[#2A2723] bg-[#181715] p-4 shadow-sm">
+              <div className="flex items-center justify-between text-xs text-[#8E867B] font-mono">
                 <span>Ingresos del Mes</span>
-                <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-emerald-500/10 text-emerald-400">
+                <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-[#1C2219] text-[#7EA35A] border border-[#7EA35A]/30">
                   <ArrowUpRight className="h-4 w-4" />
                 </div>
               </div>
-              <div className="mt-2 text-2xl font-bold font-mono text-emerald-400 tracking-tight">
+              <div className="mt-2 text-2xl font-bold font-mono text-[#7EA35A] tracking-tight">
                 +${data.totalIncomeThisMonth.toLocaleString("es-MX", { minimumFractionDigits: 2 })}
               </div>
-              <div className="mt-1 text-[11px] text-neutral-500">
+              <div className="mt-1 text-[11px] font-mono text-[#8E867B]">
                 Presupuestado: ${data.currentBudget.budgetedIncome.toLocaleString()}
               </div>
             </div>
 
-        {/* Total Expenses */}
-        <div className="rounded-2xl border border-rose-500/20 bg-neutral-900/60 p-4 backdrop-blur-xl shadow-xl">
-          <div className="flex items-center justify-between text-xs text-neutral-400">
-            <span>Gastos Acumulados</span>
-            <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-rose-500/10 text-rose-400">
-              <ArrowDownRight className="h-4 w-4" />
+            {/* Total Expenses */}
+            <div className="rounded-xl border border-[#2A2723] bg-[#181715] p-4 shadow-sm">
+              <div className="flex items-center justify-between text-xs text-[#8E867B] font-mono">
+                <span>Gastos Acumulados</span>
+                <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-[#221716] text-[#E05D52] border border-[#E05D52]/30">
+                  <ArrowDownRight className="h-4 w-4" />
+                </div>
+              </div>
+              <div className="mt-2 text-2xl font-bold font-mono text-[#E05D52] tracking-tight">
+                -${data.totalExpensesThisMonth.toLocaleString("es-MX", { minimumFractionDigits: 2 })}
+              </div>
+              <div className="mt-1 text-[11px] font-mono text-[#8E867B]">
+                Fijos: ${data.totalFixedExpensesThisMonth.toLocaleString()} • Variables: ${data.totalVariableExpensesThisMonth.toLocaleString()}
+              </div>
+            </div>
+
+            {/* Net Balance */}
+            <div className="rounded-xl border border-[#2A2723] bg-[#181715] p-4 shadow-sm">
+              <div className="flex items-center justify-between text-xs text-[#8E867B] font-mono">
+                <span>Balance Neto</span>
+                <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-[#162121] text-[#4EAB9E] border border-[#4EAB9E]/30">
+                  <Wallet className="h-4 w-4" />
+                </div>
+              </div>
+              <div
+                className={`mt-2 text-2xl font-bold font-mono tracking-tight ${
+                  isHealthyBalance ? "text-[#F5F2EB]" : "text-[#E05D52]"
+                }`}
+              >
+                {isHealthyBalance ? "+" : ""}
+                ${netBalance.toLocaleString("es-MX", { minimumFractionDigits: 2 })}
+              </div>
+              <div className="mt-1 text-[11px] font-mono text-[#8E867B] flex items-center gap-1">
+                {isHealthyBalance ? (
+                  <span className="text-[#7EA35A] font-semibold">✓ Flujo positivo</span>
+                ) : (
+                  <span className="text-[#E05D52] font-semibold">⚠️ Déficit del mes</span>
+                )}
+              </div>
+            </div>
+
+            {/* Variable Budget Remaining */}
+            <div className="rounded-xl border border-[#2A2723] bg-[#181715] p-4 shadow-sm">
+              <div className="flex items-center justify-between text-xs text-[#8E867B] font-mono">
+                <span>Presupuesto Variable Restante</span>
+                <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-[#221D16] text-[#D99B43] border border-[#D99B43]/30">
+                  <TrendingUp className="h-4 w-4" />
+                </div>
+              </div>
+              <div className="mt-2 text-2xl font-bold font-mono text-[#D99B43] tracking-tight">
+                ${Math.max(0, data.remainingMonthlyVariableBudget).toLocaleString("es-MX", { minimumFractionDigits: 2 })}
+              </div>
+              <div className="mt-1 text-[11px] font-mono text-[#8E867B]">
+                De ${data.currentBudget.budgetedVariableExpenses.toLocaleString()} presupuestados
+              </div>
             </div>
           </div>
-          <div className="mt-2 text-2xl font-bold font-mono text-rose-400 tracking-tight">
-            -${data.totalExpensesThisMonth.toLocaleString("es-MX", { minimumFractionDigits: 2 })}
-          </div>
-          <div className="mt-1 text-[11px] text-neutral-500">
-            Fijos: ${data.totalFixedExpensesThisMonth.toLocaleString()} • Variables: ${data.totalVariableExpensesThisMonth.toLocaleString()}
-          </div>
-        </div>
 
-        {/* Net Balance */}
-        <div className="rounded-2xl border border-white/8 bg-neutral-900/60 p-4 backdrop-blur-xl shadow-xl">
-          <div className="flex items-center justify-between text-xs text-neutral-400">
-            <span>Balance Neto</span>
-            <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-indigo-500/10 text-indigo-400">
-              <Wallet className="h-4 w-4" />
+          {/* 2. Monthly Budget Thermometer Card */}
+          <div className="rounded-xl border border-[#2A2723] bg-[#181715] p-5 shadow-sm">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <div className="flex items-center gap-2">
+                  <h3 className="font-serif text-base font-bold text-[#F5F2EB] tracking-tight">
+                    Termómetro de Presupuesto del Mes
+                  </h3>
+                  <span className="rounded bg-[#121110] border border-[#2A2723] px-2 py-0.5 text-xs font-mono text-[#DDD6C9]">
+                    {budgetSpentPercent}% utilizado
+                  </span>
+                </div>
+                <p className="text-xs text-[#8E867B] mt-0.5">
+                  Control de gastos contra el presupuesto límite de ${totalBudgetedExpenses.toLocaleString()} MXN
+                </p>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setIsModalOpen(true)}
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-[#D99B43] text-[#121110] font-semibold text-xs hover:bg-[#E8AF59] shadow-xs transition-all cursor-pointer"
+              >
+                <Plus className="h-4 w-4" />
+                <span>Registrar Movimiento (⌘F)</span>
+              </button>
+            </div>
+
+            {/* Big Progress Bar */}
+            <div className="mt-5 space-y-2">
+              <div className="relative h-3 w-full overflow-hidden rounded-full bg-[#121110] border border-[#2A2723]">
+                <div
+                  className={`h-full transition-all duration-700 ${
+                    budgetSpentPercent > 90
+                      ? "bg-[#E05D52]"
+                      : budgetSpentPercent > 70
+                      ? "bg-[#D99B43]"
+                      : "bg-[#7EA35A]"
+                  }`}
+                  style={{ width: `${budgetSpentPercent}%` }}
+                />
+              </div>
+              <div className="flex justify-between text-xs font-mono text-[#8E867B]">
+                <span>$0</span>
+                <span>Gastado: ${data.totalExpensesThisMonth.toLocaleString()}</span>
+                <span>Límite: ${totalBudgetedExpenses.toLocaleString()}</span>
+              </div>
             </div>
           </div>
-          <div
-            className={`mt-2 text-2xl font-bold font-mono tracking-tight ${
-              isHealthyBalance ? "text-white" : "text-rose-400"
-            }`}
-          >
-            {isHealthyBalance ? "+" : ""}
-            ${netBalance.toLocaleString("es-MX", { minimumFractionDigits: 2 })}
-          </div>
-          <div className="mt-1 text-[11px] text-neutral-400 flex items-center gap-1">
-            {isHealthyBalance ? (
-              <span className="text-emerald-400 font-semibold">✓ Flujo positivo</span>
-            ) : (
-              <span className="text-rose-400 font-semibold">⚠️ Déficit del mes</span>
-            )}
-          </div>
-        </div>
 
-        {/* Variable Budget Remaining */}
-        <div className="rounded-2xl border border-amber-500/20 bg-neutral-900/60 p-4 backdrop-blur-xl shadow-xl">
-          <div className="flex items-center justify-between text-xs text-neutral-400">
-            <span>Presupuesto Variable Restante</span>
-            <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-amber-500/10 text-amber-400">
-              <TrendingUp className="h-4 w-4" />
-            </div>
-          </div>
-          <div className="mt-2 text-2xl font-bold font-mono text-amber-400 tracking-tight">
-            ${Math.max(0, data.remainingMonthlyVariableBudget).toLocaleString("es-MX", { minimumFractionDigits: 2 })}
-          </div>
-          <div className="mt-1 text-[11px] text-neutral-500">
-            De ${data.currentBudget.budgetedVariableExpenses.toLocaleString()} presupuestados
-          </div>
-        </div>
-      </div>
+          {/* 3. Side by Side: Ant Expense Gauge & Savings Goals */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+            <AntExpenseThermometer
+              spentToday={data.totalAntExpensesToday}
+              dailyLimit={data.currentBudget.dailyAntLimit}
+              spentThisMonth={data.totalAntExpensesThisMonth}
+              onOpenNewTransaction={() => setIsModalOpen(true)}
+            />
 
-      {/* 2. Monthly Budget Thermometer Card */}
-      <div className="rounded-2xl border border-white/8 bg-neutral-900/60 p-5 backdrop-blur-xl shadow-xl">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <div>
-            <div className="flex items-center gap-2">
-              <h3 className="text-base font-bold text-white tracking-tight">
-                Termómetro de Presupuesto del Mes
-              </h3>
-              <span className="rounded-md border border-white/10 bg-neutral-800 px-2 py-0.5 text-xs font-mono text-neutral-300">
-                {budgetSpentPercent}% utilizado
-              </span>
-            </div>
-            <p className="text-xs text-neutral-400 mt-0.5">
-              Control de gastos contra el presupuesto límite de ${totalBudgetedExpenses.toLocaleString()} MXN
-            </p>
-          </div>
-
-          <button
-            type="button"
-            onClick={() => setIsModalOpen(true)}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-linear-to-r from-amber-500 to-amber-600 text-neutral-950 font-bold text-xs hover:brightness-110 shadow-lg shadow-amber-500/20 transition-all"
-          >
-            <Plus className="h-4 w-4" />
-            <span>Registrar Movimiento (⌘F)</span>
-          </button>
-        </div>
-
-        {/* Big Progress Bar */}
-        <div className="mt-5 space-y-2">
-          <div className="relative h-4 w-full overflow-hidden rounded-full bg-neutral-950 border border-white/6">
-            <div
-              className={`h-full transition-all duration-700 ${
-                budgetSpentPercent > 90
-                  ? "bg-gradient-to-r from-amber-500 to-rose-500"
-                  : budgetSpentPercent > 70
-                  ? "bg-gradient-to-r from-indigo-500 to-amber-500"
-                  : "bg-gradient-to-r from-emerald-500 to-indigo-500"
-              }`}
-              style={{ width: `${budgetSpentPercent}%` }}
+            <SavingsGoalsWidget
+              goals={data.savingsGoals}
+              onRefresh={onRefresh}
             />
           </div>
-          <div className="flex justify-between text-xs font-mono text-neutral-400">
-            <span>$0</span>
-            <span>Gastado: ${data.totalExpensesThisMonth.toLocaleString()}</span>
-            <span>Límite: ${totalBudgetedExpenses.toLocaleString()}</span>
-          </div>
-        </div>
-      </div>
 
-      {/* 3. Side by Side: Ant Expense Gauge & Savings Goals */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-        <AntExpenseThermometer
-          spentToday={data.totalAntExpensesToday}
-          dailyLimit={data.currentBudget.dailyAntLimit}
-          spentThisMonth={data.totalAntExpensesThisMonth}
-          onOpenNewTransaction={() => setIsModalOpen(true)}
-        />
-
-        <SavingsGoalsWidget
-          goals={data.savingsGoals}
-          onRefresh={onRefresh}
-        />
-      </div>
-
-      {/* 4. Category Breakdown Chips */}
-      {data.categoryBreakdown.length > 0 && (
-        <div className="rounded-2xl border border-white/8 bg-neutral-900/60 p-5 backdrop-blur-xl">
-          <div className="flex items-center gap-2 mb-3">
-            <PieChart className="h-4 w-4 text-indigo-400" />
-            <h4 className="text-xs font-bold text-white uppercase tracking-wider">
-              Distribución de Gastos por Categoría
-            </h4>
-          </div>
-          <div className="flex flex-wrap gap-2.5">
-            {data.categoryBreakdown.map((cat) => (
-              <div
-                key={cat.category}
-                className="flex items-center gap-2 px-3 py-1.5 rounded-xl border border-white/6 bg-neutral-950/60 text-xs"
-              >
-                <span className="font-semibold text-neutral-300 capitalize">
-                  #{cat.category}
-                </span>
-                <span className="font-mono text-neutral-400">
-                  ${cat.total.toLocaleString()}
-                </span>
-                <span className="rounded bg-indigo-500/20 text-indigo-300 font-mono text-[10px] px-1.5 py-0.5 font-bold">
-                  {cat.percentage}%
-                </span>
+          {/* 4. Category Breakdown Chips */}
+          {data.categoryBreakdown.length > 0 && (
+            <div className="rounded-xl border border-[#2A2723] bg-[#181715] p-5">
+              <div className="flex items-center gap-2 mb-3">
+                <PieChart className="h-4 w-4 text-[#D99B43]" />
+                <h4 className="text-xs font-semibold text-[#8E867B] uppercase tracking-wider font-mono">
+                  Distribución de Gastos por Categoría
+                </h4>
               </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* 5. Transactions Log & Search Stream */}
-      <div className="rounded-2xl border border-white/8 bg-neutral-900/60 p-5 backdrop-blur-xl shadow-xl">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-white/6">
-          <div className="flex items-center gap-2.5">
-            <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-neutral-800 text-neutral-300">
-              <Calendar className="h-4 w-4" />
-            </div>
-            <div>
-              <h3 className="text-sm font-bold text-white tracking-tight">
-                Bitácora de Transacciones Recientes
-              </h3>
-              <p className="text-xs text-neutral-400">
-                {filteredTransactions.length} movimiento(s) registrado(s)
-              </p>
-            </div>
-          </div>
-
-          {/* Search and Filters */}
-          <div className="flex flex-wrap items-center gap-2">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-neutral-500" />
-              <input
-                type="text"
-                placeholder="Buscar por concepto o cuenta..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="rounded-xl border border-white/8 bg-neutral-950/80 pl-8 pr-3 py-1.5 text-xs text-white placeholder:text-neutral-500 focus:outline-none"
-              />
-            </div>
-
-            {/* Filter Pills */}
-            <div className="flex items-center gap-1 p-1 rounded-xl bg-neutral-950/60 border border-white/6 text-xs">
-              <button
-                type="button"
-                onClick={() => setActiveFilter("all")}
-                className={`px-2.5 py-1 rounded-lg text-[11px] font-medium transition-all ${
-                  activeFilter === "all" ? "bg-neutral-800 text-white font-bold" : "text-neutral-400 hover:text-white"
-                }`}
-              >
-                Todos
-              </button>
-              <button
-                type="button"
-                onClick={() => setActiveFilter("expenses")}
-                className={`px-2.5 py-1 rounded-lg text-[11px] font-medium transition-all ${
-                  activeFilter === "expenses" ? "bg-rose-500/20 text-rose-300 font-bold" : "text-neutral-400 hover:text-white"
-                }`}
-              >
-                Gastos
-              </button>
-              <button
-                type="button"
-                onClick={() => setActiveFilter("incomes")}
-                className={`px-2.5 py-1 rounded-lg text-[11px] font-medium transition-all ${
-                  activeFilter === "incomes" ? "bg-emerald-500/20 text-emerald-300 font-bold" : "text-neutral-400 hover:text-white"
-                }`}
-              >
-                Ingresos
-              </button>
-              <button
-                type="button"
-                onClick={() => setActiveFilter("ant")}
-                className={`px-2.5 py-1 rounded-lg text-[11px] font-medium transition-all ${
-                  activeFilter === "ant" ? "bg-amber-500/20 text-amber-300 font-bold" : "text-neutral-400 hover:text-white"
-                }`}
-              >
-                Hormiga ☕
-              </button>
-            </div>
-          </div>
-        </div>
-
-        {/* Transactions List */}
-        <div className="mt-4 divide-y divide-white/4">
-          {filteredTransactions.length === 0 ? (
-            <div className="py-12 text-center text-xs text-neutral-500">
-              No hay movimientos registrados con los filtros seleccionados.
-            </div>
-          ) : (
-            filteredTransactions.map((tx) => (
-              <div
-                key={tx.id}
-                className="flex items-center justify-between py-3 px-2 rounded-xl hover:bg-white/2 transition-colors group"
-              >
-                <div className="flex items-center gap-3">
+              <div className="flex flex-wrap gap-2.5">
+                {data.categoryBreakdown.map((cat) => (
                   <div
-                    className={`flex h-8 w-8 items-center justify-center rounded-xl font-bold text-xs ${
-                      tx.type === "income"
-                        ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
-                        : "bg-rose-500/10 text-rose-400 border border-rose-500/20"
-                    }`}
+                    key={cat.category}
+                    className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-[#2A2723] bg-[#121110] text-xs font-mono"
                   >
-                    {tx.type === "income" ? "+" : "-"}
+                    <span className="font-semibold text-[#DDD6C9] capitalize">
+                      #{cat.category}
+                    </span>
+                    <span className="text-[#8E867B]">
+                      ${cat.total.toLocaleString()}
+                    </span>
+                    <span className="rounded bg-[#221D16] text-[#D99B43] border border-[#D99B43]/30 px-1.5 py-0.5 text-[10px] font-bold">
+                      {cat.percentage}%
+                    </span>
                   </div>
+                ))}
+              </div>
+            </div>
+          )}
 
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs font-semibold text-white">
-                        {tx.notes || (tx.type === "income" ? "Ingreso" : "Gasto")}
-                      </span>
-                      {tx.isAntExpense && (
-                        <span className="rounded bg-amber-500/10 border border-amber-500/20 text-amber-400 text-[10px] px-1.5 py-0.2 font-medium">
-                          Hormiga ☕
-                        </span>
-                      )}
-                    </div>
-                    <div className="flex items-center gap-2 text-[11px] text-neutral-500 mt-0.5">
-                      <span>{tx.date}</span>
-                      <span>•</span>
-                      <span className="text-indigo-400 font-mono">#{tx.category}</span>
-                      <span>•</span>
-                      <span className="text-neutral-400 font-mono">@{tx.account}</span>
-                    </div>
-                  </div>
+          {/* 5. Transactions Log & Search Stream */}
+          <div className="rounded-xl border border-[#2A2723] bg-[#181715] p-5 shadow-sm">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[#2A2723]">
+              <div className="flex items-center gap-2.5">
+                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#22201D] text-[#DDD6C9] border border-[#2A2723]">
+                  <Calendar className="h-4 w-4" />
+                </div>
+                <div>
+                  <h3 className="font-serif text-sm font-bold text-[#F5F2EB] tracking-tight">
+                    Bitácora de Transacciones Recientes
+                  </h3>
+                  <p className="text-xs text-[#8E867B] font-mono">
+                    {filteredTransactions.length} movimiento(s) registrado(s)
+                  </p>
+                </div>
+              </div>
+
+              {/* Search and Filters */}
+              <div className="flex flex-wrap items-center gap-2">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-[#8E867B]" />
+                  <input
+                    type="text"
+                    placeholder="Buscar por concepto o cuenta..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="rounded-lg border border-[#2A2723] bg-[#121110] pl-8 pr-3 py-1.5 text-xs text-[#F5F2EB] placeholder:text-[#8E867B] focus:border-[#D99B43] focus:outline-none transition-all"
+                  />
                 </div>
 
-                <div className="flex items-center gap-3">
-                  <span
-                    className={`font-mono text-sm font-bold ${
-                      tx.type === "income" ? "text-emerald-400" : "text-white"
-                    }`}
-                  >
-                    {tx.type === "income" ? "+" : "-"}${tx.amount.toLocaleString("es-MX", { minimumFractionDigits: 2 })}
-                  </span>
-
+                {/* Filter Pills */}
+                <div className="flex items-center gap-1 p-1 rounded-lg bg-[#121110] border border-[#2A2723] text-xs">
                   <button
                     type="button"
-                    onClick={() => handleDeleteTransaction(tx.id)}
-                    disabled={isPending}
-                    className="opacity-0 group-hover:opacity-100 p-1.5 text-neutral-500 hover:text-rose-400 hover:bg-neutral-800 rounded-lg transition-all"
-                    title="Eliminar transacción"
+                    onClick={() => setActiveFilter("all")}
+                    className={`px-2.5 py-1 rounded-md text-[11px] font-semibold transition-all cursor-pointer ${
+                      activeFilter === "all" ? "bg-[#22201D] text-[#F5F2EB] border border-[#38332D]" : "text-[#8E867B] hover:text-[#DDD6C9]"
+                    }`}
                   >
-                    <Trash2 className="h-3.5 w-3.5" />
+                    Todos
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setActiveFilter("expenses")}
+                    className={`px-2.5 py-1 rounded-md text-[11px] font-semibold transition-all cursor-pointer ${
+                      activeFilter === "expenses" ? "bg-[#221716] text-[#E05D52] border border-[#E05D52]/40" : "text-[#8E867B] hover:text-[#DDD6C9]"
+                    }`}
+                  >
+                    Gastos
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setActiveFilter("incomes")}
+                    className={`px-2.5 py-1 rounded-md text-[11px] font-semibold transition-all cursor-pointer ${
+                      activeFilter === "incomes" ? "bg-[#1C2219] text-[#7EA35A] border border-[#7EA35A]/40" : "text-[#8E867B] hover:text-[#DDD6C9]"
+                    }`}
+                  >
+                    Ingresos
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setActiveFilter("ant")}
+                    className={`px-2.5 py-1 rounded-md text-[11px] font-semibold transition-all cursor-pointer ${
+                      activeFilter === "ant" ? "bg-[#221D16] text-[#D99B43] border border-[#D99B43]/40" : "text-[#8E867B] hover:text-[#DDD6C9]"
+                    }`}
+                  >
+                    Hormiga ☕
                   </button>
                 </div>
               </div>
-            ))
-          )}
-        </div>
-      </div>
-    </>
-  )}
+            </div>
+
+            {/* Transactions List */}
+            <div className="mt-4 divide-y divide-[#2A2723]">
+              {filteredTransactions.length === 0 ? (
+                <div className="py-12 text-center text-xs text-[#8E867B] font-mono">
+                  No hay movimientos registrados con los filtros seleccionados.
+                </div>
+              ) : (
+                filteredTransactions.map((tx) => (
+                  <div
+                    key={tx.id}
+                    className="flex items-center justify-between py-3 px-2 rounded-lg hover:bg-[#22201D]/50 transition-colors group"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div
+                        className={`flex h-8 w-8 items-center justify-center rounded-lg font-mono font-bold text-xs ${
+                          tx.type === "income"
+                            ? "bg-[#1C2219] text-[#7EA35A] border border-[#7EA35A]/30"
+                            : "bg-[#221716] text-[#E05D52] border border-[#E05D52]/30"
+                        }`}
+                      >
+                        {tx.type === "income" ? "+" : "-"}
+                      </div>
+
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs font-semibold text-[#F5F2EB]">
+                            {tx.notes || (tx.type === "income" ? "Ingreso" : "Gasto")}
+                          </span>
+                          {tx.isAntExpense && (
+                            <span className="rounded bg-[#221D16] border border-[#D99B43]/30 text-[#D99B43] text-[10px] px-1.5 py-0.2 font-mono font-medium">
+                              Hormiga ☕
+                            </span>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-2 text-[11px] text-[#8E867B] font-mono mt-0.5">
+                          <span>{tx.date}</span>
+                          <span>•</span>
+                          <span className="text-[#D99B43]">#{tx.category}</span>
+                          <span>•</span>
+                          <span>@{tx.account}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-3">
+                      <span
+                        className={`font-mono text-sm font-bold ${
+                          tx.type === "income" ? "text-[#7EA35A]" : "text-[#F5F2EB]"
+                        }`}
+                      >
+                        {tx.type === "income" ? "+" : "-"}${tx.amount.toLocaleString("es-MX", { minimumFractionDigits: 2 })}
+                      </span>
+
+                      <button
+                        type="button"
+                        onClick={() => handleDeleteTransaction(tx.id)}
+                        disabled={isPending}
+                        className="opacity-0 group-hover:opacity-100 p-1.5 text-[#8E867B] hover:text-[#E05D52] hover:bg-[#221716] rounded-md transition-all cursor-pointer"
+                        title="Eliminar transacción"
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </button>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+        </>
+      )}
 
       {/* Transaction Modal */}
       <TransactionModal

@@ -101,22 +101,22 @@ export function TransactionModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-200">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-xs animate-in fade-in duration-200">
       <div
-        className="w-full max-w-lg rounded-2xl border border-white/10 bg-neutral-900/95 p-6 shadow-2xl backdrop-blur-xl animate-in zoom-in-95 duration-200"
+        className="w-full max-w-lg rounded-xl border border-[#2A2723] bg-[#181715] p-6 shadow-2xl animate-in zoom-in-95 duration-200"
         role="dialog"
       >
         {/* Header */}
-        <div className="flex items-center justify-between pb-4 border-b border-white/8">
+        <div className="flex items-center justify-between pb-4 border-b border-[#2A2723]">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-500/10 text-amber-400 border border-amber-500/20">
+            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[#221D16] text-[#D99B43] border border-[#D99B43]/30">
               <Wallet className="h-5 w-5" />
             </div>
             <div>
-              <h2 className="text-lg font-bold text-white tracking-tight">
+              <h2 className="font-serif text-lg font-bold text-[#F5F2EB] tracking-tight">
                 Registrar Movimiento en Brio Finanzas
               </h2>
-              <p className="text-xs text-neutral-400">
+              <p className="text-xs text-[#8E867B]">
                 Guarda tus gastos e ingresos con latencia cero en Neon DB
               </p>
             </div>
@@ -124,29 +124,29 @@ export function TransactionModal({
           <button
             type="button"
             onClick={onClose}
-            className="rounded-lg p-1.5 text-neutral-400 hover:bg-neutral-800 hover:text-white transition-colors"
+            className="rounded-lg p-1.5 text-[#8E867B] hover:bg-[#22201D] hover:text-[#F5F2EB] transition-colors cursor-pointer"
           >
             <X className="h-5 w-5" />
           </button>
         </div>
 
         {error && (
-          <div className="mt-4 flex items-center gap-2 rounded-xl border border-rose-500/30 bg-rose-500/10 p-3 text-xs text-rose-300">
+          <div className="mt-4 flex items-center gap-2 rounded-lg border border-[#E05D52]/40 bg-[#221716] p-3 text-xs text-[#E05D52] font-mono">
             <AlertCircle className="h-4 w-4 shrink-0" />
             <span>{error}</span>
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="mt-5 space-y-4">
+        <form onSubmit={handleSubmit} className="mt-5 space-y-4 font-mono">
           {/* Type Toggle: Gasto vs Ingreso */}
-          <div className="grid grid-cols-2 gap-2 p-1 rounded-xl bg-neutral-950/60 border border-white/6">
+          <div className="grid grid-cols-2 gap-2 p-1 rounded-lg bg-[#121110] border border-[#2A2723]">
             <button
               type="button"
               onClick={() => setType("expense")}
-              className={`flex items-center justify-center gap-2 py-2.5 rounded-lg text-xs font-semibold transition-all ${
+              className={`flex items-center justify-center gap-2 py-2 rounded-md text-xs font-semibold transition-all cursor-pointer ${
                 type === "expense"
-                  ? "bg-rose-500/20 text-rose-300 border border-rose-500/30 shadow-lg"
-                  : "text-neutral-400 hover:text-white"
+                  ? "bg-[#221716] text-[#E05D52] border border-[#E05D52]/40 shadow-xs font-bold"
+                  : "text-[#8E867B] hover:text-[#DDD6C9]"
               }`}
             >
               <ArrowDownRight className="h-4 w-4" />
@@ -155,10 +155,10 @@ export function TransactionModal({
             <button
               type="button"
               onClick={() => setType("income")}
-              className={`flex items-center justify-center gap-2 py-2.5 rounded-lg text-xs font-semibold transition-all ${
+              className={`flex items-center justify-center gap-2 py-2 rounded-md text-xs font-semibold transition-all cursor-pointer ${
                 type === "income"
-                  ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 shadow-lg"
-                  : "text-neutral-400 hover:text-white"
+                  ? "bg-[#1C2219] text-[#7EA35A] border border-[#7EA35A]/40 shadow-xs font-bold"
+                  : "text-[#8E867B] hover:text-[#DDD6C9]"
               }`}
             >
               <ArrowUpRight className="h-4 w-4" />
@@ -168,11 +168,11 @@ export function TransactionModal({
 
           {/* Amount Input */}
           <div>
-            <label className="block text-xs font-medium text-neutral-300 mb-1.5">
+            <label className="block text-xs font-sans font-medium text-[#DDD6C9] mb-1.5">
               Monto (MXN)
             </label>
             <div className="relative">
-              <span className="absolute left-3.5 top-1/2 -translate-y-1/2 font-mono text-neutral-400">
+              <span className="absolute left-3.5 top-1/2 -translate-y-1/2 font-mono text-[#8E867B]">
                 $
               </span>
               <input
@@ -183,38 +183,38 @@ export function TransactionModal({
                 onChange={(e) => setAmount(e.target.value)}
                 autoFocus
                 required
-                className="w-full rounded-xl border border-white/10 bg-neutral-950/80 pl-8 pr-4 py-2.5 font-mono text-lg font-bold text-white placeholder:text-neutral-600 focus:border-amber-500/50 focus:outline-none focus:ring-2 focus:ring-amber-500/20"
+                className="w-full rounded-lg border border-[#2A2723] bg-[#121110] pl-8 pr-4 py-2.5 font-mono text-lg font-bold text-[#F5F2EB] placeholder:text-[#8E867B] focus:border-[#D99B43] focus:outline-none"
               />
             </div>
           </div>
 
           {/* Concept Input */}
           <div>
-            <label className="block text-xs font-medium text-neutral-300 mb-1.5">
+            <label className="block text-xs font-sans font-medium text-[#DDD6C9] mb-1.5">
               Concepto / Descripción
             </label>
             <input
               type="text"
-              placeholder="Ej: Café con pan, Supermercado semanal, Pago de cliente..."
+              placeholder="Ej: Café de especialidad, Supermercado semanal..."
               value={concept}
               onChange={(e) => setConcept(e.target.value)}
               required
-              className="w-full rounded-xl border border-white/10 bg-neutral-950/80 px-3.5 py-2.5 text-sm text-white placeholder:text-neutral-600 focus:border-amber-500/50 focus:outline-none focus:ring-2 focus:ring-amber-500/20"
+              className="w-full rounded-lg border border-[#2A2723] bg-[#121110] px-3.5 py-2.5 text-xs text-[#F5F2EB] placeholder:text-[#8E867B] focus:border-[#D99B43] focus:outline-none"
             />
           </div>
 
           {/* Category & Account */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
-              <div className="flex items-center justify-between mb-1.5">
-                <label className="block text-xs font-medium text-neutral-300">
+              <div className="flex items-center justify-between mb-1.5 font-sans">
+                <label className="block text-xs font-medium text-[#DDD6C9]">
                   Categoría
                 </label>
                 {onOpenManageCatalog && (
                   <button
                     type="button"
                     onClick={onOpenManageCatalog}
-                    className="text-[10px] text-amber-400 hover:text-amber-300 flex items-center gap-1 transition-colors"
+                    className="text-[10px] text-[#D99B43] hover:text-[#E8AF59] flex items-center gap-1 transition-colors cursor-pointer"
                   >
                     <Settings2 className="size-3" />
                     <span>Configurar</span>
@@ -224,10 +224,10 @@ export function TransactionModal({
               <select
                 value={category}
                 onChange={(e) => handleCategoryChange(e.target.value)}
-                className="w-full rounded-xl border border-white/10 bg-neutral-950/80 px-3 py-2.5 text-xs text-white focus:border-amber-500/50 focus:outline-none focus:ring-2 focus:ring-amber-500/20"
+                className="w-full rounded-lg border border-[#2A2723] bg-[#121110] px-3 py-2 text-xs text-[#F5F2EB] focus:border-[#D99B43] focus:outline-none"
               >
                 {effectiveCategories.map((cat) => (
-                  <option key={cat.id} value={cat.id}>
+                  <option key={cat.id} value={cat.id} className="bg-[#181715] text-[#F5F2EB]">
                     {cat.icon || "🏷️"} {cat.name}
                   </option>
                 ))}
@@ -235,15 +235,15 @@ export function TransactionModal({
             </div>
 
             <div>
-              <div className="flex items-center justify-between mb-1.5">
-                <label className="block text-xs font-medium text-neutral-300">
+              <div className="flex items-center justify-between mb-1.5 font-sans">
+                <label className="block text-xs font-medium text-[#DDD6C9]">
                   Cuenta / Tarjeta
                 </label>
                 {onOpenManageCatalog && (
                   <button
                     type="button"
                     onClick={onOpenManageCatalog}
-                    className="text-[10px] text-amber-400 hover:text-amber-300 flex items-center gap-1 transition-colors"
+                    className="text-[10px] text-[#D99B43] hover:text-[#E8AF59] flex items-center gap-1 transition-colors cursor-pointer"
                   >
                     <Settings2 className="size-3" />
                     <span>Configurar</span>
@@ -253,10 +253,10 @@ export function TransactionModal({
               <select
                 value={account}
                 onChange={(e) => setAccount(e.target.value)}
-                className="w-full rounded-xl border border-white/10 bg-neutral-950/80 px-3 py-2.5 text-xs text-white focus:border-amber-500/50 focus:outline-none focus:ring-2 focus:ring-amber-500/20"
+                className="w-full rounded-lg border border-[#2A2723] bg-[#121110] px-3 py-2 text-xs text-[#F5F2EB] focus:border-[#D99B43] focus:outline-none"
               >
                 {effectiveAccounts.map((acc) => (
-                  <option key={acc.id} value={acc.id}>
+                  <option key={acc.id} value={acc.id} className="bg-[#181715] text-[#F5F2EB]">
                     {acc.icon || "💳"} {acc.name}
                   </option>
                 ))}
@@ -266,14 +266,14 @@ export function TransactionModal({
 
           {/* Gasto Hormiga Switch (Only for Expenses) */}
           {type === "expense" && (
-            <label className="flex items-center justify-between p-3 rounded-xl border border-amber-500/20 bg-amber-500/5 cursor-pointer hover:bg-amber-500/10 transition-colors">
+            <label className="flex items-center justify-between p-3 rounded-lg border border-[#3D3425] bg-[#121110] cursor-pointer hover:bg-[#221D16] transition-colors">
               <div className="flex items-center gap-2.5">
-                <Coffee className="h-4 w-4 text-amber-400" />
+                <Coffee className="h-4 w-4 text-[#D99B43]" />
                 <div>
-                  <div className="text-xs font-semibold text-amber-300">
+                  <div className="text-xs font-sans font-semibold text-[#D99B43]">
                     Es un Gasto Hormiga / Antojo
                   </div>
-                  <div className="text-[11px] text-neutral-400">
+                  <div className="text-[11px] text-[#8E867B]">
                     Se descontará de tu presupuesto diario de gustitos ($150/día)
                   </div>
                 </div>
@@ -282,7 +282,7 @@ export function TransactionModal({
                 type="checkbox"
                 checked={isAntExpense}
                 onChange={(e) => setIsAntExpense(e.target.checked)}
-                className="h-4 w-4 rounded border-neutral-700 bg-neutral-900 text-amber-500 focus:ring-amber-500/20"
+                className="h-4 w-4 rounded border-[#2A2723] bg-[#181715] text-[#D99B43] focus:ring-[#D99B43]/20 cursor-pointer"
               />
             </label>
           )}
@@ -290,18 +290,18 @@ export function TransactionModal({
           {/* Date & Optional Notes */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-medium text-neutral-300 mb-1.5">
+              <label className="block text-xs font-sans font-medium text-[#DDD6C9] mb-1.5">
                 Fecha
               </label>
               <input
                 type="date"
                 value={date}
                 onChange={(e) => setDate(e.target.value)}
-                className="w-full rounded-xl border border-white/10 bg-neutral-950/80 px-3 py-2 text-xs text-white focus:border-amber-500/50 focus:outline-none"
+                className="w-full rounded-lg border border-[#2A2723] bg-[#121110] px-3 py-2 text-xs text-[#F5F2EB] focus:border-[#D99B43] focus:outline-none"
               />
             </div>
             <div>
-              <label className="block text-xs font-medium text-neutral-300 mb-1.5">
+              <label className="block text-xs font-sans font-medium text-[#DDD6C9] mb-1.5">
                 Notas adicionales (opcional)
               </label>
               <input
@@ -309,24 +309,24 @@ export function TransactionModal({
                 placeholder="Detalle o lugar..."
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
-                className="w-full rounded-xl border border-white/10 bg-neutral-950/80 px-3 py-2 text-xs text-white focus:border-amber-500/50 focus:outline-none"
+                className="w-full rounded-lg border border-[#2A2723] bg-[#121110] px-3 py-2 text-xs text-[#F5F2EB] focus:border-[#D99B43] focus:outline-none"
               />
             </div>
           </div>
 
           {/* Actions */}
-          <div className="flex items-center justify-end gap-3 pt-3 border-t border-white/8">
+          <div className="flex items-center justify-end gap-3 pt-3 border-t border-[#2A2723]">
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 rounded-xl text-xs font-medium text-neutral-400 hover:text-white hover:bg-neutral-800 transition-colors"
+              className="px-4 py-2 rounded-lg text-xs font-sans font-medium text-[#8E867B] hover:text-[#F5F2EB] hover:bg-[#22201D] transition-colors cursor-pointer"
             >
               Cancelar
             </button>
             <button
               type="submit"
               disabled={isPending}
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-linear-to-r from-amber-500 to-amber-600 font-semibold text-xs text-neutral-950 hover:brightness-110 shadow-lg shadow-amber-500/20 disabled:opacity-50 transition-all"
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-[#D99B43] font-semibold text-xs text-[#121110] hover:bg-[#E8AF59] shadow-xs disabled:opacity-50 transition-all cursor-pointer"
             >
               <Plus className="h-4 w-4" />
               <span>{isPending ? "Guardando..." : "Registrar en Neon DB"}</span>
