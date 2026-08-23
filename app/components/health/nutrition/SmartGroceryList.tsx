@@ -80,27 +80,27 @@ export function SmartGroceryList({
   const totalChecked = checkedIds.size;
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-5 font-sans">
       {/* Date Range & Generator Toolbar */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-2xl border border-white/8 bg-neutral-900/60 p-4.5 backdrop-blur-xl shadow-xl">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-xl border border-[#2A2723] bg-[#181715] p-4.5 shadow-sm font-mono">
         <div className="flex flex-wrap items-center gap-3">
-          <div className="flex items-center gap-2 text-xs font-semibold text-neutral-300">
+          <div className="flex items-center gap-2 text-xs font-semibold text-[#8E867B]">
             <span>Desde:</span>
             <input
               type="date"
               value={startDate}
               onChange={(e) => setStartDate(e.target.value)}
-              className="rounded-xl border border-white/10 bg-neutral-950/80 px-2.5 py-1.5 font-mono text-xs text-white focus:outline-none focus:border-emerald-500/50"
+              className="rounded-lg border border-[#2A2723] bg-[#121110] px-2.5 py-1.5 font-mono text-xs text-[#F5F2EB] focus:outline-none focus:border-[#D99B43]"
             />
           </div>
 
-          <div className="flex items-center gap-2 text-xs font-semibold text-neutral-300">
+          <div className="flex items-center gap-2 text-xs font-semibold text-[#8E867B]">
             <span>Hasta:</span>
             <input
               type="date"
               value={endDate}
               onChange={(e) => setEndDate(e.target.value)}
-              className="rounded-xl border border-white/10 bg-neutral-950/80 px-2.5 py-1.5 font-mono text-xs text-white focus:outline-none focus:border-emerald-500/50"
+              className="rounded-lg border border-[#2A2723] bg-[#121110] px-2.5 py-1.5 font-mono text-xs text-[#F5F2EB] focus:outline-none focus:border-[#D99B43]"
             />
           </div>
 
@@ -108,7 +108,7 @@ export function SmartGroceryList({
             type="button"
             onClick={handleGenerate}
             disabled={isPending}
-            className="flex items-center gap-1.5 px-4 py-1.5 rounded-xl bg-emerald-600 font-bold text-xs text-white hover:bg-emerald-500 disabled:opacity-40 transition-all shadow-md shadow-emerald-600/20"
+            className="flex items-center gap-1.5 px-4 py-1.5 rounded-lg bg-[#D99B43] font-bold text-xs text-[#121110] hover:bg-[#E8AF59] disabled:opacity-40 transition-all cursor-pointer font-sans shadow-xs"
           >
             <RefreshCw className={`h-3.5 w-3.5 ${isPending ? "animate-spin" : ""}`} />
             <span>{isPending ? "Generando..." : "Actualizar Lista"}</span>
@@ -117,24 +117,24 @@ export function SmartGroceryList({
 
         {categories.length > 0 && (
           <div className="flex items-center gap-2">
-            <span className="text-xs font-mono text-neutral-400">
+            <span className="text-xs font-mono text-[#8E867B]">
               {totalChecked} de {totalItems} comprados
             </span>
 
             <button
               type="button"
               onClick={handleCopyClipboard}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-white/8 bg-neutral-950/80 text-xs font-semibold text-neutral-200 hover:bg-neutral-800 transition-all"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-[#2A2723] bg-[#121110] text-xs font-semibold text-[#DDD6C9] hover:bg-[#22201D] hover:text-[#F5F2EB] transition-all cursor-pointer"
               title="Copiar para WhatsApp o Notas"
             >
               {copied ? (
                 <>
-                  <ClipboardCheck className="h-3.5 w-3.5 text-emerald-400" />
-                  <span className="text-emerald-300">¡Copiado!</span>
+                  <ClipboardCheck className="h-3.5 w-3.5 text-[#7EA35A]" />
+                  <span className="text-[#7EA35A]">¡Copiado!</span>
                 </>
               ) : (
                 <>
-                  <Copy className="h-3.5 w-3.5 text-neutral-400" />
+                  <Copy className="h-3.5 w-3.5 text-[#8E867B]" />
                   <span>Copiar</span>
                 </>
               )}
@@ -145,12 +145,12 @@ export function SmartGroceryList({
 
       {/* Empty State */}
       {categories.length === 0 && !isPending && (
-        <div className="p-8 text-center rounded-2xl border border-dashed border-white/8 bg-neutral-950/30">
-          <ShoppingCart className="h-10 w-10 text-neutral-600 mx-auto mb-2" />
-          <h4 className="text-sm font-bold text-white mb-1">
+        <div className="p-8 text-center rounded-xl border border-dashed border-[#2A2723] bg-[#121110]">
+          <ShoppingCart className="h-10 w-10 text-[#8E867B] mx-auto mb-2" />
+          <h4 className="font-serif text-sm font-bold text-[#F5F2EB] mb-1">
             Sin comidas programadas en este rango
           </h4>
-          <p className="text-xs text-neutral-400 max-w-sm mx-auto">
+          <p className="text-xs text-[#8E867B] max-w-sm mx-auto font-mono">
             Ve a la pestaña del <strong>Planificador & Calendario</strong> y asigna tus comidas de la semana. La lista de compras se armará automáticamente con todos los ingredientes.
           </p>
         </div>
@@ -161,17 +161,17 @@ export function SmartGroceryList({
         {categories.map((cat) => (
           <div
             key={cat.categoryKey}
-            className="flex flex-col justify-between rounded-2xl border border-white/8 bg-neutral-900/60 p-4.5 backdrop-blur-xl shadow-lg"
+            className="flex flex-col justify-between rounded-xl border border-[#2A2723] bg-[#181715] p-4.5 shadow-sm"
           >
             <div>
-              <div className="flex items-center justify-between pb-3 border-b border-white/6">
+              <div className="flex items-center justify-between pb-3 border-b border-[#2A2723]">
                 <div className="flex items-center gap-2">
                   <span className="text-xl">{cat.icon}</span>
-                  <h4 className="text-sm font-bold text-white tracking-tight">
+                  <h4 className="font-serif text-sm font-bold text-[#F5F2EB] tracking-tight">
                     {cat.categoryTitle}
                   </h4>
                 </div>
-                <span className="rounded-full bg-neutral-950 px-2 py-0.5 font-mono text-[10px] font-bold text-neutral-400 border border-white/6">
+                <span className="rounded bg-[#121110] px-2 py-0.5 font-mono text-[10px] font-bold text-[#8E867B] border border-[#2A2723]">
                   {cat.items.length}
                 </span>
               </div>
@@ -185,22 +185,22 @@ export function SmartGroceryList({
                       key={item.id}
                       type="button"
                       onClick={() => toggleItemChecked(item.id)}
-                      className={`w-full flex items-start justify-between p-2.5 rounded-xl border text-left transition-all ${
+                      className={`w-full flex items-start justify-between p-2.5 rounded-lg border text-left transition-all cursor-pointer ${
                         isChecked
-                          ? "bg-emerald-500/10 border-emerald-500/20 text-neutral-400 opacity-60"
-                          : "bg-neutral-950/60 border-white/4 text-neutral-200 hover:border-white/10"
+                          ? "bg-[#141813] border-[#7EA35A]/30 text-[#8E867B] opacity-70"
+                          : "bg-[#121110] border-[#2A2723] text-[#DDD6C9] hover:border-[#38332D]"
                       }`}
                     >
                       <div className="space-y-0.5">
                         <span
                           className={`text-xs font-semibold block leading-tight ${
-                            isChecked ? "line-through" : "text-white"
+                            isChecked ? "line-through text-[#8E867B]" : "text-[#F5F2EB]"
                           }`}
                         >
                           {item.name}
                         </span>
                         {item.sourceRecipes && item.sourceRecipes.length > 0 && (
-                          <span className="text-[10px] text-neutral-500 line-clamp-1">
+                          <span className="text-[10px] text-[#8E867B] line-clamp-1 font-mono">
                             Para: {item.sourceRecipes.join(", ")}
                           </span>
                         )}
@@ -209,8 +209,8 @@ export function SmartGroceryList({
                       <div
                         className={`flex h-4 w-4 shrink-0 items-center justify-center rounded border ml-2 mt-0.5 ${
                           isChecked
-                            ? "bg-emerald-500 border-emerald-400 text-neutral-950"
-                            : "border-neutral-700 bg-neutral-900"
+                            ? "bg-[#7EA35A] border-[#7EA35A] text-[#121110]"
+                            : "border-[#2A2723] bg-[#181715]"
                         }`}
                       >
                         {isChecked && <Check className="h-3 w-3 stroke-3" />}

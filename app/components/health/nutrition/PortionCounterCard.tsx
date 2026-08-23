@@ -24,38 +24,38 @@ export function PortionCounterCard({
 
   return (
     <div
-      className={`relative flex flex-col justify-between rounded-2xl border p-4 transition-all duration-300 backdrop-blur-xl ${
+      className={`relative flex flex-col justify-between rounded-lg border p-4 transition-all duration-150 font-sans ${
         isCompleted
-          ? "border-emerald-500/30 bg-neutral-900/80 shadow-lg shadow-emerald-500/5"
-          : "border-white/8 bg-neutral-900/60 hover:border-white/14"
+          ? "border-[#7EA35A]/40 bg-[#121110]"
+          : "border-[#2A2723] bg-[#121110] hover:border-[#38332D]"
       }`}
     >
       {/* Top row: Icon + Label + Target Badge */}
       <div className="flex items-start justify-between gap-2">
         <div className="flex items-center gap-2.5">
-          <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-neutral-950/80 border border-white/8 text-lg shadow-inner">
+          <span className="flex h-9 w-9 items-center justify-center rounded-md bg-[#181715] border border-[#2A2723] text-lg">
             {meta.icon}
           </span>
           <div>
-            <h4 className="text-sm font-bold text-white tracking-tight flex items-center gap-1.5">
+            <h4 className="text-sm font-bold text-[#F5F2EB] tracking-tight flex items-center gap-1.5 font-serif">
               <span>{meta.label}</span>
               {isCompleted && (
-                <span className="flex h-4 w-4 items-center justify-center rounded-full bg-emerald-500/20 text-emerald-400">
+                <span className="flex h-4 w-4 items-center justify-center rounded bg-[#1C2219] text-[#7EA35A] border border-[#7EA35A]/30">
                   <Check className="h-2.5 w-2.5 stroke-3" />
                 </span>
               )}
             </h4>
-            <p className="text-[11px] text-neutral-400 leading-tight mt-0.5 line-clamp-1" title={meta.standardPortionDesc}>
+            <p className="text-[11px] text-[#8E867B] leading-tight mt-0.5 line-clamp-1 font-mono" title={meta.standardPortionDesc}>
               {meta.standardPortionDesc}
             </p>
           </div>
         </div>
 
         <span
-          className={`rounded-full px-2 py-0.5 text-[10px] font-bold font-mono border ${
+          className={`rounded px-2 py-0.5 text-[10px] font-bold font-mono border ${
             isCompleted
-              ? "bg-emerald-500/15 border-emerald-500/30 text-emerald-300"
-              : "bg-neutral-950/60 border-white/6 text-neutral-400"
+              ? "bg-[#1C2219] border-[#7EA35A]/30 text-[#7EA35A]"
+              : "bg-[#181715] border-[#2A2723] text-[#8E867B]"
           }`}
         >
           Meta: {target} {meta.unit}
@@ -64,39 +64,39 @@ export function PortionCounterCard({
 
       {/* Middle row: Progress Bar & Numeric Display */}
       <div className="my-3 space-y-1.5">
-        <div className="flex items-baseline justify-between text-xs">
-          <span className="font-mono text-lg font-extrabold text-white">
+        <div className="flex items-baseline justify-between text-xs font-mono">
+          <span className="text-lg font-bold text-[#F5F2EB]">
             {current}{" "}
-            <span className="text-xs font-normal text-neutral-400">/ {target}</span>
+            <span className="text-xs font-normal text-[#8E867B]">/ {target}</span>
           </span>
           <span
-            className={`font-mono text-xs font-semibold ${
-              isCompleted ? "text-emerald-400" : "text-neutral-400"
+            className={`text-xs font-semibold ${
+              isCompleted ? "text-[#7EA35A]" : "text-[#8E867B]"
             }`}
           >
             {percent}%
           </span>
         </div>
 
-        <div className="relative h-2 w-full overflow-hidden rounded-full bg-neutral-950 border border-white/6">
+        <div className="relative h-1.5 w-full overflow-hidden rounded bg-[#181715] border border-[#2A2723]">
           <div
-            className="h-full rounded-full transition-all duration-500 ease-out"
+            className={`h-full transition-all duration-300 ${
+              isCompleted ? "bg-[#7EA35A]" : "bg-[#D99B43]"
+            }`}
             style={{
               width: `${Math.min(100, percent)}%`,
-              backgroundColor: meta.color,
-              boxShadow: isCompleted ? `0 0 12px ${meta.color}` : "none",
             }}
           />
         </div>
       </div>
 
       {/* Bottom row: Quick action buttons */}
-      <div className="flex items-center gap-1.5 pt-1">
+      <div className="flex items-center gap-1.5 pt-1 font-mono">
         <button
           type="button"
           onClick={() => onAdjust(-0.5)}
           disabled={disabled || current <= 0}
-          className="flex-1 py-1.5 rounded-xl border border-white/6 bg-neutral-950/60 text-xs font-bold text-neutral-300 hover:bg-neutral-800 hover:text-white disabled:opacity-30 disabled:pointer-events-none transition-all active:scale-95 flex items-center justify-center gap-1"
+          className="flex-1 py-1.5 rounded border border-[#2A2723] bg-[#181715] text-xs font-bold text-[#8E867B] hover:bg-[#22201D] hover:text-[#DDD6C9] disabled:opacity-30 disabled:pointer-events-none transition-all active:scale-95 flex items-center justify-center gap-1 cursor-pointer"
           title="Restar 0.5 porción"
         >
           <Minus className="h-3 w-3" />
@@ -107,7 +107,7 @@ export function PortionCounterCard({
           type="button"
           onClick={() => onAdjust(0.5)}
           disabled={disabled}
-          className="flex-1 py-1.5 rounded-xl border border-white/8 bg-neutral-950/80 text-xs font-bold text-neutral-200 hover:bg-neutral-800 hover:text-white disabled:opacity-40 transition-all active:scale-95 flex items-center justify-center gap-1"
+          className="flex-1 py-1.5 rounded border border-[#2A2723] bg-[#181715] text-xs font-bold text-[#DDD6C9] hover:bg-[#22201D] hover:text-[#F5F2EB] disabled:opacity-40 transition-all active:scale-95 flex items-center justify-center gap-1 cursor-pointer"
           title="Sumar 0.5 porción"
         >
           <Plus className="h-3 w-3" />
@@ -118,12 +118,7 @@ export function PortionCounterCard({
           type="button"
           onClick={() => onAdjust(1.0)}
           disabled={disabled}
-          className="flex-1 py-1.5 rounded-xl border text-xs font-extrabold text-white transition-all active:scale-95 flex items-center justify-center gap-1 shadow-sm"
-          style={{
-            backgroundColor: `${meta.color}20`,
-            borderColor: `${meta.color}50`,
-            color: "#ffffff",
-          }}
+          className="flex-1 py-1.5 rounded border border-[#D99B43]/30 bg-[#221D16] text-xs font-bold text-[#D99B43] hover:bg-[#2A241C] transition-all active:scale-95 flex items-center justify-center gap-1 cursor-pointer"
           title="Sumar 1 porción completa"
         >
           <Plus className="h-3.5 w-3.5 stroke-3" />

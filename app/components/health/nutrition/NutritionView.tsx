@@ -71,38 +71,38 @@ export function NutritionView({
   }).length;
 
   return (
-    <div className="flex flex-col gap-6 animate-in fade-in duration-300">
+    <div className="flex flex-col gap-6 font-sans">
       {/* 1. Header Ribbon with Subtabs & Quick Summary */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 rounded-3xl border border-white/8 bg-neutral-900/80 p-5 backdrop-blur-2xl shadow-2xl">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 rounded-xl border border-[#2A2723] bg-[#181715] p-5 shadow-sm">
         <div className="flex items-center gap-3.5">
-          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-linear-to-br from-emerald-500/20 to-teal-500/20 text-emerald-400 border border-emerald-500/30 shadow-lg shadow-emerald-500/10">
-            <Salad className="h-6 w-6" />
+          <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-[#221D16] text-[#D99B43] border border-[#D99B43]/30 shadow-xs">
+            <Salad className="h-5 w-5" />
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <h2 className="text-lg font-bold text-white tracking-tight">
+              <h2 className="font-serif text-lg font-bold text-[#F5F2EB] tracking-tight">
                 Nutrición Holística & Dietas
               </h2>
-              <span className="rounded-md border border-emerald-500/30 bg-emerald-500/10 px-2 py-0.5 text-[10px] font-bold text-emerald-300">
+              <span className="rounded-md border border-[#7EA35A]/30 bg-[#1C2219] px-2 py-0.5 text-[10px] font-mono font-bold text-[#7EA35A]">
                 Plan Mariana Mont
               </span>
             </div>
-            <p className="text-xs text-neutral-400 mt-0.5">
+            <p className="text-xs text-[#8E867B] mt-0.5 font-mono">
               Tracking de porciones, macro balance dinámico y menús clínicos
             </p>
           </div>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2 font-mono">
           {/* Sub-nav Buttons */}
-          <div className="flex items-center p-1 rounded-2xl bg-neutral-950/80 border border-white/6 shadow-inner">
+          <div className="flex items-center p-1 rounded-lg bg-[#121110] border border-[#2A2723]">
             <button
               type="button"
               onClick={() => setActiveSubTab("daily")}
-              className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all ${
+              className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-md text-xs font-bold transition-all cursor-pointer ${
                 activeSubTab === "daily"
-                  ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 shadow-sm"
-                  : "text-neutral-400 hover:text-white"
+                  ? "bg-[#221D16] text-[#D99B43] border border-[#D99B43]/30 shadow-xs"
+                  : "text-[#8E867B] hover:text-[#DDD6C9]"
               }`}
             >
               <CalendarDays className="h-3.5 w-3.5" />
@@ -112,10 +112,10 @@ export function NutritionView({
             <button
               type="button"
               onClick={() => setActiveSubTab("planner")}
-              className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all ${
+              className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-md text-xs font-bold transition-all cursor-pointer ${
                 activeSubTab === "planner"
-                  ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 shadow-sm"
-                  : "text-neutral-400 hover:text-white"
+                  ? "bg-[#221D16] text-[#D99B43] border border-[#D99B43]/30 shadow-xs"
+                  : "text-[#8E867B] hover:text-[#DDD6C9]"
               }`}
             >
               <Calendar className="h-3.5 w-3.5" />
@@ -125,10 +125,10 @@ export function NutritionView({
             <button
               type="button"
               onClick={() => setActiveSubTab("recipes")}
-              className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all ${
+              className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-md text-xs font-bold transition-all cursor-pointer ${
                 activeSubTab === "recipes"
-                  ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 shadow-sm"
-                  : "text-neutral-400 hover:text-white"
+                  ? "bg-[#221D16] text-[#D99B43] border border-[#D99B43]/30 shadow-xs"
+                  : "text-[#8E867B] hover:text-[#DDD6C9]"
               }`}
             >
               <BookOpen className="h-3.5 w-3.5" />
@@ -138,10 +138,10 @@ export function NutritionView({
             <button
               type="button"
               onClick={() => setActiveSubTab("grocery")}
-              className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all ${
+              className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-md text-xs font-bold transition-all cursor-pointer ${
                 activeSubTab === "grocery"
-                  ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 shadow-sm"
-                  : "text-neutral-400 hover:text-white"
+                  ? "bg-[#221D16] text-[#D99B43] border border-[#D99B43]/30 shadow-xs"
+                  : "text-[#8E867B] hover:text-[#DDD6C9]"
               }`}
             >
               <ShoppingBag className="h-3.5 w-3.5" />
@@ -152,7 +152,7 @@ export function NutritionView({
           <button
             type="button"
             onClick={() => setIsPantryModalOpen(true)}
-            className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-linear-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-neutral-950 font-bold text-xs shadow-lg shadow-emerald-500/20 transition-all hover:scale-[1.02]"
+            className="flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-[#D99B43] hover:bg-[#E8AF59] text-[#121110] font-bold text-xs shadow-xs transition-all cursor-pointer font-sans"
           >
             <ChefHat className="h-4 w-4" />
             <span>💡 ¿Qué cocino hoy? (&lt;15m)</span>
@@ -161,7 +161,7 @@ export function NutritionView({
           <button
             type="button"
             onClick={() => setIsSettingsOpen(true)}
-            className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-neutral-950/80 border border-white/8 text-neutral-300 hover:text-white hover:bg-neutral-900 text-xs font-semibold transition-all shadow-sm"
+            className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-[#121110] border border-[#2A2723] text-[#DDD6C9] hover:text-[#F5F2EB] hover:bg-[#22201D] text-xs font-semibold transition-all cursor-pointer"
             title="Configurar metas de porciones y agua"
           >
             <Settings2 className="h-4 w-4" />
@@ -172,75 +172,75 @@ export function NutritionView({
 
       {/* 2. SUBTAB: DIARIO DE HOY */}
       {activeSubTab === "daily" && (
-        <div className="space-y-6 animate-in fade-in duration-200">
+        <div className="space-y-6">
           {/* Top Quick Status Metric Cards */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 font-mono">
             {/* Target Met Count */}
-            <div className="rounded-2xl border border-emerald-500/20 bg-neutral-900/60 p-4 backdrop-blur-xl shadow-xl">
-              <div className="flex items-center justify-between text-xs text-neutral-400">
+            <div className="rounded-lg border border-[#2A2723] bg-[#181715] p-4 shadow-sm">
+              <div className="flex items-center justify-between text-xs text-[#8E867B] font-sans">
                 <span>Grupos con Meta Cumplida</span>
-                <Sparkles className="h-4 w-4 text-emerald-400" />
+                <Sparkles className="h-4 w-4 text-[#7EA35A]" />
               </div>
-              <div className="mt-2 text-2xl font-bold font-mono text-emerald-400">
+              <div className="mt-2 text-2xl font-bold font-mono text-[#7EA35A]">
                 {groupsMetCount} de 7 grupos
               </div>
-              <div className="mt-1 text-[11px] text-neutral-500">
+              <div className="mt-1 text-[11px] text-[#8E867B]">
                 {Math.round((groupsMetCount / 7) * 100)}% de cumplimiento diario
               </div>
             </div>
 
             {/* Adherence Days */}
-            <div className="rounded-2xl border border-teal-500/20 bg-neutral-900/60 p-4 backdrop-blur-xl shadow-xl">
-              <div className="flex items-center justify-between text-xs text-neutral-400">
+            <div className="rounded-lg border border-[#2A2723] bg-[#181715] p-4 shadow-sm">
+              <div className="flex items-center justify-between text-xs text-[#8E867B] font-sans">
                 <span>Adherencia Semanal</span>
-                <Flame className="h-4 w-4 text-teal-400" />
+                <Flame className="h-4 w-4 text-[#D99B43]" />
               </div>
-              <div className="mt-2 text-2xl font-bold font-mono text-teal-400">
+              <div className="mt-2 text-2xl font-bold font-mono text-[#D99B43]">
                 {data.weeklyAdherence.daysWithPortionsMet} días en meta
               </div>
-              <div className="mt-1 text-[11px] text-neutral-500">
-                {data.weeklyAdherence.daysWithSalad} ensaladas registradas esta semana
+              <div className="mt-1 text-[11px] text-[#8E867B]">
+                {data.weeklyAdherence.daysWithSalad} ensaladas esta semana
               </div>
             </div>
 
             {/* B12 & Key Supplement status */}
-            <div className="rounded-2xl border border-violet-500/20 bg-neutral-900/60 p-4 backdrop-blur-xl shadow-xl">
-              <div className="flex items-center justify-between text-xs text-neutral-400">
+            <div className="rounded-lg border border-[#2A2723] bg-[#181715] p-4 shadow-sm">
+              <div className="flex items-center justify-between text-xs text-[#8E867B] font-sans">
                 <span>Vitamina B12 Semanal</span>
-                <Zap className="h-4 w-4 text-violet-400" />
+                <Zap className="h-4 w-4 text-[#4EAB9E]" />
               </div>
-              <div className="mt-2 text-xl font-bold text-white flex items-center gap-2">
+              <div className="mt-2 text-xl font-bold text-[#F5F2EB] flex items-center gap-2 font-mono">
                 {data.weeklyAdherence.b12LoggedThisWeek ? (
-                  <span className="text-emerald-400 flex items-center gap-1">
+                  <span className="text-[#7EA35A] flex items-center gap-1">
                     <CheckCircle2 className="h-5 w-5" />
                     <span>Tomada esta semana</span>
                   </span>
                 ) : (
-                  <span className="text-amber-400 font-mono text-base">
+                  <span className="text-[#D99B43] font-mono text-base">
                     ⏳ Pendiente de tomar
                   </span>
                 )}
               </div>
-              <div className="mt-1 text-[11px] text-neutral-500">
-                Dosis clínica: 1000 mcg 1 vez por semana
+              <div className="mt-1 text-[11px] text-[#8E867B]">
+                Dosis: 1000 mcg 1 vez por semana
               </div>
             </div>
           </div>
 
           {/* Today's Scheduled Meals Banner */}
           {data.scheduledMealsToday.length > 0 && (
-            <div className="rounded-2xl border border-white/8 bg-neutral-900/60 p-4.5 backdrop-blur-xl shadow-xl">
-              <div className="flex items-center justify-between pb-3 border-b border-white/6">
+            <div className="rounded-lg border border-[#2A2723] bg-[#181715] p-4.5 shadow-sm">
+              <div className="flex items-center justify-between pb-3 border-b border-[#2A2723]">
                 <div className="flex items-center gap-2">
-                  <Utensils className="h-4 w-4 text-emerald-400" />
-                  <h3 className="text-sm font-bold text-white tracking-tight">
+                  <Utensils className="h-4 w-4 text-[#7EA35A]" />
+                  <h3 className="font-serif text-sm font-bold text-[#F5F2EB] tracking-tight">
                     Comidas Programadas para Hoy
                   </h3>
                 </div>
                 <button
                   type="button"
                   onClick={() => setActiveSubTab("planner")}
-                  className="text-xs font-semibold text-emerald-400 hover:underline"
+                  className="text-xs font-semibold text-[#D99B43] hover:underline cursor-pointer"
                 >
                   Ver calendario completo →
                 </button>
@@ -253,15 +253,15 @@ export function NutritionView({
                   return (
                     <div
                       key={meal.id}
-                      className={`flex items-center justify-between p-3 rounded-xl border transition-all ${
+                      className={`flex items-center justify-between p-3 rounded-lg border transition-all ${
                         meal.isCompleted
-                          ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-200"
-                          : "border-white/8 bg-neutral-950/60 text-white"
+                          ? "border-[#7EA35A]/40 bg-[#1C2219] text-[#7EA35A]"
+                          : "border-[#2A2723] bg-[#121110] text-[#F5F2EB]"
                       }`}
                     >
                       <div className="space-y-0.5">
-                        <span className="text-xs font-bold block line-clamp-1">{title}</span>
-                        <span className="text-[10px] text-neutral-400 uppercase font-semibold">
+                        <span className="text-xs font-bold block line-clamp-1 font-serif">{title}</span>
+                        <span className="text-[10px] text-[#8E867B] uppercase font-semibold font-mono">
                           {meal.mealSlot}
                         </span>
                       </div>
@@ -270,10 +270,10 @@ export function NutritionView({
                         type="button"
                         onClick={() => handleToggleMeal(meal.id)}
                         disabled={isPending}
-                        className={`flex h-6 px-2.5 items-center justify-center rounded-lg text-xs font-bold transition-all ${
+                        className={`flex h-6 px-2.5 items-center justify-center rounded text-xs font-bold transition-all cursor-pointer ${
                           meal.isCompleted
-                            ? "bg-emerald-500 text-neutral-950 font-extrabold"
-                            : "bg-neutral-900 border border-white/10 text-emerald-300 hover:bg-emerald-500/20"
+                            ? "bg-[#7EA35A] text-[#121110] font-extrabold"
+                            : "bg-[#181715] border border-[#2A2723] text-[#7EA35A] hover:bg-[#1C2219]"
                         }`}
                       >
                         {meal.isCompleted ? "Comido ✓" : "Comer"}
@@ -289,10 +289,10 @@ export function NutritionView({
           <div>
             <div className="flex items-center justify-between mb-3">
               <div>
-                <h3 className="text-sm font-bold text-white tracking-tight">
+                <h3 className="font-serif text-sm font-bold text-[#F5F2EB] tracking-tight">
                   Registro de Porciones del Día
                 </h3>
-                <p className="text-xs text-neutral-400">
+                <p className="text-xs text-[#8E867B] font-mono">
                   Haz clic en (+ / -) para registrar lo que vas comiendo
                 </p>
               </div>

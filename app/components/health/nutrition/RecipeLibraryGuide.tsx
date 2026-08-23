@@ -65,17 +65,17 @@ export function RecipeLibraryGuide({
   ];
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-5 font-sans">
       {/* 1. Sub-navigation Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-2xl border border-white/8 bg-neutral-900/60 p-3 backdrop-blur-xl">
-        <div className="flex items-center gap-1.5 p-1 rounded-xl bg-neutral-950/80 border border-white/6 overflow-x-auto no-scrollbar">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-xl border border-[#2A2723] bg-[#181715] p-3 shadow-sm font-mono">
+        <div className="flex items-center gap-1.5 p-1 rounded-lg bg-[#121110] border border-[#2A2723] overflow-x-auto no-scrollbar">
           <button
             type="button"
             onClick={() => setActiveTab("recipes")}
-            className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all shrink-0 ${
+            className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-md text-xs font-bold transition-all shrink-0 cursor-pointer ${
               activeTab === "recipes"
-                ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 shadow-sm"
-                : "text-neutral-400 hover:text-white"
+                ? "bg-[#221D16] text-[#D99B43] border border-[#D99B43]/30 shadow-xs"
+                : "text-[#8E867B] hover:text-[#DDD6C9]"
             }`}
           >
             <BookOpen className="h-3.5 w-3.5" />
@@ -85,10 +85,10 @@ export function RecipeLibraryGuide({
           <button
             type="button"
             onClick={() => setActiveTab("guidelines")}
-            className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all shrink-0 ${
+            className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-md text-xs font-bold transition-all shrink-0 cursor-pointer ${
               activeTab === "guidelines"
-                ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 shadow-sm"
-                : "text-neutral-400 hover:text-white"
+                ? "bg-[#221D16] text-[#D99B43] border border-[#D99B43]/30 shadow-xs"
+                : "text-[#8E867B] hover:text-[#DDD6C9]"
             }`}
           >
             <ChefHat className="h-3.5 w-3.5" />
@@ -98,10 +98,10 @@ export function RecipeLibraryGuide({
           <button
             type="button"
             onClick={() => setActiveTab("equivalencies")}
-            className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all shrink-0 ${
+            className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-md text-xs font-bold transition-all shrink-0 cursor-pointer ${
               activeTab === "equivalencies"
-                ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 shadow-sm"
-                : "text-neutral-400 hover:text-white"
+                ? "bg-[#221D16] text-[#D99B43] border border-[#D99B43]/30 shadow-xs"
+                : "text-[#8E867B] hover:text-[#DDD6C9]"
             }`}
           >
             <Layers className="h-3.5 w-3.5" />
@@ -111,13 +111,13 @@ export function RecipeLibraryGuide({
 
         {activeTab === "recipes" && (
           <div className="relative w-full sm:w-72">
-            <Search className="absolute left-3 top-2.5 h-3.5 w-3.5 text-neutral-500" />
+            <Search className="absolute left-3 top-2 h-3.5 w-3.5 text-[#8E867B]" />
             <input
               type="text"
               placeholder="Buscar por nombre o ingrediente..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full rounded-xl border border-white/8 bg-neutral-950/80 pl-8 pr-3 py-1.5 text-xs text-white placeholder:text-neutral-600 focus:outline-none focus:border-emerald-500/50"
+              className="w-full rounded-lg border border-[#2A2723] bg-[#121110] pl-8 pr-3 py-1.5 text-xs text-[#F5F2EB] placeholder:text-[#8E867B] focus:outline-none focus:border-[#D99B43]"
             />
           </div>
         )}
@@ -127,16 +127,16 @@ export function RecipeLibraryGuide({
       {activeTab === "recipes" && (
         <div className="space-y-4">
           {/* Categories Horizontal Scroll */}
-          <div className="flex items-center gap-2 overflow-x-auto pb-1 no-scrollbar">
+          <div className="flex items-center gap-2 overflow-x-auto pb-1 no-scrollbar font-mono">
             {categoriesList.map((cat) => (
               <button
                 key={cat.id}
                 type="button"
                 onClick={() => setSelectedCategory(cat.id)}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs font-bold transition-all shrink-0 ${
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-bold transition-all shrink-0 cursor-pointer ${
                   selectedCategory === cat.id
-                    ? "bg-emerald-500/20 text-emerald-300 border-emerald-500/40 shadow-sm"
-                    : "bg-neutral-950/60 border-white/6 text-neutral-400 hover:text-white hover:border-white/12"
+                    ? "bg-[#221D16] text-[#D99B43] border-[#D99B43]/40 shadow-xs"
+                    : "bg-[#121110] border-[#2A2723] text-[#8E867B] hover:text-[#DDD6C9] hover:border-[#38332D]"
                 }`}
               >
                 <span>{cat.icon}</span>
@@ -146,8 +146,8 @@ export function RecipeLibraryGuide({
           </div>
 
           {/* Book Source Filter */}
-          <div className="flex items-center gap-2 text-xs">
-            <span className="text-[11px] font-semibold text-neutral-500">Colección:</span>
+          <div className="flex items-center gap-2 text-xs font-mono">
+            <span className="text-[11px] font-semibold text-[#8E867B]">Colección:</span>
             {[
               { id: "all", label: "Todas" },
               { id: "La Luna Verde", label: "La Luna Verde 📖" },
@@ -158,16 +158,16 @@ export function RecipeLibraryGuide({
                 key={b.id}
                 type="button"
                 onClick={() => setSelectedBook(b.id)}
-                className={`px-2.5 py-0.5 rounded-lg text-[11px] font-medium transition-all ${
+                className={`px-2.5 py-0.5 rounded-md text-[11px] font-medium transition-all cursor-pointer border ${
                   selectedBook === b.id
-                    ? "bg-neutral-800 text-white font-bold border border-white/10"
-                    : "text-neutral-500 hover:text-neutral-300"
+                    ? "bg-[#221D16] text-[#D99B43] font-bold border-[#D99B43]/30"
+                    : "text-[#8E867B] border-transparent hover:text-[#DDD6C9]"
                 }`}
               >
                 {b.label}
               </button>
             ))}
-            <span className="ml-auto font-mono text-[11px] text-neutral-500">
+            <span className="ml-auto font-mono text-[11px] text-[#8E867B]">
               {filteredRecipes.length} recetas encontradas
             </span>
           </div>
@@ -178,22 +178,22 @@ export function RecipeLibraryGuide({
               <div
                 key={recipe.id}
                 onClick={() => setActiveRecipeModal(recipe)}
-                className="group cursor-pointer flex flex-col justify-between rounded-2xl border border-white/8 bg-neutral-900/60 p-4.5 backdrop-blur-xl shadow-lg hover:border-emerald-500/30 hover:bg-neutral-900/90 transition-all"
+                className="group cursor-pointer flex flex-col justify-between rounded-lg border border-[#2A2723] bg-[#181715] p-4.5 shadow-sm hover:border-[#D99B43]/40 hover:bg-[#1E1C19] transition-all"
               >
                 <div>
-                  <div className="flex items-start justify-between gap-2 pb-2 border-b border-white/6">
+                  <div className="flex items-start justify-between gap-2 pb-2 border-b border-[#2A2723]">
                     <div>
-                      <h4 className="text-sm font-bold text-white tracking-tight leading-snug group-hover:text-emerald-300 transition-colors">
+                      <h4 className="font-serif text-sm font-bold text-[#F5F2EB] tracking-tight leading-snug group-hover:text-[#D99B43] transition-colors">
                         {recipe.title}
                       </h4>
-                      <div className="flex items-center gap-2 mt-1">
+                      <div className="flex items-center gap-2 mt-1 font-mono">
                         {recipe.category && (
-                          <span className="rounded bg-white/6 px-1.5 py-0.5 text-[10px] font-semibold text-neutral-400">
+                          <span className="rounded bg-[#121110] px-1.5 py-0.5 text-[10px] font-semibold text-[#8E867B] border border-[#2A2723]">
                             {recipe.category}
                           </span>
                         )}
                         {recipe.bookSource && (
-                          <span className="text-[10px] font-mono text-emerald-400">
+                          <span className="text-[10px] font-mono text-[#D99B43]">
                             {recipe.bookSource}
                           </span>
                         )}
@@ -203,7 +203,7 @@ export function RecipeLibraryGuide({
 
                   {/* Portions Contribution */}
                   {Object.keys(recipe.portions).length > 0 && (
-                    <div className="mt-3 flex flex-wrap gap-1">
+                    <div className="mt-3 flex flex-wrap gap-1 font-mono">
                       {(Object.keys(recipe.portions) as FoodGroupKey[]).map((k) => {
                         const meta = FOOD_GROUPS_CATALOG[k];
                         const qty = recipe.portions[k];
@@ -212,12 +212,7 @@ export function RecipeLibraryGuide({
                         return (
                           <span
                             key={k}
-                            className="inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 text-[10px] font-bold border"
-                            style={{
-                              backgroundColor: `${meta.color}15`,
-                              borderColor: `${meta.color}30`,
-                              color: "#ffffff",
-                            }}
+                            className="inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-[10px] font-bold border border-[#2A2723] bg-[#121110] text-[#DDD6C9]"
                           >
                             <span>{meta.icon}</span>
                             <span>
@@ -232,17 +227,17 @@ export function RecipeLibraryGuide({
                   {/* Ingredients preview */}
                   {recipe.ingredients.length > 0 && (
                     <div className="mt-3 space-y-1">
-                      <span className="text-[10px] font-bold uppercase tracking-wider text-neutral-500">
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-[#8E867B] font-mono">
                         Ingredientes principales:
                       </span>
-                      <p className="text-[11px] text-neutral-300 line-clamp-2 leading-relaxed">
+                      <p className="text-[11px] text-[#DDD6C9] line-clamp-2 leading-relaxed">
                         {recipe.ingredients.join(" • ")}
                       </p>
                     </div>
                   )}
                 </div>
 
-                <div className="mt-4 pt-2 border-t border-white/4 flex items-center justify-between text-[11px] text-emerald-400 font-semibold">
+                <div className="mt-4 pt-2 border-t border-[#2A2723] flex items-center justify-between text-[11px] text-[#D99B43] font-semibold font-mono">
                   <span>Ver receta completa & preparación</span>
                   <span className="group-hover:translate-x-0.5 transition-transform">→</span>
                 </div>
@@ -256,9 +251,9 @@ export function RecipeLibraryGuide({
       {activeTab === "guidelines" && (
         <div className="space-y-6">
           {/* General Indications */}
-          <div className="rounded-2xl border border-white/8 bg-neutral-900/60 p-5 backdrop-blur-xl">
-            <h3 className="text-sm font-bold text-white tracking-tight flex items-center gap-2 mb-4">
-              <Sparkles className="h-4 w-4 text-emerald-400" />
+          <div className="rounded-xl border border-[#2A2723] bg-[#181715] p-5 shadow-sm">
+            <h3 className="font-serif text-sm font-bold text-[#F5F2EB] tracking-tight flex items-center gap-2 mb-4">
+              <Sparkles className="h-4 w-4 text-[#7EA35A]" />
               <span>Indicaciones Clave de Mariana Mont</span>
             </h3>
 
@@ -266,14 +261,14 @@ export function RecipeLibraryGuide({
               {MARIANA_MONT_KNOWLEDGE_BASE.indications.map((ind) => (
                 <div
                   key={ind.id}
-                  className="flex items-start gap-3 p-3.5 rounded-xl border border-white/6 bg-neutral-950/60"
+                  className="flex items-start gap-3 p-3.5 rounded-lg border border-[#2A2723] bg-[#121110]"
                 >
-                  <span className="text-2xl mt-0.5">{ind.icon}</span>
+                  <span className="text-xl mt-0.5">{ind.icon}</span>
                   <div>
-                    <h4 className="text-xs font-bold text-white tracking-tight">
+                    <h4 className="font-serif text-xs font-bold text-[#F5F2EB] tracking-tight">
                       {ind.title}
                     </h4>
-                    <p className="text-[11px] text-neutral-400 mt-0.5 leading-relaxed">
+                    <p className="text-[11px] text-[#8E867B] mt-0.5 leading-relaxed font-mono">
                       {ind.description}
                     </p>
                   </div>
@@ -283,9 +278,9 @@ export function RecipeLibraryGuide({
           </div>
 
           {/* Preparation Rules & Tips */}
-          <div className="rounded-2xl border border-white/8 bg-neutral-900/60 p-5 backdrop-blur-xl">
-            <h3 className="text-sm font-bold text-white tracking-tight flex items-center gap-2 mb-4">
-              <ChefHat className="h-4 w-4 text-amber-400" />
+          <div className="rounded-xl border border-[#2A2723] bg-[#181715] p-5 shadow-sm">
+            <h3 className="font-serif text-sm font-bold text-[#F5F2EB] tracking-tight flex items-center gap-2 mb-4">
+              <ChefHat className="h-4 w-4 text-[#D99B43]" />
               <span>Reglas de Preparación & Digestibilidad</span>
             </h3>
 
@@ -293,14 +288,14 @@ export function RecipeLibraryGuide({
               {MARIANA_MONT_KNOWLEDGE_BASE.preparationTips.map((tip, i) => (
                 <div
                   key={i}
-                  className="flex items-start gap-3 p-3.5 rounded-xl border border-white/6 bg-neutral-950/60"
+                  className="flex items-start gap-3 p-3.5 rounded-lg border border-[#2A2723] bg-[#121110]"
                 >
-                  <span className="text-2xl mt-0.5">{tip.icon}</span>
+                  <span className="text-xl mt-0.5">{tip.icon}</span>
                   <div>
-                    <h4 className="text-xs font-bold text-amber-300 tracking-tight">
+                    <h4 className="font-serif text-xs font-bold text-[#D99B43] tracking-tight">
                       {tip.topic}
                     </h4>
-                    <p className="text-[11px] text-neutral-300 mt-1 leading-relaxed">
+                    <p className="text-[11px] text-[#DDD6C9] mt-1 leading-relaxed font-sans">
                       {tip.text}
                     </p>
                   </div>
@@ -312,48 +307,48 @@ export function RecipeLibraryGuide({
           {/* Cooking Supplies Reference */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {/* Oils */}
-            <div className="rounded-2xl border border-white/8 bg-neutral-900/60 p-4.5 backdrop-blur-xl">
-              <h4 className="text-xs font-bold text-emerald-300 tracking-tight flex items-center gap-2 mb-3">
+            <div className="rounded-xl border border-[#2A2723] bg-[#181715] p-4.5 shadow-sm">
+              <h4 className="font-serif text-xs font-bold text-[#7EA35A] tracking-tight flex items-center gap-2 mb-3">
                 <Droplets className="h-4 w-4" />
                 <span>Aceites Recomendados</span>
               </h4>
-              <div className="space-y-2">
+              <div className="space-y-2 font-mono">
                 {MARIANA_MONT_KNOWLEDGE_BASE.cookingSupplies.oils.map((oil, i) => (
-                  <div key={i} className="p-2 rounded-lg bg-neutral-950/60 border border-white/4 text-[11px]">
-                    <strong className="text-white block">{oil.name}</strong>
-                    <span className="text-neutral-400">{oil.use}</span>
+                  <div key={i} className="p-2 rounded-lg bg-[#121110] border border-[#2A2723] text-[11px]">
+                    <strong className="text-[#F5F2EB] block font-sans">{oil.name}</strong>
+                    <span className="text-[#8E867B]">{oil.use}</span>
                   </div>
                 ))}
               </div>
             </div>
 
             {/* Sweeteners */}
-            <div className="rounded-2xl border border-white/8 bg-neutral-900/60 p-4.5 backdrop-blur-xl">
-              <h4 className="text-xs font-bold text-amber-300 tracking-tight flex items-center gap-2 mb-3">
+            <div className="rounded-xl border border-[#2A2723] bg-[#181715] p-4.5 shadow-sm">
+              <h4 className="font-serif text-xs font-bold text-[#D99B43] tracking-tight flex items-center gap-2 mb-3">
                 <Flame className="h-4 w-4" />
                 <span>Endulzantes Permitidos</span>
               </h4>
-              <div className="space-y-2">
+              <div className="space-y-2 font-mono">
                 {MARIANA_MONT_KNOWLEDGE_BASE.cookingSupplies.sweeteners.map((sw, i) => (
-                  <div key={i} className="p-2 rounded-lg bg-neutral-950/60 border border-white/4 text-[11px]">
-                    <strong className="text-white block">{sw.name}</strong>
-                    <span className="text-neutral-400">{sw.notes}</span>
+                  <div key={i} className="p-2 rounded-lg bg-[#121110] border border-[#2A2723] text-[11px]">
+                    <strong className="text-[#F5F2EB] block font-sans">{sw.name}</strong>
+                    <span className="text-[#8E867B]">{sw.notes}</span>
                   </div>
                 ))}
               </div>
             </div>
 
             {/* Seasonings & Salt */}
-            <div className="rounded-2xl border border-white/8 bg-neutral-900/60 p-4.5 backdrop-blur-xl">
-              <h4 className="text-xs font-bold text-sky-300 tracking-tight flex items-center gap-2 mb-3">
+            <div className="rounded-xl border border-[#2A2723] bg-[#181715] p-4.5 shadow-sm">
+              <h4 className="font-serif text-xs font-bold text-[#4EAB9E] tracking-tight flex items-center gap-2 mb-3">
                 <Sparkles className="h-4 w-4" />
                 <span>Sal & Especias</span>
               </h4>
-              <div className="space-y-2">
+              <div className="space-y-2 font-mono">
                 {MARIANA_MONT_KNOWLEDGE_BASE.cookingSupplies.seasonings.map((sn, i) => (
-                  <div key={i} className="p-2 rounded-lg bg-neutral-950/60 border border-white/4 text-[11px]">
-                    <strong className="text-white block">{sn.name}</strong>
-                    <span className="text-neutral-400">{sn.notes}</span>
+                  <div key={i} className="p-2 rounded-lg bg-[#121110] border border-[#2A2723] text-[11px]">
+                    <strong className="text-[#F5F2EB] block font-sans">{sn.name}</strong>
+                    <span className="text-[#8E867B]">{sn.notes}</span>
                   </div>
                 ))}
               </div>
@@ -366,19 +361,19 @@ export function RecipeLibraryGuide({
       {activeTab === "equivalencies" && (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {/* Fruits */}
-          <div className="rounded-2xl border border-rose-500/20 bg-neutral-900/60 p-4.5 backdrop-blur-xl shadow-lg">
-            <div className="flex items-center gap-2 pb-3 border-b border-white/6">
+          <div className="rounded-xl border border-[#2A2723] bg-[#181715] p-4.5 shadow-sm">
+            <div className="flex items-center gap-2 pb-3 border-b border-[#2A2723]">
               <span className="text-xl">🍎</span>
               <div>
-                <h4 className="text-sm font-bold text-white">Frutas (1 tz = 1 porción)</h4>
-                <p className="text-[11px] text-rose-300 font-medium">Meta: 3 a 4 tazas/día</p>
+                <h4 className="font-serif text-sm font-bold text-[#F5F2EB]">Frutas (1 tz = 1 porción)</h4>
+                <p className="text-[11px] text-[#E05D52] font-mono">Meta: 3 a 4 tazas/día</p>
               </div>
             </div>
-            <div className="mt-3 flex flex-wrap gap-1.5">
+            <div className="mt-3 flex flex-wrap gap-1.5 font-mono">
               {MARIANA_MONT_KNOWLEDGE_BASE.foodEquivalencies.fruits.map((f, i) => (
                 <span
                   key={i}
-                  className="rounded-lg bg-rose-500/10 border border-rose-500/20 px-2 py-1 text-xs font-medium text-rose-200"
+                  className="rounded bg-[#121110] border border-[#2A2723] px-2 py-1 text-xs text-[#DDD6C9]"
                 >
                   {f}
                 </span>
@@ -387,19 +382,19 @@ export function RecipeLibraryGuide({
           </div>
 
           {/* Vegetables */}
-          <div className="rounded-2xl border border-emerald-500/20 bg-neutral-900/60 p-4.5 backdrop-blur-xl shadow-lg">
-            <div className="flex items-center gap-2 pb-3 border-b border-white/6">
+          <div className="rounded-xl border border-[#2A2723] bg-[#181715] p-4.5 shadow-sm">
+            <div className="flex items-center gap-2 pb-3 border-b border-[#2A2723]">
               <span className="text-xl">🥦</span>
               <div>
-                <h4 className="text-sm font-bold text-white">Verduras & Hongos</h4>
-                <p className="text-[11px] text-emerald-300 font-medium">Meta: 4 a 5 raciones/día</p>
+                <h4 className="font-serif text-sm font-bold text-[#F5F2EB]">Verduras & Hongos</h4>
+                <p className="text-[11px] text-[#7EA35A] font-mono">Meta: 4 a 5 raciones/día</p>
               </div>
             </div>
-            <div className="mt-3 flex flex-wrap gap-1.5">
+            <div className="mt-3 flex flex-wrap gap-1.5 font-mono">
               {MARIANA_MONT_KNOWLEDGE_BASE.foodEquivalencies.vegetables.map((v, i) => (
                 <span
                   key={i}
-                  className="rounded-lg bg-emerald-500/10 border border-emerald-500/20 px-2 py-1 text-xs font-medium text-emerald-200"
+                  className="rounded bg-[#121110] border border-[#2A2723] px-2 py-1 text-xs text-[#DDD6C9]"
                 >
                   {v}
                 </span>
@@ -408,19 +403,19 @@ export function RecipeLibraryGuide({
           </div>
 
           {/* Legumes */}
-          <div className="rounded-2xl border border-purple-500/20 bg-neutral-900/60 p-4.5 backdrop-blur-xl shadow-lg">
-            <div className="flex items-center gap-2 pb-3 border-b border-white/6">
+          <div className="rounded-xl border border-[#2A2723] bg-[#181715] p-4.5 shadow-sm">
+            <div className="flex items-center gap-2 pb-3 border-b border-[#2A2723]">
               <span className="text-xl">🫘</span>
               <div>
-                <h4 className="text-sm font-bold text-white">Legumbres & Tofu</h4>
-                <p className="text-[11px] text-purple-300 font-medium">Meta: 2 a 4 porciones/día</p>
+                <h4 className="font-serif text-sm font-bold text-[#F5F2EB]">Legumbres & Tofu</h4>
+                <p className="text-[11px] text-[#4EAB9E] font-mono">Meta: 2 a 4 porciones/día</p>
               </div>
             </div>
-            <div className="mt-3 flex flex-wrap gap-1.5">
+            <div className="mt-3 flex flex-wrap gap-1.5 font-mono">
               {MARIANA_MONT_KNOWLEDGE_BASE.foodEquivalencies.legumes.map((l, i) => (
                 <span
                   key={i}
-                  className="rounded-lg bg-purple-500/10 border border-purple-500/20 px-2 py-1 text-xs font-medium text-purple-200"
+                  className="rounded bg-[#121110] border border-[#2A2723] px-2 py-1 text-xs text-[#DDD6C9]"
                 >
                   {l}
                 </span>
@@ -429,19 +424,19 @@ export function RecipeLibraryGuide({
           </div>
 
           {/* Cereals */}
-          <div className="rounded-2xl border border-amber-500/20 bg-neutral-900/60 p-4.5 backdrop-blur-xl shadow-lg">
-            <div className="flex items-center gap-2 pb-3 border-b border-white/6">
+          <div className="rounded-xl border border-[#2A2723] bg-[#181715] p-4.5 shadow-sm">
+            <div className="flex items-center gap-2 pb-3 border-b border-[#2A2723]">
               <span className="text-xl">🌾</span>
               <div>
-                <h4 className="text-sm font-bold text-white">Cereales Integrales</h4>
-                <p className="text-[11px] text-amber-300 font-medium">Meta: 4 a 6 raciones/día</p>
+                <h4 className="font-serif text-sm font-bold text-[#F5F2EB]">Cereales Integrales</h4>
+                <p className="text-[11px] text-[#D99B43] font-mono">Meta: 4 a 6 raciones/día</p>
               </div>
             </div>
-            <div className="mt-3 flex flex-wrap gap-1.5">
+            <div className="mt-3 flex flex-wrap gap-1.5 font-mono">
               {MARIANA_MONT_KNOWLEDGE_BASE.foodEquivalencies.cereals.map((c, i) => (
                 <span
                   key={i}
-                  className="rounded-lg bg-amber-500/10 border border-amber-500/20 px-2 py-1 text-xs font-medium text-amber-200"
+                  className="rounded bg-[#121110] border border-[#2A2723] px-2 py-1 text-xs text-[#DDD6C9]"
                 >
                   {c}
                 </span>
@@ -450,19 +445,19 @@ export function RecipeLibraryGuide({
           </div>
 
           {/* Seeds & Fats */}
-          <div className="rounded-2xl border border-lime-500/20 bg-neutral-900/60 p-4.5 backdrop-blur-xl shadow-lg">
-            <div className="flex items-center gap-2 pb-3 border-b border-white/6">
+          <div className="rounded-xl border border-[#2A2723] bg-[#181715] p-4.5 shadow-sm">
+            <div className="flex items-center gap-2 pb-3 border-b border-[#2A2723]">
               <span className="text-xl">🥑</span>
               <div>
-                <h4 className="text-sm font-bold text-white">Grasas & Semillas</h4>
-                <p className="text-[11px] text-lime-300 font-medium">Meta: 3 a 4 raciones/día</p>
+                <h4 className="font-serif text-sm font-bold text-[#F5F2EB]">Grasas & Semillas</h4>
+                <p className="text-[11px] text-[#7EA35A] font-mono">Meta: 3 a 4 raciones/día</p>
               </div>
             </div>
-            <div className="mt-3 flex flex-wrap gap-1.5">
+            <div className="mt-3 flex flex-wrap gap-1.5 font-mono">
               {MARIANA_MONT_KNOWLEDGE_BASE.foodEquivalencies.seeds.map((s, i) => (
                 <span
                   key={i}
-                  className="rounded-lg bg-lime-500/10 border border-lime-500/20 px-2 py-1 text-xs font-medium text-lime-200"
+                  className="rounded bg-[#121110] border border-[#2A2723] px-2 py-1 text-xs text-[#DDD6C9]"
                 >
                   {s}
                 </span>
@@ -474,23 +469,23 @@ export function RecipeLibraryGuide({
 
       {/* 5. RECIPE DETAIL MODAL */}
       {activeRecipeModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-200">
-          <div className="w-full max-w-xl rounded-3xl border border-white/10 bg-neutral-900/95 p-6 shadow-2xl backdrop-blur-2xl flex flex-col max-h-[85vh]">
-            <div className="flex items-start justify-between pb-4 border-b border-white/8">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-150 font-sans">
+          <div className="w-full max-w-xl rounded-xl border border-[#2A2723] bg-[#181715] p-6 shadow-2xl flex flex-col max-h-[85vh]">
+            <div className="flex items-start justify-between pb-4 border-b border-[#2A2723]">
               <div>
-                <span className="text-xs font-bold text-emerald-400 font-mono">
+                <span className="text-xs font-bold text-[#D99B43] font-mono">
                   {activeRecipeModal.bookSource || "Mariana Mont"} • {activeRecipeModal.category || activeRecipeModal.mealSlot}
                 </span>
-                <h3 className="text-lg font-bold text-white tracking-tight mt-0.5">
+                <h3 className="font-serif text-lg font-bold text-[#F5F2EB] tracking-tight mt-0.5">
                   {activeRecipeModal.title}
                 </h3>
               </div>
               <button
                 type="button"
                 onClick={() => setActiveRecipeModal(null)}
-                className="rounded-lg p-1.5 text-neutral-400 hover:bg-neutral-800 hover:text-white"
+                className="rounded-lg p-1.5 text-[#8E867B] hover:bg-[#22201D] hover:text-[#F5F2EB] cursor-pointer"
               >
-                <X className="h-5 w-5" />
+                <X className="h-4 w-4" />
               </button>
             </div>
 
@@ -498,10 +493,10 @@ export function RecipeLibraryGuide({
               {/* Portions Contribution */}
               {Object.keys(activeRecipeModal.portions).length > 0 && (
                 <div>
-                  <span className="text-xs font-bold text-neutral-400 block mb-1.5">
+                  <span className="text-xs font-bold text-[#8E867B] block mb-1.5 font-mono">
                     Aporte de Porciones:
                   </span>
-                  <div className="flex flex-wrap gap-1.5">
+                  <div className="flex flex-wrap gap-1.5 font-mono">
                     {(Object.keys(activeRecipeModal.portions) as FoodGroupKey[]).map((k) => {
                       const meta = FOOD_GROUPS_CATALOG[k];
                       const qty = activeRecipeModal.portions[k];
@@ -510,12 +505,7 @@ export function RecipeLibraryGuide({
                       return (
                         <span
                           key={k}
-                          className="inline-flex items-center gap-1 rounded-lg px-2.5 py-1 text-xs font-bold border"
-                          style={{
-                            backgroundColor: `${meta.color}20`,
-                            borderColor: `${meta.color}40`,
-                            color: "#ffffff",
-                          }}
+                          className="inline-flex items-center gap-1 rounded px-2 py-1 text-xs font-bold border border-[#2A2723] bg-[#121110] text-[#DDD6C9]"
                         >
                           <span>{meta.icon}</span>
                           <span>
@@ -531,16 +521,16 @@ export function RecipeLibraryGuide({
               {/* Ingredients List */}
               {activeRecipeModal.ingredients.length > 0 && (
                 <div className="space-y-2">
-                  <span className="text-xs font-bold text-white block">
+                  <span className="font-serif text-xs font-bold text-[#F5F2EB] block">
                     Ingredientes:
                   </span>
-                  <ul className="space-y-1.5 p-3 rounded-2xl bg-neutral-950/60 border border-white/6">
+                  <ul className="space-y-1.5 p-3 rounded-lg bg-[#121110] border border-[#2A2723]">
                     {activeRecipeModal.ingredients.map((ing, i) => (
                       <li
                         key={i}
-                        className="text-xs text-neutral-200 flex items-start gap-2 leading-relaxed"
+                        className="text-xs text-[#DDD6C9] flex items-start gap-2 leading-relaxed"
                       >
-                        <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 mt-1.5 shrink-0" />
+                        <span className="h-1.5 w-1.5 rounded-full bg-[#7EA35A] mt-1.5 shrink-0" />
                         <span>{ing}</span>
                       </li>
                     ))}
@@ -551,18 +541,18 @@ export function RecipeLibraryGuide({
               {/* Instructions / Prep notes */}
               {activeRecipeModal.prepNotes && (
                 <div className="space-y-2">
-                  <span className="text-xs font-bold text-white block">
+                  <span className="font-serif text-xs font-bold text-[#F5F2EB] block">
                     Elaboración & Preparación:
                   </span>
-                  <div className="p-3.5 rounded-2xl bg-neutral-950/80 border border-emerald-500/20 text-xs text-neutral-300 leading-relaxed">
+                  <div className="p-3.5 rounded-lg bg-[#121110] border border-[#2A2723] text-xs text-[#DDD6C9] leading-relaxed font-sans">
                     {activeRecipeModal.prepNotes}
                   </div>
                 </div>
               )}
             </div>
 
-            <div className="mt-4 pt-3 border-t border-white/8 flex justify-between items-center">
-              <span className="text-[11px] text-neutral-500">
+            <div className="mt-4 pt-3 border-t border-[#2A2723] flex justify-between items-center font-mono">
+              <span className="text-[11px] text-[#8E867B]">
                 100% Plant-Based & Holístico
               </span>
 
@@ -570,7 +560,7 @@ export function RecipeLibraryGuide({
                 <button
                   type="button"
                   onClick={() => setActiveRecipeModal(null)}
-                  className="px-4 py-2 text-xs font-semibold text-neutral-400 hover:text-white"
+                  className="px-4 py-2 text-xs font-semibold text-[#8E867B] hover:text-[#DDD6C9] cursor-pointer"
                 >
                   Cerrar
                 </button>
@@ -581,7 +571,7 @@ export function RecipeLibraryGuide({
                       onScheduleRecipe(activeRecipeModal.id);
                       setActiveRecipeModal(null);
                     }}
-                    className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-emerald-600 font-bold text-xs text-white hover:bg-emerald-500 transition-all shadow-md shadow-emerald-600/20"
+                    className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-[#D99B43] hover:bg-[#E8AF59] font-bold text-xs text-[#121110] transition-all cursor-pointer shadow-xs font-sans"
                   >
                     <CalendarPlus className="h-4 w-4" />
                     <span>Programar en Calendario</span>
