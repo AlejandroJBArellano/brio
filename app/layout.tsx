@@ -1,19 +1,27 @@
 import type { Metadata, Viewport } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Fraunces, Plus_Jakarta_Sans, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const fraunces = Fraunces({
+  variable: "--font-fraunces",
   subsets: ["latin"],
+  display: "swap",
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const plusJakartaSans = Plus_Jakarta_Sans({
+  variable: "--font-jakarta",
   subsets: ["latin"],
+  display: "swap",
+});
+
+const jetbrainsMono = JetBrains_Mono({
+  variable: "--font-jetbrains",
+  subsets: ["latin"],
+  display: "swap",
 });
 
 export const viewport: Viewport = {
-  themeColor: "#090a0f",
+  themeColor: "#121110",
   width: "device-width",
   initialScale: 1,
   maximumScale: 1,
@@ -52,15 +60,10 @@ export default function RootLayout({
 }) {
   return (
     <html
-      lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} dark h-full antialiased`}
+      lang="es"
+      className={`${plusJakartaSans.variable} ${fraunces.variable} ${jetbrainsMono.variable} dark h-full antialiased font-sans`}
     >
-      <body className="min-h-full bg-[#090a0f] text-neutral-100 flex flex-col selection:bg-indigo-500/30 selection:text-white">
-        {/* Ambient background glow accents */}
-        <div className="fixed inset-0 pointer-events-none -z-10 overflow-hidden">
-          <div className="absolute -top-40 left-1/2 -translate-x-1/2 w-175 h-87.5 bg-linear-to-tr from-indigo-600/10 via-violet-600/10 to-transparent blur-[120px]" />
-          <div className="absolute top-1/3 -left-40 size-125 bg-linear-to-r from-sky-600/5 to-transparent blur-[100px]" />
-        </div>
+      <body className="min-h-full bg-[#121110] text-[#DDD6C9] flex flex-col selection:bg-[#D99B43]/25 selection:text-[#F5F2EB]">
         {children}
       </body>
     </html>

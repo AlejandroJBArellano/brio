@@ -27,6 +27,7 @@ export default async function DashboardLayout({
     <CommandCenterProvider>
       <DashboardShellClient
         user={habiticaData.user}
+        tasks={habiticaData.tasks}
         tags={habiticaData.tags}
         isConfigured={habiticaData.isConfigured}
       >

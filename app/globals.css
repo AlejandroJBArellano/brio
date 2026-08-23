@@ -2,28 +2,41 @@
 
 @layer base {
   :root {
-    --background: #090a0f;
-    --foreground: #f3f4f6;
+    --background: #121110;
+    --foreground: #ddd6c9;
+    --font-serif: var(--font-fraunces), Georgia, serif;
+    --font-sans: var(--font-jakarta), -apple-system, BlinkMacSystemFont, sans-serif;
+    --font-mono: var(--font-jetbrains), ui-monospace, SFMono-Regular, monospace;
   }
 
   body {
     background-color: var(--background);
     color: var(--foreground);
+    font-family: var(--font-sans);
     font-feature-settings: "cv02", "cv03", "cv04", "cv11";
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
 
+  h1, h2, h3, .font-serif {
+    font-family: var(--font-serif);
+  }
+
+  .font-mono, code, kbd, pre {
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+  }
+
   ::selection {
-    background-color: rgba(99, 102, 241, 0.3);
-    color: #ffffff;
+    background-color: rgba(217, 155, 67, 0.28);
+    color: #f5f2eb;
   }
 }
 
-/* Custom Minimalist Scrollbars */
+/* Archival Fine Scrollbars */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 5px;
+  height: 5px;
 }
 
 ::-webkit-scrollbar-track {
@@ -31,12 +44,12 @@
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.12);
-  border-radius: 9999px;
+  background: #2a2723;
+  border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.25);
+  background: #3d3831;
 }
 
 /* Safe Area Utilities for Mobile & PWA */
@@ -69,4 +82,5 @@ button, a, input, select, textarea {
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
+
 
