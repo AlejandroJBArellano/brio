@@ -2,6 +2,7 @@
 
 import { createTransactionAction } from "@/app/actions/finance";
 import { TransactionType } from "@/lib/types";
+import { getTodayDateStr } from "@/lib/dateUtils";
 import {
   AlertCircle,
   ArrowDownRight,
@@ -51,7 +52,7 @@ export function TransactionModal({
   const [account, setAccount] = useState("nu");
   const [isAntExpense, setIsAntExpense] = useState(false);
   const [notes, setNotes] = useState("");
-  const [date, setDate] = useState(new Date().toISOString().split("T")[0]);
+  const [date, setDate] = useState(getTodayDateStr());
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
 

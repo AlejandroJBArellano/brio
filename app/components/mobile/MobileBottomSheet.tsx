@@ -3,6 +3,7 @@ import { createBodyCompositionAction, logWaterAction } from "@/app/actions/healt
 import { quickAdjustPortionAction, toggleNutritionHabitAction } from "@/app/actions/nutrition";
 import { createSingleTaskAction } from "@/app/actions/tasks";
 import { FoodGroupKey } from "@/lib/types";
+import { getTodayDateStr } from "@/lib/dateUtils";
 import {
   Check,
   CheckSquare,
@@ -152,7 +153,7 @@ export function MobileBottomSheet({
   };
 
   const handleQuickPortion = (group: FoodGroupKey, name: string) => {
-    const todayStr = new Date().toISOString().split("T")[0];
+    const todayStr = getTodayDateStr();
     startTransition(async () => {
       const res = await quickAdjustPortionAction(todayStr, group, 1.0);
       if (res.success) {
@@ -167,7 +168,7 @@ export function MobileBottomSheet({
   };
 
   const handleQuickHabit = (habitKey: "dailySalad" | "noUltraProcessed" | "b12Weekly", name: string) => {
-    const todayStr = new Date().toISOString().split("T")[0];
+    const todayStr = getTodayDateStr();
     startTransition(async () => {
       const res = await toggleNutritionHabitAction(todayStr, habitKey);
       if (res.success) {

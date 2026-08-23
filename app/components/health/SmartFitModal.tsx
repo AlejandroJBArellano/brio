@@ -2,6 +2,7 @@
 
 import { createBodyCompositionLogAction } from "@/app/actions/health";
 import { BodyCompositionLog, BodyCompositionSegmental } from "@/lib/types";
+import { getTodayDateStr } from "@/lib/dateUtils";
 import {
   Activity,
   AlertCircle,
@@ -30,7 +31,7 @@ export function SmartFitModal({
   latestLog,
   onSuccess,
 }: SmartFitModalProps) {
-  const [date, setDate] = useState(new Date().toISOString().split("T")[0]);
+  const [date, setDate] = useState(getTodayDateStr());
   const [weightKg, setWeightKg] = useState(latestLog ? String(latestLog.weightKg) : "");
   const [bodyFat, setBodyFat] = useState(
     latestLog?.bodyFatPercentage ? String(latestLog.bodyFatPercentage) : ""

@@ -17,6 +17,7 @@ import {
   PantryCategory,
   PantryItem,
 } from "@/lib/types";
+import { getTodayDateStr } from "@/lib/dateUtils";
 import {
   AlertCircle,
   Check,
@@ -53,7 +54,7 @@ export function PantryAssistantModal({
   isOpen,
   onClose,
   recipesCatalog = MARIANA_MONT_PRESET_RECIPES,
-  todayDate = new Date().toISOString().split("T")[0],
+  todayDate = getTodayDateStr(),
   onRefresh,
 }: PantryAssistantModalProps) {
   const [pantryItems, setPantryItems] = useState<PantryItem[]>([]);

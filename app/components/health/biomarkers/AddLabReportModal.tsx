@@ -3,6 +3,7 @@
 import { createLabReportAction } from "@/app/actions/health";
 import { BIOMARKER_CATEGORIES_META, DEFAULT_BIOMARKER_TEMPLATES } from "@/lib/labPresets";
 import { BiomarkerCategoryKey, BiomarkerStatus } from "@/lib/types";
+import { getTodayDateStr } from "@/lib/dateUtils";
 import {
   AlertCircle,
   Check,
@@ -23,7 +24,7 @@ export function AddLabReportModal({
   onClose,
   onSuccess,
 }: AddLabReportModalProps) {
-  const [date, setDate] = useState(new Date().toISOString().split("T")[0]);
+  const [date, setDate] = useState(getTodayDateStr());
   const [labName, setLabName] = useState("Laboratorio Chopo");
   const [orderNumber, setOrderNumber] = useState("");
   const [patientId, setPatientId] = useState("");

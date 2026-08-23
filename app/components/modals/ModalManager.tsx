@@ -10,6 +10,7 @@ import {
   HealthDashboardData,
   ProjectsDashboardData,
 } from "@/lib/types";
+import { getTodayDateStr } from "@/lib/dateUtils";
 import dynamic from "next/dynamic";
 
 // Dynamic imports for bundle optimization - components load only when requested
@@ -102,7 +103,7 @@ export function ModalManager({
   tasks = [],
   tags = [],
   calendarSchedule = {
-    date: new Date().toISOString().split("T")[0],
+    date: getTodayDateStr(),
     events: [],
     totalMeetingMinutes: 0,
   },

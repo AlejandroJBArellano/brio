@@ -2,6 +2,7 @@
 
 import { generateGroceryListAction } from "@/app/actions/nutrition";
 import { GroceryListCategory } from "@/lib/types";
+import { getWeekDateRange } from "@/lib/dateUtils";
 import {
   Check,
   ClipboardCheck,
@@ -20,20 +21,14 @@ export function SmartGroceryList({
   initialStartDate,
   initialEndDate,
 }: SmartGroceryListProps) {
-  // Default range: Monday to Sunday of current week
-  const today = new Date();
-  const dayOfWeek = today.getUTCDay();
-  const diffToMon = (dayOfWeek + 6) % 7;
-  const monday = new Date(today);
-  monday.setUTCDate(monday.getUTCDate() - diffToMon);
-  const sunday = new Date(monday);
-  sunday.setUTCDate(sunday.getUTCDate() + 6);
+  // Default range: Monday to Sunday of current week in CDMX
+  const { mondayStr, sundayStr } = getWeekDateRange();
 
   const [startDate, setStartDate] = useState<string>(
-    initialStartDate || monday.toISOString().split("T")[0]
+    initialStartDate || mondayStr
   );
   const [endDate, setEndDate] = useState<string>(
-    initialEndDate || sunday.toISOString().split("T")[0]
+    initialEndDate || sundayStr
   );
   const [categories, setCategories] = useState<GroceryListCategory[]>([]);
   const [checkedIds, setCheckedIds] = useState<Set<string>>(new Set());

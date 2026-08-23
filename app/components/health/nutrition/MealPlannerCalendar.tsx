@@ -12,6 +12,7 @@ import {
   NutritionRecipe,
   ScheduledMealItem,
 } from "@/lib/types";
+import { getTodayDateStr } from "@/lib/dateUtils";
 import {
   Calendar as CalendarIcon,
   Check,
@@ -108,7 +109,7 @@ export function MealPlannerCalendar({
       dateStr,
       dayName: dayNames[i],
       dayNumber: d.getUTCDate(),
-      isToday: dateStr === new Date().toISOString().split("T")[0],
+      isToday: dateStr === getTodayDateStr(),
       isSelected: dateStr === selectedDate,
     };
   });
@@ -207,7 +208,7 @@ export function MealPlannerCalendar({
             </button>
             <button
               type="button"
-              onClick={() => handleDayClick(new Date().toISOString().split("T")[0])}
+              onClick={() => handleDayClick(getTodayDateStr())}
               className="px-2.5 py-1 rounded-lg border border-emerald-500/20 bg-emerald-500/10 text-xs font-bold text-emerald-300 hover:bg-emerald-500/20 transition-all"
             >
               Hoy
