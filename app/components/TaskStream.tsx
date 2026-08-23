@@ -38,7 +38,7 @@ export function TaskStream({
 }: TaskStreamProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [hideCompleted, setHideCompleted] = useState(false);
-  const [isPending, startTransition] = useTransition();
+  const [_isPending, startTransition] = useTransition();
 
   const tagsMap = useMemo(() => {
     const map: Record<string, string> = {};

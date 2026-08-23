@@ -27,7 +27,7 @@ export function AddLabReportModal({
   const [date, setDate] = useState(getTodayDateStr());
   const [labName, setLabName] = useState("Laboratorio Chopo");
   const [orderNumber, setOrderNumber] = useState("");
-  const [patientId, setPatientId] = useState("");
+  const [patientId, _setPatientId] = useState("");
   const [title, setTitle] = useState("Química Sanguínea y Biometría Hemática");
   const [doctorNotes, setDoctorNotes] = useState("");
   const [biomarkers, setBiomarkers] = useState<

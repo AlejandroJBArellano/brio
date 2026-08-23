@@ -27,7 +27,7 @@ export function TasksViewClient({
     selectedTask,
     setSelectedTask,
     mustWinTaskIds,
-    setMustWinTaskIds,
+    setMustWinTaskIds: _setMustWinTaskIds,
     openModal,
   } = useCommandCenter();
 

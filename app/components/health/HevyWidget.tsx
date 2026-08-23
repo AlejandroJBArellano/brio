@@ -45,7 +45,7 @@ export function HevyWidget({
 
   const latestWorkout = recentWorkouts[0];
   const totalWorkouts = stats?.totalWorkouts || recentWorkouts.length;
-  const totalVolume = stats?.totalVolumeKg || 0;
+  const _totalVolume = stats?.totalVolumeKg || 0;
 
   const handleSync = () => {
     setSyncFeedback(null);

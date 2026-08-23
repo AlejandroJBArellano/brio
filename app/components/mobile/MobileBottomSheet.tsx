@@ -33,7 +33,7 @@ export function MobileBottomSheet({
   isOpen,
   onClose,
   initialTab = "expense",
-  dailyAntRemaining = 150,
+  dailyAntRemaining: _dailyAntRemaining = 150,
   categories = [],
   accounts = [],
 }: MobileBottomSheetProps) {

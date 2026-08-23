@@ -45,7 +45,7 @@ export function SmartFitModal({
   const [visceralFat, setVisceralFat] = useState(
     latestLog?.visceralFatLevel ? String(latestLog.visceralFatLevel) : ""
   );
-  const [bmi, setBmi] = useState(latestLog?.bmi ? String(latestLog.bmi) : "");
+  const [bmi, _setBmi] = useState(latestLog?.bmi ? String(latestLog.bmi) : "");
   const [bmr, setBmr] = useState(latestLog?.bmrKcal ? String(latestLog.bmrKcal) : "");
   const [water, setWater] = useState(
     latestLog?.waterLiters ? String(latestLog.waterLiters) : ""

@@ -16,7 +16,7 @@ interface BiomarkerPanelCardProps {
 
 export function BiomarkerPanelCard({
   biomarker,
-  accentColor = "emerald",
+  accentColor: _accentColor = "emerald",
 }: BiomarkerPanelCardProps) {
   const [showNotes, setShowNotes] = useState(false);
 
@@ -37,7 +37,7 @@ export function BiomarkerPanelCard({
   const isHigh = status === "high" || status === "critical";
   const isLow = status === "low";
   const isOptimal = status === "optimal";
-  const isNormal = status === "normal";
+  const _isNormal = status === "normal";
 
   const badgeConfig = isHigh
     ? {

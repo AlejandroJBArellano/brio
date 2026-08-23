@@ -1,7 +1,7 @@
 // Brio OS Service Worker for Push Notifications & Android PWA support
-const CACHE_NAME = "brio-pwa-v1";
+const _CACHE_NAME = "brio-pwa-v1";
 
-self.addEventListener("install", (event) => {
+self.addEventListener("install", (_event) => {
   self.skipWaiting();
 });
 

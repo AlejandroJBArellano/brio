@@ -20,7 +20,7 @@ export function PortionCounterCard({
 }: PortionCounterCardProps) {
   const percent = target > 0 ? Math.min(100, Math.round((current / target) * 100)) : 0;
   const isCompleted = current >= target && target > 0;
-  const isOver = current > target;
+  const _isOver = current > target;
 
   return (
     <div

@@ -82,7 +82,7 @@ export async function fetchAnalyticsDataAction(): Promise<AnalyticsDashboardData
 
   // Generate 90 days grid
   const heatmap: HeatmapDay[] = [];
-  const today = new Date();
+  const _today = new Date();
   let totalActivitiesLogged = 0;
   let currentStreak = 0;
   let longestStreak = 0;

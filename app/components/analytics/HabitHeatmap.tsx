@@ -23,7 +23,7 @@ export function HabitHeatmap({
   days,
   currentStreak,
   longestStreak,
-  totalActivities,
+  totalActivities: _totalActivities,
 }: HabitHeatmapProps) {
   const [hoveredDay, setHoveredDay] = useState<HeatmapDay | null>(null);
 

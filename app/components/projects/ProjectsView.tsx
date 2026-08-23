@@ -49,14 +49,14 @@ export function ProjectsView({
   // Project form state
   const [projectTitle, setProjectTitle] = useState("");
   const [projectDesc, setProjectDesc] = useState("");
-  const [projectStatus, setProjectStatus] = useState<ProjectStatus>("idea");
+  const [projectStatus, _setProjectStatus] = useState<ProjectStatus>("idea");
   const [projectTech, setProjectTech] = useState("");
   const [projectRepo, setProjectRepo] = useState("");
 
   // Book form state
   const [bookTitle, setBookTitle] = useState("");
   const [bookAuthor, setBookAuthor] = useState("");
-  const [bookType, setBookType] = useState<LearningItemType>("book");
+  const [bookType, _setBookType] = useState<LearningItemType>("book");
   const [bookTotal, setBookTotal] = useState(300);
 
   const [isPending, startTransition] = useTransition();

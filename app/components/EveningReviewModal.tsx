@@ -43,7 +43,7 @@ export function EveningReviewModal({
   const [reflection, setReflection] = useState("");
   const [gratitude, setGratitude] = useState("");
   const [tomorrowNotes, setTomorrowNotes] = useState("");
-  const [expensesConfirmed, setExpensesConfirmed] = useState(true);
+  const [expensesConfirmed, _setExpensesConfirmed] = useState(true);
   const [isShutdownComplete, setIsShutdownComplete] = useState(false);
   const [isPending, startTransition] = useTransition();
 

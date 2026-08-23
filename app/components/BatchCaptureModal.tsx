@@ -29,7 +29,7 @@ export function BatchCaptureModal({
   onClose,
 }: BatchCaptureModalProps) {
   const [rawText, setRawText] = useState("");
-  const [showCheatsheet, setShowCheatsheet] = useState(false);
+  const [_showCheatsheet, _setShowCheatsheet] = useState(false);
   const [lastResult, setLastResult] = useState<BatchActionResult | null>(null);
   const [isPending, startTransition] = useTransition();
   const textareaRef = useRef<HTMLTextAreaElement>(null);

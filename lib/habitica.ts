@@ -439,7 +439,7 @@ export class HabiticaClient {
       return { success: true, stats: inMemoryMockUser.stats };
     }
 
-    const data = await this.request<{ delta?: number }>(
+    const _data = await this.request<{ delta?: number }>(
       `/tasks/${taskId}/score/${direction}`,
       {
         method: "POST",

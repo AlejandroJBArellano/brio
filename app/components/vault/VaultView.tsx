@@ -50,7 +50,7 @@ export function VaultView({ data, onRefresh, onOpenScratchpad }: VaultViewProps)
   const [isNewProjectModalOpen, setIsNewProjectModalOpen] = useState(false);
   const [projectTitle, setProjectTitle] = useState("");
   const [projectDesc, setProjectDesc] = useState("");
-  const [projectStatus, setProjectStatus] = useState<ProjectStatus>("idea");
+  const [projectStatus, _setProjectStatus] = useState<ProjectStatus>("idea");
   const [projectTech, setProjectTech] = useState("");
   const [projectRepo, setProjectRepo] = useState("");
 

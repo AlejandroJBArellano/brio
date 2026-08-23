@@ -51,7 +51,7 @@ export function AddVaultItemModal({
   const [tags, setTags] = useState("");
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [selectedCover, setSelectedCover] = useState<File | null>(null);
-  const [coverUrl, setCoverUrl] = useState("");
+  const [coverUrl, _setCoverUrl] = useState("");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
 

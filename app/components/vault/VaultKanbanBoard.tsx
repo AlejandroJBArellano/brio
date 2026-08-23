@@ -215,7 +215,7 @@ export function VaultKanbanBoard({
                     const isCourse = item.category === "course";
                     const isBook = item.category === "book";
                     const isSheetMusic = item.category === "sheet_music";
-                    const isResource = item.category === "video" || item.category === "link" || item.category === "document";
+                    const _isResource = item.category === "video" || item.category === "link" || item.category === "document";
 
                     const currentProg = item.progress || 0;
                     const totalUnits = item.totalPages || 0;

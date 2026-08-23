@@ -51,7 +51,7 @@ export function HealthView({ data, onRefresh }: HealthViewProps) {
   const [activeHealthTab, setActiveHealthTab] = useState<
     "overview" | "hormonal" | "nutrition" | "body_composition" | "hevy" | "biomarkers"
   >("overview");
-  const [workoutNotes, setWorkoutNotes] = useState("");
+  const [workoutNotes, _setWorkoutNotes] = useState("");
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
   const [isManageSupplementsOpen, setIsManageSupplementsOpen] = useState(false);
   const [isSmartFitModalOpen, setIsSmartFitModalOpen] = useState(false);

@@ -63,7 +63,7 @@ export function parseICalFeed(icsContent: string, targetDate: Date = new Date())
   // Sort chronologically by start time
   events.sort((a, b) => new Date(a.start).getTime() - new Date(b.start).getTime());
 
-  const now = new Date();
+  const _now = new Date();
   const nextEvent = events.find((e) => e.status === "now" || e.status === "upcoming");
   const totalMeetingMinutes = events.reduce((sum, e) => (e.isAllDay ? sum : sum + e.durationMinutes), 0);
 
