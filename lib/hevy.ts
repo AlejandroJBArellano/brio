@@ -1,4 +1,5 @@
 import { HevyExercise, HevySet, HevyWorkout } from "./types";
+import { toDateStr } from "./dateUtils";
 
 const HEVY_BASE_URL = "https://api.hevyapp.com";
 
@@ -56,7 +57,7 @@ export function parseRawHevyWorkout(raw: RawHevyWorkout): HevyWorkout {
   const endMs = new Date(endTime).getTime();
   const durationSeconds = Math.max(0, Math.round((endMs - startMs) / 1000));
 
-  const date = startTime.split("T")[0];
+  const date = toDateStr(startTime);
 
   const exercises: HevyExercise[] = Array.isArray(raw.exercises)
     ? raw.exercises.map((ex, exIdx) => {

@@ -1,4 +1,5 @@
 import { CalendarDaySchedule, CalendarEvent } from "./types";
+import { toDateStr } from "./dateUtils";
 
 /**
  * Native lightweight iCal parser for Google Calendar feeds.
@@ -67,7 +68,7 @@ export function parseICalFeed(icsContent: string, targetDate: Date = new Date())
   const totalMeetingMinutes = events.reduce((sum, e) => (e.isAllDay ? sum : sum + e.durationMinutes), 0);
 
   return {
-    date: targetDate.toISOString().split("T")[0],
+    date: toDateStr(targetDate),
     events,
     nextEvent,
     totalMeetingMinutes,
@@ -227,7 +228,7 @@ export function getMockCalendarSchedule(): CalendarDaySchedule {
   ];
 
   return {
-    date: now.toISOString().split("T")[0],
+    date: toDateStr(now),
     events,
     nextEvent: events[1],
     totalMeetingMinutes: 165,
