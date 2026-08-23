@@ -17,6 +17,7 @@ import {
 } from "@/lib/types";
 import {
   BookOpen,
+  ExternalLink,
   Plus,
   Rocket,
   Trash2,
@@ -226,6 +227,34 @@ export function ProjectsView({
                       ))}
                     </div>
                   )}
+
+                  {/* External links */}
+                  {(project.liveUrl || project.repoUrl) && (
+                    <div className="mt-3.5 flex items-center gap-2">
+                      {project.liveUrl && (
+                        <a
+                          href={project.liveUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white/5 hover:bg-white/10 border border-white/8 text-[11px] font-medium text-neutral-300 hover:text-white transition-all"
+                        >
+                          <span>🌐 Sitio Web</span>
+                          <ExternalLink className="h-3 w-3 text-neutral-400" />
+                        </a>
+                      )}
+                      {project.repoUrl && (
+                        <a
+                          href={project.repoUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white/5 hover:bg-white/10 border border-white/8 text-[11px] font-medium text-neutral-300 hover:text-white transition-all"
+                        >
+                          <span>🔗 Repo / Enlace</span>
+                          <ExternalLink className="h-3 w-3 text-neutral-400" />
+                        </a>
+                      )}
+                    </div>
+                  )}
                 </div>
 
                 <div className="mt-5 pt-3 border-t border-white/6 flex items-center justify-between">
@@ -274,10 +303,10 @@ export function ProjectsView({
             </div>
             <div>
               <h2 className="text-base font-bold text-white tracking-tight">
-                Tracker de Libros & Cursos
+                Tracker de Cursos, Certificaciones & Universidad
               </h2>
               <p className="text-xs text-neutral-400">
-                Aprendizaje continuo, lecturas activas y notas clave
+                Rutas de aprendizaje activas, certificaciones cloud y materias universitarias
               </p>
             </div>
           </div>
@@ -288,7 +317,7 @@ export function ProjectsView({
             className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-amber-500 font-bold text-xs text-neutral-950 hover:bg-amber-400 shadow-lg shadow-amber-500/20 transition-all"
           >
             <Plus className="h-4 w-4" />
-            <span>Nuevo Libro / Curso</span>
+            <span>Nuevo Curso / Libro</span>
           </button>
         </div>
 
@@ -298,6 +327,7 @@ export function ProjectsView({
               100,
               Math.round((item.currentProgress / item.totalProgress) * 100)
             );
+            const unitLabel = item.totalProgress <= 20 ? "módulos / días" : (item.type === "book" ? "págs" : "%");
 
             return (
               <div
@@ -339,7 +369,7 @@ export function ProjectsView({
                   <div>
                     <div className="flex items-center justify-between text-[11px] mb-1 font-mono">
                       <span className="text-neutral-400">
-                        {item.currentProgress} / {item.totalProgress} págs
+                        {item.currentProgress} / {item.totalProgress} {unitLabel}
                       </span>
                       <span className="text-amber-400 font-bold">{percent}%</span>
                     </div>
@@ -355,19 +385,19 @@ export function ProjectsView({
                   <div className="flex items-center gap-2">
                     <button
                       type="button"
-                      onClick={() => handleIncrementBookProgress(item, 10)}
+                      onClick={() => handleIncrementBookProgress(item, item.totalProgress <= 20 ? 1 : 10)}
                       disabled={isPending}
                       className="flex-1 py-1.5 rounded-lg bg-neutral-950 border border-white/6 text-xs font-mono text-neutral-300 hover:text-white"
                     >
-                      +10 págs
+                      +{item.totalProgress <= 20 ? "1 u." : "10"}
                     </button>
                     <button
                       type="button"
-                      onClick={() => handleIncrementBookProgress(item, 25)}
+                      onClick={() => handleIncrementBookProgress(item, item.totalProgress <= 20 ? 2 : 25)}
                       disabled={isPending}
                       className="flex-1 py-1.5 rounded-lg bg-neutral-950 border border-white/6 text-xs font-mono text-neutral-300 hover:text-white"
                     >
-                      +25 págs
+                      +{item.totalProgress <= 20 ? "2 u." : "25"}
                     </button>
                   </div>
                 </div>
