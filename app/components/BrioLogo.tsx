@@ -35,32 +35,28 @@ export function BrioLogo({
           fill="none"
           xmlns="http://www.w3.org/2000/svg"
         >
-          {/* Razor-Sharp Editorial Monogram B with Inlaid Momentum Spark */}
-          {/* Main Serif Stem */}
-          <rect x="10" y="8" width="3" height="24" rx="0.5" fill="#F5F2EB" />
-          <path d="M 8 9 L 15 9 M 8 31 L 15 31" stroke="#F5F2EB" strokeWidth="1.2" strokeLinecap="square" />
-
-          {/* Top Bow */}
+          {/* Precision Rayito (Lightning Momentum Mark) */}
+          {/* Left / Shaded Facet */}
           <path
-            d="M 13 9.5 H 22 C 26 9.5 28.5 12 28.5 15.5 C 28.5 18.5 26.5 20.5 22.5 20.5 H 13"
-            stroke="#D99B43"
-            strokeWidth="2"
-            strokeLinecap="square"
+            d="M 22.5 7 L 13.5 21 H 19 L 17 33 L 19.8 20 Z"
+            fill="#D99B43"
           />
 
-          {/* Bottom Bow */}
+          {/* Right / Luminous Facet */}
           <path
-            d="M 13 20.5 H 23.5 C 28 20.5 30.5 23 30.5 27 C 30.5 30.5 27.5 31.5 22.5 31.5 H 13"
-            stroke="#D99B43"
-            strokeWidth="2"
-            strokeLinecap="square"
-          />
-
-          {/* Inlaid Precision Energy Spark (⚡) */}
-          <path
-            d="M 23 15 L 27 15 L 19 26 L 22 26 L 16 33 L 19 23 L 16 23 Z"
+            d="M 22.5 7 L 19.8 20 L 17 33 L 26.5 19 H 21 Z"
             fill="#F5F2EB"
-            opacity="0.9"
+          />
+
+          {/* Center Spine Ridge */}
+          <line
+            x1="22.5"
+            y1="7"
+            x2="17"
+            y2="33"
+            stroke="#FFFDF7"
+            strokeWidth="0.5"
+            opacity="0.8"
           />
 
           {/* Fine Cardinal Corner Ticks */}
