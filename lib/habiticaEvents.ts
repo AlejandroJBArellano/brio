@@ -45,10 +45,12 @@ const EVENT_TEMPLATES: Record<HabiticaEventType, EventTemplate> = {
     tags: ["brio", "health"],
   },
   SUPPLEMENTS_COMPLETED: {
-    type: "daily",
+    type: "habit",
     text: "[Brio] Suplementación Diaria",
     notes: "Tomar suplementación y vitaminas según el protocolo.",
     priority: 1,
+    up: true,
+    down: false,
     tags: ["brio", "health"],
   },
   SLEEP_LOGGED: {
@@ -199,7 +201,6 @@ async function findOrCreateHabiticaTask(
       notes: customNotes || template.notes,
       type: template.type,
       priority: template.priority,
-      tags: template.tags,
       up: template.up,
       down: template.down,
     };

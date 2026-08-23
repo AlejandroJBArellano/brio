@@ -725,31 +725,49 @@ export async function toggleSupplementAction(
     const sql = getDb();
     const todayStr = new Date().toISOString().split("T")[0];
 
-    const current = await sql`
-      SELECT supplements FROM health_logs WHERE date = ${todayStr} LIMIT 1;
-    `;
+    const [catalog, current] = await Promise.all([
+      getSupplementsCatalog(sql),
+      sql`SELECT supplements FROM health_logs WHERE date = ${todayStr} LIMIT 1;`,
+    ]);
 
-    let supplements: SupplementItem[] =
+    const existingSupplements: SupplementItem[] =
       current.length > 0 && Array.isArray(current[0].supplements)
         ? current[0].supplements
         : [];
 
-    supplements = supplements.map((s) =>
-      s.id === supplementId ? { ...s, taken: !s.taken } : s
-    );
+    const updatedSupplements: SupplementItem[] = catalog.map((catItem) => {
+      const match = existingSupplements.find((s) => s.id === catItem.id);
+      const wasTaken = match ? Boolean(match.taken) : false;
+      const isTarget = catItem.id === supplementId;
+      return {
+        id: catItem.id,
+        name: catItem.dosage ? `${catItem.name} (${catItem.dosage})` : catItem.name,
+        dosage: catItem.dosage,
+        timing: catItem.timing,
+        taken: isTarget ? !wasTaken : wasTaken,
+      };
+    });
 
     await sql`
       INSERT INTO health_logs (date, supplements, updated_at)
-      VALUES (${todayStr}, ${JSON.stringify(supplements)}::jsonb, NOW())
+      VALUES (${todayStr}, ${JSON.stringify(updatedSupplements)}::jsonb, NOW())
       ON CONFLICT (date) DO UPDATE
-      SET supplements = ${JSON.stringify(supplements)}::jsonb,
+      SET supplements = ${JSON.stringify(updatedSupplements)}::jsonb,
           updated_at = NOW();
     `;
 
-    // Award Habitica XP
-    await awardHabiticaEvent("SUPPLEMENTS_COMPLETED");
+    // Award Habitica XP safely without blocking
+    try {
+      await awardHabiticaEvent("SUPPLEMENTS_COMPLETED");
+    } catch (gamifyErr) {
+      console.warn("[Habitica Gamify Non-blocking Warning]:", gamifyErr);
+    }
 
-    revalidatePath("/");
+    try {
+      revalidatePath("/");
+    } catch {
+      // Ignored in non-request test contexts
+    }
     return { success: true };
   } catch (error) {
     console.error("[Toggle Supplement Error]:", error);
@@ -768,11 +786,12 @@ export async function batchToggleSupplementsByTimingAction(
     const sql = getDb();
     const todayStr = new Date().toISOString().split("T")[0];
 
-    const current = await sql`
-      SELECT supplements FROM health_logs WHERE date = ${todayStr} LIMIT 1;
-    `;
+    const [catalog, current] = await Promise.all([
+      getSupplementsCatalog(sql),
+      sql`SELECT supplements FROM health_logs WHERE date = ${todayStr} LIMIT 1;`,
+    ]);
 
-    let supplements: SupplementItem[] =
+    const existingSupplements: SupplementItem[] =
       current.length > 0 && Array.isArray(current[0].supplements)
         ? current[0].supplements
         : [];
@@ -780,40 +799,70 @@ export async function batchToggleSupplementsByTimingAction(
     let modifiedCount = 0;
     const normalizedTiming = timing.toLowerCase().trim();
 
-    supplements = supplements.map((s) => {
-      const itemTiming = (s.timing || "").toLowerCase().trim();
+    const updatedSupplements: SupplementItem[] = catalog.map((catItem) => {
+      const match = existingSupplements.find((s) => s.id === catItem.id);
+      const wasTaken = match ? Boolean(match.taken) : false;
+      const itemTiming = (catItem.timing || "").toLowerCase().trim();
       const matches =
         normalizedTiming === "all" ||
         itemTiming === normalizedTiming ||
-        (normalizedTiming === "mañana" && (itemTiming.includes("mañana") || itemTiming.includes("morning") || itemTiming.includes("desayuno"))) ||
-        (normalizedTiming === "tarde" && (itemTiming.includes("tarde") || itemTiming.includes("afternoon") || itemTiming.includes("comida")));
+        (normalizedTiming === "mañana" &&
+          (itemTiming.includes("mañana") ||
+            itemTiming.includes("morning") ||
+            itemTiming.includes("desayuno"))) ||
+        (normalizedTiming === "tarde" &&
+          (itemTiming.includes("tarde") ||
+            itemTiming.includes("afternoon") ||
+            itemTiming.includes("comida")));
 
       if (matches) {
         modifiedCount++;
-        return { ...s, taken: completed };
+        return {
+          id: catItem.id,
+          name: catItem.dosage ? `${catItem.name} (${catItem.dosage})` : catItem.name,
+          dosage: catItem.dosage,
+          timing: catItem.timing,
+          taken: completed,
+        };
       }
-      return s;
+      return {
+        id: catItem.id,
+        name: catItem.dosage ? `${catItem.name} (${catItem.dosage})` : catItem.name,
+        dosage: catItem.dosage,
+        timing: catItem.timing,
+        taken: wasTaken,
+      };
     });
 
     await sql`
       INSERT INTO health_logs (date, supplements, updated_at)
-      VALUES (${todayStr}, ${JSON.stringify(supplements)}::jsonb, NOW())
+      VALUES (${todayStr}, ${JSON.stringify(updatedSupplements)}::jsonb, NOW())
       ON CONFLICT (date) DO UPDATE
-      SET supplements = ${JSON.stringify(supplements)}::jsonb,
+      SET supplements = ${JSON.stringify(updatedSupplements)}::jsonb,
           updated_at = NOW();
     `;
 
-    if (modifiedCount > 0 && completed) {
-      await awardHabiticaEvent("SUPPLEMENTS_COMPLETED", {
-        customNotes: `Protocolo ${timing}: ${modifiedCount} suplementos tomados`,
-      });
+    if (completed) {
+      try {
+        await awardHabiticaEvent("SUPPLEMENTS_COMPLETED");
+      } catch (gamifyErr) {
+        console.warn("[Habitica Gamify Non-blocking Warning]:", gamifyErr);
+      }
     }
 
-    revalidatePath("/");
+    try {
+      revalidatePath("/");
+    } catch {
+      // Ignored in non-request test contexts
+    }
     return { success: true, modifiedCount };
   } catch (error) {
     console.error("[Batch Toggle Supplements Error]:", error);
-    return { success: false, modifiedCount: 0, error: "Failed to batch toggle supplements" };
+    return {
+      success: false,
+      modifiedCount: 0,
+      error: "Failed to batch toggle supplements",
+    };
   }
 }
 

@@ -34,7 +34,7 @@ import {
   Zap,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useMemo, useState, useTransition } from "react";
+import { useEffect, useMemo, useState, useTransition } from "react";
 
 interface MobileQuickDashboardProps {
   user: HabiticaUser;
@@ -81,6 +81,12 @@ export function MobileQuickDashboard({
   // Health Data
   const todayHealth = healthData.todayHealth;
   const supplements = todayHealth?.supplements || [];
+  const [optimisticSupplements, setOptimisticSupplements] = useState(supplements);
+
+  useEffect(() => {
+    setOptimisticSupplements(supplements);
+  }, [supplements]);
+
   const waterMl = todayHealth?.waterMl || 0;
   const waterPercent = Math.min(100, Math.round((waterMl / 3000) * 100));
 
@@ -93,9 +99,9 @@ export function MobileQuickDashboard({
 
   // Filtered supplements
   const filteredSupplements = useMemo(() => {
-    if (activeSuppTiming === "Todos") return supplements;
+    if (activeSuppTiming === "Todos") return optimisticSupplements;
     const term = activeSuppTiming.toLowerCase();
-    return supplements.filter((s) => {
+    return optimisticSupplements.filter((s) => {
       const itemTiming = (s.timing || "").toLowerCase();
       if (term === "mañana") {
         return itemTiming.includes("mañana") || itemTiming.includes("morning") || itemTiming.includes("desayuno");
@@ -105,7 +111,7 @@ export function MobileQuickDashboard({
       }
       return true;
     });
-  }, [supplements, activeSuppTiming]);
+  }, [optimisticSupplements, activeSuppTiming]);
 
   const allTakenInActiveTiming =
     filteredSupplements.length > 0 && filteredSupplements.every((s) => s.taken);
@@ -120,17 +126,41 @@ export function MobileQuickDashboard({
 
   // Handlers
   const handleToggleSupplement = (id: string) => {
+    setOptimisticSupplements((prev) =>
+      prev.map((s) => (s.id === id ? { ...s, taken: !s.taken } : s))
+    );
     startTransition(async () => {
       await toggleSupplementAction(id);
+      router.refresh();
     });
   };
 
   const handleBatchTakeSupplements = () => {
+    const targetValue = !allTakenInActiveTiming;
+    setOptimisticSupplements((prev) =>
+      prev.map((s) => {
+        const itemTiming = (s.timing || "").toLowerCase();
+        const term = activeSuppTiming.toLowerCase();
+        const matches =
+          term === "todos" ||
+          (term === "mañana" &&
+            (itemTiming.includes("mañana") ||
+              itemTiming.includes("morning") ||
+              itemTiming.includes("desayuno"))) ||
+          (term === "tarde" &&
+            (itemTiming.includes("tarde") ||
+              itemTiming.includes("afternoon") ||
+              itemTiming.includes("comida")));
+
+        return matches ? { ...s, taken: targetValue } : s;
+      })
+    );
     startTransition(async () => {
       await batchToggleSupplementsByTimingAction(
         activeSuppTiming === "Todos" ? "all" : activeSuppTiming,
-        !allTakenInActiveTiming
+        targetValue
       );
+      router.refresh();
     });
   };
 
