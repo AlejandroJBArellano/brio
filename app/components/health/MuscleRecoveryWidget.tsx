@@ -35,7 +35,7 @@ export function MuscleRecoveryWidget({ recentWorkouts = [] }: MuscleRecoveryWidg
         return {
           fill: "#EF4444",
           stroke: "#DC2626",
-          glow: "rgba(239, 68, 68, 0.5)",
+          glow: "rgba(239, 68, 68, 0.65)",
           badgeBg: "bg-red-500/10 text-red-400 border-red-500/20",
           progressBg: "bg-red-500",
           text: "text-red-400",
@@ -46,7 +46,7 @@ export function MuscleRecoveryWidget({ recentWorkouts = [] }: MuscleRecoveryWidg
         return {
           fill: "#F59E0B",
           stroke: "#D97706",
-          glow: "rgba(245, 158, 11, 0.4)",
+          glow: "rgba(245, 158, 11, 0.55)",
           badgeBg: "bg-amber-500/10 text-amber-300 border-amber-500/20",
           progressBg: "bg-amber-400",
           text: "text-amber-300",
@@ -57,7 +57,7 @@ export function MuscleRecoveryWidget({ recentWorkouts = [] }: MuscleRecoveryWidg
         return {
           fill: "#10B981",
           stroke: "#059669",
-          glow: "rgba(16, 185, 129, 0.4)",
+          glow: "rgba(16, 185, 129, 0.55)",
           badgeBg: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
           progressBg: "bg-emerald-400",
           text: "text-emerald-400",
@@ -69,7 +69,7 @@ export function MuscleRecoveryWidget({ recentWorkouts = [] }: MuscleRecoveryWidg
         return {
           fill: "#0EA5E9",
           stroke: "#0284C7",
-          glow: "rgba(14, 165, 233, 0.3)",
+          glow: "rgba(14, 165, 233, 0.45)",
           badgeBg: "bg-sky-500/10 text-sky-400 border-sky-500/20",
           progressBg: "bg-sky-400",
           text: "text-sky-400",
@@ -81,7 +81,7 @@ export function MuscleRecoveryWidget({ recentWorkouts = [] }: MuscleRecoveryWidg
 
   const getMuscleFill = (mId: MuscleGroupId) => {
     const m = recoverySummary.muscles[mId];
-    if (!m) return "#2A2723";
+    if (!m) return "#22201D";
     const colors = getStateColor(m.state);
     return colors.fill;
   };
@@ -92,7 +92,7 @@ export function MuscleRecoveryWidget({ recentWorkouts = [] }: MuscleRecoveryWidg
     const colors = getStateColor(m.state);
     const isSelected = selectedMuscleId === mId;
     return isSelected
-      ? `drop-shadow(0 0 10px ${colors.fill}) drop-shadow(0 0 4px ${colors.fill})`
+      ? `drop-shadow(0 0 12px ${colors.fill}) drop-shadow(0 0 4px ${colors.fill})`
       : `drop-shadow(0 0 4px ${colors.glow})`;
   };
 
@@ -249,219 +249,251 @@ export function MuscleRecoveryWidget({ recentWorkouts = [] }: MuscleRecoveryWidg
             </div>
           </div>
 
-          {/* SVG Anatomical Mannequin */}
-          <div className="relative w-full max-w-65 py-4 flex items-center justify-center">
+          {/* SVG Anatomical Mannequin with High-Definition Biomechanical Paths */}
+          <div className="relative w-full max-w-70 py-3 flex items-center justify-center">
             {viewMode === "anterior" ? (
               /* ANTERIOR / FRONTAL VIEW SVG */
               <svg
-                viewBox="0 0 200 360"
-                className="w-full h-auto max-h-85 drop-shadow-md select-none"
+                viewBox="0 0 240 380"
+                className="w-full h-auto max-h-90 drop-shadow-lg select-none"
               >
-                <defs>
-                  {/* Head & Body outline glow */}
-                  <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
-                    <feGaussianBlur stdDeviation="2" result="blur" />
-                    <feComposite in="SourceGraphic" in2="blur" operator="over" />
-                  </filter>
-                </defs>
+                {/* Background HUD Grid Lines */}
+                <g opacity="0.15" stroke="#D99B43" strokeWidth="0.5" strokeDasharray="2,4">
+                  <line x1="120" y1="10" x2="120" y2="370" />
+                  <line x1="30" y1="95" x2="210" y2="95" />
+                  <line x1="30" y1="170" x2="210" y2="170" />
+                  <line x1="40" y1="260" x2="200" y2="260" />
+                </g>
 
-                {/* Head / Neck Base (Neutral) */}
-                <circle cx="100" cy="28" r="14" fill="#22201D" stroke="#38332B" strokeWidth="1.5" />
-                <path d="M93 42 L107 42 L109 52 L91 52 Z" fill="#22201D" stroke="#38332B" strokeWidth="1" />
+                {/* Body Base Silhouette (Athletic Mannequin Outline) */}
+                <path
+                  d="M 120 12 C 129 12, 136 18, 136 28 C 136 38, 130 46, 126 48 L 126 54 C 146 54, 172 58, 184 66 C 196 74, 198 94, 192 116 C 188 132, 198 164, 194 198 C 192 208, 184 212, 178 206 C 172 198, 174 176, 170 162 L 160 160 C 168 184, 172 220, 166 250 C 160 274, 154 274, 156 294 C 160 320, 158 350, 150 366 C 144 372, 134 372, 136 358 C 138 336, 134 300, 134 276 L 124 200 L 116 200 L 106 276 C 106 300, 102 336, 104 358 C 106 372, 96 372, 90 366 C 82 350, 80 320, 84 294 C 86 274, 80 274, 74 250 C 68 220, 72 184, 80 160 L 70 162 C 66 176, 68 198, 62 206 C 56 212, 48 208, 46 198 C 42 164, 52 132, 48 116 C 42 94, 44 74, 56 66 C 68 58, 94 54, 114 54 L 114 48 C 110 46, 104 38, 104 28 C 104 18, 111 12, 120 12 Z"
+                  fill="#1B1916"
+                  stroke="#2D2822"
+                  strokeWidth="1.2"
+                />
 
-                {/* Chest / Pectorales */}
+                {/* Head, Chin & Neck Structure */}
+                <ellipse cx="120" cy="27" rx="12" ry="14" fill="#22201D" stroke="#38332B" strokeWidth="1.2" />
+                <path d="M 114 39 L 126 39 L 128 50 L 112 50 Z" fill="#22201D" stroke="#38332B" strokeWidth="1" />
+                {/* Clavicles (Collarbones) */}
+                <path d="M 118 52 C 104 53, 86 57, 72 61" stroke="#38332B" strokeWidth="1" fill="none" />
+                <path d="M 122 52 C 136 53, 154 57, 168 61" stroke="#38332B" strokeWidth="1" fill="none" />
+
+                {/* CHEST / PECTORALES */}
                 <g
                   onClick={() => setSelectedMuscleId("chest")}
-                  className="cursor-pointer transition-transform hover:scale-[1.02] transform-origin-center"
+                  className="cursor-pointer transition-all duration-200 hover:scale-[1.02] transform-origin-center"
                   style={{ filter: getMuscleGlow("chest") }}
                 >
+                  {/* Left Pec */}
                   <path
-                    d="M74 54 C82 54, 98 57, 98 78 C98 84, 84 89, 74 89 C64 89, 61 78, 62 67 C63 58, 68 54, 74 54 Z"
+                    d="M 118 55 C 105 54, 82 58, 75 66 C 68 74, 72 96, 92 98 C 108 100, 118 92, 118 80 Z"
                     fill={getMuscleFill("chest")}
-                    opacity={selectedMuscleId === "chest" ? 1 : 0.85}
+                    opacity={selectedMuscleId === "chest" ? 1 : 0.88}
                     stroke="#121110"
                     strokeWidth="1.5"
                   />
+                  {/* Right Pec */}
                   <path
-                    d="M126 54 C118 54, 102 57, 102 78 C102 84, 116 89, 126 89 C136 89, 139 78, 138 67 C137 58, 132 54, 126 54 Z"
+                    d="M 122 55 C 135 54, 158 58, 165 66 C 172 74, 168 96, 148 98 C 132 100, 122 92, 122 80 Z"
                     fill={getMuscleFill("chest")}
-                    opacity={selectedMuscleId === "chest" ? 1 : 0.85}
+                    opacity={selectedMuscleId === "chest" ? 1 : 0.88}
                     stroke="#121110"
                     strokeWidth="1.5"
                   />
                 </g>
 
-                {/* Shoulders / Deltoides (Anterior) */}
+                {/* SHOULDERS / DELTOIDES (ANTERIOR & LATERAL HEADS) */}
                 <g
                   onClick={() => setSelectedMuscleId("shoulders")}
-                  className="cursor-pointer transition-transform hover:scale-[1.02]"
+                  className="cursor-pointer transition-all duration-200 hover:scale-[1.02]"
                   style={{ filter: getMuscleGlow("shoulders") }}
                 >
+                  {/* Left Deltoid */}
                   <path
-                    d="M58 54 C63 54, 65 64, 60 76 C55 78, 48 72, 46 64 C44 56, 52 54, 58 54 Z"
+                    d="M 72 61 C 60 62, 48 72, 46 86 C 44 98, 54 106, 62 100 C 68 94, 72 82, 74 69 Z"
                     fill={getMuscleFill("shoulders")}
-                    opacity={selectedMuscleId === "shoulders" ? 1 : 0.85}
+                    opacity={selectedMuscleId === "shoulders" ? 1 : 0.88}
                     stroke="#121110"
                     strokeWidth="1.5"
                   />
+                  {/* Right Deltoid */}
                   <path
-                    d="M142 54 C137 54, 135 64, 140 76 C145 78, 152 72, 154 64 C156 56, 148 54, 142 54 Z"
+                    d="M 168 61 C 180 62, 192 72, 194 86 C 196 98, 186 106, 178 100 C 172 94, 168 82, 166 69 Z"
                     fill={getMuscleFill("shoulders")}
-                    opacity={selectedMuscleId === "shoulders" ? 1 : 0.85}
+                    opacity={selectedMuscleId === "shoulders" ? 1 : 0.88}
                     stroke="#121110"
                     strokeWidth="1.5"
                   />
                 </g>
 
-                {/* Biceps */}
+                {/* BICEPS BRACHII */}
                 <g
                   onClick={() => setSelectedMuscleId("biceps")}
-                  className="cursor-pointer transition-transform hover:scale-[1.02]"
+                  className="cursor-pointer transition-all duration-200 hover:scale-[1.02]"
                   style={{ filter: getMuscleGlow("biceps") }}
                 >
+                  {/* Left Bicep */}
                   <path
-                    d="M45 76 C53 78, 55 98, 47 114 C40 112, 38 94, 40 82 Z"
+                    d="M 60 102 C 52 106, 48 124, 54 140 C 60 144, 68 138, 70 124 C 72 112, 68 104, 60 102 Z"
                     fill={getMuscleFill("biceps")}
-                    opacity={selectedMuscleId === "biceps" ? 1 : 0.85}
+                    opacity={selectedMuscleId === "biceps" ? 1 : 0.88}
                     stroke="#121110"
                     strokeWidth="1.5"
                   />
+                  {/* Right Bicep */}
                   <path
-                    d="M155 76 C147 78, 145 98, 153 114 C160 112, 162 94, 160 82 Z"
+                    d="M 180 102 C 188 106, 192 124, 186 140 C 180 144, 172 138, 170 124 C 168 112, 172 104, 180 102 Z"
                     fill={getMuscleFill("biceps")}
-                    opacity={selectedMuscleId === "biceps" ? 1 : 0.85}
+                    opacity={selectedMuscleId === "biceps" ? 1 : 0.88}
                     stroke="#121110"
                     strokeWidth="1.5"
                   />
                 </g>
 
-                {/* Forearms / Antebrazos */}
+                {/* FOREARMS / ANTEBRAZOS */}
                 <g
                   onClick={() => setSelectedMuscleId("forearms")}
-                  className="cursor-pointer transition-transform hover:scale-[1.02]"
+                  className="cursor-pointer transition-all duration-200 hover:scale-[1.02]"
                   style={{ filter: getMuscleGlow("forearms") }}
                 >
+                  {/* Left Forearm */}
                   <path
-                    d="M43 118 C48 120, 48 145, 42 165 C37 165, 34 140, 36 122 Z"
+                    d="M 52 144 C 44 150, 42 178, 48 200 C 54 204, 60 196, 62 176 C 64 158, 60 148, 52 144 Z"
                     fill={getMuscleFill("forearms")}
-                    opacity={selectedMuscleId === "forearms" ? 1 : 0.85}
+                    opacity={selectedMuscleId === "forearms" ? 1 : 0.88}
                     stroke="#121110"
                     strokeWidth="1.5"
                   />
+                  {/* Right Forearm */}
                   <path
-                    d="M157 118 C152 120, 152 145, 158 165 C163 165, 166 140, 164 122 Z"
+                    d="M 188 144 C 196 150, 198 178, 192 200 C 186 204, 180 196, 178 176 C 176 158, 180 148, 188 144 Z"
                     fill={getMuscleFill("forearms")}
-                    opacity={selectedMuscleId === "forearms" ? 1 : 0.85}
+                    opacity={selectedMuscleId === "forearms" ? 1 : 0.88}
                     stroke="#121110"
                     strokeWidth="1.5"
                   />
                 </g>
 
-                {/* Abs / Abdominales & Core */}
+                {/* ABS & OBLIQUES (ANTERIOR CORE) */}
                 <g
                   onClick={() => setSelectedMuscleId("abs")}
-                  className="cursor-pointer transition-transform hover:scale-[1.02]"
+                  className="cursor-pointer transition-all duration-200 hover:scale-[1.02]"
                   style={{ filter: getMuscleGlow("abs") }}
                 >
-                  <rect
-                    x="84"
-                    y="92"
-                    width="14"
-                    height="14"
-                    rx="3"
+                  {/* Upper Abs (Pair 1) */}
+                  <path
+                    d="M 104 104 C 104 101, 116 101, 117 104 L 117 119 C 117 122, 104 122, 104 119 Z"
                     fill={getMuscleFill("abs")}
-                    opacity={selectedMuscleId === "abs" ? 1 : 0.85}
+                    opacity={selectedMuscleId === "abs" ? 1 : 0.88}
                     stroke="#121110"
-                    strokeWidth="1"
+                    strokeWidth="1.2"
                   />
-                  <rect
-                    x="102"
-                    y="92"
-                    width="14"
-                    height="14"
-                    rx="3"
+                  <path
+                    d="M 123 104 C 123 101, 135 101, 136 104 L 136 119 C 136 122, 123 122, 123 119 Z"
                     fill={getMuscleFill("abs")}
-                    opacity={selectedMuscleId === "abs" ? 1 : 0.85}
+                    opacity={selectedMuscleId === "abs" ? 1 : 0.88}
                     stroke="#121110"
-                    strokeWidth="1"
+                    strokeWidth="1.2"
                   />
-                  <rect
-                    x="84"
-                    y="110"
-                    width="14"
-                    height="15"
-                    rx="3"
+
+                  {/* Mid Abs (Pair 2) */}
+                  <path
+                    d="M 104 123 C 104 120, 116 120, 117 123 L 117 139 C 117 142, 104 142, 104 139 Z"
                     fill={getMuscleFill("abs")}
-                    opacity={selectedMuscleId === "abs" ? 1 : 0.85}
+                    opacity={selectedMuscleId === "abs" ? 1 : 0.88}
                     stroke="#121110"
-                    strokeWidth="1"
+                    strokeWidth="1.2"
                   />
-                  <rect
-                    x="102"
-                    y="110"
-                    width="14"
-                    height="15"
-                    rx="3"
+                  <path
+                    d="M 123 123 C 123 120, 135 120, 136 123 L 136 139 C 136 142, 123 142, 123 139 Z"
                     fill={getMuscleFill("abs")}
-                    opacity={selectedMuscleId === "abs" ? 1 : 0.85}
+                    opacity={selectedMuscleId === "abs" ? 1 : 0.88}
+                    stroke="#121110"
+                    strokeWidth="1.2"
+                  />
+
+                  {/* Lower Abs & Iliac V-Taper (Pair 3) */}
+                  <path
+                    d="M 104 143 C 104 141, 116 141, 117 143 L 116 164 C 112 168, 106 164, 104 158 Z"
+                    fill={getMuscleFill("abs")}
+                    opacity={selectedMuscleId === "abs" ? 1 : 0.88}
+                    stroke="#121110"
+                    strokeWidth="1.2"
+                  />
+                  <path
+                    d="M 123 143 C 123 141, 135 141, 136 143 L 136 158 C 134 164, 128 168, 124 164 Z"
+                    fill={getMuscleFill("abs")}
+                    opacity={selectedMuscleId === "abs" ? 1 : 0.88}
+                    stroke="#121110"
+                    strokeWidth="1.2"
+                  />
+
+                  {/* External Obliques / Serratus */}
+                  <path
+                    d="M 88 108 C 82 120, 84 142, 98 156 C 100 152, 98 136, 100 120 Z"
+                    fill={getMuscleFill("abs")}
+                    opacity={selectedMuscleId === "abs" ? 0.9 : 0.75}
                     stroke="#121110"
                     strokeWidth="1"
                   />
                   <path
-                    d="M84 129 L98 129 L97 148 L87 148 Z"
+                    d="M 152 108 C 158 120, 156 142, 142 156 C 140 152, 142 136, 140 120 Z"
                     fill={getMuscleFill("abs")}
-                    opacity={selectedMuscleId === "abs" ? 1 : 0.85}
-                    stroke="#121110"
-                    strokeWidth="1"
-                  />
-                  <path
-                    d="M102 129 L116 129 L113 148 L103 148 Z"
-                    fill={getMuscleFill("abs")}
-                    opacity={selectedMuscleId === "abs" ? 1 : 0.85}
+                    opacity={selectedMuscleId === "abs" ? 0.9 : 0.75}
                     stroke="#121110"
                     strokeWidth="1"
                   />
                 </g>
 
-                {/* Quads / Cuádriceps */}
+                {/* QUADS / CUÁDRICEPS (RECTUS FEMORIS & VASTUS) */}
                 <g
                   onClick={() => setSelectedMuscleId("quads")}
-                  className="cursor-pointer transition-transform hover:scale-[1.02]"
+                  className="cursor-pointer transition-all duration-200 hover:scale-[1.02]"
                   style={{ filter: getMuscleGlow("quads") }}
                 >
+                  {/* Left Quad */}
                   <path
-                    d="M72 155 C82 155, 96 165, 94 220 C88 230, 72 230, 68 215 C62 195, 64 165, 72 155 Z"
+                    d="M 88 174 C 76 182, 70 216, 76 248 C 82 258, 96 260, 104 246 C 108 238, 110 212, 110 186 C 104 178, 94 174, 88 174 Z"
                     fill={getMuscleFill("quads")}
-                    opacity={selectedMuscleId === "quads" ? 1 : 0.85}
+                    opacity={selectedMuscleId === "quads" ? 1 : 0.88}
                     stroke="#121110"
                     strokeWidth="1.5"
                   />
+                  {/* Right Quad */}
                   <path
-                    d="M128 155 C118 155, 104 165, 106 220 C112 230, 128 230, 132 215 C138 195, 136 165, 128 155 Z"
+                    d="M 152 174 C 164 182, 170 216, 164 248 C 158 258, 144 260, 136 246 C 132 238, 130 212, 130 186 C 136 178, 146 174, 152 174 Z"
                     fill={getMuscleFill("quads")}
-                    opacity={selectedMuscleId === "quads" ? 1 : 0.85}
+                    opacity={selectedMuscleId === "quads" ? 1 : 0.88}
                     stroke="#121110"
                     strokeWidth="1.5"
                   />
                 </g>
 
-                {/* Calves / Gemelos (Frontal) */}
+                {/* Knee Caps (Patella Bones) */}
+                <circle cx="89" cy="262" r="5" fill="#22201D" stroke="#38332B" strokeWidth="1" />
+                <circle cx="151" cy="262" r="5" fill="#22201D" stroke="#38332B" strokeWidth="1" />
+
+                {/* CALVES / GEMELOS & TIBIALIS (ANTERIOR) */}
                 <g
                   onClick={() => setSelectedMuscleId("calves")}
-                  className="cursor-pointer transition-transform hover:scale-[1.02]"
+                  className="cursor-pointer transition-all duration-200 hover:scale-[1.02]"
                   style={{ filter: getMuscleGlow("calves") }}
                 >
+                  {/* Left Calf */}
                   <path
-                    d="M70 245 C80 245, 88 260, 84 310 C76 320, 68 315, 66 295 C64 275, 66 250, 70 245 Z"
+                    d="M 84 274 C 74 286, 76 318, 84 348 C 92 354, 98 348, 100 326 C 102 304, 98 284, 90 274 Z"
                     fill={getMuscleFill("calves")}
-                    opacity={selectedMuscleId === "calves" ? 1 : 0.85}
+                    opacity={selectedMuscleId === "calves" ? 1 : 0.88}
                     stroke="#121110"
                     strokeWidth="1.5"
                   />
+                  {/* Right Calf */}
                   <path
-                    d="M130 245 C120 245, 112 260, 116 310 C124 320, 132 315, 134 295 C136 275, 134 250, 130 245 Z"
+                    d="M 156 274 C 166 286, 164 318, 156 348 C 148 354, 142 348, 140 326 C 138 304, 142 284, 150 274 Z"
                     fill={getMuscleFill("calves")}
-                    opacity={selectedMuscleId === "calves" ? 1 : 0.85}
+                    opacity={selectedMuscleId === "calves" ? 1 : 0.88}
                     stroke="#121110"
                     strokeWidth="1.5"
                   />
@@ -470,154 +502,183 @@ export function MuscleRecoveryWidget({ recentWorkouts = [] }: MuscleRecoveryWidg
             ) : (
               /* POSTERIOR / DORSAL VIEW SVG */
               <svg
-                viewBox="0 0 200 360"
-                className="w-full h-auto max-h-85 drop-shadow-md select-none"
+                viewBox="0 0 240 380"
+                className="w-full h-auto max-h-90 drop-shadow-lg select-none"
               >
-                {/* Head (Posterior) */}
-                <circle cx="100" cy="28" r="14" fill="#22201D" stroke="#38332B" strokeWidth="1.5" />
+                {/* Background HUD Grid Lines */}
+                <g opacity="0.15" stroke="#D99B43" strokeWidth="0.5" strokeDasharray="2,4">
+                  <line x1="120" y1="10" x2="120" y2="370" />
+                  <line x1="30" y1="95" x2="210" y2="95" />
+                  <line x1="30" y1="170" x2="210" y2="170" />
+                  <line x1="40" y1="260" x2="200" y2="260" />
+                </g>
 
-                {/* Traps / Upper Back */}
+                {/* Body Base Silhouette (Posterior Mannequin Outline) */}
+                <path
+                  d="M 120 12 C 129 12, 136 18, 136 28 C 136 38, 130 46, 126 48 L 126 54 C 146 54, 172 58, 184 66 C 196 74, 198 94, 192 116 C 188 132, 198 164, 194 198 C 192 208, 184 212, 178 206 C 172 198, 174 176, 170 162 L 160 160 C 168 184, 172 220, 166 250 C 160 274, 154 274, 156 294 C 160 320, 158 350, 150 366 C 144 372, 134 372, 136 358 C 138 336, 134 300, 134 276 L 124 200 L 116 200 L 106 276 C 106 300, 102 336, 104 358 C 106 372, 96 372, 90 366 C 82 350, 80 320, 84 294 C 86 274, 80 274, 74 250 C 68 220, 72 184, 80 160 L 70 162 C 66 176, 68 198, 62 206 C 56 212, 48 208, 46 198 C 42 164, 52 132, 48 116 C 42 94, 44 74, 56 66 C 68 58, 94 54, 114 54 L 114 48 C 110 46, 104 38, 104 28 C 104 18, 111 12, 120 12 Z"
+                  fill="#1B1916"
+                  stroke="#2D2822"
+                  strokeWidth="1.2"
+                />
+
+                {/* Back of Head & Cervical Spine */}
+                <ellipse cx="120" cy="27" rx="12" ry="14" fill="#22201D" stroke="#38332B" strokeWidth="1.2" />
+                <path d="M 120 40 L 120 160" stroke="#38332B" strokeWidth="1.2" strokeDasharray="3,3" fill="none" />
+
+                {/* TRAPS & UPPER BACK (DIAMOND TRAPEZIUS & RHOMBOIDS) */}
                 <g
                   onClick={() => setSelectedMuscleId("upper_back")}
-                  className="cursor-pointer transition-transform hover:scale-[1.02]"
+                  className="cursor-pointer transition-all duration-200 hover:scale-[1.02]"
                   style={{ filter: getMuscleGlow("upper_back") }}
                 >
                   <path
-                    d="M100 45 L130 65 L115 105 L100 115 L85 105 L70 65 Z"
+                    d="M 120 45 L 146 62 C 144 74, 138 98, 120 120 C 102 98, 96 74, 94 62 Z"
                     fill={getMuscleFill("upper_back")}
-                    opacity={selectedMuscleId === "upper_back" ? 1 : 0.85}
+                    opacity={selectedMuscleId === "upper_back" ? 1 : 0.88}
                     stroke="#121110"
                     strokeWidth="1.5"
                   />
                 </g>
 
-                {/* Shoulders (Posterior / Rear Delts) */}
+                {/* REAR DELTS / DELTOIDES POSTERIOR */}
                 <g
                   onClick={() => setSelectedMuscleId("shoulders")}
-                  className="cursor-pointer transition-transform hover:scale-[1.02]"
+                  className="cursor-pointer transition-all duration-200 hover:scale-[1.02]"
                   style={{ filter: getMuscleGlow("shoulders") }}
                 >
+                  {/* Left Rear Delt */}
                   <path
-                    d="M58 54 C64 54, 68 66, 62 76 C56 78, 48 72, 46 64 C44 56, 52 54, 58 54 Z"
+                    d="M 72 61 C 62 61, 48 72, 46 86 C 46 96, 58 102, 66 96 C 72 90, 74 78, 74 66 Z"
                     fill={getMuscleFill("shoulders")}
-                    opacity={selectedMuscleId === "shoulders" ? 1 : 0.85}
+                    opacity={selectedMuscleId === "shoulders" ? 1 : 0.88}
                     stroke="#121110"
                     strokeWidth="1.5"
                   />
+                  {/* Right Rear Delt */}
                   <path
-                    d="M142 54 C136 54, 132 66, 138 76 C144 78, 152 72, 154 64 C156 56, 148 54, 142 54 Z"
+                    d="M 168 61 C 178 61, 192 72, 194 86 C 194 96, 182 102, 174 96 C 168 90, 166 78, 166 66 Z"
                     fill={getMuscleFill("shoulders")}
-                    opacity={selectedMuscleId === "shoulders" ? 1 : 0.85}
+                    opacity={selectedMuscleId === "shoulders" ? 1 : 0.88}
                     stroke="#121110"
                     strokeWidth="1.5"
                   />
                 </g>
 
-                {/* Triceps (Posterior) */}
+                {/* TRICEPS (HORSESHOE & LATERAL/LONG HEADS) */}
                 <g
                   onClick={() => setSelectedMuscleId("triceps")}
-                  className="cursor-pointer transition-transform hover:scale-[1.02]"
+                  className="cursor-pointer transition-all duration-200 hover:scale-[1.02]"
                   style={{ filter: getMuscleGlow("triceps") }}
                 >
+                  {/* Left Tricep */}
                   <path
-                    d="M44 76 C52 78, 54 100, 46 116 C38 114, 36 96, 38 82 Z"
+                    d="M 58 98 C 48 102, 46 122, 52 142 C 58 144, 66 138, 68 122 C 70 108, 68 100, 58 98 Z"
                     fill={getMuscleFill("triceps")}
-                    opacity={selectedMuscleId === "triceps" ? 1 : 0.85}
+                    opacity={selectedMuscleId === "triceps" ? 1 : 0.88}
                     stroke="#121110"
                     strokeWidth="1.5"
                   />
+                  {/* Right Tricep */}
                   <path
-                    d="M156 76 C148 78, 146 100, 154 116 C162 114, 164 96, 162 82 Z"
+                    d="M 182 98 C 192 102, 194 122, 188 142 C 182 144, 174 138, 172 122 C 170 108, 172 100, 182 98 Z"
                     fill={getMuscleFill("triceps")}
-                    opacity={selectedMuscleId === "triceps" ? 1 : 0.85}
+                    opacity={selectedMuscleId === "triceps" ? 1 : 0.88}
                     stroke="#121110"
                     strokeWidth="1.5"
                   />
                 </g>
 
-                {/* Lats / Dorsales */}
+                {/* LATS / DORSALES (V-TAPER WINGS) */}
                 <g
                   onClick={() => setSelectedMuscleId("lats")}
-                  className="cursor-pointer transition-transform hover:scale-[1.02]"
+                  className="cursor-pointer transition-all duration-200 hover:scale-[1.02]"
                   style={{ filter: getMuscleGlow("lats") }}
                 >
+                  {/* Left Lat */}
                   <path
-                    d="M68 76 C80 84, 85 110, 80 135 C70 128, 62 108, 60 90 Z"
+                    d="M 92 78 C 80 88, 76 116, 82 144 C 94 150, 106 142, 108 126 C 108 106, 102 88, 92 78 Z"
                     fill={getMuscleFill("lats")}
-                    opacity={selectedMuscleId === "lats" ? 1 : 0.85}
+                    opacity={selectedMuscleId === "lats" ? 1 : 0.88}
                     stroke="#121110"
                     strokeWidth="1.5"
                   />
+                  {/* Right Lat */}
                   <path
-                    d="M132 76 C120 84, 115 110, 120 135 C130 128, 138 108, 140 90 Z"
+                    d="M 148 78 C 160 88, 164 116, 158 144 C 146 150, 134 142, 132 126 C 132 106, 138 88, 148 78 Z"
                     fill={getMuscleFill("lats")}
-                    opacity={selectedMuscleId === "lats" ? 1 : 0.85}
+                    opacity={selectedMuscleId === "lats" ? 1 : 0.88}
                     stroke="#121110"
                     strokeWidth="1.5"
                   />
                 </g>
 
-                {/* Glutes / Glúteos */}
+                {/* GLUTES / GLÚTEOS */}
                 <g
                   onClick={() => setSelectedMuscleId("glutes")}
-                  className="cursor-pointer transition-transform hover:scale-[1.02]"
+                  className="cursor-pointer transition-all duration-200 hover:scale-[1.02]"
                   style={{ filter: getMuscleGlow("glutes") }}
                 >
+                  {/* Left Glute */}
                   <path
-                    d="M68 145 C82 145, 96 150, 96 182 C96 195, 78 198, 68 190 C60 182, 60 155, 68 145 Z"
+                    d="M 84 158 C 72 164, 70 196, 82 214 C 94 220, 114 216, 118 196 C 120 180, 114 164, 100 156 Z"
                     fill={getMuscleFill("glutes")}
-                    opacity={selectedMuscleId === "glutes" ? 1 : 0.85}
+                    opacity={selectedMuscleId === "glutes" ? 1 : 0.88}
                     stroke="#121110"
                     strokeWidth="1.5"
                   />
+                  {/* Right Glute */}
                   <path
-                    d="M132 145 C118 145, 104 150, 104 182 C104 195, 122 198, 132 190 C140 182, 140 155, 132 145 Z"
+                    d="M 156 158 C 168 164, 170 196, 158 214 C 146 220, 126 216, 122 196 C 120 180, 126 164, 140 156 Z"
                     fill={getMuscleFill("glutes")}
-                    opacity={selectedMuscleId === "glutes" ? 1 : 0.85}
+                    opacity={selectedMuscleId === "glutes" ? 1 : 0.88}
                     stroke="#121110"
                     strokeWidth="1.5"
                   />
                 </g>
 
-                {/* Hamstrings / Femorales */}
+                {/* HAMSTRINGS / FEMORALES & ISQUIOS */}
                 <g
                   onClick={() => setSelectedMuscleId("hamstrings")}
-                  className="cursor-pointer transition-transform hover:scale-[1.02]"
+                  className="cursor-pointer transition-all duration-200 hover:scale-[1.02]"
                   style={{ filter: getMuscleGlow("hamstrings") }}
                 >
+                  {/* Left Hamstring */}
                   <path
-                    d="M70 196 C84 196, 94 206, 92 245 C86 250, 72 250, 68 240 C62 225, 64 205, 70 196 Z"
+                    d="M 82 222 C 74 234, 76 264, 84 286 C 94 290, 106 286, 110 268 C 114 246, 110 230, 102 222 Z"
                     fill={getMuscleFill("hamstrings")}
-                    opacity={selectedMuscleId === "hamstrings" ? 1 : 0.85}
+                    opacity={selectedMuscleId === "hamstrings" ? 1 : 0.88}
                     stroke="#121110"
                     strokeWidth="1.5"
                   />
+                  {/* Right Hamstring */}
                   <path
-                    d="M130 196 C116 196, 106 206, 108 245 C114 250, 128 250, 132 240 C138 225, 136 205, 130 196 Z"
+                    d="M 158 222 C 166 234, 164 264, 156 286 C 146 290, 134 286, 130 268 C 126 246, 130 230, 138 222 Z"
                     fill={getMuscleFill("hamstrings")}
-                    opacity={selectedMuscleId === "hamstrings" ? 1 : 0.85}
+                    opacity={selectedMuscleId === "hamstrings" ? 1 : 0.88}
                     stroke="#121110"
                     strokeWidth="1.5"
                   />
                 </g>
 
-                {/* Calves / Gemelos (Posterior) */}
+                {/* CALVES / GEMELOS (POSTERIOR DOUBLE HEART GASTROCNEMIUS) */}
                 <g
                   onClick={() => setSelectedMuscleId("calves")}
-                  className="cursor-pointer transition-transform hover:scale-[1.02]"
+                  className="cursor-pointer transition-all duration-200 hover:scale-[1.02]"
                   style={{ filter: getMuscleGlow("calves") }}
                 >
+                  {/* Left Calf (Heart Bellies) */}
                   <path
-                    d="M68 255 C82 255, 90 270, 86 312 C78 322, 68 318, 64 298 C62 278, 64 260, 68 255 Z"
+                    d="M 82 298 C 70 308, 72 334, 82 358 C 90 364, 98 358, 102 338 C 104 318, 98 302, 88 296 Z"
                     fill={getMuscleFill("calves")}
-                    opacity={selectedMuscleId === "calves" ? 1 : 0.85}
+                    opacity={selectedMuscleId === "calves" ? 1 : 0.88}
                     stroke="#121110"
                     strokeWidth="1.5"
                   />
+                  {/* Right Calf */}
                   <path
-                    d="M132 255 C118 255, 110 270, 114 312 C122 322, 132 318, 136 298 C138 278, 136 260, 132 255 Z"
+                    d="M 158 298 C 170 308, 168 334, 158 358 C 150 364, 142 358, 138 338 C 136 318, 142 302, 152 296 Z"
                     fill={getMuscleFill("calves")}
-                    opacity={selectedMuscleId === "calves" ? 1 : 0.85}
+                    opacity={selectedMuscleId === "calves" ? 1 : 0.88}
                     stroke="#121110"
                     strokeWidth="1.5"
                   />
