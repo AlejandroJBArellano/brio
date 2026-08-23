@@ -154,22 +154,22 @@ export function ManageSupplementsModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-200">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-xs animate-in fade-in duration-200">
       <div
-        className="w-full max-w-2xl max-h-[90vh] flex flex-col rounded-2xl border border-white/10 bg-neutral-900/95 shadow-2xl backdrop-blur-xl animate-in zoom-in-95 duration-200 overflow-hidden"
+        className="w-full max-w-2xl max-h-[90vh] flex flex-col rounded-xl border border-[#2A2723] bg-[#181715] shadow-2xl animate-in zoom-in-95 duration-200 overflow-hidden"
         role="dialog"
       >
         {/* Header */}
-        <div className="flex items-center justify-between p-6 pb-4 border-b border-white/8">
+        <div className="flex items-center justify-between p-6 pb-4 border-b border-[#2A2723] bg-[#121110]">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-violet-500/10 text-violet-400 border border-violet-500/20">
+            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[#221D16] text-[#D99B43] border border-[#D99B43]/30">
               <Pill className="h-5 w-5" />
             </div>
             <div>
-              <h2 className="text-lg font-bold text-white tracking-tight">
+              <h2 className="font-serif text-base font-bold text-[#F5F2EB] tracking-tight">
                 Gestionar Suplementos Diarios
               </h2>
-              <p className="text-xs text-neutral-400">
+              <p className="text-xs text-[#8E867B]">
                 Personaliza los suplementos y dosis que tomas a diario
               </p>
             </div>
@@ -177,7 +177,7 @@ export function ManageSupplementsModal({
           <button
             type="button"
             onClick={onClose}
-            className="rounded-lg p-1.5 text-neutral-400 hover:bg-neutral-800 hover:text-white transition-colors"
+            className="rounded-lg p-1.5 text-[#8E867B] hover:bg-[#22201D] hover:text-[#F5F2EB] transition-colors cursor-pointer"
           >
             <X className="h-5 w-5" />
           </button>
@@ -186,25 +186,25 @@ export function ManageSupplementsModal({
         {/* Scrollable Content */}
         <div className="flex-1 overflow-y-auto p-6 space-y-6">
           {error && (
-            <div className="flex items-center gap-2 rounded-xl border border-rose-500/30 bg-rose-500/10 p-3 text-xs text-rose-300">
+            <div className="flex items-center gap-2 rounded-lg border border-[#E05D52]/40 bg-[#221716] p-3 text-xs text-[#E05D52] font-mono">
               <AlertCircle className="h-4 w-4 shrink-0" />
               <span>{error}</span>
             </div>
           )}
 
           {/* Form: Add or Edit */}
-          <form onSubmit={handleSubmit} className="rounded-xl border border-white/8 bg-neutral-950/60 p-4 space-y-4">
+          <form onSubmit={handleSubmit} className="rounded-xl border border-[#2A2723] bg-[#121110] p-4 space-y-4 font-mono">
             <div className="flex items-center justify-between">
-              <h3 className="text-xs font-bold text-white tracking-wider uppercase flex items-center gap-1.5">
+              <h3 className="text-xs font-bold text-[#F5F2EB] tracking-wider uppercase flex items-center gap-1.5 font-mono">
                 {editingId ? (
                   <>
-                    <Edit2 className="h-3.5 w-3.5 text-amber-400" />
-                    Editar Suplemento
+                    <Edit2 className="h-3.5 w-3.5 text-[#D99B43]" />
+                    <span>Editar Suplemento</span>
                   </>
                 ) : (
                   <>
-                    <Plus className="h-3.5 w-3.5 text-violet-400" />
-                    Nuevo Suplemento
+                    <Plus className="h-3.5 w-3.5 text-[#D99B43]" />
+                    <span>Nuevo Suplemento</span>
                   </>
                 )}
               </h3>
@@ -212,7 +212,7 @@ export function ManageSupplementsModal({
                 <button
                   type="button"
                   onClick={handleCancelEdit}
-                  className="text-xs text-neutral-400 hover:text-white transition-colors"
+                  className="text-xs text-[#8E867B] hover:text-[#DDD6C9] underline transition-colors cursor-pointer"
                 >
                   Cancelar edición
                 </button>
@@ -221,7 +221,7 @@ export function ManageSupplementsModal({
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
-                <label className="block text-xs font-medium text-neutral-300 mb-1">
+                <label className="block text-xs font-sans font-medium text-[#DDD6C9] mb-1">
                   Nombre del suplemento *
                 </label>
                 <input
@@ -229,13 +229,13 @@ export function ManageSupplementsModal({
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder="Ej. Citrato de Magnesio"
-                  className="w-full rounded-xl border border-white/8 bg-neutral-900 px-3.5 py-2 text-xs text-white placeholder-neutral-500 focus:border-violet-500 focus:outline-none focus:ring-1 focus:ring-violet-500"
+                  className="w-full rounded-lg border border-[#2A2723] bg-[#181715] px-3 py-2 text-xs text-[#F5F2EB] placeholder:text-[#8E867B] focus:border-[#D99B43] focus:outline-none"
                   required
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-neutral-300 mb-1">
+                <label className="block text-xs font-sans font-medium text-[#DDD6C9] mb-1">
                   Dosis recomendada (opcional)
                 </label>
                 <input
@@ -243,25 +243,25 @@ export function ManageSupplementsModal({
                   value={dosage}
                   onChange={(e) => setDosage(e.target.value)}
                   placeholder="Ej. 400mg, 5g, 2 cápsulas"
-                  className="w-full rounded-xl border border-white/8 bg-neutral-900 px-3.5 py-2 text-xs text-white placeholder-neutral-500 focus:border-violet-500 focus:outline-none focus:ring-1 focus:ring-violet-500"
+                  className="w-full rounded-lg border border-[#2A2723] bg-[#181715] px-3 py-2 text-xs text-[#F5F2EB] placeholder:text-[#8E867B] focus:border-[#D99B43] focus:outline-none"
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-xs font-medium text-neutral-300 mb-1.5">
+              <label className="block text-xs font-sans font-medium text-[#DDD6C9] mb-1.5">
                 Momento de toma
               </label>
-              <div className="flex flex-wrap gap-1.5">
+              <div className="flex flex-wrap gap-1.5 font-sans">
                 {TIMING_OPTIONS.map((opt) => (
                   <button
                     key={opt.id}
                     type="button"
                     onClick={() => setTiming(opt.id)}
-                    className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-all ${
+                    className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-all cursor-pointer ${
                       timing === opt.id
-                        ? "border-violet-500/50 bg-violet-500/20 text-violet-200"
-                        : "border-white/6 bg-neutral-900 text-neutral-400 hover:border-white/12"
+                        ? "border-[#D99B43]/40 bg-[#221D16] text-[#D99B43] font-bold"
+                        : "border-[#2A2723] bg-[#181715] text-[#8E867B] hover:border-[#38332D] hover:text-[#DDD6C9]"
                     }`}
                   >
                     {opt.label}
@@ -270,21 +270,21 @@ export function ManageSupplementsModal({
               </div>
             </div>
 
-            <div className="flex justify-end pt-1">
+            <div className="flex justify-end pt-1 font-sans">
               <button
                 type="submit"
                 disabled={isPending}
-                className="px-4 py-2 rounded-xl bg-linear-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white font-bold text-xs shadow-lg shadow-violet-500/20 transition-all flex items-center gap-1.5 disabled:opacity-50"
+                className="px-4 py-2 rounded-lg bg-[#D99B43] hover:bg-[#E8AF59] text-[#121110] font-bold text-xs shadow-xs transition-all flex items-center gap-1.5 disabled:opacity-50 cursor-pointer"
               >
                 {editingId ? (
                   <>
                     <Check className="h-3.5 w-3.5" />
-                    {isPending ? "Guardando..." : "Actualizar Suplemento"}
+                    <span>{isPending ? "Guardando..." : "Actualizar Suplemento"}</span>
                   </>
                 ) : (
                   <>
                     <Plus className="h-3.5 w-3.5" />
-                    {isPending ? "Agregando..." : "Agregar al Checklist"}
+                    <span>{isPending ? "Agregando..." : "Agregar al Checklist"}</span>
                   </>
                 )}
               </button>
@@ -295,12 +295,12 @@ export function ManageSupplementsModal({
           {!editingId && (
             <div>
               <div className="flex items-center gap-1.5 mb-2.5">
-                <Sparkles className="h-3.5 w-3.5 text-amber-400" />
-                <h4 className="text-xs font-bold text-neutral-300 tracking-tight">
+                <Sparkles className="h-3.5 w-3.5 text-[#D99B43]" />
+                <h4 className="text-xs font-serif font-bold text-[#F5F2EB] tracking-tight">
                   Agregar populares en 1 clic
                 </h4>
               </div>
-              <div className="flex flex-wrap gap-2">
+              <div className="flex flex-wrap gap-2 font-mono">
                 {COMMON_PRESETS.map((preset) => {
                   const alreadyAdded = supplements.some(
                     (s) => s.name.toLowerCase() === preset.name.toLowerCase()
@@ -311,20 +311,20 @@ export function ManageSupplementsModal({
                       type="button"
                       disabled={isPending || alreadyAdded}
                       onClick={() => handleAddPreset(preset)}
-                      className={`px-2.5 py-1.5 rounded-lg border text-xs flex items-center gap-1.5 transition-all ${
+                      className={`px-2.5 py-1.5 rounded-lg border text-xs flex items-center gap-1.5 transition-all cursor-pointer ${
                         alreadyAdded
-                          ? "border-emerald-500/20 bg-emerald-500/5 text-emerald-400/60 opacity-60 cursor-default"
-                          : "border-white/8 bg-neutral-900/80 hover:border-violet-500/40 hover:bg-violet-500/10 text-neutral-300 hover:text-violet-200"
+                          ? "border-[#7EA35A]/30 bg-[#1C2219] text-[#7EA35A] opacity-60 cursor-default"
+                          : "border-[#2A2723] bg-[#121110] hover:border-[#D99B43]/40 hover:bg-[#221D16] text-[#DDD6C9] hover:text-[#D99B43]"
                       }`}
                     >
                       <span>{preset.name}</span>
-                      <span className="text-[10px] font-mono text-neutral-500">
+                      <span className="text-[10px] font-mono text-[#8E867B]">
                         {preset.dosage}
                       </span>
                       {alreadyAdded ? (
-                        <Check className="h-3 w-3 text-emerald-400 ml-0.5" />
+                        <Check className="h-3 w-3 text-[#7EA35A] ml-0.5" />
                       ) : (
-                        <Plus className="h-3 w-3 text-neutral-400 ml-0.5" />
+                        <Plus className="h-3 w-3 text-[#8E867B] ml-0.5" />
                       )}
                     </button>
                   );
@@ -335,51 +335,51 @@ export function ManageSupplementsModal({
 
           {/* Current Supplements List */}
           <div>
-            <div className="flex items-center justify-between mb-3">
-              <h4 className="text-xs font-bold text-neutral-300 tracking-tight flex items-center gap-2">
+            <div className="flex items-center justify-between mb-3 font-mono">
+              <h4 className="text-xs font-bold text-[#F5F2EB] tracking-tight flex items-center gap-2">
                 <span>Tus Suplementos Activos</span>
-                <span className="rounded-full bg-violet-500/10 px-2 py-0.5 text-[10px] font-bold text-violet-400 border border-violet-500/20">
+                <span className="rounded-full bg-[#221D16] px-2 py-0.5 text-[10px] font-bold text-[#D99B43] border border-[#D99B43]/30">
                   {supplements.length}
                 </span>
               </h4>
             </div>
 
             {supplements.length === 0 ? (
-              <div className="p-8 text-center rounded-xl border border-dashed border-white/8 bg-neutral-950/30">
-                <Pill className="h-8 w-8 text-neutral-600 mx-auto mb-2" />
-                <p className="text-xs text-neutral-400">
+              <div className="p-8 text-center rounded-lg border border-dashed border-[#2A2723] bg-[#121110]">
+                <Pill className="h-8 w-8 text-[#8E867B] mx-auto mb-2" />
+                <p className="text-xs text-[#8E867B]">
                   Aún no tienes suplementos configurados. Agrega uno arriba o usa los presets rápidos.
                 </p>
               </div>
             ) : (
-              <div className="space-y-2">
+              <div className="space-y-2 font-mono">
                 {supplements.map((supp) => (
                   <div
                     key={supp.id}
-                    className={`flex items-center justify-between p-3 rounded-xl border transition-all ${
+                    className={`flex items-center justify-between p-3 rounded-lg border transition-all ${
                       editingId === supp.id
-                        ? "border-violet-500/50 bg-violet-500/10"
-                        : "border-white/6 bg-neutral-950/40 hover:border-white/12"
+                        ? "border-[#D99B43]/40 bg-[#221D16]"
+                        : "border-[#2A2723] bg-[#121110] hover:border-[#38332D]"
                     }`}
                   >
                     <div className="flex items-center gap-3">
-                      <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-violet-500/10 text-violet-400 border border-violet-500/20">
+                      <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#221D16] text-[#D99B43] border border-[#D99B43]/30">
                         <Pill className="h-4 w-4" />
                       </div>
                       <div>
                         <div className="flex items-center gap-2">
-                          <span className="text-xs font-semibold text-white">
+                          <span className="text-xs font-semibold text-[#F5F2EB]">
                             {supp.name}
                           </span>
                           {supp.dosage && (
-                            <span className="rounded-md bg-white/6 px-1.5 py-0.5 text-[10px] font-mono text-violet-300 border border-white/4">
+                            <span className="rounded bg-[#181715] px-1.5 py-0.5 text-[10px] font-mono text-[#D99B43] border border-[#2A2723]">
                               {supp.dosage}
                             </span>
                           )}
                         </div>
                         {supp.timing && (
-                          <div className="flex items-center gap-1 mt-0.5 text-[10px] text-neutral-400">
-                            <Clock className="h-2.5 w-2.5 text-neutral-500" />
+                          <div className="flex items-center gap-1 mt-0.5 text-[10px] text-[#8E867B]">
+                            <Clock className="h-2.5 w-2.5 text-[#8E867B]" />
                             <span>{supp.timing}</span>
                           </div>
                         )}
@@ -391,25 +391,25 @@ export function ManageSupplementsModal({
                         type="button"
                         onClick={() => handleStartEdit(supp)}
                         disabled={isPending}
-                        className="p-2 rounded-lg text-neutral-400 hover:text-white hover:bg-neutral-800 transition-colors"
+                        className="p-2 rounded-lg text-[#8E867B] hover:text-[#D99B43] hover:bg-[#181715] transition-colors cursor-pointer"
                         title="Editar"
                       >
                         <Edit2 className="h-3.5 w-3.5" />
                       </button>
                       {deletingId === supp.id ? (
-                        <div className="flex items-center gap-1 bg-rose-500/10 p-1 rounded-lg border border-rose-500/20">
+                        <div className="flex items-center gap-1 bg-[#221716] p-1 rounded-lg border border-[#E05D52]/30">
                           <button
                             type="button"
                             onClick={() => handleDelete(supp.id)}
                             disabled={isPending}
-                            className="px-2 py-1 bg-rose-600 hover:bg-rose-500 text-white rounded text-[10px] font-bold transition-all"
+                            className="px-2 py-1 bg-[#E05D52] hover:bg-[#E8736A] text-white rounded text-[10px] font-bold transition-all cursor-pointer"
                           >
                             Confirmar
                           </button>
                           <button
                             type="button"
                             onClick={() => setDeletingId(null)}
-                            className="p-1 text-neutral-400 hover:text-white"
+                            className="p-1 text-[#8E867B] hover:text-[#F5F2EB] cursor-pointer"
                           >
                             <X className="h-3 w-3" />
                           </button>
@@ -419,7 +419,7 @@ export function ManageSupplementsModal({
                           type="button"
                           onClick={() => setDeletingId(supp.id)}
                           disabled={isPending}
-                          className="p-2 rounded-lg text-neutral-400 hover:text-rose-400 hover:bg-rose-500/10 transition-colors"
+                          className="p-2 rounded-lg text-[#8E867B] hover:text-[#E05D52] hover:bg-[#221716] transition-colors cursor-pointer"
                           title="Eliminar"
                         >
                           <Trash2 className="h-3.5 w-3.5" />
@@ -434,11 +434,11 @@ export function ManageSupplementsModal({
         </div>
 
         {/* Footer */}
-        <div className="p-4 border-t border-white/8 bg-neutral-950/40 flex justify-end">
+        <div className="p-4 border-t border-[#2A2723] bg-[#121110] flex justify-end">
           <button
             type="button"
             onClick={onClose}
-            className="px-4 py-2 rounded-xl bg-neutral-800 hover:bg-neutral-700 text-white text-xs font-semibold transition-colors"
+            className="px-4 py-2 rounded-lg bg-[#181715] hover:bg-[#22201D] text-[#DDD6C9] hover:text-[#F5F2EB] text-xs font-semibold transition-colors cursor-pointer border border-[#2A2723]"
           >
             Listo
           </button>

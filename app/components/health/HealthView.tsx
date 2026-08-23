@@ -101,15 +101,15 @@ export function HealthView({ data, onRefresh }: HealthViewProps) {
   return (
     <div className="flex flex-col gap-6 animate-in fade-in duration-300">
       {/* 0. Health Sub-module Navigation Ribbon */}
-      <div className="flex flex-wrap items-center justify-between gap-3 p-2 rounded-2xl border border-white/8 bg-neutral-900/60 backdrop-blur-xl shadow-lg">
-        <div className="flex flex-wrap items-center gap-1.5 p-1 rounded-xl bg-neutral-950/80 border border-white/6">
+      <div className="flex flex-wrap items-center justify-between gap-3 p-2 rounded-xl border border-[#2A2723] bg-[#181715] shadow-sm">
+        <div className="flex flex-wrap items-center gap-1.5 p-1 rounded-lg bg-[#121110] border border-[#2A2723]">
           <button
             type="button"
             onClick={() => setActiveHealthTab("overview")}
-            className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all ${
+            className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-md text-xs font-semibold transition-all cursor-pointer ${
               activeHealthTab === "overview"
-                ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 shadow-sm"
-                : "text-neutral-400 hover:text-white"
+                ? "bg-[#D99B43] text-[#121110] font-bold shadow-xs"
+                : "text-[#8E867B] hover:text-[#DDD6C9] hover:bg-[#22201D]"
             }`}
           >
             <Activity className="h-3.5 w-3.5" />
@@ -119,29 +119,29 @@ export function HealthView({ data, onRefresh }: HealthViewProps) {
           <button
             type="button"
             onClick={() => setActiveHealthTab("hormonal")}
-            className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all ${
+            className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-md text-xs font-semibold transition-all cursor-pointer ${
               activeHealthTab === "hormonal"
-                ? "bg-amber-500/20 text-amber-300 border border-amber-500/30 shadow-sm"
-                : "text-neutral-400 hover:text-white"
+                ? "bg-[#D99B43] text-[#121110] font-bold shadow-xs"
+                : "text-[#8E867B] hover:text-[#DDD6C9] hover:bg-[#22201D]"
             }`}
           >
-            <Flame className="h-3.5 w-3.5 text-amber-400" />
+            <Flame className="h-3.5 w-3.5 text-[#D99B43]" />
             <span>🔥 Ritmo Hormonal 24h</span>
           </button>
 
           <button
             type="button"
             onClick={() => setActiveHealthTab("nutrition")}
-            className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all ${
+            className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-md text-xs font-semibold transition-all cursor-pointer ${
               activeHealthTab === "nutrition"
-                ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 shadow-sm"
-                : "text-neutral-400 hover:text-white"
+                ? "bg-[#7EA35A] text-[#121110] font-bold shadow-xs"
+                : "text-[#8E867B] hover:text-[#DDD6C9] hover:bg-[#22201D]"
             }`}
           >
-            <Salad className="h-3.5 w-3.5 text-emerald-400" />
+            <Salad className="h-3.5 w-3.5" />
             <span>Nutrición & Mariana Mont</span>
             {data.nutritionData && (
-              <span className="ml-1 rounded-full bg-emerald-500/20 px-1.5 py-0.2 text-[9px] font-mono text-emerald-300">
+              <span className="ml-1 rounded bg-[#121110] px-1.5 py-0.2 text-[9px] font-mono text-[#DDD6C9]">
                 {data.nutritionData.todayLog.calculatedMacros.kcal} kcal
               </span>
             )}
@@ -150,10 +150,10 @@ export function HealthView({ data, onRefresh }: HealthViewProps) {
           <button
             type="button"
             onClick={() => setActiveHealthTab("body_composition")}
-            className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all ${
+            className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-md text-xs font-semibold transition-all cursor-pointer ${
               activeHealthTab === "body_composition"
-                ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 shadow-sm"
-                : "text-neutral-400 hover:text-white"
+                ? "bg-[#4EAB9E] text-[#121110] font-bold shadow-xs"
+                : "text-[#8E867B] hover:text-[#DDD6C9] hover:bg-[#22201D]"
             }`}
           >
             <Heart className="h-3.5 w-3.5" />
@@ -163,10 +163,10 @@ export function HealthView({ data, onRefresh }: HealthViewProps) {
           <button
             type="button"
             onClick={() => setActiveHealthTab("hevy")}
-            className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all ${
+            className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-md text-xs font-semibold transition-all cursor-pointer ${
               activeHealthTab === "hevy"
-                ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 shadow-sm"
-                : "text-neutral-400 hover:text-white"
+                ? "bg-[#D99B43] text-[#121110] font-bold shadow-xs"
+                : "text-[#8E867B] hover:text-[#DDD6C9] hover:bg-[#22201D]"
             }`}
           >
             <Dumbbell className="h-3.5 w-3.5" />
@@ -176,16 +176,16 @@ export function HealthView({ data, onRefresh }: HealthViewProps) {
           <button
             type="button"
             onClick={() => setActiveHealthTab("biomarkers")}
-            className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all ${
+            className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-md text-xs font-semibold transition-all cursor-pointer ${
               activeHealthTab === "biomarkers"
-                ? "bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 shadow-sm"
-                : "text-neutral-400 hover:text-white"
+                ? "bg-[#4EAB9E] text-[#121110] font-bold shadow-xs"
+                : "text-[#8E867B] hover:text-[#DDD6C9] hover:bg-[#22201D]"
             }`}
           >
-            <FlaskConical className="h-3.5 w-3.5 text-cyan-400" />
+            <FlaskConical className="h-3.5 w-3.5" />
             <span>Estudios & Biomarcadores</span>
             {data.biomarkersData && (
-              <span className="ml-1 rounded-full bg-cyan-500/20 px-1.5 py-0.2 text-[9px] font-mono text-cyan-300">
+              <span className="ml-1 rounded bg-[#121110] px-1.5 py-0.2 text-[9px] font-mono text-[#4EAB9E]">
                 {data.biomarkersData.totalBiomarkersTracked} pruebas
               </span>
             )}
@@ -251,63 +251,63 @@ export function HealthView({ data, onRefresh }: HealthViewProps) {
           {/* 1. Header Metrics Row */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {/* Workout Streak */}
-            <div className="rounded-2xl border border-emerald-500/20 bg-neutral-900/60 p-4 backdrop-blur-xl shadow-xl">
-              <div className="flex items-center justify-between text-xs text-neutral-400">
+            <div className="rounded-xl border border-[#2A2723] bg-[#181715] p-4 shadow-sm">
+              <div className="flex items-center justify-between text-xs text-[#8E867B] font-mono">
                 <span>Racha de Entrenamiento</span>
-                <Flame className="h-4 w-4 text-amber-400" />
+                <Flame className="h-4 w-4 text-[#D99B43]" />
               </div>
-              <div className="mt-2 text-2xl font-bold font-mono text-emerald-400">
+              <div className="mt-2 text-2xl font-bold font-mono text-[#7EA35A]">
                 {data.workoutStreak} días seguidos
               </div>
-              <div className="mt-1 text-[11px] text-neutral-500">
+              <div className="mt-1 text-[11px] font-mono text-[#8E867B]">
                 {data.weeklyWorkoutsCount} sesiones esta semana
               </div>
             </div>
 
             {/* Hydration */}
-            <div className="rounded-2xl border border-sky-500/20 bg-neutral-900/60 p-4 backdrop-blur-xl shadow-xl">
-              <div className="flex items-center justify-between text-xs text-neutral-400">
+            <div className="rounded-xl border border-[#2A2723] bg-[#181715] p-4 shadow-sm">
+              <div className="flex items-center justify-between text-xs text-[#8E867B] font-mono">
                 <span>Hidratación Hoy</span>
-                <Droplet className="h-4 w-4 text-sky-400" />
+                <Droplet className="h-4 w-4 text-[#4EAB9E]" />
               </div>
-              <div className="mt-2 text-2xl font-bold font-mono text-sky-400">
+              <div className="mt-2 text-2xl font-bold font-mono text-[#4EAB9E]">
                 {data.todayHealth.waterMl} / 3000 ml
               </div>
-              <div className="mt-1 text-[11px] text-neutral-500">
+              <div className="mt-1 text-[11px] font-mono text-[#8E867B]">
                 {data.waterPercent}% de tu meta diaria de 3L
               </div>
             </div>
 
             {/* Sleep Average */}
-            <div className="rounded-2xl border border-indigo-500/20 bg-neutral-900/60 p-4 backdrop-blur-xl shadow-xl">
-              <div className="flex items-center justify-between text-xs text-neutral-400">
+            <div className="rounded-xl border border-[#2A2723] bg-[#181715] p-4 shadow-sm">
+              <div className="flex items-center justify-between text-xs text-[#8E867B] font-mono">
                 <span>Sueño & Recuperación</span>
-                <Moon className="h-4 w-4 text-indigo-400" />
+                <Moon className="h-4 w-4 text-[#DDD6C9]" />
               </div>
-              <div className="mt-2 text-2xl font-bold font-mono text-indigo-400">
+              <div className="mt-2 text-2xl font-bold font-mono text-[#F5F2EB]">
                 {data.todayHealth.sleepHours} hrs
               </div>
-              <div className="mt-1 text-[11px] text-neutral-500">
+              <div className="mt-1 text-[11px] font-mono text-[#8E867B]">
                 Calidad: {data.todayHealth.sleepQuality} de 5 ⭐ (Promedio: {data.averageSleepHours}h)
               </div>
             </div>
 
             {/* Daily Steps */}
-            <div className="rounded-2xl border border-violet-500/20 bg-neutral-900/60 p-4 backdrop-blur-xl shadow-xl">
-              <div className="flex items-center justify-between text-xs text-neutral-400">
+            <div className="rounded-xl border border-[#2A2723] bg-[#181715] p-4 shadow-sm">
+              <div className="flex items-center justify-between text-xs text-[#8E867B] font-mono">
                 <span>Pasos / Movimiento</span>
-                <Activity className="h-4 w-4 text-violet-400" />
+                <Activity className="h-4 w-4 text-[#D99B43]" />
               </div>
-              <div className="mt-2 text-2xl font-bold font-mono text-violet-400">
+              <div className="mt-2 text-2xl font-bold font-mono text-[#F5F2EB]">
                 {data.todayHealth.stepsCount > 0
                   ? `${data.todayHealth.stepsCount.toLocaleString()} pasos`
                   : "Samsung Sync"}
               </div>
-              <div className="mt-1 text-[11px] text-neutral-500">
+              <div className="mt-1 text-[11px] font-mono text-[#8E867B]">
                 <button
                   type="button"
                   onClick={() => setIsImportModalOpen(true)}
-                  className="text-violet-300 hover:underline font-semibold"
+                  className="text-[#D99B43] hover:underline font-semibold cursor-pointer"
                 >
                   Importar Samsung Health ↗
                 </button>
@@ -317,21 +317,21 @@ export function HealthView({ data, onRefresh }: HealthViewProps) {
 
           {/* 1.2 Nutrition Glance Summary Card */}
           {data.nutritionData && (
-            <div className="rounded-2xl border border-emerald-500/20 bg-linear-to-r from-emerald-950/30 via-neutral-900/60 to-neutral-900/60 p-4.5 backdrop-blur-xl shadow-xl flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="rounded-xl border border-[#2A2723] bg-[#181715] p-4.5 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div className="flex items-center gap-3.5">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[#1C2219] text-[#7EA35A] border border-[#7EA35A]/30">
                   <Salad className="h-5 w-5" />
                 </div>
                 <div>
                   <div className="flex items-center gap-2">
-                    <h3 className="text-sm font-bold text-white tracking-tight">
+                    <h3 className="font-serif text-sm font-bold text-[#F5F2EB] tracking-tight">
                       Nutrición Hoy: {data.nutritionData.todayLog.calculatedMacros.kcal} kcal
                     </h3>
-                    <span className="rounded bg-emerald-500/20 border border-emerald-500/30 px-1.5 py-0.5 text-[10px] font-mono text-emerald-300 font-bold">
+                    <span className="rounded bg-[#1C2219] border border-[#7EA35A]/30 px-1.5 py-0.5 text-[10px] font-mono text-[#7EA35A] font-bold">
                       P: {data.nutritionData.todayLog.calculatedMacros.proteinGrams}g | C: {data.nutritionData.todayLog.calculatedMacros.carbsGrams}g | G: {data.nutritionData.todayLog.calculatedMacros.fatGrams}g
                     </span>
                   </div>
-                  <p className="text-xs text-neutral-400 mt-0.5">
+                  <p className="text-xs text-[#8E867B] mt-0.5">
                     {data.nutritionData.scheduledMealsToday.length > 0
                       ? `Próxima comida: ${data.nutritionData.scheduledMealsToday[0].recipe?.title || data.nutritionData.scheduledMealsToday[0].customTitle || "Programada"}`
                       : "Toca para registrar porciones de fruta, cereales, legumbres y ensalada diaria"}
@@ -342,7 +342,7 @@ export function HealthView({ data, onRefresh }: HealthViewProps) {
               <button
                 type="button"
                 onClick={() => setActiveHealthTab("nutrition")}
-                className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-emerald-600 font-bold text-xs text-white hover:bg-emerald-500 transition-all shadow-md shadow-emerald-600/20 shrink-0 self-start sm:self-center"
+                className="flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-[#7EA35A] font-bold text-xs text-[#121110] hover:bg-[#8FBA66] transition-all shadow-xs shrink-0 self-start sm:self-center cursor-pointer"
               >
                 <span>Abrir Nutrición</span>
                 <span>→</span>
@@ -350,293 +350,293 @@ export function HealthView({ data, onRefresh }: HealthViewProps) {
             </div>
           )}
 
-      {/* 1.5. Hevy Workout Tracker Widget */}
-      <HevyWidget
-        recentWorkouts={data.recentHevyWorkouts}
-        stats={data.hevyStats}
-        onRefresh={onRefresh}
-      />
+          {/* 1.5. Hevy Workout Tracker Widget */}
+          <HevyWidget
+            recentWorkouts={data.recentHevyWorkouts}
+            stats={data.hevyStats}
+            onRefresh={onRefresh}
+          />
 
-      {/* 2. Workout Logger Card */}
-      <div className="rounded-2xl border border-white/8 bg-neutral-900/60 p-5 backdrop-blur-xl shadow-xl">
-        <div className="flex items-center justify-between pb-3 border-b border-white/6">
-          <div className="flex items-center gap-2.5">
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-              <Dumbbell className="h-4 w-4" />
-            </div>
-            <div>
-              <h3 className="text-sm font-bold text-white tracking-tight">
-                Check-in de Entrenamiento de Hoy
-              </h3>
-              <p className="text-xs text-neutral-400">
-                1 clic para registrar tu sesión y mantener la racha activa
-              </p>
-            </div>
-          </div>
+          {/* 2. Workout Logger Card */}
+          <div className="rounded-xl border border-[#2A2723] bg-[#181715] p-5 shadow-sm">
+            <div className="flex items-center justify-between pb-3 border-b border-[#2A2723]">
+              <div className="flex items-center gap-2.5">
+                <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#221D16] text-[#D99B43] border border-[#D99B43]/30">
+                  <Dumbbell className="h-4 w-4" />
+                </div>
+                <div>
+                  <h3 className="font-serif text-sm font-bold text-[#F5F2EB] tracking-tight">
+                    Check-in de Entrenamiento de Hoy
+                  </h3>
+                  <p className="text-xs text-[#8E867B]">
+                    1 clic para registrar tu sesión y mantener la racha activa
+                  </p>
+                </div>
+              </div>
 
-          {data.todayHealth.workoutType && (
-            <span className="rounded-md border border-emerald-500/30 bg-emerald-500/10 px-2.5 py-1 text-xs font-bold text-emerald-400 flex items-center gap-1">
-              <CheckCircle2 className="h-3.5 w-3.5" />
-              <span>Registrado: {data.todayHealth.workoutType.toUpperCase()}</span>
-            </span>
-          )}
-        </div>
-
-        <div className="mt-4 grid grid-cols-2 sm:grid-cols-5 gap-2.5">
-          {WORKOUT_TYPES.map((w) => {
-            const isSelected = data.todayHealth.workoutType === w.id;
-
-            return (
-              <button
-                key={w.id}
-                type="button"
-                onClick={() => handleWorkoutCheckin(w.id)}
-                disabled={isPending}
-                className={`flex flex-col items-center justify-center gap-1.5 p-3.5 rounded-2xl border text-xs font-bold transition-all active:scale-95 ${
-                  isSelected
-                    ? "bg-emerald-500/20 border-emerald-500/40 text-emerald-300 shadow-lg shadow-emerald-500/10"
-                    : "bg-neutral-950/60 border-white/6 text-neutral-300 hover:border-white/12 hover:bg-neutral-900"
-                }`}
-              >
-                <span className="text-xl">{w.icon}</span>
-                <span>{w.label.split(" ")[0]}</span>
-              </button>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* 3. Side by Side: Water Gauge & Supplements */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-        {/* Hydration Tracker */}
-        <div className="rounded-2xl border border-sky-500/20 bg-neutral-900/60 p-5 backdrop-blur-xl shadow-xl">
-          <div className="flex items-center justify-between pb-3 border-b border-white/6">
-            <div className="flex items-center gap-2">
-              <Droplet className="h-4 w-4 text-sky-400" />
-              <h3 className="text-sm font-bold text-white tracking-tight">
-                Medidor de Hidratación (Meta 3L)
-              </h3>
-            </div>
-            <span className="font-mono text-xs font-bold text-sky-400">
-              {data.todayHealth.waterMl} ml ({data.waterPercent}%)
-            </span>
-          </div>
-
-          <div className="mt-4 space-y-3">
-            {/* Progress bar */}
-            <div className="relative h-4 w-full overflow-hidden rounded-full bg-neutral-950 border border-white/6">
-              <div
-                className="h-full bg-linear-to-r from-sky-500 to-cyan-400 transition-all duration-500"
-                style={{ width: `${data.waterPercent}%` }}
-              />
+              {data.todayHealth.workoutType && (
+                <span className="rounded border border-[#7EA35A]/40 bg-[#1C2219] px-2.5 py-1 text-xs font-mono font-bold text-[#7EA35A] flex items-center gap-1">
+                  <CheckCircle2 className="h-3.5 w-3.5" />
+                  <span>Registrado: {data.todayHealth.workoutType.toUpperCase()}</span>
+                </span>
+              )}
             </div>
 
-            {/* Quick add buttons */}
-            <div className="flex items-center justify-between gap-2 pt-2">
-              <button
-                type="button"
-                onClick={() => handleAddWater(250)}
-                disabled={isPending}
-                className="flex-1 py-2 rounded-xl bg-sky-500/10 border border-sky-500/20 text-xs font-semibold text-sky-300 hover:bg-sky-500/20 transition-all font-mono"
-              >
-                +250 ml (Vaso)
-              </button>
-              <button
-                type="button"
-                onClick={() => handleAddWater(500)}
-                disabled={isPending}
-                className="flex-1 py-2 rounded-xl bg-sky-500/10 border border-sky-500/20 text-xs font-semibold text-sky-300 hover:bg-sky-500/20 transition-all font-mono"
-              >
-                +500 ml (Botella)
-              </button>
-              <button
-                type="button"
-                onClick={() => handleAddWater(1000)}
-                disabled={isPending}
-                className="flex-1 py-2 rounded-xl bg-sky-500/10 border border-sky-500/20 text-xs font-semibold text-sky-300 hover:bg-sky-500/20 transition-all font-mono"
-              >
-                +1,000 ml (Termo)
-              </button>
-            </div>
-          </div>
-        </div>
+            <div className="mt-4 grid grid-cols-2 sm:grid-cols-5 gap-2.5">
+              {WORKOUT_TYPES.map((w) => {
+                const isSelected = data.todayHealth.workoutType === w.id;
 
-        {/* Supplements Checklist */}
-        <div className="rounded-2xl border border-white/8 bg-neutral-900/60 p-5 backdrop-blur-xl shadow-xl">
-          <div className="flex items-center justify-between pb-3 border-b border-white/6">
-            <div className="flex items-center gap-2">
-              <Pill className="h-4 w-4 text-violet-400" />
-              <h3 className="text-sm font-bold text-white tracking-tight">
-                Checklist de Suplementos Diarios
-              </h3>
-            </div>
-            <div className="flex items-center gap-3">
-              <span className="text-xs text-neutral-400">
-                {data.todayHealth.supplements.filter((s) => s.taken).length}/
-                {data.todayHealth.supplements.length} tomados
-              </span>
-              <button
-                type="button"
-                onClick={() => setIsManageSupplementsOpen(true)}
-                className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-violet-500/10 hover:bg-violet-500/20 text-violet-300 border border-violet-500/20 text-xs font-semibold transition-all shadow-sm"
-                title="Configurar y gestionar suplementos"
-              >
-                <Settings2 className="h-3.5 w-3.5" />
-                <span>Configurar</span>
-              </button>
-            </div>
-          </div>
-
-          {data.todayHealth.supplements.length === 0 ? (
-            <div className="mt-4 p-6 text-center rounded-xl border border-dashed border-white/8 bg-neutral-950/30">
-              <Pill className="h-7 w-7 text-neutral-600 mx-auto mb-2" />
-              <p className="text-xs text-neutral-400 mb-3">
-                No tienes suplementos configurados en tu checklist diario.
-              </p>
-              <button
-                type="button"
-                onClick={() => setIsManageSupplementsOpen(true)}
-                className="px-3 py-1.5 rounded-lg bg-violet-600 hover:bg-violet-500 text-white font-semibold text-xs transition-all inline-flex items-center gap-1.5"
-              >
-                <Plus className="h-3.5 w-3.5" />
-                <span>Configurar Suplementos</span>
-              </button>
-            </div>
-          ) : (
-            <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-2">
-              {data.todayHealth.supplements.map((supp) => (
-                <button
-                  key={supp.id}
-                  type="button"
-                  onClick={() => handleToggleSupplement(supp.id)}
-                  disabled={isPending}
-                  className={`flex items-center justify-between p-3 rounded-xl border transition-all text-xs font-semibold ${
-                    supp.taken
-                      ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-300"
-                      : "border-white/6 bg-neutral-950/60 text-neutral-300 hover:border-white/12"
-                  }`}
-                >
-                  <div className="flex flex-col items-start text-left">
-                    <span>{supp.name}</span>
-                    {supp.timing && (
-                      <span className="text-[10px] font-normal text-neutral-400 mt-0.5">
-                        {supp.timing}
-                      </span>
-                    )}
-                  </div>
-                  <div
-                    className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-md border ml-2 ${
-                      supp.taken
-                        ? "bg-emerald-500 border-emerald-400 text-neutral-950"
-                        : "border-neutral-700 bg-neutral-900"
+                return (
+                  <button
+                    key={w.id}
+                    type="button"
+                    onClick={() => handleWorkoutCheckin(w.id)}
+                    disabled={isPending}
+                    className={`flex flex-col items-center justify-center gap-1.5 p-3.5 rounded-lg border text-xs font-bold transition-all cursor-pointer ${
+                      isSelected
+                        ? "bg-[#1C2219] border-[#7EA35A]/40 text-[#7EA35A] shadow-xs"
+                        : "bg-[#121110] border-[#2A2723] text-[#DDD6C9] hover:border-[#38332D] hover:bg-[#22201D]"
                     }`}
                   >
-                    {supp.taken && <Check className="h-3.5 w-3.5 stroke-3" />}
-                  </div>
-                </button>
-              ))}
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* 4. Sleep & Recovery Editor */}
-      <div className="rounded-2xl border border-indigo-500/20 bg-neutral-900/60 p-5 backdrop-blur-xl shadow-xl">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-3 border-b border-white/6">
-          <div className="flex items-center gap-2.5">
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
-              <Moon className="h-4 w-4" />
-            </div>
-            <div>
-              <h3 className="text-sm font-bold text-white tracking-tight">
-                Registro de Sueño & Recuperación
-              </h3>
-              <p className="text-xs text-neutral-400">
-                Ajusta las horas de sueño y calidad de tu última noche
-              </p>
+                    <span className="text-xl">{w.icon}</span>
+                    <span>{w.label.split(" ")[0]}</span>
+                  </button>
+                );
+              })}
             </div>
           </div>
 
-          <button
-            type="button"
-            onClick={handleSaveSleep}
-            disabled={isPending}
-            className="px-4 py-2 rounded-xl bg-indigo-600 font-bold text-xs text-white hover:bg-indigo-500 transition-all shadow-lg shadow-indigo-500/20"
-          >
-            {isPending ? "Guardando..." : "Guardar Registro"}
-          </button>
-        </div>
+          {/* 3. Side by Side: Water Gauge & Supplements */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+            {/* Hydration Tracker */}
+            <div className="rounded-xl border border-[#2A2723] bg-[#181715] p-5 shadow-sm">
+              <div className="flex items-center justify-between pb-3 border-b border-[#2A2723]">
+                <div className="flex items-center gap-2">
+                  <Droplet className="h-4 w-4 text-[#4EAB9E]" />
+                  <h3 className="font-serif text-sm font-bold text-[#F5F2EB] tracking-tight">
+                    Medidor de Hidratación (Meta 3L)
+                  </h3>
+                </div>
+                <span className="font-mono text-xs font-bold text-[#4EAB9E]">
+                  {data.todayHealth.waterMl} ml ({data.waterPercent}%)
+                </span>
+              </div>
 
-        <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div>
-            <label className="block text-xs font-medium text-neutral-300 mb-1.5">
-              Horas dormidas: <strong className="text-white font-mono">{sleepHours} hrs</strong>
-            </label>
-            <input
-              type="range"
-              min="4"
-              max="12"
-              step="0.5"
-              value={sleepHours}
-              onChange={(e) => setSleepHours(parseFloat(e.target.value))}
-              className="w-full accent-indigo-500"
-            />
-            <div className="flex justify-between text-[10px] font-mono text-neutral-500 mt-1">
-              <span>4h (Insomnio)</span>
-              <span>8h (Ideal)</span>
-              <span>12h</span>
+              <div className="mt-4 space-y-3">
+                {/* Progress bar */}
+                <div className="relative h-3 w-full overflow-hidden rounded-full bg-[#121110] border border-[#2A2723]">
+                  <div
+                    className="h-full bg-[#4EAB9E] transition-all duration-500"
+                    style={{ width: `${data.waterPercent}%` }}
+                  />
+                </div>
+
+                {/* Quick add buttons */}
+                <div className="flex items-center justify-between gap-2 pt-2">
+                  <button
+                    type="button"
+                    onClick={() => handleAddWater(250)}
+                    disabled={isPending}
+                    className="flex-1 py-2 rounded-lg bg-[#121110] border border-[#2A2723] text-xs font-semibold text-[#4EAB9E] hover:bg-[#162121] transition-all font-mono cursor-pointer"
+                  >
+                    +250 ml (Vaso)
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleAddWater(500)}
+                    disabled={isPending}
+                    className="flex-1 py-2 rounded-lg bg-[#121110] border border-[#2A2723] text-xs font-semibold text-[#4EAB9E] hover:bg-[#162121] transition-all font-mono cursor-pointer"
+                  >
+                    +500 ml (Botella)
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleAddWater(1000)}
+                    disabled={isPending}
+                    className="flex-1 py-2 rounded-lg bg-[#121110] border border-[#2A2723] text-xs font-semibold text-[#4EAB9E] hover:bg-[#162121] transition-all font-mono cursor-pointer"
+                  >
+                    +1,000 ml (Termo)
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* Supplements Checklist */}
+            <div className="rounded-xl border border-[#2A2723] bg-[#181715] p-5 shadow-sm">
+              <div className="flex items-center justify-between pb-3 border-b border-[#2A2723]">
+                <div className="flex items-center gap-2">
+                  <Pill className="h-4 w-4 text-[#D99B43]" />
+                  <h3 className="font-serif text-sm font-bold text-[#F5F2EB] tracking-tight">
+                    Checklist de Suplementos Diarios
+                  </h3>
+                </div>
+                <div className="flex items-center gap-3">
+                  <span className="text-xs text-[#8E867B] font-mono">
+                    {data.todayHealth.supplements.filter((s) => s.taken).length}/
+                    {data.todayHealth.supplements.length} tomados
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setIsManageSupplementsOpen(true)}
+                    className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-[#221D16] hover:bg-[#3D3425] text-[#D99B43] border border-[#D99B43]/30 text-xs font-semibold transition-all shadow-xs cursor-pointer"
+                    title="Configurar y gestionar suplementos"
+                  >
+                    <Settings2 className="h-3.5 w-3.5" />
+                    <span>Configurar</span>
+                  </button>
+                </div>
+              </div>
+
+              {data.todayHealth.supplements.length === 0 ? (
+                <div className="mt-4 p-6 text-center rounded-lg border border-dashed border-[#2A2723] bg-[#121110]">
+                  <Pill className="h-7 w-7 text-[#8E867B] mx-auto mb-2" />
+                  <p className="text-xs text-[#8E867B] mb-3">
+                    No tienes suplementos configurados en tu checklist diario.
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => setIsManageSupplementsOpen(true)}
+                    className="px-3 py-1.5 rounded-md bg-[#D99B43] hover:bg-[#E8AF59] text-[#121110] font-semibold text-xs transition-all inline-flex items-center gap-1.5 cursor-pointer"
+                  >
+                    <Plus className="h-3.5 w-3.5" />
+                    <span>Configurar Suplementos</span>
+                  </button>
+                </div>
+              ) : (
+                <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-2 font-mono">
+                  {data.todayHealth.supplements.map((supp) => (
+                    <button
+                      key={supp.id}
+                      type="button"
+                      onClick={() => handleToggleSupplement(supp.id)}
+                      disabled={isPending}
+                      className={`flex items-center justify-between p-3 rounded-lg border transition-all text-xs font-semibold cursor-pointer ${
+                        supp.taken
+                          ? "border-[#7EA35A]/40 bg-[#1C2219] text-[#7EA35A]"
+                          : "border-[#2A2723] bg-[#121110] text-[#DDD6C9] hover:border-[#38332D]"
+                      }`}
+                    >
+                      <div className="flex flex-col items-start text-left">
+                        <span>{supp.name}</span>
+                        {supp.timing && (
+                          <span className="text-[10px] font-normal text-[#8E867B] mt-0.5">
+                            {supp.timing}
+                          </span>
+                        )}
+                      </div>
+                      <div
+                        className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-md border ml-2 ${
+                          supp.taken
+                            ? "bg-[#7EA35A] border-[#7EA35A] text-[#121110]"
+                            : "border-[#2A2723] bg-[#181715]"
+                        }`}
+                      >
+                        {supp.taken && <Check className="h-3.5 w-3.5 stroke-3" />}
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
 
-          <div>
-            <label className="block text-xs font-medium text-neutral-300 mb-1.5">
-              Calidad de descanso: <strong className="text-white">{sleepQuality} / 5 ⭐</strong>
-            </label>
-            <div className="flex items-center gap-2">
-              {[1, 2, 3, 4, 5].map((q) => (
-                <button
-                  key={q}
-                  type="button"
-                  onClick={() => setSleepQuality(q)}
-                  className={`flex-1 py-2 rounded-xl border text-xs font-bold transition-all ${
-                    sleepQuality === q
-                      ? "bg-amber-500/20 border-amber-500/40 text-amber-300"
-                      : "bg-neutral-950/60 border-white/6 text-neutral-400 hover:text-white"
-                  }`}
-                >
-                  {q} ⭐
-                </button>
-              ))}
+          {/* 4. Sleep & Recovery Editor */}
+          <div className="rounded-xl border border-[#2A2723] bg-[#181715] p-5 shadow-sm">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-3 border-b border-[#2A2723]">
+              <div className="flex items-center gap-2.5">
+                <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#221D16] text-[#D99B43] border border-[#D99B43]/30">
+                  <Moon className="h-4 w-4" />
+                </div>
+                <div>
+                  <h3 className="font-serif text-sm font-bold text-[#F5F2EB] tracking-tight">
+                    Registro de Sueño & Recuperación
+                  </h3>
+                  <p className="text-xs text-[#8E867B]">
+                    Ajusta las horas de sueño y calidad de tu última noche
+                  </p>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={handleSaveSleep}
+                disabled={isPending}
+                className="px-4 py-2 rounded-lg bg-[#D99B43] font-bold text-xs text-[#121110] hover:bg-[#E8AF59] transition-all shadow-xs cursor-pointer"
+              >
+                {isPending ? "Guardando..." : "Guardar Registro"}
+              </button>
+            </div>
+
+            <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-xs font-medium text-[#DDD6C9] mb-1.5">
+                  Horas dormidas: <strong className="text-[#F5F2EB] font-mono">{sleepHours} hrs</strong>
+                </label>
+                <input
+                  type="range"
+                  min="4"
+                  max="12"
+                  step="0.5"
+                  value={sleepHours}
+                  onChange={(e) => setSleepHours(parseFloat(e.target.value))}
+                  className="w-full accent-[#D99B43]"
+                />
+                <div className="flex justify-between text-[10px] font-mono text-[#8E867B] mt-1">
+                  <span>4h (Insomnio)</span>
+                  <span>8h (Ideal)</span>
+                  <span>12h</span>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-medium text-[#DDD6C9] mb-1.5">
+                  Calidad de descanso: <strong className="text-[#F5F2EB]">{sleepQuality} / 5 ⭐</strong>
+                </label>
+                <div className="flex items-center gap-2 font-mono">
+                  {[1, 2, 3, 4, 5].map((q) => (
+                    <button
+                      key={q}
+                      type="button"
+                      onClick={() => setSleepQuality(q)}
+                      className={`flex-1 py-2 rounded-md border text-xs font-bold transition-all cursor-pointer ${
+                        sleepQuality === q
+                          ? "bg-[#221D16] border-[#D99B43]/40 text-[#D99B43]"
+                          : "bg-[#121110] border-[#2A2723] text-[#8E867B] hover:text-[#DDD6C9]"
+                      }`}
+                    >
+                      {q} ⭐
+                    </button>
+                  ))}
+                </div>
+              </div>
             </div>
           </div>
-        </div>
-      </div>
 
-      {/* 5. Body Composition & Smart Fit Evolution */}
-      <BodyCompositionWidget
-        logs={data.bodyCompositionLogs || []}
-        latest={data.latestBodyComposition}
-        previous={data.previousBodyComposition}
-        onOpenModal={() => setIsSmartFitModalOpen(true)}
-        onRefresh={onRefresh}
-      />
+          {/* 5. Body Composition & Smart Fit Evolution */}
+          <BodyCompositionWidget
+            logs={data.bodyCompositionLogs || []}
+            latest={data.latestBodyComposition}
+            previous={data.previousBodyComposition}
+            onOpenModal={() => setIsSmartFitModalOpen(true)}
+            onRefresh={onRefresh}
+          />
         </div>
       )}
 
       {/* Samsung Health Import Modal */}
       {isImportModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-200">
-          <div className="w-full max-w-lg rounded-3xl border border-white/10 bg-neutral-900/95 p-6 shadow-2xl backdrop-blur-2xl">
-            <div className="flex items-center justify-between pb-4 border-b border-white/8">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-xs animate-in fade-in duration-200">
+          <div className="w-full max-w-lg rounded-xl border border-[#2A2723] bg-[#181715] p-6 shadow-2xl">
+            <div className="flex items-center justify-between pb-4 border-b border-[#2A2723]">
               <div className="flex items-center gap-2.5">
-                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-violet-500/10 text-violet-400">
+                <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#221D16] text-[#D99B43] border border-[#D99B43]/30">
                   <UploadCloud className="h-5 w-5" />
                 </div>
                 <div>
-                  <h3 className="text-base font-bold text-white tracking-tight">
+                  <h3 className="font-serif text-base font-bold text-[#F5F2EB] tracking-tight">
                     Importar Datos de Samsung Health
                   </h3>
-                  <p className="text-xs text-neutral-400">
+                  <p className="text-xs text-[#8E867B]">
                     Pega el contenido JSON o registros exportados
                   </p>
                 </div>
@@ -644,25 +644,25 @@ export function HealthView({ data, onRefresh }: HealthViewProps) {
               <button
                 type="button"
                 onClick={() => setIsImportModalOpen(false)}
-                className="rounded-lg p-1.5 text-neutral-400 hover:bg-neutral-800 hover:text-white"
+                className="rounded-lg p-1.5 text-[#8E867B] hover:bg-[#22201D] hover:text-[#F5F2EB] cursor-pointer"
               >
                 <X className="h-5 w-5" />
               </button>
             </div>
 
-            <div className="mt-4 space-y-3">
+            <div className="mt-4 space-y-3 font-mono">
               <textarea
                 rows={6}
                 placeholder={'[{"date": "2026-08-22", "steps": 8500, "sleep_hours": 7.8}]'}
                 value={importJson}
                 onChange={(e) => setImportJson(e.target.value)}
-                className="w-full rounded-xl border border-white/10 bg-neutral-950/80 p-3 font-mono text-xs text-white placeholder:text-neutral-600 focus:outline-none"
+                className="w-full rounded-lg border border-[#2A2723] bg-[#121110] p-3 text-xs text-[#F5F2EB] placeholder:text-[#8E867B] focus:border-[#D99B43] focus:outline-none"
               />
-              <div className="flex justify-end gap-2">
+              <div className="flex justify-end gap-2 font-sans">
                 <button
                   type="button"
                   onClick={() => setIsImportModalOpen(false)}
-                  className="px-3.5 py-2 text-xs text-neutral-400 hover:text-white"
+                  className="px-3.5 py-2 text-xs text-[#8E867B] hover:text-[#DDD6C9] cursor-pointer"
                 >
                   Cancelar
                 </button>
@@ -670,7 +670,7 @@ export function HealthView({ data, onRefresh }: HealthViewProps) {
                   type="button"
                   onClick={handleImportSamsungHealth}
                   disabled={isPending || !importJson.trim()}
-                  className="px-4 py-2 rounded-xl bg-violet-600 font-bold text-xs text-white hover:bg-violet-500 disabled:opacity-50"
+                  className="px-4 py-2 rounded-lg bg-[#D99B43] font-bold text-xs text-[#121110] hover:bg-[#E8AF59] disabled:opacity-50 cursor-pointer"
                 >
                   {isPending ? "Importando..." : "Importar a Neon DB"}
                 </button>

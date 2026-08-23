@@ -66,20 +66,20 @@ export function BodyCompositionWidget({
 
   if (!current) {
     return (
-      <div className="rounded-2xl border border-white/8 bg-neutral-900/60 p-6 backdrop-blur-xl shadow-xl text-center">
-        <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-amber-500/10 text-amber-400 border border-amber-500/20 mx-auto mb-3">
-          <Activity className="h-6 w-6" />
+      <div className="rounded-xl border border-[#2A2723] bg-[#181715] p-6 shadow-sm text-center font-sans">
+        <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-[#221D16] text-[#D99B43] border border-[#D99B43]/30 mx-auto mb-3">
+          <Activity className="h-5 w-5" />
         </div>
-        <h3 className="text-sm font-bold text-white mb-1">
+        <h3 className="font-serif text-sm font-bold text-[#F5F2EB] mb-1">
           Registro de Smart Fit Body (Bioimpedancia)
         </h3>
-        <p className="text-xs text-neutral-400 max-w-md mx-auto mb-4">
+        <p className="text-xs text-[#8E867B] max-w-md mx-auto mb-4 font-mono">
           Lleva el control mensual de tu composición corporal: peso, porcentaje de grasa, masa muscular y grasa visceral.
         </p>
         <button
           type="button"
           onClick={onOpenModal}
-          className="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-neutral-950 font-bold text-xs shadow-lg shadow-amber-500/20 transition-all inline-flex items-center gap-1.5"
+          className="px-4 py-2 rounded-lg bg-[#D99B43] hover:bg-[#E8AF59] text-[#121110] font-bold text-xs shadow-xs transition-all inline-flex items-center gap-1.5 cursor-pointer font-sans"
         >
           <Plus className="h-4 w-4" />
           <span>Registrar Primera Medición</span>
@@ -89,25 +89,25 @@ export function BodyCompositionWidget({
   }
 
   return (
-    <div className="rounded-2xl border border-amber-500/20 bg-neutral-900/60 p-5 backdrop-blur-xl shadow-xl space-y-6">
+    <div className="rounded-xl border border-[#2A2723] bg-[#181715] p-5 sm:p-6 shadow-sm space-y-6 font-sans">
       {/* 1. Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-white/6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[#2A2723]">
         <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-500/10 text-amber-400 border border-amber-500/20">
+          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[#221D16] text-[#D99B43] border border-[#D99B43]/30 shadow-xs">
             <Activity className="h-5 w-5" />
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <h3 className="text-base font-bold text-white tracking-tight">
+              <h3 className="font-serif text-base font-bold text-[#F5F2EB] tracking-tight">
                 Composición Corporal & Evolución
               </h3>
-              <span className="rounded-full bg-amber-500/10 px-2 py-0.5 text-[10px] font-bold text-amber-400 border border-amber-500/20">
+              <span className="rounded-md bg-[#221D16] px-2 py-0.5 text-[10px] font-mono font-bold text-[#D99B43] border border-[#D99B43]/30">
                 Smart Fit Body
               </span>
             </div>
-            <p className="text-xs text-neutral-400">
+            <p className="text-xs text-[#8E867B] mt-0.5 font-mono">
               Última medición:{" "}
-              <strong className="text-neutral-200">
+              <strong className="text-[#F5F2EB]">
                 {new Date(current.date + "T00:00:00").toLocaleDateString("es-ES", {
                   day: "numeric",
                   month: "long",
@@ -118,11 +118,11 @@ export function BodyCompositionWidget({
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 font-mono">
           <button
             type="button"
             onClick={onOpenModal}
-            className="px-3.5 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-neutral-950 font-bold text-xs shadow-lg shadow-amber-500/20 transition-all flex items-center gap-1.5"
+            className="px-3.5 py-2 rounded-lg bg-[#D99B43] hover:bg-[#E8AF59] text-[#121110] font-bold text-xs shadow-xs transition-all flex items-center gap-1.5 cursor-pointer font-sans"
           >
             <Plus className="h-4 w-4 stroke-[2.5]" />
             <span>+ Nueva Medición</span>
@@ -133,16 +133,16 @@ export function BodyCompositionWidget({
       {/* 2. Key Metrics Cards with Deltas */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         {/* Peso Total */}
-        <div className="rounded-xl border border-white/6 bg-neutral-950/60 p-4 transition-all hover:border-white/12">
-          <div className="flex items-center justify-between text-xs text-neutral-400 mb-1">
+        <div className="rounded-lg border border-[#2A2723] bg-[#121110] p-4 transition-all hover:border-[#38332D]">
+          <div className="flex items-center justify-between text-xs text-[#8E867B] mb-1 font-mono">
             <span className="flex items-center gap-1.5">
-              <Scale className="h-3.5 w-3.5 text-emerald-400" />
+              <Scale className="h-3.5 w-3.5 text-[#7EA35A]" />
               Peso Total
             </span>
             {weightDelta !== null && (
               <span
                 className={`text-[10px] font-mono font-bold flex items-center gap-0.5 ${
-                  weightDelta <= 0 ? "text-emerald-400" : "text-amber-400"
+                  weightDelta <= 0 ? "text-[#7EA35A]" : "text-[#D99B43]"
                 }`}
               >
                 {weightDelta > 0 ? `+${weightDelta} kg` : `${weightDelta} kg`}
@@ -150,27 +150,27 @@ export function BodyCompositionWidget({
             )}
           </div>
           <div className="flex items-baseline gap-1">
-            <span className="text-2xl font-black text-white font-mono tracking-tight">
+            <span className="text-2xl font-bold text-[#F5F2EB] font-mono tracking-tight">
               {current.weightKg}
             </span>
-            <span className="text-xs text-neutral-400 font-mono">kg</span>
+            <span className="text-xs text-[#8E867B] font-mono">kg</span>
           </div>
-          <span className="text-[10px] text-neutral-500 block mt-1">
+          <span className="text-[10px] text-[#8E867B] block mt-1 font-mono">
             IMC: {current.bmi || "25.6"}
           </span>
         </div>
 
         {/* Grasa Corporal */}
-        <div className="rounded-xl border border-white/6 bg-neutral-950/60 p-4 transition-all hover:border-white/12">
-          <div className="flex items-center justify-between text-xs text-neutral-400 mb-1">
+        <div className="rounded-lg border border-[#2A2723] bg-[#121110] p-4 transition-all hover:border-[#38332D]">
+          <div className="flex items-center justify-between text-xs text-[#8E867B] mb-1 font-mono">
             <span className="flex items-center gap-1.5">
-              <Flame className="h-3.5 w-3.5 text-rose-400" />
+              <Flame className="h-3.5 w-3.5 text-[#E05D52]" />
               % Grasa
             </span>
             {fatDelta !== null && (
               <span
                 className={`text-[10px] font-mono font-bold flex items-center gap-0.5 ${
-                  fatDelta <= 0 ? "text-emerald-400" : "text-rose-400"
+                  fatDelta <= 0 ? "text-[#7EA35A]" : "text-[#E05D52]"
                 }`}
               >
                 {fatDelta <= 0 ? (
@@ -188,12 +188,12 @@ export function BodyCompositionWidget({
             )}
           </div>
           <div className="flex items-baseline gap-1">
-            <span className="text-2xl font-black text-white font-mono tracking-tight">
+            <span className="text-2xl font-bold text-[#F5F2EB] font-mono tracking-tight">
               {current.bodyFatPercentage ?? "--"}
             </span>
-            <span className="text-xs text-neutral-400 font-mono">%</span>
+            <span className="text-xs text-[#8E867B] font-mono">%</span>
           </div>
-          <span className="text-[10px] text-neutral-500 block mt-1">
+          <span className="text-[10px] text-[#8E867B] block mt-1 font-mono">
             Masa Grasa:{" "}
             {current.bodyFatPercentage
               ? ((current.weightKg * current.bodyFatPercentage) / 100).toFixed(1) + " kg"
@@ -202,16 +202,16 @@ export function BodyCompositionWidget({
         </div>
 
         {/* Masa Muscular Esquelética */}
-        <div className="rounded-xl border border-white/6 bg-neutral-950/60 p-4 transition-all hover:border-white/12">
-          <div className="flex items-center justify-between text-xs text-neutral-400 mb-1">
+        <div className="rounded-lg border border-[#2A2723] bg-[#121110] p-4 transition-all hover:border-[#38332D]">
+          <div className="flex items-center justify-between text-xs text-[#8E867B] mb-1 font-mono">
             <span className="flex items-center gap-1.5">
-              <Dumbbell className="h-3.5 w-3.5 text-indigo-400" />
+              <Dumbbell className="h-3.5 w-3.5 text-[#4EAB9E]" />
               Músculo Esquelético
             </span>
             {muscleDelta !== null && (
               <span
                 className={`text-[10px] font-mono font-bold flex items-center gap-0.5 ${
-                  muscleDelta >= 0 ? "text-emerald-400" : "text-amber-400"
+                  muscleDelta >= 0 ? "text-[#7EA35A]" : "text-[#D99B43]"
                 }`}
               >
                 {muscleDelta >= 0 ? (
@@ -229,34 +229,34 @@ export function BodyCompositionWidget({
             )}
           </div>
           <div className="flex items-baseline gap-1">
-            <span className="text-2xl font-black text-white font-mono tracking-tight">
+            <span className="text-2xl font-bold text-[#F5F2EB] font-mono tracking-tight">
               {current.skeletalMuscleKg ?? "--"}
             </span>
-            <span className="text-xs text-neutral-400 font-mono">kg</span>
+            <span className="text-xs text-[#8E867B] font-mono">kg</span>
           </div>
-          <span className="text-[10px] text-neutral-500 block mt-1">
+          <span className="text-[10px] text-[#8E867B] block mt-1 font-mono">
             Masa Libre Grasa: {current.fatFreeMassKg ? `${current.fatFreeMassKg} kg` : "--"}
           </span>
         </div>
 
         {/* Grasa Visceral & TMB */}
-        <div className="rounded-xl border border-white/6 bg-neutral-950/60 p-4 transition-all hover:border-white/12">
-          <div className="flex items-center justify-between text-xs text-neutral-400 mb-1">
+        <div className="rounded-lg border border-[#2A2723] bg-[#121110] p-4 transition-all hover:border-[#38332D]">
+          <div className="flex items-center justify-between text-xs text-[#8E867B] mb-1 font-mono">
             <span className="flex items-center gap-1.5">
-              <Zap className="h-3.5 w-3.5 text-amber-400" />
+              <Zap className="h-3.5 w-3.5 text-[#D99B43]" />
               TMB / Visceral
             </span>
-            <span className="text-[10px] font-mono text-neutral-400">
+            <span className="text-[10px] font-mono text-[#8E867B]">
               Nivel {current.visceralFatLevel ?? "8.0"}
             </span>
           </div>
           <div className="flex items-baseline gap-1">
-            <span className="text-2xl font-black text-white font-mono tracking-tight">
+            <span className="text-2xl font-bold text-[#F5F2EB] font-mono tracking-tight">
               {current.bmrKcal ?? "--"}
             </span>
-            <span className="text-xs text-neutral-400 font-mono">kcal</span>
+            <span className="text-xs text-[#8E867B] font-mono">kcal</span>
           </div>
-          <span className="text-[10px] text-neutral-500 block mt-1">
+          <span className="text-[10px] text-[#8E867B] block mt-1 font-mono">
             Agua corporal: {current.waterLiters ? `${current.waterLiters} L` : "--"}
           </span>
         </div>
@@ -264,26 +264,26 @@ export function BodyCompositionWidget({
 
       {/* 3. Segmental Muscle & Fat Map */}
       {current.segmentalData && (
-        <div className="rounded-xl border border-white/6 bg-neutral-950/40 p-4">
+        <div className="rounded-lg border border-[#2A2723] bg-[#121110] p-4">
           <div className="flex items-center justify-between mb-3">
-            <h4 className="text-xs font-bold text-neutral-300 uppercase tracking-wider flex items-center gap-2">
-              <User className="h-3.5 w-3.5 text-violet-400" />
+            <h4 className="font-serif text-xs font-bold text-[#DDD6C9] uppercase tracking-wider flex items-center gap-2">
+              <User className="h-3.5 w-3.5 text-[#D99B43]" />
               <span>Desglose Segmentario (Músculo vs Grasa)</span>
             </h4>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             {/* Tronco */}
-            <div className="p-3 rounded-lg bg-neutral-900/80 border border-white/4">
-              <span className="text-xs font-semibold text-neutral-200 block mb-1.5">
+            <div className="p-3 rounded-lg bg-[#181715] border border-[#2A2723]">
+              <span className="text-xs font-semibold text-[#F5F2EB] block mb-1.5 font-serif">
                 🏛️ Tronco (Core & Espalda)
               </span>
               <div className="flex items-center justify-between text-xs font-mono">
-                <span className="text-indigo-300">
+                <span className="text-[#4EAB9E]">
                   Músculo:{" "}
                   <strong>{current.segmentalData.muscle?.trunk ?? 27.88} kg</strong>
                 </span>
-                <span className="text-amber-400">
+                <span className="text-[#D99B43]">
                   Grasa:{" "}
                   <strong>{current.segmentalData.fat?.trunk ?? 13.79} kg</strong>
                 </span>
@@ -291,19 +291,19 @@ export function BodyCompositionWidget({
             </div>
 
             {/* Brazos */}
-            <div className="p-3 rounded-lg bg-neutral-900/80 border border-white/4">
-              <span className="text-xs font-semibold text-neutral-200 block mb-1.5">
+            <div className="p-3 rounded-lg bg-[#181715] border border-[#2A2723]">
+              <span className="text-xs font-semibold text-[#F5F2EB] block mb-1.5 font-serif">
                 💪 Brazos (Izq / Der)
               </span>
               <div className="flex flex-col gap-1 text-[11px] font-mono">
-                <div className="flex justify-between text-indigo-300">
+                <div className="flex justify-between text-[#4EAB9E]">
                   <span>Músculo:</span>
                   <span>
                     {current.segmentalData.muscle?.leftArm ?? 3.63}kg /{" "}
                     {current.segmentalData.muscle?.rightArm ?? 3.57}kg
                   </span>
                 </div>
-                <div className="flex justify-between text-amber-400">
+                <div className="flex justify-between text-[#D99B43]">
                   <span>Grasa:</span>
                   <span>
                     {current.segmentalData.fat?.leftArm ?? 0.72}kg /{" "}
@@ -314,19 +314,19 @@ export function BodyCompositionWidget({
             </div>
 
             {/* Piernas */}
-            <div className="p-3 rounded-lg bg-neutral-900/80 border border-white/4">
-              <span className="text-xs font-semibold text-neutral-200 block mb-1.5">
+            <div className="p-3 rounded-lg bg-[#181715] border border-[#2A2723]">
+              <span className="text-xs font-semibold text-[#F5F2EB] block mb-1.5 font-serif">
                 🦵 Piernas (Izq / Der)
               </span>
               <div className="flex flex-col gap-1 text-[11px] font-mono">
-                <div className="flex justify-between text-indigo-300">
+                <div className="flex justify-between text-[#4EAB9E]">
                   <span>Músculo:</span>
                   <span>
                     {current.segmentalData.muscle?.leftLeg ?? 9.76}kg /{" "}
                     {current.segmentalData.muscle?.rightLeg ?? 9.74}kg
                   </span>
                 </div>
-                <div className="flex justify-between text-amber-400">
+                <div className="flex justify-between text-[#D99B43]">
                   <span>Grasa:</span>
                   <span>
                     {current.segmentalData.fat?.leftLeg ?? 2.03}kg /{" "}
@@ -343,10 +343,10 @@ export function BodyCompositionWidget({
       {logs.length > 0 && (
         <div>
           <div className="flex items-center justify-between mb-2.5">
-            <h4 className="text-xs font-bold text-neutral-300 tracking-tight flex items-center gap-1.5">
-              <Calendar className="h-3.5 w-3.5 text-neutral-400" />
+            <h4 className="font-serif text-xs font-bold text-[#DDD6C9] tracking-tight flex items-center gap-1.5">
+              <Calendar className="h-3.5 w-3.5 text-[#8E867B]" />
               <span>Historial de Mediciones Mensuales</span>
-              <span className="rounded-full bg-white/6 px-2 py-0.5 text-[10px] text-neutral-400 font-mono ml-1">
+              <span className="rounded bg-[#181715] px-2 py-0.5 text-[10px] text-[#8E867B] font-mono ml-1 border border-[#2A2723]">
                 {logs.length}
               </span>
             </h4>
@@ -359,18 +359,18 @@ export function BodyCompositionWidget({
                 <div
                   key={log.id}
                   onClick={() => setSelectedLog(log)}
-                  className={`flex items-center justify-between p-3 rounded-xl border transition-all cursor-pointer ${
+                  className={`flex items-center justify-between p-3 rounded-lg border transition-all cursor-pointer ${
                     isSelected
-                      ? "border-amber-500/40 bg-amber-500/10 text-white"
-                      : "border-white/4 bg-neutral-950/40 text-neutral-300 hover:border-white/10 hover:bg-neutral-950/80"
+                      ? "border-[#D99B43]/40 bg-[#221D16] text-[#F5F2EB]"
+                      : "border-[#2A2723] bg-[#121110] text-[#8E867B] hover:border-[#38332D] hover:bg-[#181715]"
                   }`}
                 >
                   <div className="flex items-center gap-3">
-                    <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-white/6 text-neutral-300 text-xs font-mono">
+                    <div className="flex h-7 w-7 items-center justify-center rounded bg-[#181715] text-[#8E867B] text-xs font-mono border border-[#2A2723]">
                       📅
                     </div>
                     <div>
-                      <span className="text-xs font-semibold block">
+                      <span className="text-xs font-semibold block text-[#F5F2EB]">
                         {new Date(log.date + "T00:00:00").toLocaleDateString("es-ES", {
                           day: "numeric",
                           month: "short",
@@ -378,7 +378,7 @@ export function BodyCompositionWidget({
                         })}
                       </span>
                       {log.notes && (
-                        <span className="text-[10px] text-neutral-500 block truncate max-w-50">
+                        <span className="text-[10px] text-[#8E867B] block truncate max-w-50 font-mono">
                           {log.notes}
                         </span>
                       )}
@@ -387,12 +387,12 @@ export function BodyCompositionWidget({
 
                   <div className="flex items-center gap-4">
                     <div className="flex items-center gap-3 text-xs font-mono">
-                      <span className="text-white font-bold">{log.weightKg} kg</span>
+                      <span className="text-[#F5F2EB] font-bold">{log.weightKg} kg</span>
                       {log.bodyFatPercentage && (
-                        <span className="text-rose-400">{log.bodyFatPercentage}% grasa</span>
+                        <span className="text-[#E05D52]">{log.bodyFatPercentage}% grasa</span>
                       )}
                       {log.skeletalMuscleKg && (
-                        <span className="text-indigo-400 hidden sm:inline">
+                        <span className="text-[#4EAB9E] hidden sm:inline">
                           {log.skeletalMuscleKg} kg músculo
                         </span>
                       )}
@@ -406,7 +406,7 @@ export function BodyCompositionWidget({
                           handleDelete(log.id);
                         }}
                         disabled={isPending}
-                        className="px-2 py-1 bg-rose-600 hover:bg-rose-500 text-white rounded text-[10px] font-bold"
+                        className="px-2 py-1 bg-[#E05D52] hover:bg-[#EB7369] text-white rounded text-[10px] font-bold cursor-pointer"
                       >
                         Confirmar
                       </button>
@@ -418,7 +418,7 @@ export function BodyCompositionWidget({
                           setDeletingId(log.id);
                         }}
                         disabled={isPending}
-                        className="p-1 text-neutral-500 hover:text-rose-400 transition-colors"
+                        className="p-1 text-[#8E867B] hover:text-[#E05D52] transition-colors cursor-pointer"
                         title="Eliminar registro"
                       >
                         <Trash2 className="h-3.5 w-3.5" />

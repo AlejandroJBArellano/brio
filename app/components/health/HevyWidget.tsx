@@ -86,37 +86,37 @@ export function HevyWidget({
   };
 
   return (
-    <div className="rounded-3xl border border-cyan-500/20 bg-linear-to-b from-neutral-900/90 via-neutral-900/60 to-neutral-950/80 p-6 backdrop-blur-2xl shadow-2xl shadow-cyan-950/20">
+    <div className="rounded-xl border border-[#2A2723] bg-[#181715] p-5 sm:p-6 shadow-sm font-sans">
       {/* 1. Header with Hevy Branding & Quick Sync */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-white/8">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[#2A2723]">
         <div className="flex items-center gap-3">
-          <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-linear-to-br from-cyan-500/20 to-blue-600/20 border border-cyan-500/30 text-cyan-400 shadow-lg shadow-cyan-500/10">
-            <Dumbbell className="h-6 w-6" />
+          <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-[#221D16] border border-[#D99B43]/30 text-[#D99B43] shadow-xs">
+            <Dumbbell className="h-5 w-5" />
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <h3 className="text-base font-bold text-white tracking-tight flex items-center gap-2">
+              <h3 className="font-serif text-base font-bold text-[#F5F2EB] tracking-tight flex items-center gap-2">
                 Hevy Tracker Integrado
-                <span className="inline-flex items-center gap-1 rounded-full bg-cyan-500/10 px-2 py-0.5 text-[10px] font-bold text-cyan-400 border border-cyan-500/30">
-                  <span className="h-1.5 w-1.5 rounded-full bg-cyan-400 animate-pulse" />
+                <span className="inline-flex items-center gap-1 rounded-md bg-[#221D16] px-2 py-0.5 text-[10px] font-mono font-bold text-[#D99B43] border border-[#D99B43]/30">
+                  <span className="h-1.5 w-1.5 rounded-full bg-[#D99B43]" />
                   API PRO
                 </span>
               </h3>
             </div>
-            <p className="text-xs text-neutral-400">
+            <p className="text-xs text-[#8E867B] mt-0.5 font-mono">
               Sincronización de fuerza, rutinas, series y volumen en tiempo real
             </p>
           </div>
         </div>
 
-        <div className="flex items-center gap-2.5">
+        <div className="flex items-center gap-2.5 font-mono">
           <button
             type="button"
             onClick={() => setShowWebhookInfo(!showWebhookInfo)}
-            className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-neutral-950/60 border border-white/8 text-xs font-semibold text-neutral-300 hover:text-white hover:border-white/15 transition-all"
+            className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-[#121110] border border-[#2A2723] text-xs font-semibold text-[#DDD6C9] hover:text-[#F5F2EB] hover:bg-[#22201D] transition-all cursor-pointer"
             title="Configuración de Webhook en tiempo real"
           >
-            <Webhook className="h-3.5 w-3.5 text-cyan-400" />
+            <Webhook className="h-3.5 w-3.5 text-[#D99B43]" />
             <span className="hidden sm:inline">Webhook</span>
           </button>
 
@@ -124,7 +124,7 @@ export function HevyWidget({
             type="button"
             onClick={handleSync}
             disabled={isPending}
-            className="flex items-center gap-2 px-4 py-2 rounded-xl bg-linear-to-r from-cyan-500 to-blue-600 font-bold text-xs text-white hover:from-cyan-400 hover:to-blue-500 transition-all shadow-lg shadow-cyan-500/20 disabled:opacity-50 active:scale-95 cursor-pointer"
+            className="flex items-center gap-2 px-4 py-2 rounded-lg bg-[#D99B43] hover:bg-[#E8AF59] font-bold text-xs text-[#121110] transition-all shadow-xs disabled:opacity-50 active:scale-95 cursor-pointer font-sans"
           >
             <RefreshCw
               className={`h-3.5 w-3.5 ${isPending ? "animate-spin" : ""}`}
@@ -137,24 +137,24 @@ export function HevyWidget({
       {/* Sync Feedback Alert */}
       {syncFeedback && (
         <div
-          className={`mt-4 p-3 rounded-2xl border text-xs font-semibold flex items-center justify-between animate-in fade-in duration-200 ${
+          className={`mt-4 p-3 rounded-lg border text-xs font-semibold flex items-center justify-between animate-in fade-in duration-200 ${
             syncFeedback.type === "success"
-              ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-300"
-              : "bg-rose-500/10 border-rose-500/30 text-rose-300"
+              ? "bg-[#1C2219] border-[#7EA35A]/30 text-[#7EA35A]"
+              : "bg-[#2A1715] border-[#E05D52]/30 text-[#E05D52]"
           }`}
         >
           <div className="flex items-center gap-2">
             {syncFeedback.type === "success" ? (
-              <Sparkles className="h-4 w-4 text-emerald-400" />
+              <Sparkles className="h-4 w-4 text-[#7EA35A]" />
             ) : (
-              <Zap className="h-4 w-4 text-rose-400" />
+              <Zap className="h-4 w-4 text-[#E05D52]" />
             )}
             <span>{syncFeedback.message}</span>
           </div>
           <button
             type="button"
             onClick={() => setSyncFeedback(null)}
-            className="text-neutral-400 hover:text-white"
+            className="text-[#8E867B] hover:text-[#F5F2EB] cursor-pointer"
           >
             ×
           </button>
@@ -163,25 +163,25 @@ export function HevyWidget({
 
       {/* 2. Webhook Setup Banner (Collapsible) */}
       {showWebhookInfo && (
-        <div className="mt-4 p-4 rounded-2xl border border-cyan-500/20 bg-neutral-950/80 space-y-3 animate-in fade-in duration-200">
+        <div className="mt-4 p-4 rounded-lg border border-[#2A2723] bg-[#121110] space-y-3 animate-in fade-in duration-200 font-mono">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-cyan-300 flex items-center gap-1.5">
-              <Radio className="h-3.5 w-3.5 text-cyan-400 animate-pulse" />
+            <span className="text-xs font-bold text-[#D99B43] flex items-center gap-1.5 font-sans">
+              <Radio className="h-3.5 w-3.5 text-[#D99B43]" />
               Sincronización Automática con Webhook
             </span>
             <a
               href="https://hevy.com/settings?developer"
               target="_blank"
               rel="noreferrer"
-              className="text-[11px] text-cyan-400 hover:underline inline-flex items-center gap-1"
+              className="text-[11px] text-[#D99B43] hover:underline inline-flex items-center gap-1 font-sans"
             >
               Abrir Hevy Web <ExternalLink className="h-3 w-3" />
             </a>
           </div>
-          <p className="text-xs text-neutral-400 leading-relaxed">
+          <p className="text-xs text-[#8E867B] leading-relaxed font-sans">
             Pega esta URL en tu panel de Desarrollador en Hevy (sección Webhooks). Cada vez que termines un entrenamiento en la app, Brio se actualizará automáticamente:
           </p>
-          <div className="flex items-center gap-2 bg-neutral-900 border border-white/8 rounded-xl p-2.5 font-mono text-xs text-neutral-300">
+          <div className="flex items-center gap-2 bg-[#181715] border border-[#2A2723] rounded-lg p-2.5 font-mono text-xs text-[#DDD6C9]">
             <span className="truncate flex-1">
               {typeof window !== "undefined" ? window.location.origin : "https://brio.app"}
               /api/webhooks/hevy
@@ -189,11 +189,11 @@ export function HevyWidget({
             <button
               type="button"
               onClick={copyWebhookUrl}
-              className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-cyan-500/20 text-cyan-300 hover:bg-cyan-500/30 text-xs font-sans font-semibold transition-all shrink-0"
+              className="flex items-center gap-1 px-2.5 py-1 rounded-md bg-[#221D16] text-[#D99B43] border border-[#D99B43]/30 hover:bg-[#2A241C] text-xs font-sans font-semibold transition-all shrink-0 cursor-pointer"
             >
               {copiedWebhook ? (
                 <>
-                  <Check className="h-3.5 w-3.5 text-emerald-400" />
+                  <Check className="h-3.5 w-3.5 text-[#7EA35A]" />
                   <span>Copiado</span>
                 </>
               ) : (
@@ -209,56 +209,56 @@ export function HevyWidget({
 
       {/* 3. Metrics Summary Ribbon */}
       <div className="mt-5 grid grid-cols-2 sm:grid-cols-4 gap-3">
-        <div className="rounded-2xl border border-white/6 bg-neutral-950/60 p-3.5">
-          <div className="flex items-center justify-between text-[11px] text-neutral-400">
+        <div className="rounded-lg border border-[#2A2723] bg-[#121110] p-3.5">
+          <div className="flex items-center justify-between text-[11px] text-[#8E867B]">
             <span>Total Sesiones</span>
-            <Layers className="h-3.5 w-3.5 text-cyan-400" />
+            <Layers className="h-3.5 w-3.5 text-[#D99B43]" />
           </div>
-          <div className="mt-1.5 text-xl font-bold font-mono text-white">
+          <div className="mt-1.5 text-xl font-bold font-mono text-[#F5F2EB]">
             {totalWorkouts > 0 ? `${totalWorkouts} entrenos` : "0"}
           </div>
-          <div className="text-[10px] text-neutral-500 mt-0.5">
+          <div className="text-[10px] text-[#8E867B] mt-0.5 font-mono">
             Registrados en Hevy
           </div>
         </div>
 
-        <div className="rounded-2xl border border-white/6 bg-neutral-950/60 p-3.5">
-          <div className="flex items-center justify-between text-[11px] text-neutral-400">
+        <div className="rounded-lg border border-[#2A2723] bg-[#121110] p-3.5">
+          <div className="flex items-center justify-between text-[11px] text-[#8E867B]">
             <span>Volumen Última Sesión</span>
-            <TrendingUp className="h-3.5 w-3.5 text-emerald-400" />
+            <TrendingUp className="h-3.5 w-3.5 text-[#7EA35A]" />
           </div>
-          <div className="mt-1.5 text-xl font-bold font-mono text-emerald-400">
+          <div className="mt-1.5 text-xl font-bold font-mono text-[#7EA35A]">
             {latestWorkout
               ? `${Math.round(latestWorkout.totalVolumeKg).toLocaleString("es-MX")} kg`
               : "0 kg"}
           </div>
-          <div className="text-[10px] text-neutral-500 mt-0.5">
+          <div className="text-[10px] text-[#8E867B] mt-0.5 font-mono">
             {latestWorkout ? `${latestWorkout.setsCount} series completadas` : "Sin datos"}
           </div>
         </div>
 
-        <div className="rounded-2xl border border-white/6 bg-neutral-950/60 p-3.5">
-          <div className="flex items-center justify-between text-[11px] text-neutral-400">
+        <div className="rounded-lg border border-[#2A2723] bg-[#121110] p-3.5">
+          <div className="flex items-center justify-between text-[11px] text-[#8E867B]">
             <span>Última Rutina</span>
-            <Flame className="h-3.5 w-3.5 text-amber-400" />
+            <Flame className="h-3.5 w-3.5 text-[#D99B43]" />
           </div>
-          <div className="mt-1.5 text-xl font-bold text-white truncate">
+          <div className="mt-1.5 text-xl font-bold text-[#F5F2EB] truncate font-serif">
             {latestWorkout ? latestWorkout.title : "Ninguna"}
           </div>
-          <div className="text-[10px] text-neutral-500 mt-0.5">
+          <div className="text-[10px] text-[#8E867B] mt-0.5 font-mono">
             {latestWorkout ? latestWorkout.date : "Pulsa Sincronizar"}
           </div>
         </div>
 
-        <div className="rounded-2xl border border-white/6 bg-neutral-950/60 p-3.5">
-          <div className="flex items-center justify-between text-[11px] text-neutral-400">
+        <div className="rounded-lg border border-[#2A2723] bg-[#121110] p-3.5">
+          <div className="flex items-center justify-between text-[11px] text-[#8E867B]">
             <span>Tiempo de Sesión</span>
-            <Clock className="h-3.5 w-3.5 text-indigo-400" />
+            <Clock className="h-3.5 w-3.5 text-[#4EAB9E]" />
           </div>
-          <div className="mt-1.5 text-xl font-bold font-mono text-indigo-400">
+          <div className="mt-1.5 text-xl font-bold font-mono text-[#4EAB9E]">
             {latestWorkout ? formatDuration(latestWorkout.durationSeconds) : "0 min"}
           </div>
-          <div className="text-[10px] text-neutral-500 mt-0.5">
+          <div className="text-[10px] text-[#8E867B] mt-0.5 font-mono">
             {latestWorkout ? `${latestWorkout.exercisesCount} ejercicios` : "-"}
           </div>
         </div>
@@ -267,25 +267,25 @@ export function HevyWidget({
       {/* 4. Latest Workouts List & Detailed Exercise Breakdown */}
       <div className="mt-6 space-y-3">
         <div className="flex items-center justify-between">
-          <h4 className="text-xs font-bold text-neutral-300 uppercase tracking-wider">
+          <h4 className="font-serif text-xs font-bold text-[#DDD6C9] uppercase tracking-wider">
             Sesiones de Entrenamiento Recientes
           </h4>
-          <span className="text-[11px] text-neutral-500 font-mono">
+          <span className="text-[11px] text-[#8E867B] font-mono">
             {recentWorkouts.length} sincronizadas
           </span>
         </div>
 
         {recentWorkouts.length === 0 ? (
-          <div className="p-8 text-center rounded-2xl border border-dashed border-white/8 bg-neutral-950/40">
-            <Dumbbell className="h-8 w-8 text-cyan-500/40 mx-auto mb-2" />
-            <p className="text-xs text-neutral-400 mb-3">
+          <div className="p-8 text-center rounded-lg border border-dashed border-[#2A2723] bg-[#121110]">
+            <Dumbbell className="h-8 w-8 text-[#8E867B] mx-auto mb-2 opacity-50" />
+            <p className="text-xs text-[#8E867B] mb-3">
               Aún no hay entrenamientos de Hevy sincronizados localmente en Brio.
             </p>
             <button
               type="button"
               onClick={handleSync}
               disabled={isPending}
-              className="px-4 py-2 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white font-bold text-xs transition-all shadow-lg shadow-cyan-500/20 inline-flex items-center gap-2"
+              className="px-4 py-2 rounded-lg bg-[#D99B43] hover:bg-[#E8AF59] text-[#121110] font-bold text-xs transition-all shadow-xs inline-flex items-center gap-2 cursor-pointer"
             >
               <RefreshCw className={`h-3.5 w-3.5 ${isPending ? "animate-spin" : ""}`} />
               <span>Realizar primera sincronización</span>
@@ -299,10 +299,10 @@ export function HevyWidget({
               return (
                 <div
                   key={workout.id}
-                  className={`rounded-2xl border transition-all overflow-hidden ${
+                  className={`rounded-lg border transition-all overflow-hidden ${
                     isExpanded
-                      ? "border-cyan-500/30 bg-neutral-950/80 shadow-lg shadow-cyan-950/20"
-                      : "border-white/6 bg-neutral-950/40 hover:border-white/12"
+                      ? "border-[#D99B43]/40 bg-[#121110]"
+                      : "border-[#2A2723] bg-[#121110] hover:border-[#38332D]"
                   }`}
                 >
                   {/* Workout Header Bar */}
@@ -311,27 +311,27 @@ export function HevyWidget({
                     onClick={() =>
                       setExpandedWorkoutId(isExpanded ? null : workout.id)
                     }
-                    className="w-full p-4 flex items-center justify-between text-left transition-colors hover:bg-white/2"
+                    className="w-full p-4 flex items-center justify-between text-left transition-colors hover:bg-[#181715] cursor-pointer"
                   >
                     <div className="flex items-center gap-3">
-                      <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 font-bold text-xs shrink-0">
+                      <div className="flex h-9 w-9 items-center justify-center rounded-md bg-[#221D16] border border-[#D99B43]/30 text-[#D99B43] font-bold font-mono text-xs shrink-0">
                         {workout.title.slice(0, 2).toUpperCase()}
                       </div>
                       <div>
                         <div className="flex items-center gap-2">
-                          <span className="text-sm font-bold text-white tracking-tight">
+                          <span className="text-sm font-bold text-[#F5F2EB] tracking-tight font-serif">
                             {workout.title}
                           </span>
-                          <span className="text-[11px] font-mono text-neutral-400 bg-white/4 px-2 py-0.5 rounded-md">
+                          <span className="text-[11px] font-mono text-[#8E867B] bg-[#181715] px-2 py-0.5 rounded border border-[#2A2723]">
                             {workout.date}
                           </span>
                         </div>
-                        <div className="flex items-center gap-3 text-[11px] text-neutral-400 mt-0.5">
+                        <div className="flex items-center gap-3 text-[11px] text-[#8E867B] mt-0.5 font-mono">
                           <span>{workout.exercisesCount} ejercicios</span>
                           <span>•</span>
                           <span>{workout.setsCount} series</span>
                           <span>•</span>
-                          <span className="text-cyan-400 font-mono font-semibold">
+                          <span className="text-[#7EA35A] font-mono font-semibold">
                             {Math.round(workout.totalVolumeKg).toLocaleString("es-MX")} kg
                           </span>
                         </div>
@@ -339,10 +339,10 @@ export function HevyWidget({
                     </div>
 
                     <div className="flex items-center gap-2">
-                      <span className="text-xs font-mono text-neutral-400 hidden sm:inline">
+                      <span className="text-xs font-mono text-[#8E867B] hidden sm:inline">
                         {formatDuration(workout.durationSeconds)}
                       </span>
-                      <div className="p-1 rounded-lg text-neutral-400 hover:text-white">
+                      <div className="p-1 rounded text-[#8E867B] hover:text-[#F5F2EB]">
                         {isExpanded ? (
                           <ChevronUp className="h-4 w-4" />
                         ) : (
@@ -354,9 +354,9 @@ export function HevyWidget({
 
                   {/* Expanded Exercise Breakdown */}
                   {isExpanded && (
-                    <div className="p-4 pt-0 border-t border-white/6 mt-1 space-y-3 animate-in fade-in duration-200">
+                    <div className="p-4 pt-0 border-t border-[#2A2723] mt-1 space-y-3 animate-in fade-in duration-200">
                       {workout.description && (
-                        <p className="text-xs text-neutral-400 italic bg-neutral-900/60 p-2.5 rounded-xl border border-white/4">
+                        <p className="text-xs text-[#8E867B] italic bg-[#181715] p-2.5 rounded-md border border-[#2A2723]">
                           {workout.description}
                         </p>
                       )}
@@ -365,19 +365,19 @@ export function HevyWidget({
                         {workout.exercises.map((exercise, idx) => (
                           <div
                             key={idx}
-                            className="p-3 rounded-xl border border-white/4 bg-neutral-900/40 space-y-2"
+                            className="p-3 rounded-md border border-[#2A2723] bg-[#181715] space-y-2"
                           >
                             <div className="flex items-center justify-between">
-                              <span className="text-xs font-bold text-neutral-200">
+                              <span className="text-xs font-bold text-[#DDD6C9]">
                                 {exercise.title}
                               </span>
-                              <span className="text-[10px] font-mono text-neutral-500">
+                              <span className="text-[10px] font-mono text-[#8E867B]">
                                 {exercise.sets.length} {exercise.sets.length === 1 ? "set" : "sets"}
                               </span>
                             </div>
 
                             {exercise.notes && (
-                              <p className="text-[11px] text-cyan-300/80 italic">
+                              <p className="text-[11px] text-[#D99B43]/80 italic">
                                 💬 {exercise.notes}
                               </p>
                             )}
@@ -390,17 +390,17 @@ export function HevyWidget({
                                 const isDrop = set.type === "drop";
 
                                 const badgeColor = isWarmup
-                                  ? "bg-amber-500/10 border-amber-500/20 text-amber-300"
+                                  ? "bg-[#221D16] border-[#D99B43]/30 text-[#D99B43]"
                                   : isFailure
-                                  ? "bg-rose-500/10 border-rose-500/20 text-rose-300"
+                                  ? "bg-[#2A1715] border-[#E05D52]/30 text-[#E05D52]"
                                   : isDrop
-                                  ? "bg-purple-500/10 border-purple-500/20 text-purple-300"
-                                  : "bg-cyan-500/10 border-cyan-500/20 text-cyan-300";
+                                  ? "bg-[#221D16] border-[#D99B43]/30 text-[#D99B43]"
+                                  : "bg-[#121110] border-[#2A2723] text-[#DDD6C9]";
 
                                 return (
                                   <span
                                     key={sIdx}
-                                    className={`inline-flex items-center gap-1 px-2 py-1 rounded-lg border text-[10px] font-mono font-medium ${badgeColor}`}
+                                    className={`inline-flex items-center gap-1 px-2 py-0.5 rounded border text-[10px] font-mono font-medium ${badgeColor}`}
                                   >
                                     <span className="opacity-60">
                                       {isWarmup ? "W" : isFailure ? "F" : isDrop ? "D" : `${sIdx + 1}`}:

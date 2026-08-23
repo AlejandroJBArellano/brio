@@ -42,28 +42,28 @@ export function BiomarkerPanelCard({
   const badgeConfig = isHigh
     ? {
         label: "Sobre Rango",
-        bg: "bg-rose-500/10 text-rose-400 border-rose-500/20",
-        indicatorColor: "bg-rose-500",
+        bg: "bg-[#2A1715] text-[#E05D52] border-[#E05D52]/30",
+        indicatorColor: "bg-[#E05D52]",
         icon: ArrowUpRight,
       }
     : isLow
     ? {
         label: "Bajo Rango",
-        bg: "bg-amber-500/10 text-amber-400 border-amber-500/20",
-        indicatorColor: "bg-amber-500",
+        bg: "bg-[#221D16] text-[#D99B43] border-[#D99B43]/30",
+        indicatorColor: "bg-[#D99B43]",
         icon: ArrowDownRight,
       }
     : isOptimal
     ? {
         label: "Óptimo",
-        bg: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
-        indicatorColor: "bg-emerald-400",
+        bg: "bg-[#1C2219] text-[#7EA35A] border-[#7EA35A]/30",
+        indicatorColor: "bg-[#7EA35A]",
         icon: CheckCircle2,
       }
     : {
         label: "Normal",
-        bg: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
-        indicatorColor: "bg-emerald-400",
+        bg: "bg-[#1C2219] text-[#7EA35A] border-[#7EA35A]/30",
+        indicatorColor: "bg-[#7EA35A]",
         icon: CheckCircle2,
       };
 
@@ -96,37 +96,37 @@ export function BiomarkerPanelCard({
 
   return (
     <div
-      className={`group relative rounded-2xl border transition-all duration-200 p-4 ${
+      className={`group relative rounded-lg border transition-all duration-150 p-4 font-sans ${
         isHigh
-          ? "border-rose-500/25 bg-rose-950/10 hover:border-rose-500/40"
+          ? "border-[#E05D52]/30 bg-[#121110] hover:border-[#E05D52]/50"
           : isLow
-          ? "border-amber-500/25 bg-amber-950/10 hover:border-amber-500/40"
-          : "border-white/8 bg-neutral-900/50 hover:border-white/15 hover:bg-neutral-900/80"
-      } backdrop-blur-xl shadow-lg`}
+          ? "border-[#D99B43]/30 bg-[#121110] hover:border-[#D99B43]/50"
+          : "border-[#2A2723] bg-[#121110] hover:border-[#38332D]"
+      }`}
     >
       {/* 1. Header: Name, Code & Badge */}
       <div className="flex items-start justify-between gap-2 mb-2">
         <div>
           <div className="flex items-center gap-1.5 flex-wrap">
-            <h4 className="text-xs sm:text-sm font-semibold text-neutral-100 group-hover:text-white transition-colors">
+            <h4 className="text-xs sm:text-sm font-semibold text-[#F5F2EB] group-hover:text-[#D99B43] transition-colors">
               {name}
             </h4>
             {code && (
-              <span className="rounded bg-white/6 px-1.5 py-0.2 text-[9px] font-mono text-neutral-400">
+              <span className="rounded bg-[#181715] px-1.5 py-0.2 text-[9px] font-mono text-[#8E867B] border border-[#2A2723]">
                 {code}
               </span>
             )}
           </div>
           {refText && (
-            <p className="text-[10px] text-neutral-400 font-mono mt-0.5">
-              Ref: <span className="text-neutral-300">{refText}</span>
+            <p className="text-[10px] text-[#8E867B] font-mono mt-0.5">
+              Ref: <span className="text-[#DDD6C9]">{refText}</span>
             </p>
           )}
         </div>
 
-        <div className="flex items-center gap-1 shrink-0">
+        <div className="flex items-center gap-1 shrink-0 font-mono">
           <span
-            className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-bold border ${badgeConfig.bg}`}
+            className={`inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-[10px] font-bold border ${badgeConfig.bg}`}
           >
             <BadgeIcon className="h-3 w-3" />
             <span>{badgeConfig.label}</span>
@@ -136,10 +136,10 @@ export function BiomarkerPanelCard({
             <button
               type="button"
               onClick={() => setShowNotes(!showNotes)}
-              className={`p-1 rounded-lg transition-colors ${
+              className={`p-1 rounded transition-colors cursor-pointer ${
                 showNotes
-                  ? "bg-white/10 text-white"
-                  : "text-neutral-500 hover:text-neutral-300 hover:bg-white/5"
+                  ? "bg-[#221D16] text-[#D99B43]"
+                  : "text-[#8E867B] hover:text-[#DDD6C9] hover:bg-[#181715]"
               }`}
               title="Ver notas clínicas y contexto deportivo"
             >
@@ -151,25 +151,25 @@ export function BiomarkerPanelCard({
 
       {/* 2. Value Display */}
       <div className="my-2.5 flex items-baseline justify-between">
-        <div className="flex items-baseline gap-1.5">
+        <div className="flex items-baseline gap-1.5 font-mono">
           <span
             className={`text-xl sm:text-2xl font-bold font-mono tracking-tight ${
               isHigh
-                ? "text-rose-400"
+                ? "text-[#E05D52]"
                 : isLow
-                ? "text-amber-400"
-                : "text-emerald-400"
+                ? "text-[#D99B43]"
+                : "text-[#7EA35A]"
             }`}
           >
             {valueNumeric !== undefined ? valueNumeric : valueText || "—"}
           </span>
           {unit && (
-            <span className="text-xs font-mono text-neutral-400">{unit}</span>
+            <span className="text-xs font-mono text-[#8E867B]">{unit}</span>
           )}
         </div>
 
         {refMin !== undefined && refMax !== undefined && (
-          <div className="text-right text-[10px] font-mono text-neutral-500">
+          <div className="text-right text-[10px] font-mono text-[#8E867B]">
             <span>
               {refMin} – {refMax} {unit}
             </span>
@@ -179,11 +179,11 @@ export function BiomarkerPanelCard({
 
       {/* 3. Range Gauge Semáforo (for numerical biomarkers) */}
       {valueNumeric !== undefined && refMin !== undefined && refMax !== undefined && (
-        <div className="mt-3 pt-2 border-t border-white/5">
-          <div className="relative h-2 w-full rounded-full bg-neutral-950/80 border border-white/6 overflow-hidden">
+        <div className="mt-3 pt-2 border-t border-[#2A2723]">
+          <div className="relative h-1.5 w-full rounded-full bg-[#181715] border border-[#2A2723] overflow-hidden">
             {/* Optimal reference target zone */}
             <div
-              className="absolute top-0 bottom-0 bg-emerald-500/20 border-x border-emerald-500/40"
+              className="absolute top-0 bottom-0 bg-[#7EA35A]/20 border-x border-[#7EA35A]/40"
               style={{
                 left: `${minPct}%`,
                 width: `${maxPct - minPct}%`,
@@ -192,16 +192,16 @@ export function BiomarkerPanelCard({
 
             {/* Current value pin point */}
             <div
-              className={`absolute top-0 bottom-0 w-2.5 -ml-1 rounded-full shadow-md ${badgeConfig.indicatorColor} ring-2 ring-white/20`}
+              className={`absolute top-0 bottom-0 w-2 -ml-1 rounded-full ${badgeConfig.indicatorColor}`}
               style={{
                 left: `${positionPct}%`,
               }}
             />
           </div>
 
-          <div className="flex justify-between text-[9px] font-mono text-neutral-500 mt-1">
+          <div className="flex justify-between text-[9px] font-mono text-[#8E867B] mt-1">
             <span>Bajo</span>
-            <span className="text-emerald-400/80">Rango Clínico Ideal</span>
+            <span className="text-[#7EA35A]">Rango Clínico Ideal</span>
             <span>Alto</span>
           </div>
         </div>
@@ -209,9 +209,9 @@ export function BiomarkerPanelCard({
 
       {/* 4. Qualitative / Descriptive notes banner */}
       {showNotes && notes && (
-        <div className="mt-3 p-2.5 rounded-xl bg-neutral-950/90 border border-white/8 text-[11px] text-neutral-300 leading-relaxed animate-in fade-in slide-in-from-top-1 duration-200">
+        <div className="mt-3 p-2.5 rounded-lg bg-[#181715] border border-[#2A2723] text-[11px] text-[#DDD6C9] leading-relaxed animate-in fade-in slide-in-from-top-1 duration-150">
           <div className="flex items-start gap-1.5">
-            <Info className="h-3.5 w-3.5 text-amber-400 shrink-0 mt-0.5" />
+            <Info className="h-3.5 w-3.5 text-[#D99B43] shrink-0 mt-0.5" />
             <p>{notes}</p>
           </div>
         </div>

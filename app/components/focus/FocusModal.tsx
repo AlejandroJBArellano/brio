@@ -302,16 +302,16 @@ export function FocusModal({
   const activeYtTrack = allYouTubeTracks.find((t) => t.id === selectedYouTubeId) || DEFAULT_YOUTUBE_TRACKS[0];
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/90 backdrop-blur-xl animate-in fade-in duration-200 overflow-y-auto">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md animate-in fade-in duration-200 overflow-y-auto">
       <div
-        className="relative w-full max-w-3xl overflow-hidden rounded-3xl border border-indigo-500/30 bg-neutral-950/95 p-5 sm:p-7 shadow-2xl backdrop-blur-2xl my-auto"
+        className="relative w-full max-w-3xl overflow-hidden rounded-xl border border-[#2A2723] bg-[#181715] p-5 sm:p-7 shadow-2xl my-auto"
         role="dialog"
       >
         {/* Close Button */}
         <button
           type="button"
           onClick={handleClose}
-          className="absolute right-4 top-4 rounded-xl p-2 text-neutral-400 hover:bg-neutral-800 hover:text-white transition-colors z-20"
+          className="absolute right-4 top-4 rounded-lg p-2 text-[#8E867B] hover:bg-[#22201D] hover:text-[#F5F2EB] transition-colors z-20"
         >
           <X className="h-5 w-5" />
         </button>
@@ -319,8 +319,8 @@ export function FocusModal({
         <div className="flex flex-col items-center text-center space-y-5">
           {/* Header Badge with Hormonal Context */}
           <div className="flex flex-col items-center gap-1.5">
-            <div className="flex items-center gap-2 rounded-full border border-indigo-500/30 bg-indigo-500/10 px-3.5 py-1 text-xs font-bold text-indigo-300">
-              <Zap className="h-3.5 w-3.5 text-indigo-400" />
+            <div className="flex items-center gap-2 rounded-lg border border-[#3D3425] bg-[#221D16] px-3.5 py-1 text-xs font-semibold text-[#D99B43]">
+              <Zap className="h-3.5 w-3.5 text-[#D99B43]" />
               <span>Modo Focus Zen & Deep Work (⌘P)</span>
             </div>
 
@@ -339,13 +339,13 @@ export function FocusModal({
 
           {/* Active Task Selector */}
           <div className="w-full max-w-md">
-            <label className="block text-[11px] font-bold text-neutral-400 uppercase tracking-wider mb-1.5 text-left">
+            <label className="block text-[11px] font-semibold text-[#8E867B] uppercase tracking-wider mb-1.5 text-left font-mono">
               Tarea en foco:
             </label>
             <select
               value={selectedTaskId}
               onChange={(e) => setSelectedTaskId(e.target.value)}
-              className="w-full rounded-xl border border-white/10 bg-neutral-900 px-3 py-2 text-xs font-semibold text-white focus:border-indigo-500 focus:outline-none"
+              className="w-full rounded-lg border border-[#2A2723] bg-[#121110] px-3 py-2 text-xs font-medium text-[#F5F2EB] focus:border-[#D99B43] focus:outline-none"
             >
               {tasks.map((task) => (
                 <option key={task.id} value={task.id}>
@@ -357,29 +357,20 @@ export function FocusModal({
 
           {/* Giant Timer Display */}
           <div className="relative flex flex-col items-center justify-center">
-            {/* Circular glowing aura */}
-            <div
-              className={`absolute h-56 w-56 rounded-full blur-3xl transition-opacity duration-700 pointer-events-none ${
-                isActive
-                  ? "bg-indigo-600/25 opacity-100"
-                  : "bg-indigo-900/10 opacity-30"
-              }`}
-            />
-
-            <div className="font-mono text-6xl sm:text-7xl font-black tracking-tight text-white select-none">
+            <div className="font-mono text-6xl sm:text-7xl font-bold tracking-tight text-[#F5F2EB] select-none">
               {String(minutes).padStart(2, "0")}:{String(seconds).padStart(2, "0")}
             </div>
 
             {/* Progress bar */}
-            <div className="mt-3 h-2 w-64 overflow-hidden rounded-full bg-neutral-900 border border-white/6">
+            <div className="mt-3 h-1.5 w-64 overflow-hidden rounded-full bg-[#22201D] border border-[#2A2723]">
               <div
-                className="h-full bg-linear-to-r from-indigo-500 to-emerald-400 transition-all duration-500"
+                className="h-full bg-[#D99B43] transition-all duration-500"
                 style={{ width: `${progressPercent}%` }}
               />
             </div>
 
             {isCompleted && (
-              <div className="mt-2.5 flex items-center gap-2 text-sm font-bold text-emerald-400 animate-bounce">
+              <div className="mt-2.5 flex items-center gap-2 text-sm font-semibold text-[#7EA35A]">
                 <Sparkles className="h-4 w-4" />
                 <span>¡Sesión completada! +EXP & Oro otorgados 🎉</span>
               </div>
@@ -393,10 +384,10 @@ export function FocusModal({
                 key={dur.minutes}
                 type="button"
                 onClick={() => handleSelectDuration(dur.minutes)}
-                className={`px-3 py-1.5 rounded-xl text-xs font-medium transition-all ${
+                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
                   selectedMinutes === dur.minutes
-                    ? "bg-indigo-600 text-white font-bold shadow-lg shadow-indigo-500/20"
-                    : "bg-neutral-900/80 text-neutral-400 hover:text-white border border-white/6"
+                    ? "bg-[#D99B43] text-[#121110] font-bold shadow-xs"
+                    : "bg-[#121110] text-[#8E867B] hover:text-[#DDD6C9] border border-[#2A2723]"
                 }`}
               >
                 {dur.label}
@@ -410,7 +401,7 @@ export function FocusModal({
               type="button"
               onClick={handleReset}
               title="Reiniciar temporizador"
-              className="flex h-11 w-11 items-center justify-center rounded-2xl border border-white/10 bg-neutral-900 text-neutral-400 hover:text-white hover:bg-neutral-800 transition-all active:scale-95"
+              className="flex h-11 w-11 items-center justify-center rounded-lg border border-[#2A2723] bg-[#121110] text-[#8E867B] hover:text-[#F5F2EB] hover:bg-[#22201D] transition-all active:scale-95"
             >
               <RotateCcw className="h-4 w-4" />
             </button>
@@ -418,10 +409,10 @@ export function FocusModal({
             <button
               type="button"
               onClick={isActive ? handlePause : handleStart}
-              className={`flex h-14 w-36 items-center justify-center gap-2 rounded-2xl font-bold text-sm shadow-xl transition-all active:scale-95 ${
+              className={`flex h-13 w-36 items-center justify-center gap-2 rounded-lg font-bold text-sm shadow-lg transition-all active:scale-95 ${
                 isActive
-                  ? "bg-amber-500 text-neutral-950 hover:bg-amber-400 shadow-amber-500/20"
-                  : "bg-linear-to-r from-indigo-500 to-indigo-600 text-white hover:brightness-110 shadow-indigo-500/30"
+                  ? "bg-[#E8AF59] text-[#121110] hover:bg-[#D99B43]"
+                  : "bg-[#D99B43] text-[#121110] hover:bg-[#E8AF59]"
               }`}
             >
               {isActive ? (
@@ -439,7 +430,7 @@ export function FocusModal({
           </div>
 
           {/* Audio Source Tabs Switcher */}
-          <div className="w-full pt-4 border-t border-white/8">
+          <div className="w-full pt-4 border-t border-[#2A2723]">
             <div className="flex flex-col sm:flex-row items-center justify-between gap-3 mb-3">
               <div className="flex items-center gap-2">
                 <button
@@ -447,13 +438,13 @@ export function FocusModal({
                   onClick={() => {
                     setAudioSource("synth");
                   }}
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all border ${
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all border ${
                     audioSource === "synth"
-                      ? "bg-indigo-600/90 text-white border-indigo-500 shadow-sm"
-                      : "bg-neutral-900/60 text-neutral-400 border-white/6 hover:text-white hover:bg-white/5"
+                      ? "bg-[#282622] text-[#F5F2EB] border-[#3D3831] shadow-xs"
+                      : "bg-[#121110] text-[#8E867B] border-[#2A2723] hover:text-[#DDD6C9]"
                   }`}
                 >
-                  <Headphones className="h-3.5 w-3.5" />
+                  <Headphones className="h-3.5 w-3.5 text-[#D99B43]" />
                   <span>🧠 Ondas Hz & Frecuencias</span>
                 </button>
 
@@ -464,26 +455,26 @@ export function FocusModal({
                     ambientAudio.stop();
                     setIsSynthPlaying(false);
                   }}
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all border ${
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all border ${
                     audioSource === "youtube"
-                      ? "bg-red-600/90 text-white border-red-500 shadow-sm"
-                      : "bg-neutral-900/60 text-neutral-400 border-white/6 hover:text-white hover:bg-white/5"
+                      ? "bg-[#282622] text-[#F5F2EB] border-[#3D3831] shadow-xs"
+                      : "bg-[#121110] text-[#8E867B] border-[#2A2723] hover:text-[#DDD6C9]"
                   }`}
                 >
-                  <Tv className="h-3.5 w-3.5" />
-                  <span>📺 YouTube Player & Canales</span>
+                  <Tv className="h-3.5 w-3.5 text-[#E05D52]" />
+                  <span>📺 YouTube Focus</span>
                 </button>
               </div>
 
               {audioSource === "synth" && currentSound !== "none" && (
-                <div className="flex items-center gap-2.5 text-xs text-neutral-300">
+                <div className="flex items-center gap-2.5 text-xs text-[#DDD6C9]">
                   <button
                     type="button"
                     onClick={handleToggleSynthPlay}
-                    className={`flex items-center gap-1.5 px-2.5 py-1 rounded-xl text-xs font-semibold transition-all border ${
+                    className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold transition-all border ${
                       isSynthPlaying
-                        ? "bg-emerald-500/20 text-emerald-300 border-emerald-500/40 shadow-sm"
-                        : "bg-neutral-850 text-neutral-400 border-white/10 hover:text-white hover:bg-neutral-800"
+                        ? "bg-[#7EA35A]/20 text-[#7EA35A] border-[#7EA35A]/40"
+                        : "bg-[#121110] text-[#8E867B] border-[#2A2723] hover:text-[#DDD6C9]"
                     }`}
                   >
                     {isSynthPlaying ? (
@@ -499,8 +490,8 @@ export function FocusModal({
                     )}
                   </button>
 
-                  <div className="flex items-center gap-1.5 text-neutral-400">
-                    <Volume2 className="h-3.5 w-3.5 text-indigo-400" />
+                  <div className="flex items-center gap-1.5 text-[#8E867B]">
+                    <Volume2 className="h-3.5 w-3.5 text-[#D99B43]" />
                     <input
                       type="range"
                       min="0.05"
@@ -512,7 +503,7 @@ export function FocusModal({
                         setSynthVolume(v);
                         ambientAudio.setVolume(v);
                       }}
-                      className="w-20 h-1.5 bg-neutral-800 rounded-lg appearance-none cursor-pointer accent-indigo-500"
+                      className="w-20 h-1.5 bg-[#22201D] rounded-lg appearance-none cursor-pointer accent-[#D99B43]"
                     />
                   </div>
                 </div>
@@ -531,10 +522,10 @@ export function FocusModal({
                       key={snd.id}
                       type="button"
                       onClick={() => handleSelectSound(snd.id)}
-                      className={`flex flex-col p-2.5 rounded-2xl border text-xs transition-all ${
+                      className={`flex flex-col p-2.5 rounded-lg border text-xs transition-all ${
                         isSelected
-                          ? "bg-indigo-500/20 text-white border-indigo-500/50 shadow-md shadow-indigo-500/10 font-bold"
-                          : "bg-neutral-900/50 text-neutral-400 border-white/6 hover:text-white hover:bg-white/5"
+                          ? "bg-[#221D16] text-[#F5F2EB] border-[#D99B43]/50 shadow-xs font-bold"
+                          : "bg-[#121110] text-[#8E867B] border-[#2A2723] hover:text-[#DDD6C9] hover:bg-[#1A1816]"
                       }`}
                     >
                       <div className="flex items-center justify-between gap-1 mb-1">
@@ -544,16 +535,16 @@ export function FocusModal({
                         </span>
                         <div className="flex items-center gap-1">
                           {isPlayingThis && (
-                            <span className="flex h-1.5 w-1.5 rounded-full bg-emerald-400 animate-ping shrink-0" />
+                            <span className="flex h-1.5 w-1.5 rounded-full bg-[#7EA35A] animate-ping shrink-0" />
                           )}
                           {snd.hzBadge && snd.id !== "none" && (
-                            <span className="px-1.5 py-0.5 rounded-md font-mono text-[9px] font-bold bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 shrink-0">
+                            <span className="px-1.5 py-0.5 rounded font-mono text-[9px] font-bold bg-[#3D3425] text-[#E8AF59] border border-[#D99B43]/30 shrink-0">
                               {snd.hzBadge}
                             </span>
                           )}
                         </div>
                       </div>
-                      <span className="text-[10px] text-neutral-500 font-normal line-clamp-2 leading-tight">
+                      <span className="text-[10px] text-[#8E867B] font-normal line-clamp-2 leading-tight">
                         {snd.sublabel}
                       </span>
                     </button>
@@ -564,7 +555,7 @@ export function FocusModal({
 
             {/* View 2: YouTube Iframe Focus Player */}
             {audioSource === "youtube" && (
-              <div className="space-y-3 text-left animate-in fade-in duration-150">
+              <div className="space-y-3 text-left animate-in fade-in duration-150 font-mono">
                 {/* Track Selector Chips */}
                 <div className="flex flex-wrap items-center gap-1.5">
                   {allYouTubeTracks.map((track) => {
@@ -573,16 +564,16 @@ export function FocusModal({
                     return (
                       <div
                         key={track.id}
-                        className={`group inline-flex items-center rounded-xl border text-xs transition-all ${
+                        className={`group inline-flex items-center rounded-lg border text-xs transition-all ${
                           isSelected
-                            ? "bg-red-500/20 text-white border-red-500/50 font-bold"
-                            : "bg-neutral-900/60 text-neutral-400 border-white/6 hover:text-white hover:bg-white/5"
+                            ? "bg-[#221716] text-[#F5F2EB] border-[#E05D52]/50 font-bold"
+                            : "bg-[#121110] text-[#8E867B] border-[#2A2723] hover:text-[#DDD6C9] hover:bg-[#1A1816]"
                         }`}
                       >
                         <button
                           type="button"
                           onClick={() => setSelectedYouTubeId(track.id)}
-                          className="flex items-center gap-1.5 px-3 py-1.5"
+                          className="flex items-center gap-1.5 px-3 py-1.5 cursor-pointer"
                         >
                           <span>{track.icon}</span>
                           <span className="max-w-40 truncate">{track.title}</span>
@@ -592,7 +583,7 @@ export function FocusModal({
                             type="button"
                             onClick={(e) => handleDeleteCustomTrack(track.id, e)}
                             title="Eliminar este video"
-                            className="pr-2 pl-0.5 text-neutral-500 hover:text-rose-400 transition-colors"
+                            className="pr-2 pl-0.5 text-[#8E867B] hover:text-[#E05D52] transition-colors cursor-pointer"
                           >
                             <Trash2 className="h-3 w-3" />
                           </button>
@@ -605,7 +596,7 @@ export function FocusModal({
                   <button
                     type="button"
                     onClick={() => setIsYouTubeFormOpen(!isYouTubeFormOpen)}
-                    className="flex items-center gap-1 px-3 py-1.5 rounded-xl border border-dashed border-white/20 bg-white/5 text-xs text-neutral-300 hover:text-white hover:border-white/40 transition-all"
+                    className="flex items-center gap-1 px-3 py-1.5 rounded-lg border border-dashed border-[#2A2723] bg-[#121110] text-xs text-[#8E867B] hover:text-[#DDD6C9] hover:border-[#38332D] transition-all cursor-pointer"
                   >
                     <Plus className="h-3.5 w-3.5" />
                     <span>Agregar Video/Canal</span>
@@ -614,45 +605,45 @@ export function FocusModal({
 
                 {/* Form to Add Custom YouTube Video */}
                 {isYouTubeFormOpen && (
-                  <div className="p-3.5 rounded-2xl border border-red-500/30 bg-neutral-900/90 space-y-2.5 animate-in fade-in duration-150">
-                    <div className="flex items-center justify-between text-xs font-bold text-white">
+                  <div className="p-3.5 rounded-xl border border-[#E05D52]/30 bg-[#181715] space-y-2.5 animate-in fade-in duration-150">
+                    <div className="flex items-center justify-between text-xs font-bold text-[#F5F2EB] font-serif">
                       <span>🎬 Agregar Video o Transmisión en Vivo de YouTube:</span>
                       <button
                         type="button"
                         onClick={() => setIsYouTubeFormOpen(false)}
-                        className="text-neutral-400 hover:text-white"
+                        className="text-[#8E867B] hover:text-[#F5F2EB] cursor-pointer"
                       >
                         <X className="h-4 w-4" />
                       </button>
                     </div>
 
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 font-sans">
                       <input
                         type="text"
                         placeholder="URL de YouTube (ej. https://youtube.com/watch?v=...)"
                         value={newYtUrl}
                         onChange={(e) => setNewYtUrl(e.target.value)}
-                        className="sm:col-span-2 rounded-xl border border-white/10 bg-neutral-950 px-3 py-2 text-xs text-white placeholder:text-neutral-500 focus:outline-none focus:border-red-500"
+                        className="sm:col-span-2 rounded-lg border border-[#2A2723] bg-[#121110] px-3 py-2 text-xs text-[#F5F2EB] placeholder:text-[#8E867B] focus:outline-none focus:border-[#E05D52]"
                       />
                       <input
                         type="text"
                         placeholder="Nombre / Título (ej. Jazz Café)"
                         value={newYtTitle}
                         onChange={(e) => setNewYtTitle(e.target.value)}
-                        className="rounded-xl border border-white/10 bg-neutral-950 px-3 py-2 text-xs text-white placeholder:text-neutral-500 focus:outline-none focus:border-red-500"
+                        className="rounded-lg border border-[#2A2723] bg-[#121110] px-3 py-2 text-xs text-[#F5F2EB] placeholder:text-[#8E867B] focus:outline-none focus:border-[#E05D52]"
                       />
                     </div>
 
-                    <div className="flex items-center justify-between gap-2 pt-1">
+                    <div className="flex items-center justify-between gap-2 pt-1 font-sans">
                       <div className="flex items-center gap-1.5">
-                        <span className="text-xs text-neutral-400">Emoji:</span>
+                        <span className="text-xs text-[#8E867B]">Emoji:</span>
                         {["🎵", "🎧", "☕", "🌧️", "🌌", "🧠", "🔥", "🏮"].map((emoji) => (
                           <button
                             key={emoji}
                             type="button"
                             onClick={() => setNewYtIcon(emoji)}
-                            className={`px-1.5 py-0.5 rounded text-xs transition-all ${
-                              newYtIcon === emoji ? "bg-white/20 scale-110" : "opacity-60 hover:opacity-100"
+                            className={`px-1.5 py-0.5 rounded text-xs transition-all cursor-pointer ${
+                              newYtIcon === emoji ? "bg-[#221D16] border border-[#D99B43]/40 scale-110" : "opacity-60 hover:opacity-100"
                             }`}
                           >
                             {emoji}
@@ -663,7 +654,7 @@ export function FocusModal({
                       <button
                         type="button"
                         onClick={handleAddYouTubeTrack}
-                        className="px-3.5 py-1.5 rounded-xl bg-red-600 text-white font-bold text-xs hover:bg-red-500 shadow-md shadow-red-500/20 transition-all"
+                        className="px-3.5 py-1.5 rounded-lg bg-[#E05D52] hover:bg-[#E8736A] text-white font-bold text-xs shadow-xs transition-all cursor-pointer"
                       >
                         Guardar Video
                       </button>
@@ -672,9 +663,9 @@ export function FocusModal({
                 )}
 
                 {/* Embedded YouTube Iframe Player */}
-                <div className="relative rounded-2xl overflow-hidden border border-white/10 bg-black/60 shadow-xl">
-                  <div className="flex items-center justify-between px-3 py-2 bg-neutral-900/80 border-b border-white/6 text-xs">
-                    <span className="flex items-center gap-1.5 font-semibold text-white">
+                <div className="relative rounded-xl overflow-hidden border border-[#2A2723] bg-[#121110] shadow-xl">
+                  <div className="flex items-center justify-between px-3 py-2 bg-[#181715] border-b border-[#2A2723] text-xs">
+                    <span className="flex items-center gap-1.5 font-semibold text-[#F5F2EB]">
                       <span>{activeYtTrack.icon}</span>
                       <span>{activeYtTrack.title}</span>
                     </span>
@@ -683,7 +674,7 @@ export function FocusModal({
                       type="button"
                       onClick={() => setIsYtVideoExpanded(!isYtVideoExpanded)}
                       title={isYtVideoExpanded ? "Minimizar video" : "Expandir video"}
-                      className="flex items-center gap-1 text-neutral-400 hover:text-white transition-colors"
+                      className="flex items-center gap-1 text-[#8E867B] hover:text-[#DDD6C9] transition-colors cursor-pointer"
                     >
                       {isYtVideoExpanded ? (
                         <>
