@@ -184,17 +184,17 @@ export function TaskStream({
       {/* Stream Controls: Tabs, Tag pill & Search */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         {/* Category Tabs */}
-        <div className="flex items-center gap-1.5 overflow-x-auto rounded-xl border border-white/8 bg-neutral-900/60 p-1 backdrop-blur-xl">
+        <div className="flex items-center gap-1.5 overflow-x-auto rounded-xl border border-[#2A2723] bg-[#181715] p-1">
           <button
             onClick={() => onTabChange("all")}
             className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold transition-all ${
               activeTab === "all"
-                ? "bg-indigo-500 text-white shadow-md shadow-indigo-500/20"
-                : "text-neutral-400 hover:bg-white/5 hover:text-white"
+                ? "bg-[#282622] text-[#F5F2EB] border border-[#3D3831] shadow-xs"
+                : "text-[#8E867B] hover:bg-[#1F1D1A] hover:text-[#DDD6C9]"
             }`}
           >
             <span>All</span>
-            <span className="rounded-full bg-black/20 px-1.5 py-0.2 text-[10px]">
+            <span className="rounded bg-[#121110] px-1.5 py-0.2 font-mono text-[10px] text-[#8E867B]">
               {tasks.length}
             </span>
           </button>
@@ -203,13 +203,13 @@ export function TaskStream({
             onClick={() => onTabChange("dailies")}
             className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold transition-all ${
               activeTab === "dailies"
-                ? "bg-amber-500 text-neutral-950 font-bold shadow-md shadow-amber-500/20"
-                : "text-neutral-400 hover:bg-white/5 hover:text-white"
+                ? "bg-[#3D3425] text-[#E8AF59] border border-[#D99B43]/40 shadow-xs"
+                : "text-[#8E867B] hover:bg-[#1F1D1A] hover:text-[#DDD6C9]"
             }`}
           >
             <Calendar className="h-3 w-3" />
             <span>Dailies</span>
-            <span className="rounded-full bg-black/10 px-1.5 py-0.2 text-[10px]">
+            <span className="rounded bg-[#121110] px-1.5 py-0.2 font-mono text-[10px]">
               {dailies.length}
             </span>
           </button>
@@ -218,13 +218,13 @@ export function TaskStream({
             onClick={() => onTabChange("todos")}
             className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold transition-all ${
               activeTab === "todos"
-                ? "bg-sky-500 text-neutral-950 font-bold shadow-md shadow-sky-500/20"
-                : "text-neutral-400 hover:bg-white/5 hover:text-white"
+                ? "bg-[#1E2825] text-[#4EAB9E] border border-[#4EAB9E]/40 shadow-xs"
+                : "text-[#8E867B] hover:bg-[#1F1D1A] hover:text-[#DDD6C9]"
             }`}
           >
             <ListTodo className="h-3 w-3" />
             <span>To-Dos</span>
-            <span className="rounded-full bg-black/10 px-1.5 py-0.2 text-[10px]">
+            <span className="rounded bg-[#121110] px-1.5 py-0.2 font-mono text-[10px]">
               {todos.length}
             </span>
           </button>
@@ -233,13 +233,13 @@ export function TaskStream({
             onClick={() => onTabChange("habits")}
             className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold transition-all ${
               activeTab === "habits"
-                ? "bg-emerald-500 text-neutral-950 font-bold shadow-md shadow-emerald-500/20"
-                : "text-neutral-400 hover:bg-white/5 hover:text-white"
+                ? "bg-[#1D2619] text-[#7EA35A] border border-[#7EA35A]/40 shadow-xs"
+                : "text-[#8E867B] hover:bg-[#1F1D1A] hover:text-[#DDD6C9]"
             }`}
           >
             <Zap className="h-3 w-3" />
             <span>Habits</span>
-            <span className="rounded-full bg-black/10 px-1.5 py-0.2 text-[10px]">
+            <span className="rounded bg-[#121110] px-1.5 py-0.2 font-mono text-[10px]">
               {habits.length}
             </span>
           </button>
@@ -248,12 +248,12 @@ export function TaskStream({
         {/* Active Tag Filter Indicator & Search */}
         <div className="flex items-center gap-2">
           {activeTagFilter && (
-            <div className="flex items-center gap-1 rounded-xl border border-indigo-500/30 bg-indigo-500/10 px-2.5 py-1 text-xs text-indigo-300">
+            <div className="flex items-center gap-1 rounded-lg border border-[#3D3425] bg-[#221D16] px-2.5 py-1 text-xs text-[#D99B43]">
               <Hash className="h-3 w-3" />
               <span>{activeTagFilter}</span>
               <button
                 onClick={onClearTagFilter}
-                className="ml-1 hover:text-white"
+                className="ml-1 hover:text-[#F5F2EB]"
               >
                 <X className="h-3 w-3" />
               </button>
@@ -261,23 +261,23 @@ export function TaskStream({
           )}
 
           <div className="relative flex-1 sm:w-56">
-            <Search className="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-neutral-500" />
+            <Search className="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-[#8E867B]" />
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Filter list..."
-              className="w-full rounded-xl border border-white/10 bg-neutral-900/60 py-1.5 pl-8 pr-3 text-xs text-neutral-100 placeholder:text-neutral-500 backdrop-blur-md focus:border-indigo-500 focus:outline-none"
+              className="w-full rounded-lg border border-[#2A2723] bg-[#121110] py-1.5 pl-8 pr-3 text-xs text-[#F5F2EB] placeholder:text-[#8E867B] focus:border-[#D99B43] focus:outline-none transition-all"
             />
           </div>
 
           <button
             onClick={() => setHideCompleted((prev) => !prev)}
             title={hideCompleted ? "Show completed" : "Hide completed"}
-            className={`flex h-8 items-center gap-1.5 rounded-xl border px-2.5 text-xs transition-colors ${
+            className={`flex h-8 items-center gap-1.5 rounded-lg border px-2.5 text-xs transition-colors ${
               hideCompleted
-                ? "border-indigo-500/50 bg-indigo-500/10 text-indigo-300"
-                : "border-white/10 bg-neutral-900/60 text-neutral-400 hover:text-neutral-200"
+                ? "border-[#D99B43]/50 bg-[#D99B43]/15 text-[#E8AF59]"
+                : "border-[#2A2723] bg-[#121110] text-[#8E867B] hover:text-[#DDD6C9] hover:border-[#38332D]"
             }`}
           >
             <CheckCircle2 className="h-3.5 w-3.5" />
@@ -288,7 +288,7 @@ export function TaskStream({
 
       {/* Task Stream Grid / List */}
       {filteredTasks.length > 0 ? (
-        <div className="grid grid-cols-1 gap-2.5">
+        <div className="grid grid-cols-1 gap-2">
           {filteredTasks.map((task, idx) => (
             <TaskItem
               key={task.id}
@@ -301,14 +301,14 @@ export function TaskStream({
         </div>
       ) : (
         /* Empty State */
-        <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-white/10 bg-neutral-950/40 py-12 text-center backdrop-blur-md">
-          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/5 text-neutral-400">
-            <Sparkles className="h-5 w-5 text-indigo-400" />
+        <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-[#2A2723] bg-[#141311] py-12 text-center">
+          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[#1C1A17] text-[#8E867B]">
+            <Sparkles className="h-5 w-5 text-[#D99B43]" />
           </div>
-          <h3 className="mt-3 text-sm font-semibold text-neutral-200">
+          <h3 className="mt-3 font-serif text-sm font-semibold text-[#F5F2EB]">
             No tasks found
           </h3>
-          <p className="mt-1 max-w-sm text-xs text-neutral-400">
+          <p className="mt-1 max-w-sm text-xs text-[#8E867B]">
             {searchQuery || activeTagFilter
               ? "No tasks match your active filters."
               : "Use the Quick Omnibar or press 'C' to batch capture tasks."}
@@ -317,39 +317,39 @@ export function TaskStream({
       )}
 
       {/* Keyboard Shortcuts Helper Ribbon */}
-      <div className="hidden lg:flex items-center justify-between border-t border-white/4 pt-2 text-[11px] font-mono text-neutral-500">
+      <div className="hidden lg:flex items-center justify-between border-t border-[#2A2723] pt-2 text-[11px] font-mono text-[#8E867B]">
         <div className="flex items-center gap-3">
           <span>
-            <kbd className="rounded bg-neutral-800 px-1 py-0.5 text-neutral-300">
+            <kbd className="rounded bg-[#181715] px-1 py-0.5 text-[#DDD6C9] border border-[#2A2723]">
               j
             </kbd>
             /
-            <kbd className="rounded bg-neutral-800 px-1 py-0.5 text-neutral-300">
+            <kbd className="rounded bg-[#181715] px-1 py-0.5 text-[#DDD6C9] border border-[#2A2723]">
               k
             </kbd>{" "}
             navigate
           </span>
           <span>
-            <kbd className="rounded bg-neutral-800 px-1 py-0.5 text-neutral-300">
+            <kbd className="rounded bg-[#181715] px-1 py-0.5 text-[#DDD6C9] border border-[#2A2723]">
               Space
             </kbd>{" "}
             toggle
           </span>
           <span>
-            <kbd className="rounded bg-neutral-800 px-1 py-0.5 text-neutral-300">
+            <kbd className="rounded bg-[#181715] px-1 py-0.5 text-[#DDD6C9] border border-[#2A2723]">
               Enter
             </kbd>{" "}
             inspect
           </span>
           <span>
-            <kbd className="rounded bg-neutral-800 px-1 py-0.5 text-neutral-300">
+            <kbd className="rounded bg-[#181715] px-1 py-0.5 text-[#DDD6C9] border border-[#2A2723]">
               d
             </kbd>{" "}
             delete
           </span>
         </div>
         <span>
-          <kbd className="rounded bg-neutral-800 px-1 py-0.5 text-neutral-300">
+          <kbd className="rounded bg-[#181715] px-1 py-0.5 text-[#DDD6C9] border border-[#2A2723]">
             ⌘K
           </kbd>{" "}
           command palette

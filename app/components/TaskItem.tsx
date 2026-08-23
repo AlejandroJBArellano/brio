@@ -73,11 +73,11 @@ export function TaskItem({
   return (
     <div
       onClick={onSelect}
-      className={`group relative flex items-center justify-between rounded-2xl border p-3.5 sm:p-4 transition-all cursor-pointer select-none ${
+      className={`group relative flex items-center justify-between rounded-xl border p-3.5 sm:p-4 transition-all cursor-pointer select-none ${
         isSelected
-          ? "border-indigo-500/80 bg-neutral-900 shadow-lg shadow-indigo-500/10 ring-1 ring-indigo-500/50"
-          : "border-white/6 bg-neutral-900/60 hover:border-white/20 hover:bg-neutral-900/90"
-      } ${optimisticState.completed ? "opacity-40" : "opacity-100"}`}
+          ? "border-[#D99B43]/80 bg-[#1F1D1A] shadow-md ring-1 ring-[#D99B43]/40"
+          : "border-[#2A2723] bg-[#181715] hover:border-[#38332D] hover:bg-[#1D1B18]"
+      } ${optimisticState.completed ? "opacity-45" : "opacity-100"}`}
     >
       {/* Left Column: Checkbox / Counter + Text & Meta */}
       <div className="flex items-center gap-3.5 min-w-0 flex-1">
@@ -87,10 +87,10 @@ export function TaskItem({
             type="button"
             onClick={(e) => handleScore(e, "up")}
             aria-label={optimisticState.completed ? "Mark as uncompleted" : "Mark as completed"}
-            className={`flex size-6 shrink-0 items-center justify-center rounded-lg border transition-all ${
+            className={`flex size-5.5 shrink-0 items-center justify-center rounded border transition-all ${
               optimisticState.completed
-                ? "border-emerald-500 bg-emerald-500 text-neutral-950 shadow-sm shadow-emerald-500/30"
-                : "border-white/20 bg-neutral-950/60 hover:border-indigo-400 hover:bg-indigo-500/10"
+                ? "border-[#7EA35A] bg-[#7EA35A] text-[#121110] shadow-xs"
+                : "border-[#38332D] bg-[#121110] hover:border-[#D99B43]/60 hover:bg-[#D99B43]/10"
             }`}
           >
             {optimisticState.completed && <Check className="size-3.5 stroke-3" />}
@@ -105,7 +105,7 @@ export function TaskItem({
                 type="button"
                 onClick={(e) => handleScore(e, "up")}
                 aria-label="Score habit up"
-                className="flex size-6 items-center justify-center rounded-md border border-white/10 bg-neutral-950/80 text-emerald-400 hover:border-emerald-500/40 hover:bg-emerald-500/20 active:scale-95 transition-all"
+                className="flex size-6 items-center justify-center rounded border border-[#2A2723] bg-[#121110] text-[#7EA35A] hover:border-[#7EA35A]/50 hover:bg-[#7EA35A]/15 active:scale-95 transition-all"
               >
                 <Plus className="size-3.5" />
               </button>
@@ -115,7 +115,7 @@ export function TaskItem({
                 type="button"
                 onClick={(e) => handleScore(e, "down")}
                 aria-label="Score habit down"
-                className="flex size-6 items-center justify-center rounded-md border border-white/10 bg-neutral-950/80 text-rose-400 hover:border-rose-500/40 hover:bg-rose-500/20 active:scale-95 transition-all"
+                className="flex size-6 items-center justify-center rounded border border-[#2A2723] bg-[#121110] text-[#E05D52] hover:border-[#E05D52]/50 hover:bg-[#E05D52]/15 active:scale-95 transition-all"
               >
                 <Minus className="size-3.5" />
               </button>
@@ -127,8 +127,8 @@ export function TaskItem({
         <div className="min-w-0 flex-1 space-y-1">
           <div className="flex items-center gap-2">
             <span
-              className={`text-sm font-medium leading-snug tracking-tight text-neutral-100 truncate ${
-                optimisticState.completed ? "line-through text-neutral-500" : ""
+              className={`text-sm font-medium leading-snug tracking-tight text-[#F5F2EB] truncate ${
+                optimisticState.completed ? "line-through text-[#8E867B]" : ""
               }`}
             >
               {task.text}
@@ -136,18 +136,18 @@ export function TaskItem({
 
             {/* Streak Flame Badge for Dailies */}
             {task.type === "daily" && (task.streak || 0) > 0 && (
-              <span className="flex items-center gap-0.5 rounded-full bg-amber-500/10 px-1.5 py-0.2 text-[10px] font-bold text-amber-400 border border-amber-500/20 shrink-0">
-                <Flame className="size-2.5 fill-amber-500" />
+              <span className="flex items-center gap-0.5 rounded border border-[#3D3425] bg-[#221D16] px-1.5 py-0.2 font-mono text-[10px] font-semibold text-[#D99B43] shrink-0">
+                <Flame className="size-2.5 fill-[#D99B43]" />
                 {task.streak}
               </span>
             )}
           </div>
 
           {/* Subtitle / Notes preview / Tags */}
-          <div className="flex flex-wrap items-center gap-2 text-xs text-neutral-400">
+          <div className="flex flex-wrap items-center gap-2 text-xs text-[#8E867B]">
             {totalChecklistCount > 0 && (
-              <span className="flex items-center gap-1 font-mono text-[11px] text-neutral-400">
-                <CheckSquare className="size-3 text-neutral-500" />
+              <span className="flex items-center gap-1 font-mono text-[11px] text-[#8E867B]">
+                <CheckSquare className="size-3 text-[#8E867B]" />
                 {completedChecklistCount}/{totalChecklistCount}
               </span>
             )}
@@ -164,15 +164,15 @@ export function TaskItem({
                     <span
                       key={i}
                       title={tagName}
-                      className="inline-flex items-center gap-0.5 rounded-md bg-white/5 px-1.5 py-0.5 text-[10px] font-medium text-neutral-300 border border-white/5 truncate max-w-28"
+                      className="inline-flex items-center gap-0.5 rounded border border-[#2E2A25] bg-[#1C1A17] px-1.5 py-0.5 text-[10px] font-medium text-[#C2BAAD] truncate max-w-28"
                     >
-                      <Tag className="size-2.5 text-neutral-400 shrink-0" />
+                      <Tag className="size-2.5 text-[#8E867B] shrink-0" />
                       <span className="truncate">{tagName}</span>
                     </span>
                   );
                 })}
                 {task.tags.length > 3 && (
-                  <span className="text-[10px] text-neutral-400">
+                  <span className="text-[10px] font-mono text-[#8E867B]">
                     +{task.tags.length - 3}
                   </span>
                 )}
@@ -185,7 +185,7 @@ export function TaskItem({
       {/* Right Column: Habitica RPG Value Badge */}
       <div className="ml-3 flex items-center gap-2 shrink-0">
         {task.type === "habit" && (
-          <div className="font-mono text-xs text-neutral-400 hidden sm:block">
+          <div className="font-mono text-xs text-[#8E867B] hidden sm:block">
             +{optimisticState.counterUp} / -{optimisticState.counterDown}
           </div>
         )}

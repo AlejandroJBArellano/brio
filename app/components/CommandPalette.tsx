@@ -370,14 +370,14 @@ function CommandPaletteContent({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-start justify-center p-4 pt-16 sm:pt-24 backdrop-blur-md bg-black/70 animate-in fade-in duration-150">
+    <div className="fixed inset-0 z-50 flex items-start justify-center p-4 pt-16 sm:pt-24 backdrop-blur-xs bg-black/80 animate-in fade-in duration-150 font-sans">
       <div
-        className="w-full max-w-2xl overflow-hidden rounded-3xl border border-white/10 bg-neutral-900/95 shadow-2xl backdrop-blur-2xl transition-all"
+        className="w-full max-w-2xl overflow-hidden rounded-xl border border-[#2A2723] bg-[#181715] shadow-2xl transition-all"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Search input header */}
-        <div className="relative flex items-center border-b border-white/8 px-4 py-3.5">
-          <Search className="h-4 w-4 text-neutral-400" />
+        <div className="relative flex items-center border-b border-[#2A2723] px-4 py-3.5 bg-[#121110]">
+          <Search className="h-4 w-4 text-[#8E867B]" />
           <input
             ref={inputRef}
             type="text"
@@ -388,9 +388,9 @@ function CommandPaletteContent({
             }}
             onKeyDown={handleKeyDown}
             placeholder="Escribe un comando, tarea, #tag o acción..."
-            className="w-full bg-transparent pl-3 pr-8 font-sans text-sm text-neutral-100 placeholder:text-neutral-500 focus:outline-none"
+            className="w-full bg-transparent pl-3 pr-8 font-mono text-sm text-[#F5F2EB] placeholder:text-[#8E867B]/50 focus:outline-none"
           />
-          <kbd className="rounded border border-neutral-700 bg-neutral-800 px-1.5 py-0.5 text-[10px] font-mono text-neutral-400">
+          <kbd className="rounded border border-[#2A2723] bg-[#181715] px-1.5 py-0.5 text-[10px] font-mono text-[#8E867B]">
             ESC
           </kbd>
         </div>
@@ -400,10 +400,10 @@ function CommandPaletteContent({
           {/* Actions Group */}
           {filteredActions.length > 0 && (
             <div className="mb-2">
-              <div className="px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider text-neutral-500">
+              <div className="px-2.5 py-1 text-[10px] font-mono font-semibold uppercase tracking-wider text-[#8E867B]">
                 Comandos & Vistas
               </div>
-              <div className="space-y-1">
+              <div className="space-y-1 font-mono">
                 {filteredActions.map((action, idx) => {
                   const isSelected = selectedIndex === idx;
                   const Icon = action.icon;
@@ -412,23 +412,23 @@ function CommandPaletteContent({
                       key={action.id}
                       onClick={action.run}
                       onMouseEnter={() => setSelectedIndex(idx)}
-                      className={`flex w-full items-center justify-between rounded-2xl px-3.5 py-2.5 text-left text-xs transition-all ${
+                      className={`flex w-full items-center justify-between rounded-lg px-3.5 py-2.5 text-left text-xs transition-all cursor-pointer ${
                         isSelected
-                          ? "bg-indigo-600 text-white shadow-md shadow-indigo-500/20"
-                          : "text-neutral-300 hover:bg-white/5"
+                          ? "bg-[#221D16] text-[#F5F2EB] border border-[#D99B43]/40 shadow-xs"
+                          : "text-[#DDD6C9] hover:bg-[#1C1A17]"
                       }`}
                     >
-                      <div className="flex items-center gap-3">
+                      <div className="flex items-center gap-3 font-sans">
                         <Icon
                           className={`h-4 w-4 ${
-                            isSelected ? "text-white" : "text-neutral-400"
+                            isSelected ? "text-[#D99B43]" : "text-[#8E867B]"
                           }`}
                         />
                         <div>
-                          <div className="font-semibold text-xs">{action.title}</div>
+                          <div className="font-semibold text-xs text-[#F5F2EB]">{action.title}</div>
                           <div
                             className={`text-[11px] ${
-                              isSelected ? "text-indigo-100" : "text-neutral-500"
+                              isSelected ? "text-[#D99B43]" : "text-[#8E867B]"
                             }`}
                           >
                             {action.subtitle}
@@ -438,8 +438,8 @@ function CommandPaletteContent({
                       <span
                         className={`rounded-md px-1.5 py-0.5 font-mono text-[10px] font-bold ${
                           isSelected
-                            ? "bg-indigo-700 text-white"
-                            : "bg-neutral-800 text-neutral-400"
+                            ? "bg-[#D99B43] text-[#121110]"
+                            : "bg-[#121110] border border-[#2A2723] text-[#8E867B]"
                         }`}
                       >
                         {action.badge}
@@ -454,10 +454,10 @@ function CommandPaletteContent({
           {/* Tags Group */}
           {filteredTags.length > 0 && (
             <div className="mb-2">
-              <div className="px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider text-neutral-500">
+              <div className="px-2.5 py-1 text-[10px] font-mono font-semibold uppercase tracking-wider text-[#8E867B]">
                 Filtrar por Tag
               </div>
-              <div className="space-y-1">
+              <div className="space-y-1 font-mono">
                 {filteredTags.map((tag, idx) => {
                   const itemIdx = filteredActions.length + idx;
                   const isSelected = selectedIndex === itemIdx;
@@ -469,21 +469,21 @@ function CommandPaletteContent({
                         onClose();
                       }}
                       onMouseEnter={() => setSelectedIndex(itemIdx)}
-                      className={`flex w-full items-center justify-between rounded-2xl px-3.5 py-2 text-left text-xs transition-all ${
+                      className={`flex w-full items-center justify-between rounded-lg px-3.5 py-2 text-left text-xs transition-all cursor-pointer ${
                         isSelected
-                          ? "bg-indigo-600 text-white"
-                          : "text-neutral-300 hover:bg-white/5"
+                          ? "bg-[#221D16] text-[#F5F2EB] border border-[#D99B43]/40"
+                          : "text-[#DDD6C9] hover:bg-[#1C1A17]"
                       }`}
                     >
                       <div className="flex items-center gap-2">
                         <Hash
                           className={`h-3.5 w-3.5 ${
-                            isSelected ? "text-white" : "text-indigo-400"
+                            isSelected ? "text-[#D99B43]" : "text-[#4EAB9E]"
                           }`}
                         />
                         <span className="font-mono font-medium">#{tag.name}</span>
                       </div>
-                      <span className="text-[10px] opacity-75">Filtrar</span>
+                      <span className="text-[10px] text-[#8E867B]">Filtrar</span>
                     </button>
                   );
                 })}
@@ -494,7 +494,7 @@ function CommandPaletteContent({
           {/* Tasks Match Group */}
           {filteredTasks.length > 0 && (
             <div>
-              <div className="px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider text-neutral-500">
+              <div className="px-2.5 py-1 text-[10px] font-mono font-semibold uppercase tracking-wider text-[#8E867B]">
                 Tareas Encontradas
               </div>
               <div className="space-y-1">
@@ -510,29 +510,29 @@ function CommandPaletteContent({
                         onClose();
                       }}
                       onMouseEnter={() => setSelectedIndex(itemIdx)}
-                      className={`flex w-full items-center justify-between rounded-2xl px-3.5 py-2 text-left text-xs transition-all ${
+                      className={`flex w-full items-center justify-between rounded-lg px-3.5 py-2 text-left text-xs transition-all cursor-pointer ${
                         isSelected
-                          ? "bg-indigo-600 text-white"
-                          : "text-neutral-300 hover:bg-white/5"
+                          ? "bg-[#221D16] text-[#F5F2EB] border border-[#D99B43]/40"
+                          : "text-[#DDD6C9] hover:bg-[#1C1A17]"
                       }`}
                     >
-                      <div className="flex items-center gap-2.5 min-w-0 pr-2">
+                      <div className="flex items-center gap-2.5 min-w-0 pr-2 font-sans">
                         {task.type === "daily" ? (
                           <Calendar
                             className={`h-3.5 w-3.5 shrink-0 ${
-                              isSelected ? "text-white" : "text-amber-400"
+                              isSelected ? "text-[#D99B43]" : "text-[#D99B43]"
                             }`}
                           />
                         ) : task.type === "habit" ? (
                           <Zap
                             className={`h-3.5 w-3.5 shrink-0 ${
-                              isSelected ? "text-white" : "text-emerald-400"
+                              isSelected ? "text-[#7EA35A]" : "text-[#7EA35A]"
                             }`}
                           />
                         ) : (
                           <ListTodo
                             className={`h-3.5 w-3.5 shrink-0 ${
-                              isSelected ? "text-white" : "text-sky-400"
+                              isSelected ? "text-[#4EAB9E]" : "text-[#4EAB9E]"
                             }`}
                           />
                         )}
@@ -543,8 +543,8 @@ function CommandPaletteContent({
                         <span
                           className={`rounded px-1.5 py-0.5 ${
                             isSelected
-                              ? "bg-indigo-700 text-white"
-                              : "bg-neutral-800 text-neutral-400"
+                              ? "bg-[#D99B43] text-[#121110] font-bold"
+                              : "bg-[#121110] border border-[#2A2723] text-[#8E867B]"
                           }`}
                         >
                           {capitalize(task.type)}
@@ -558,29 +558,29 @@ function CommandPaletteContent({
           )}
 
           {allItems.length === 0 && (
-            <div className="py-8 text-center text-xs text-neutral-500">
+            <div className="py-8 text-center text-xs text-[#8E867B] font-mono">
               No se encontraron comandos o tareas que coincidan con la búsqueda.
             </div>
           )}
         </div>
 
         {/* Footer hints */}
-        <div className="flex items-center justify-between border-t border-white/6 bg-neutral-950/60 px-4 py-2.5 text-[11px] text-neutral-400">
+        <div className="flex items-center justify-between border-t border-[#2A2723] bg-[#121110] px-4 py-2.5 text-[11px] text-[#8E867B] font-mono">
           <div className="flex items-center gap-3">
             <span className="flex items-center gap-1">
-              <kbd className="rounded bg-neutral-800 px-1 py-0.5 font-mono text-[10px]">
+              <kbd className="rounded bg-[#181715] border border-[#2A2723] px-1 py-0.5 text-[10px]">
                 ↑↓
               </kbd>{" "}
               Navegar
             </span>
             <span className="flex items-center gap-1">
-              <kbd className="rounded bg-neutral-800 px-1 py-0.5 font-mono text-[10px]">
+              <kbd className="rounded bg-[#181715] border border-[#2A2723] px-1 py-0.5 text-[10px]">
                 ↵
               </kbd>{" "}
               Ejecutar
             </span>
           </div>
-          <span className="font-mono text-[10px] text-neutral-500">
+          <span className="text-[10px] text-[#8E867B]">
             Brio OS Command Launcher
           </span>
         </div>

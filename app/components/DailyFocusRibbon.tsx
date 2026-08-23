@@ -18,17 +18,17 @@ export function DailyFocusRibbon({
 }: DailyFocusRibbonProps) {
   if (!mustWinTaskIds || mustWinTaskIds.length === 0) {
     return (
-      <div className="rounded-2xl border border-amber-500/20 bg-linear-to-r from-amber-500/10 via-neutral-900/60 to-neutral-900/60 p-4 backdrop-blur-xl shadow-xl flex items-center justify-between">
+      <div className="rounded-xl border border-[#3D3425] bg-[#1A1815] p-4 shadow-lg flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-amber-500/20 text-amber-300">
+          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#D99B43]/15 text-[#D99B43]">
             <Target className="h-4 w-4" />
           </div>
           <div>
-            <h4 className="text-xs font-bold text-white tracking-tight">
+            <h4 className="font-serif text-sm font-bold text-[#F5F2EB] tracking-tight">
               ¿Cuáles son tus 3 Must-Win Tasks de hoy?
             </h4>
-            <p className="text-[11px] text-neutral-400">
-              Inicia el Ritual Matutino para fijar tus 3 prioridades del día
+            <p className="text-[11px] text-[#8E867B]">
+              Inicia el Ritual Matutino para fijar tus 3 prioridades clave del día
             </p>
           </div>
         </div>
@@ -36,7 +36,7 @@ export function DailyFocusRibbon({
         <button
           type="button"
           onClick={onOpenMorningRitual}
-          className="px-3 py-1.5 rounded-xl bg-linear-to-r from-amber-500 to-amber-600 font-bold text-xs text-neutral-950 hover:brightness-110 shadow-lg shadow-amber-500/20 transition-all"
+          className="px-3.5 py-1.5 rounded-lg bg-[#D99B43] font-sans font-semibold text-xs text-[#121110] hover:bg-[#E8AF59] transition-all shadow-md"
         >
           🌅 Ritual Matutino (⌘M)
         </button>
@@ -49,18 +49,18 @@ export function DailyFocusRibbon({
   const isAllDone = focusTasks.length > 0 && completedCount === focusTasks.length;
 
   return (
-    <div className="rounded-2xl border border-indigo-500/30 bg-linear-to-r from-indigo-950/40 via-neutral-900/80 to-neutral-900/80 p-4 backdrop-blur-xl shadow-xl space-y-3">
+    <div className="rounded-xl border border-[#2A2723] bg-[#181715] p-4 shadow-lg space-y-3">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-indigo-500/20 text-indigo-300">
+          <div className="flex h-7 w-7 items-center justify-center rounded-md bg-[#D99B43]/15 text-[#D99B43]">
             <Target className="h-3.5 w-3.5" />
           </div>
           <div>
-            <h4 className="text-xs font-bold text-white tracking-tight flex items-center gap-1.5">
+            <h4 className="font-serif text-sm font-bold text-[#F5F2EB] tracking-tight flex items-center gap-1.5">
               <span>🎯 Top 3 Must-Win Focus de Hoy</span>
               {isAllDone && (
-                <span className="rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 px-1.5 py-0.2 text-[10px] font-bold">
-                  ¡3/3 Logradas! 🏆
+                <span className="rounded bg-[#7EA35A]/15 text-[#7EA35A] border border-[#7EA35A]/30 px-1.5 py-0.2 font-mono text-[10px] font-bold">
+                  3/3 Logradas 🏆
                 </span>
               )}
             </h4>
@@ -68,13 +68,13 @@ export function DailyFocusRibbon({
         </div>
 
         <div className="flex items-center gap-2">
-          <span className="font-mono text-xs font-bold text-indigo-300">
+          <span className="font-mono text-xs font-semibold text-[#D99B43]">
             {completedCount}/{focusTasks.length} hechas
           </span>
           <button
             type="button"
             onClick={onOpenMorningRitual}
-            className="text-[10px] text-neutral-400 hover:text-neutral-200 underline"
+            className="text-[11px] text-[#8E867B] hover:text-[#DDD6C9] underline decoration-[#38332D]"
           >
             Editar foco
           </button>
@@ -89,20 +89,20 @@ export function DailyFocusRibbon({
             <div
               key={task.id}
               onClick={() => onToggleTask(task.id)}
-              className={`flex items-center gap-2.5 p-2.5 rounded-xl border cursor-pointer transition-all ${
+              className={`flex items-center gap-2.5 p-2.5 rounded-lg border cursor-pointer transition-all ${
                 isDone
-                  ? "border-emerald-500/30 bg-emerald-500/10 text-neutral-400"
-                  : "border-white/8 bg-neutral-950/60 hover:border-indigo-500/40 text-white"
+                  ? "border-[#7EA35A]/30 bg-[#151814] text-[#8E867B]"
+                  : "border-[#2A2723] bg-[#121110] hover:border-[#D99B43]/40 text-[#F5F2EB]"
               }`}
             >
               {isDone ? (
-                <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-400" />
+                <CheckCircle2 className="h-4 w-4 shrink-0 text-[#7EA35A]" />
               ) : (
-                <Circle className="h-4 w-4 shrink-0 text-neutral-500 hover:text-indigo-400" />
+                <Circle className="h-4 w-4 shrink-0 text-[#8E867B] hover:text-[#D99B43]" />
               )}
               <span
                 className={`text-xs font-medium truncate ${
-                  isDone ? "line-through text-neutral-400" : ""
+                  isDone ? "line-through text-[#8E867B]" : ""
                 }`}
               >
                 {task.text}

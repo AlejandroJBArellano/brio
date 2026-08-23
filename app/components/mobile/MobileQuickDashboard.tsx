@@ -163,15 +163,15 @@ export function MobileQuickDashboard({
   return (
     <div className="space-y-4 pb-24 animate-in fade-in duration-300">
       {/* 1. Widget de Suplementos Inteligente por Horario */}
-      <div className="rounded-3xl border border-white/8 bg-neutral-900/80 p-4.5 backdrop-blur-xl shadow-xl space-y-3.5">
+      <div className="rounded-xl border border-[#2A2723] bg-[#181715] p-4.5 shadow-lg space-y-3.5">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className="flex size-7 items-center justify-center rounded-xl bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+            <div className="flex size-7 items-center justify-center rounded-lg bg-[#7EA35A]/15 text-[#7EA35A] border border-[#7EA35A]/30">
               <Pill className="size-4" />
             </div>
             <div>
-              <h3 className="text-sm font-semibold text-white">Suplementación</h3>
-              <p className="text-[11px] text-neutral-400">
+              <h3 className="font-serif text-sm font-bold text-[#F5F2EB]">Suplementación</h3>
+              <p className="text-[11px] text-[#8E867B]">
                 {takenCountInActiveTiming}/{filteredSupplements.length} tomados
               </p>
             </div>
@@ -180,20 +180,20 @@ export function MobileQuickDashboard({
           <button
             type="button"
             onClick={onOpenManageSupplements}
-            className="text-[11px] text-indigo-400 hover:text-indigo-300 font-medium transition-colors"
+            className="text-[11px] text-[#D99B43] hover:text-[#E8AF59] font-medium transition-colors"
           >
             Editar Catálogo
           </button>
         </div>
 
         {/* Filter Pills (Mañana / Tarde / Todos) */}
-        <div className="flex items-center gap-1.5 p-1 rounded-2xl bg-neutral-950/80 border border-white/6">
+        <div className="flex items-center gap-1.5 p-1 rounded-lg bg-[#121110] border border-[#2A2723]">
           <button
             type="button"
             onClick={() => setActiveSuppTiming("Mañana")}
-            className={`flex-1 flex items-center justify-center gap-1 py-1.5 rounded-xl text-xs font-semibold transition-all ${activeSuppTiming === "Mañana"
-                ? "bg-amber-500/20 text-amber-300 border border-amber-500/40 shadow-sm"
-                : "text-neutral-400 hover:text-white"
+            className={`flex-1 flex items-center justify-center gap-1 py-1.5 rounded-md text-xs font-semibold transition-all ${activeSuppTiming === "Mañana"
+                ? "bg-[#3D3425] text-[#E8AF59] border border-[#D99B43]/40 shadow-xs"
+                : "text-[#8E867B] hover:text-[#DDD6C9]"
               }`}
           >
             <Sun className="size-3" />
@@ -202,9 +202,9 @@ export function MobileQuickDashboard({
           <button
             type="button"
             onClick={() => setActiveSuppTiming("Tarde")}
-            className={`flex-1 flex items-center justify-center gap-1 py-1.5 rounded-xl text-xs font-semibold transition-all ${activeSuppTiming === "Tarde"
-                ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 shadow-sm"
-                : "text-neutral-400 hover:text-white"
+            className={`flex-1 flex items-center justify-center gap-1 py-1.5 rounded-md text-xs font-semibold transition-all ${activeSuppTiming === "Tarde"
+                ? "bg-[#1D2619] text-[#7EA35A] border border-[#7EA35A]/40 shadow-xs"
+                : "text-[#8E867B] hover:text-[#DDD6C9]"
               }`}
           >
             <Pill className="size-3" />
@@ -213,9 +213,9 @@ export function MobileQuickDashboard({
           <button
             type="button"
             onClick={() => setActiveSuppTiming("Todos")}
-            className={`flex-1 py-1.5 rounded-xl text-xs font-semibold transition-all ${activeSuppTiming === "Todos"
-                ? "bg-white/15 text-white border border-white/20 shadow-sm"
-                : "text-neutral-400 hover:text-white"
+            className={`flex-1 py-1.5 rounded-md text-xs font-semibold transition-all ${activeSuppTiming === "Todos"
+                ? "bg-[#282622] text-[#F5F2EB] border border-[#3D3831] shadow-xs"
+                : "text-[#8E867B] hover:text-[#DDD6C9]"
               }`}
           >
             Todos
@@ -228,9 +228,9 @@ export function MobileQuickDashboard({
             type="button"
             disabled={isPending}
             onClick={handleBatchTakeSupplements}
-            className={`w-full py-2.5 px-3 rounded-2xl font-semibold text-xs transition-all flex items-center justify-center gap-2 shadow-md active:scale-98 ${allTakenInActiveTiming
-                ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/40"
-                : "bg-linear-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white shadow-emerald-900/30"
+            className={`w-full py-2.5 px-3 rounded-lg font-semibold text-xs transition-all flex items-center justify-center gap-2 shadow-xs active:scale-98 ${allTakenInActiveTiming
+                ? "bg-[#7EA35A]/20 text-[#7EA35A] border border-[#7EA35A]/40"
+                : "bg-[#7EA35A] hover:bg-[#8FB866] text-[#121110]"
               }`}
           >
             <CheckCircle2 className="size-4" />
@@ -242,7 +242,7 @@ export function MobileQuickDashboard({
 
         {/* List of active supplements */}
         {filteredSupplements.length === 0 ? (
-          <div className="rounded-2xl border border-white/5 bg-white/2 p-3 text-center text-xs text-neutral-500">
+          <div className="rounded-lg border border-[#2A2723] bg-[#121110] p-3 text-center text-xs text-[#8E867B]">
             No hay suplementos configurados para el turno de la {activeSuppTiming}.
           </div>
         ) : (
@@ -251,29 +251,29 @@ export function MobileQuickDashboard({
               <div
                 key={supp.id}
                 onClick={() => handleToggleSupplement(supp.id)}
-                className={`flex items-center justify-between p-3 rounded-2xl border transition-all cursor-pointer select-none active:scale-98 ${supp.taken
-                    ? "bg-emerald-950/20 border-emerald-500/30 text-neutral-400"
-                    : "bg-neutral-800/40 border-white/6 hover:border-white/15 text-white"
+                className={`flex items-center justify-between p-3 rounded-lg border transition-all cursor-pointer select-none active:scale-98 ${supp.taken
+                    ? "bg-[#151814] border-[#7EA35A]/30 text-[#8E867B]"
+                    : "bg-[#121110] border-[#2A2723] hover:border-[#38332D] text-[#F5F2EB]"
                   }`}
               >
                 <div className="flex items-center gap-3">
                   <div
-                    className={`flex size-5 shrink-0 items-center justify-center rounded-lg border transition-colors ${supp.taken
-                        ? "bg-emerald-500 border-emerald-400 text-neutral-950 font-bold"
-                        : "border-neutral-500 bg-neutral-900"
+                    className={`flex size-5 shrink-0 items-center justify-center rounded border transition-colors ${supp.taken
+                        ? "bg-[#7EA35A] border-[#7EA35A] text-[#121110] font-bold"
+                        : "border-[#38332D] bg-[#181715]"
                       }`}
                   >
                     {supp.taken && <Check className="size-3.5 stroke-3" />}
                   </div>
                   <div>
                     <span
-                      className={`text-xs font-semibold ${supp.taken ? "line-through text-neutral-400" : "text-white"
+                      className={`text-xs font-semibold ${supp.taken ? "line-through text-[#8E867B]" : "text-[#F5F2EB]"
                         }`}
                     >
                       {supp.name}
                     </span>
                     {supp.timing && (
-                      <span className="block text-[10px] text-neutral-500">
+                      <span className="block text-[10px] text-[#8E867B]">
                         {supp.timing}
                       </span>
                     )}
@@ -281,7 +281,7 @@ export function MobileQuickDashboard({
                 </div>
 
                 {supp.dosage && (
-                  <span className="text-[10px] font-mono font-medium px-2 py-0.5 rounded-md bg-white/5 border border-white/6 text-neutral-400">
+                  <span className="text-[10px] font-mono font-medium px-2 py-0.5 rounded border border-[#2A2723] bg-[#181715] text-[#C2BAAD]">
                     {supp.dosage}
                   </span>
                 )}
@@ -292,15 +292,15 @@ export function MobileQuickDashboard({
       </div>
 
       {/* 3. Widget de Agenda & Tareas Must-Win */}
-      <div className="rounded-3xl border border-white/8 bg-neutral-900/80 p-4.5 backdrop-blur-xl shadow-xl space-y-3.5">
+      <div className="rounded-xl border border-[#2A2723] bg-[#181715] p-4.5 shadow-lg space-y-3.5">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className="flex size-7 items-center justify-center rounded-xl bg-indigo-500/20 text-indigo-400 border border-indigo-500/30">
+            <div className="flex size-7 items-center justify-center rounded-lg bg-[#D99B43]/15 text-[#D99B43] border border-[#D99B43]/30">
               <Zap className="size-4" />
             </div>
             <div>
-              <h3 className="text-sm font-semibold text-white">Agenda & Foco Must-Win</h3>
-              <p className="text-[11px] text-neutral-400">
+              <h3 className="font-serif text-sm font-bold text-[#F5F2EB]">Agenda & Foco Must-Win</h3>
+              <p className="text-[11px] text-[#8E867B]">
                 {mustWinTasks.filter((t) => t.completed).length}/{mustWinTasks.length} victorias de hoy
               </p>
             </div>
@@ -309,7 +309,7 @@ export function MobileQuickDashboard({
           <button
             type="button"
             onClick={onOpenMorningRitual}
-            className="text-[11px] text-indigo-400 hover:text-indigo-300 font-medium transition-colors"
+            className="text-[11px] text-[#D99B43] hover:text-[#E8AF59] font-medium transition-colors"
           >
             Ritual AM ⚡
           </button>
@@ -317,43 +317,43 @@ export function MobileQuickDashboard({
 
         {/* Next Calendar Event Banner */}
         {nextEvent ? (
-          <div className="rounded-2xl border border-sky-500/30 bg-sky-950/20 p-3 flex items-center justify-between gap-2">
+          <div className="rounded-lg border border-[#4EAB9E]/30 bg-[#141C1A] p-3 flex items-center justify-between gap-2">
             <div className="flex items-center gap-2.5 overflow-hidden">
-              <div className="flex size-8 shrink-0 items-center justify-center rounded-xl bg-sky-500/20 text-sky-400 border border-sky-500/30">
+              <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-[#4EAB9E]/20 text-[#4EAB9E] border border-[#4EAB9E]/30">
                 <Calendar className="size-4" />
               </div>
               <div className="truncate">
-                <p className="text-xs font-semibold text-white truncate">
+                <p className="text-xs font-semibold text-[#F5F2EB] truncate">
                   {nextEvent.title}
                 </p>
-                <p className="text-[10px] text-sky-300">
+                <p className="text-[10px] text-[#4EAB9E] font-mono">
                   {nextEvent.startTimeFormatted} {nextEvent.timeUntil ? `(${nextEvent.timeUntil})` : ""}
                 </p>
               </div>
             </div>
             {nextEvent.location && (
-              <span className="text-[10px] font-mono text-neutral-400 truncate max-w-25">
+              <span className="text-[10px] font-mono text-[#8E867B] truncate max-w-25">
                 {nextEvent.location}
               </span>
             )}
           </div>
         ) : (
-          <div className="rounded-2xl border border-white/5 bg-white/2 p-2.5 text-center text-[11px] text-neutral-400 flex items-center justify-center gap-1.5">
-            <Clock className="size-3.5 text-neutral-500" />
+          <div className="rounded-lg border border-[#2A2723] bg-[#121110] p-2.5 text-center text-[11px] text-[#8E867B] flex items-center justify-center gap-1.5">
+            <Clock className="size-3.5 text-[#8E867B]" />
             Sin reuniones pendientes para hoy
           </div>
         )}
 
         {/* Must-Win Tasks List */}
         {mustWinTasks.length === 0 ? (
-          <div className="rounded-2xl border border-dashed border-white/10 p-3.5 text-center space-y-2">
-            <p className="text-xs text-neutral-400">
+          <div className="rounded-lg border border-dashed border-[#2A2723] p-3.5 text-center space-y-2">
+            <p className="text-xs text-[#8E867B]">
               Aún no has definido tus 3 tareas Must-Win de hoy.
             </p>
             <button
               type="button"
               onClick={onOpenMorningRitual}
-              className="px-3 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs shadow-md transition-colors inline-flex items-center gap-1.5"
+              className="px-3 py-1.5 rounded-lg bg-[#D99B43] hover:bg-[#E8AF59] text-[#121110] font-semibold text-xs shadow-xs transition-colors inline-flex items-center gap-1.5"
             >
               <Sparkles className="size-3.5" />
               Elegir Must-Wins en Ritual AM
@@ -365,22 +365,22 @@ export function MobileQuickDashboard({
               <div
                 key={task.id}
                 onClick={() => handleToggleTask(task)}
-                className={`flex items-center justify-between p-3 rounded-2xl border transition-all cursor-pointer select-none active:scale-98 ${task.completed
-                    ? "bg-indigo-950/20 border-indigo-500/30 text-neutral-400"
-                    : "bg-neutral-800/40 border-white/6 hover:border-white/15 text-white"
+                className={`flex items-center justify-between p-3 rounded-lg border transition-all cursor-pointer select-none active:scale-98 ${task.completed
+                    ? "bg-[#151814] border-[#7EA35A]/30 text-[#8E867B]"
+                    : "bg-[#121110] border-[#2A2723] hover:border-[#38332D] text-[#F5F2EB]"
                   }`}
               >
                 <div className="flex items-center gap-3">
                   <div
-                    className={`flex size-5 shrink-0 items-center justify-center rounded-lg border transition-colors ${task.completed
-                        ? "bg-indigo-500 border-indigo-400 text-white font-bold"
-                        : "border-neutral-500 bg-neutral-900"
+                    className={`flex size-5 shrink-0 items-center justify-center rounded border transition-colors ${task.completed
+                        ? "bg-[#7EA35A] border-[#7EA35A] text-[#121110] font-bold"
+                        : "border-[#38332D] bg-[#181715]"
                       }`}
                   >
                     {task.completed && <Check className="size-3.5 stroke-3" />}
                   </div>
                   <span
-                    className={`text-xs font-semibold ${task.completed ? "line-through text-neutral-400" : "text-white"
+                    className={`text-xs font-semibold ${task.completed ? "line-through text-[#8E867B]" : "text-[#F5F2EB]"
                       }`}
                   >
                     {task.text}
@@ -393,20 +393,20 @@ export function MobileQuickDashboard({
       </div>
 
       {/* 4. Widget de Finanzas & Gastos Hormiga */}
-      <div className="rounded-3xl border border-white/8 bg-neutral-900/80 p-4.5 backdrop-blur-xl shadow-xl space-y-3.5">
+      <div className="rounded-xl border border-[#2A2723] bg-[#181715] p-4.5 shadow-lg space-y-3.5">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <div
-              className={`flex size-7 items-center justify-center rounded-xl border ${isAntExceeded
-                  ? "bg-rose-500/20 text-rose-400 border-rose-500/30"
-                  : "bg-amber-500/20 text-amber-400 border-amber-500/30"
+              className={`flex size-7 items-center justify-center rounded-lg border ${isAntExceeded
+                  ? "bg-[#E05D52]/15 text-[#E05D52] border-[#E05D52]/30"
+                  : "bg-[#D99B43]/15 text-[#D99B43] border-[#D99B43]/30"
                 }`}
             >
               <Wallet className="size-4" />
             </div>
             <div>
-              <h3 className="text-sm font-semibold text-white">Gastos Hormiga del Día</h3>
-              <p className="text-[11px] text-neutral-400">
+              <h3 className="font-serif text-sm font-bold text-[#F5F2EB]">Gastos Hormiga del Día</h3>
+              <p className="text-[11px] text-[#8E867B]">
                 Presupuesto diario: ${antLimit} MXN
               </p>
             </div>
@@ -415,7 +415,7 @@ export function MobileQuickDashboard({
           <button
             type="button"
             onClick={() => onOpenBottomSheet("expense")}
-            className="px-2.5 py-1 rounded-xl bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 border border-rose-500/40 text-[11px] font-semibold transition-all flex items-center gap-1"
+            className="px-2.5 py-1 rounded-lg bg-[#E05D52]/15 hover:bg-[#E05D52]/25 text-[#E05D52] border border-[#E05D52]/30 text-[11px] font-semibold transition-all flex items-center gap-1"
           >
             <Plus className="size-3" />
             Gasto
@@ -424,46 +424,46 @@ export function MobileQuickDashboard({
 
         {/* Thermometer Status Card */}
         <div
-          className={`rounded-2xl border p-3.5 space-y-2.5 ${isAntExceeded
-              ? "bg-rose-950/20 border-rose-500/40"
+          className={`rounded-lg border p-3.5 space-y-2.5 ${isAntExceeded
+              ? "bg-[#221716] border-[#E05D52]/40"
               : antPercent >= 80
-                ? "bg-amber-950/20 border-amber-500/40"
-                : "bg-neutral-950/60 border-white/6"
+                ? "bg-[#221D16] border-[#D99B43]/40"
+                : "bg-[#121110] border-[#2A2723]"
             }`}
         >
           <div className="flex items-center justify-between">
             <div>
-              <span className="text-2xl font-extrabold text-white">
+              <span className="font-mono text-2xl font-extrabold text-[#F5F2EB]">
                 ${antSpent.toFixed(0)}
               </span>
-              <span className="text-xs text-neutral-400 ml-1">/ ${antLimit} MXN</span>
+              <span className="font-mono text-xs text-[#8E867B] ml-1">/ ${antLimit} MXN</span>
             </div>
 
             <div className="text-right">
               <span
-                className={`text-xs font-bold ${isAntExceeded
-                    ? "text-rose-400"
+                className={`font-mono text-xs font-bold ${isAntExceeded
+                    ? "text-[#E05D52]"
                     : antPercent >= 80
-                      ? "text-amber-400"
-                      : "text-emerald-400"
+                      ? "text-[#D99B43]"
+                      : "text-[#7EA35A]"
                   }`}
               >
                 {isAntExceeded
                   ? `+$${(antSpent - antLimit).toFixed(0)} excedido`
                   : `$${antRemaining.toFixed(0)} disponible`}
               </span>
-              <p className="text-[10px] text-neutral-500">{antPercent}% consumido</p>
+              <p className="text-[10px] font-mono text-[#8E867B]">{antPercent}% consumido</p>
             </div>
           </div>
 
           {/* Progress bar */}
-          <div className="h-2 w-full rounded-full bg-neutral-800 overflow-hidden">
+          <div className="h-1.5 w-full rounded-full bg-[#22201D] overflow-hidden">
             <div
               className={`h-full transition-all ${isAntExceeded
-                  ? "bg-rose-500"
+                  ? "bg-[#E05D52]"
                   : antPercent >= 80
-                    ? "bg-amber-500"
-                    : "bg-emerald-500"
+                    ? "bg-[#D99B43]"
+                    : "bg-[#7EA35A]"
                 }`}
               style={{ width: `${Math.min(100, antPercent)}%` }}
             />
@@ -472,30 +472,30 @@ export function MobileQuickDashboard({
       </div>
 
       {/* 5. Widget de Hidratación Diaria */}
-      <div className="rounded-3xl border border-white/8 bg-neutral-900/80 p-4.5 backdrop-blur-xl shadow-xl space-y-3.5">
+      <div className="rounded-xl border border-[#2A2723] bg-[#181715] p-4.5 shadow-lg space-y-3.5">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2.5">
-            <div className="flex size-9 items-center justify-center rounded-2xl bg-sky-500/15 text-sky-400 border border-sky-500/25 shadow-sm shadow-sky-500/10">
-              <Droplet className="size-4.5" />
+            <div className="flex size-8 items-center justify-center rounded-lg bg-[#4EAB9E]/15 text-[#4EAB9E] border border-[#4EAB9E]/30 shadow-xs">
+              <Droplet className="size-4" />
             </div>
             <div>
-              <span className="text-xs font-bold text-white tracking-tight">Hidratación Diaria</span>
-              <p className="text-[10px] text-neutral-400">Meta recomendada: 3,000 ml</p>
+              <span className="font-serif text-sm font-bold text-[#F5F2EB] tracking-tight">Hidratación Diaria</span>
+              <p className="text-[10px] text-[#8E867B]">Meta recomendada: 3,000 ml</p>
             </div>
           </div>
           <div className="flex items-center gap-1.5">
-            <span className="text-sm font-extrabold text-white">{waterMl}</span>
-            <span className="text-xs text-neutral-400">/ 3000 ml</span>
-            <span className="ml-1 rounded-lg bg-sky-500/15 border border-sky-500/30 px-2 py-0.5 text-[10px] font-bold text-sky-300">
+            <span className="font-mono text-sm font-extrabold text-[#F5F2EB]">{waterMl}</span>
+            <span className="font-mono text-xs text-[#8E867B]">/ 3000 ml</span>
+            <span className="ml-1 rounded border border-[#4EAB9E]/30 bg-[#4EAB9E]/15 px-2 py-0.5 font-mono text-[10px] font-bold text-[#4EAB9E]">
               {waterPercent}%
             </span>
           </div>
         </div>
 
         {/* Progress bar */}
-        <div className="h-2 w-full rounded-full bg-neutral-950 overflow-hidden border border-white/4">
+        <div className="h-1.5 w-full rounded-full bg-[#22201D] overflow-hidden">
           <div
-            className="h-full bg-linear-to-r from-sky-500 via-cyan-400 to-teal-400 transition-all duration-500"
+            className="h-full bg-[#4EAB9E] transition-all duration-300"
             style={{ width: `${Math.min(100, waterPercent)}%` }}
           />
         </div>
@@ -506,7 +506,7 @@ export function MobileQuickDashboard({
             type="button"
             disabled={isPending}
             onClick={() => handleQuickAddWater(250)}
-            className="flex items-center justify-center py-2 rounded-xl bg-sky-500/10 hover:bg-sky-500/20 border border-sky-500/20 text-sky-300 text-xs font-bold transition-all active:scale-95 disabled:opacity-50"
+            className="flex items-center justify-center py-2 rounded-lg bg-[#141C1A] hover:bg-[#1E2B27] border border-[#4EAB9E]/25 text-[#4EAB9E] font-mono text-xs font-bold transition-all active:scale-95 disabled:opacity-50"
           >
             +250 ml
           </button>
@@ -514,7 +514,7 @@ export function MobileQuickDashboard({
             type="button"
             disabled={isPending}
             onClick={() => handleQuickAddWater(500)}
-            className="flex items-center justify-center py-2 rounded-xl bg-sky-500/15 hover:bg-sky-500/25 border border-sky-500/25 text-sky-200 text-xs font-bold transition-all active:scale-95 disabled:opacity-50"
+            className="flex items-center justify-center py-2 rounded-lg bg-[#141C1A] hover:bg-[#1E2B27] border border-[#4EAB9E]/35 text-[#4EAB9E] font-mono text-xs font-bold transition-all active:scale-95 disabled:opacity-50"
           >
             +500 ml
           </button>
@@ -522,7 +522,7 @@ export function MobileQuickDashboard({
             type="button"
             disabled={isPending}
             onClick={() => handleQuickAddWater(750)}
-            className="flex items-center justify-center py-2 rounded-xl bg-sky-500/20 hover:bg-sky-500/30 border border-sky-500/30 text-sky-100 text-xs font-bold transition-all active:scale-95 disabled:opacity-50"
+            className="flex items-center justify-center py-2 rounded-lg bg-[#141C1A] hover:bg-[#1E2B27] border border-[#4EAB9E]/50 text-[#F5F2EB] font-mono text-xs font-bold transition-all active:scale-95 disabled:opacity-50"
           >
             +750 ml
           </button>

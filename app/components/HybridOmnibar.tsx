@@ -184,7 +184,7 @@ export function HybridOmnibar({
   };
 
   return (
-    <div className="relative rounded-2xl border border-white/8 bg-neutral-900/70 p-2.5 backdrop-blur-xl shadow-xl transition-all">
+    <div className="relative rounded-xl border border-[#2A2723] bg-[#181715] p-2.5 shadow-lg transition-all">
       <div className="flex flex-col sm:flex-row items-center gap-2">
         {/* Rapid Capture Input */}
         <div className="relative flex-1 w-full flex items-center">
@@ -192,9 +192,9 @@ export function HybridOmnibar({
             className={`absolute left-3 flex items-center pointer-events-none transition-colors ${
               financialParse.isFinancial
                 ? financialParse.type === "income"
-                  ? "text-emerald-400"
-                  : "text-amber-400"
-                : "text-indigo-400"
+                  ? "text-[#7EA35A]"
+                  : "text-[#D99B43]"
+                : "text-[#D99B43]"
             }`}
           >
             {financialParse.isFinancial ? (
@@ -211,10 +211,10 @@ export function HybridOmnibar({
             onChange={handleInputChange}
             onKeyDown={handleKeyDown}
             placeholder="Captura rápida: -$85 Café #antojo @nu, * Daily 20m, + Ejercicio, Comprar super !urgent..."
-            className={`w-full rounded-xl border bg-neutral-950/70 py-2.5 pl-9 pr-24 font-sans text-xs sm:text-sm text-neutral-100 placeholder:text-neutral-500 focus:outline-none transition-all ${
+            className={`w-full rounded-lg border py-2.5 pl-9 pr-24 font-sans text-xs sm:text-sm text-[#F5F2EB] placeholder:text-[#8E867B] bg-[#121110] focus:outline-none transition-all ${
               financialParse.isFinancial
-                ? "border-amber-500/50 focus:border-amber-400"
-                : "border-white/10 focus:border-indigo-500"
+                ? "border-[#D99B43]/50 focus:border-[#D99B43]"
+                : "border-[#2A2723] focus:border-[#D99B43]"
             }`}
           />
 
@@ -225,14 +225,10 @@ export function HybridOmnibar({
                 type="button"
                 onClick={handleSubmit}
                 disabled={isPending}
-                className={`flex items-center gap-1 rounded-lg px-2.5 py-1 text-[11px] font-semibold text-neutral-950 transition-all active:scale-95 disabled:opacity-40 shadow-md ${
-                  financialParse.isFinancial
-                    ? "bg-amber-400 hover:bg-amber-300 shadow-amber-500/20"
-                    : "bg-indigo-600 hover:bg-indigo-500 text-white shadow-indigo-500/20"
-                }`}
+                className="flex items-center gap-1 rounded-md px-2.5 py-1 text-[11px] font-semibold text-[#121110] bg-[#D99B43] hover:bg-[#E8AF59] transition-all active:scale-95 disabled:opacity-40 shadow-xs"
               >
                 {isPending ? (
-                  <div className="h-3 w-3 animate-spin rounded-full border border-neutral-950 border-t-transparent" />
+                  <div className="h-3 w-3 animate-spin rounded-full border border-[#121110] border-t-transparent" />
                 ) : (
                   <>
                     <Send className="h-3 w-3" />
@@ -241,8 +237,8 @@ export function HybridOmnibar({
                 )}
               </button>
             ) : (
-              <div className="hidden sm:flex items-center gap-1 text-[11px] text-neutral-500 font-mono">
-                <kbd className="rounded border border-neutral-700 bg-neutral-800 px-1 text-[10px] text-neutral-400">
+              <div className="hidden sm:flex items-center gap-1 text-[11px] text-[#8E867B] font-mono">
+                <kbd className="rounded border border-[#2A2723] bg-[#181715] px-1 text-[10px] text-[#8E867B]">
                   /
                 </kbd>
                 <span>focus</span>
@@ -266,11 +262,11 @@ export function HybridOmnibar({
           type="button"
           onClick={onOpenBatchModal}
           title="Open Multiline Batch Capture (⌘B or C)"
-          className="flex w-full sm:w-auto items-center justify-center gap-2 rounded-xl border border-white/10 bg-neutral-800/80 px-3.5 py-2.5 text-xs font-semibold text-neutral-200 transition-all hover:border-indigo-500/50 hover:bg-indigo-500/10 hover:text-white"
+          className="flex w-full sm:w-auto items-center justify-center gap-2 rounded-lg border border-[#2A2723] bg-[#121110] px-3.5 py-2.5 text-xs font-semibold text-[#DDD6C9] transition-all hover:border-[#38332D] hover:bg-[#22201D] hover:text-[#F5F2EB]"
         >
-          <Layers className="h-4 w-4 text-indigo-400" />
+          <Layers className="h-4 w-4 text-[#D99B43]" />
           <span>Batch Tasks</span>
-          <kbd className="hidden sm:inline-block rounded bg-neutral-900 px-1.5 py-0.5 font-mono text-[10px] text-neutral-400 border border-white/5">
+          <kbd className="hidden sm:inline-block rounded bg-[#181715] px-1.5 py-0.5 font-mono text-[10px] text-[#8E867B] border border-[#2A2723]">
             ⌘B
           </kbd>
         </button>
@@ -278,19 +274,19 @@ export function HybridOmnibar({
 
       {/* Financial Detection Helper Pill */}
       {financialParse.isFinancial && (
-        <div className="mt-2 flex items-center gap-2 text-[11px] text-amber-300 font-mono px-2 animate-in fade-in duration-150">
+        <div className="mt-2 flex items-center gap-2 text-[11px] text-[#E8AF59] font-mono px-2 animate-in fade-in duration-150">
           <span>✨ Detectado Brio Finanzas:</span>
           <strong>{financialParse.type === "income" ? "+ Ingreso" : "- Gasto"} ${financialParse.amount}</strong>
           <span>• #{financialParse.category}</span>
           <span>• @{financialParse.account}</span>
-          {financialParse.isAntExpense && <span className="text-amber-400 font-bold">(Gasto Hormiga ☕)</span>}
+          {financialParse.isAntExpense && <span className="text-[#E05D52] font-bold">(Gasto Hormiga ☕)</span>}
         </div>
       )}
 
       {/* Success Toast */}
       {feedbackToast && (
-        <div className="absolute -bottom-10 left-1/2 -translate-x-1/2 z-30 flex items-center gap-1.5 rounded-full border border-emerald-500/40 bg-neutral-950/90 px-3.5 py-1 text-xs font-medium text-emerald-300 shadow-xl backdrop-blur-md animate-in fade-in slide-in-from-bottom-2 duration-200">
-          <CheckCircle2 className="h-3.5 w-3.5 text-emerald-400" />
+        <div className="absolute -bottom-10 left-1/2 -translate-x-1/2 z-30 flex items-center gap-1.5 rounded-full border border-[#7EA35A]/40 bg-[#121110]/95 px-3.5 py-1 text-xs font-medium text-[#7EA35A] shadow-xl backdrop-blur-md animate-in fade-in slide-in-from-bottom-2 duration-200">
+          <CheckCircle2 className="h-3.5 w-3.5 text-[#7EA35A]" />
           <span>{feedbackToast}</span>
         </div>
       )}

@@ -281,7 +281,7 @@ function BrioCommandCenterContent({
         type="button"
         onClick={() => handleOpenBottomSheetWithTab("expense")}
         aria-label="Captura Rápida Móvil"
-        className="fixed bottom-6 right-6 z-40 flex size-14 items-center justify-center rounded-full bg-linear-to-tr from-indigo-600 to-violet-600 text-white shadow-2xl shadow-indigo-500/40 hover:scale-105 active:scale-95 transition-all border border-white/20 bottom-safe"
+        className="fixed bottom-6 right-6 z-40 flex size-13 items-center justify-center rounded-full bg-[#D99B43] hover:bg-[#E8AF59] text-[#121110] shadow-xl shadow-black/60 hover:scale-105 active:scale-95 transition-all border border-[#E8AF59]/40 bottom-safe"
       >
         <Plus className="size-6 stroke-3" />
       </button>
@@ -298,16 +298,16 @@ function BrioCommandCenterContent({
       />
 
       {/* Footer */}
-      <footer className="mt-auto border-t border-white/6 pt-6 pb-2 text-center text-xs text-neutral-500">
+      <footer className="mt-auto border-t border-[#2A2723] pt-6 pb-2 text-center text-xs text-[#8E867B]">
         <div className="flex flex-wrap items-center justify-center gap-3 font-mono text-[11px]">
-          <span>Brio OS v1.1 • Habitica + Neon DB + PWA Mobile</span>
+          <span>Brio OS • Habitica + Neon DB + Archival Cockpit</span>
           <span>•</span>
           <span>
-            Vistas: <kbd className="rounded bg-neutral-800 px-1 py-0.5 text-neutral-300">⌘0</kbd> Hoy • <kbd className="rounded bg-neutral-800 px-1 py-0.5 text-neutral-300">⌘1</kbd> Tareas • <kbd className="rounded bg-neutral-800 px-1 py-0.5 text-neutral-300">⌘2</kbd> Finanzas • <kbd className="rounded bg-neutral-800 px-1 py-0.5 text-neutral-300">⌘3</kbd> Balance • <kbd className="rounded bg-neutral-800 px-1 py-0.5 text-neutral-300">⌘4</kbd> Agenda • <kbd className="rounded bg-neutral-800 px-1 py-0.5 text-neutral-300">⌘5</kbd> Salud • <kbd className="rounded bg-neutral-800 px-1 py-0.5 text-neutral-300">⌘6</kbd> Proyectos
+            Vistas: <kbd className="rounded bg-[#181715] px-1 py-0.5 text-[#DDD6C9] border border-[#2A2723]">⌘0</kbd> Hoy • <kbd className="rounded bg-[#181715] px-1 py-0.5 text-[#DDD6C9] border border-[#2A2723]">⌘1</kbd> Tareas • <kbd className="rounded bg-[#181715] px-1 py-0.5 text-[#DDD6C9] border border-[#2A2723]">⌘2</kbd> Finanzas • <kbd className="rounded bg-[#181715] px-1 py-0.5 text-[#DDD6C9] border border-[#2A2723]">⌘3</kbd> Balance • <kbd className="rounded bg-[#181715] px-1 py-0.5 text-[#DDD6C9] border border-[#2A2723]">⌘4</kbd> Agenda • <kbd className="rounded bg-[#181715] px-1 py-0.5 text-[#DDD6C9] border border-[#2A2723]">⌘5</kbd> Salud • <kbd className="rounded bg-[#181715] px-1 py-0.5 text-[#DDD6C9] border border-[#2A2723]">⌘6</kbd> Proyectos
           </span>
           <span>•</span>
           <span>
-            Atajos: <kbd className="rounded bg-neutral-800 px-1 py-0.5 text-neutral-300">⌘P</kbd> Focus • <kbd className="rounded bg-neutral-800 px-1 py-0.5 text-neutral-300">⌘J</kbd> Scratchpad • <kbd className="rounded bg-neutral-800 px-1 py-0.5 text-neutral-300">⌘M</kbd> AM • <kbd className="rounded bg-neutral-800 px-1 py-0.5 text-neutral-300">⌘E</kbd> PM
+            Atajos: <kbd className="rounded bg-[#181715] px-1 py-0.5 text-[#DDD6C9] border border-[#2A2723]">⌘P</kbd> Focus • <kbd className="rounded bg-[#181715] px-1 py-0.5 text-[#DDD6C9] border border-[#2A2723]">⌘J</kbd> Scratchpad • <kbd className="rounded bg-[#181715] px-1 py-0.5 text-[#DDD6C9] border border-[#2A2723]">⌘M</kbd> AM • <kbd className="rounded bg-[#181715] px-1 py-0.5 text-[#DDD6C9] border border-[#2A2723]">⌘E</kbd> PM
           </span>
         </div>
       </footer>

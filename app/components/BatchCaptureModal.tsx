@@ -95,22 +95,22 @@ export function BatchCaptureModal({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-blur-md bg-black/60 animate-in fade-in duration-150">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-blur-xs bg-black/80 animate-in fade-in duration-150 font-sans">
       <div
-        className="w-full max-w-2xl overflow-hidden rounded-2xl border border-white/10 bg-neutral-900/95 shadow-2xl backdrop-blur-2xl transition-all"
+        className="w-full max-w-2xl overflow-hidden rounded-xl border border-[#2A2723] bg-[#181715] shadow-2xl transition-all"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-white/8 px-4 py-3">
+        <div className="flex items-center justify-between border-b border-[#2A2723] px-4 py-3 bg-[#121110]">
           <div className="flex items-center gap-2">
-            <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-indigo-500/20 text-indigo-400">
+            <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-[#221D16] text-[#D99B43] border border-[#D99B43]/30">
               <Send className="h-4 w-4 rotate-45" />
             </div>
             <div>
-              <h3 className="text-sm font-semibold text-white">
+              <h3 className="font-serif text-sm font-semibold text-[#F5F2EB]">
                 Frictionless Batch Capture
               </h3>
-              <p className="text-[11px] text-neutral-400">
+              <p className="text-[11px] text-[#8E867B]">
                 Type or paste multiple tasks and dispatch them concurrently
               </p>
             </div>
@@ -119,56 +119,56 @@ export function BatchCaptureModal({
           <button
             onClick={onClose}
             aria-label="Close modal"
-            className="rounded-lg p-1 text-neutral-400 hover:bg-neutral-800 hover:text-white"
+            className="rounded-lg p-1 text-[#8E867B] hover:bg-[#22201D] hover:text-[#F5F2EB] cursor-pointer"
           >
             <X className="h-4 w-4" />
           </button>
         </div>
 
         {/* Content */}
-        <div className="p-4 space-y-3">
+        <div className="p-4 space-y-3 font-mono">
           {/* Quick Syntax Pill Bar */}
           <div className="flex flex-wrap items-center justify-between gap-2">
             <div className="flex items-center gap-1.5 overflow-x-auto text-[11px]">
               <button
                 type="button"
                 onClick={() => handleSyntaxInsert("")}
-                className="rounded-md border border-white/5 bg-neutral-800/80 px-2 py-1 text-neutral-300 hover:text-sky-300 hover:border-sky-500/40"
+                className="rounded-md border border-[#2A2723] bg-[#121110] px-2 py-1 text-[#DDD6C9] hover:text-[#4EAB9E] hover:border-[#4EAB9E]/40 cursor-pointer"
               >
-                <span className="text-sky-400">Todo</span> Standard
+                <span className="text-[#4EAB9E]">Todo</span> Standard
               </button>
               <button
                 type="button"
                 onClick={() => handleSyntaxInsert("*")}
-                className="rounded-md border border-white/5 bg-neutral-800/80 px-2 py-1 text-neutral-300 hover:text-amber-300 hover:border-amber-500/40"
+                className="rounded-md border border-[#2A2723] bg-[#121110] px-2 py-1 text-[#DDD6C9] hover:text-[#D99B43] hover:border-[#D99B43]/40 cursor-pointer"
               >
-                <span className="text-amber-400">* Daily</span>
+                <span className="text-[#D99B43]">* Daily</span>
               </button>
               <button
                 type="button"
                 onClick={() => handleSyntaxInsert("+")}
-                className="rounded-md border border-white/5 bg-neutral-800/80 px-2 py-1 text-neutral-300 hover:text-emerald-300 hover:border-emerald-500/40"
+                className="rounded-md border border-[#2A2723] bg-[#121110] px-2 py-1 text-[#DDD6C9] hover:text-[#7EA35A] hover:border-[#7EA35A]/40 cursor-pointer"
               >
-                <span className="text-emerald-400">+ Habit</span>
+                <span className="text-[#7EA35A]">+ Habit</span>
               </button>
               <button
                 type="button"
                 onClick={() => handleSyntaxInsert("-")}
-                className="rounded-md border border-white/5 bg-neutral-800/80 px-2 py-1 text-neutral-300 hover:text-rose-300 hover:border-rose-500/40"
+                className="rounded-md border border-[#2A2723] bg-[#121110] px-2 py-1 text-[#DDD6C9] hover:text-[#E05D52] hover:border-[#E05D52]/40 cursor-pointer"
               >
-                <span className="text-rose-400">- Habit</span>
+                <span className="text-[#E05D52]">- Habit</span>
               </button>
               <button
                 type="button"
                 onClick={() => handleSyntaxInsert("#work // Note !urgent")}
-                className="rounded-md border border-white/5 bg-neutral-800/80 px-2 py-1 text-neutral-300 hover:text-violet-300 hover:border-violet-500/40"
+                className="rounded-md border border-[#2A2723] bg-[#121110] px-2 py-1 text-[#DDD6C9] hover:text-[#D99B43] hover:border-[#D99B43]/40 cursor-pointer"
               >
-                <span className="text-violet-400">#tags //notes !priority</span>
+                <span className="text-[#D99B43]">#tags //notes !priority</span>
               </button>
             </div>
 
             {liveParsed.stats.total > 0 && (
-              <div className="flex items-center gap-1 text-[11px] font-mono text-neutral-400">
+              <div className="flex items-center gap-1 text-[11px] font-mono text-[#8E867B]">
                 <span>
                   {liveParsed.stats.total} parsed (
                   {liveParsed.stats.todos}t, {liveParsed.stats.dailies}d,{" "}
@@ -179,7 +179,7 @@ export function BatchCaptureModal({
           </div>
 
           {/* Textarea */}
-          <div className="relative rounded-xl border border-white/10 bg-neutral-950/80 focus-within:border-indigo-500/80 focus-within:ring-1 focus-within:ring-indigo-500/50 transition-all">
+          <div className="relative rounded-lg border border-[#2A2723] bg-[#121110] focus-within:border-[#D99B43] transition-all">
             <textarea
               ref={textareaRef}
               value={rawText}
@@ -187,23 +187,23 @@ export function BatchCaptureModal({
               onKeyDown={handleKeyDownInTextarea}
               placeholder={`Buy groceries #errands\n* Morning 30m reading #growth\n+ Hydration 2L\nDeploy hotfix !urgent // Review logs first`}
               rows={7}
-              className="w-full resize-none bg-transparent p-3.5 font-mono text-sm leading-relaxed text-neutral-100 placeholder:text-neutral-600 focus:outline-none"
+              className="w-full resize-none bg-transparent p-3.5 font-mono text-sm leading-relaxed text-[#F5F2EB] placeholder:text-[#8E867B]/50 focus:outline-none"
             />
           </div>
 
           {/* Result Alert */}
           {lastResult && (
             <div
-              className={`flex items-start gap-2.5 rounded-xl border p-3 text-xs backdrop-blur-md transition-all ${
+              className={`flex items-start gap-2.5 rounded-lg border p-3 text-xs transition-all ${
                 lastResult.success
-                  ? "border-emerald-500/30 bg-emerald-950/30 text-emerald-300"
-                  : "border-rose-500/30 bg-rose-950/30 text-rose-300"
+                  ? "border-[#7EA35A]/30 bg-[#1C2219] text-[#7EA35A]"
+                  : "border-[#E05D52]/30 bg-[#2A1715] text-[#E05D52]"
               }`}
             >
               {lastResult.success ? (
-                <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-400 mt-0.5" />
+                <CheckCircle2 className="h-4 w-4 shrink-0 text-[#7EA35A] mt-0.5" />
               ) : (
-                <AlertCircle className="h-4 w-4 shrink-0 text-rose-400 mt-0.5" />
+                <AlertCircle className="h-4 w-4 shrink-0 text-[#E05D52] mt-0.5" />
               )}
               <div className="flex-1">
                 <span className="font-semibold">{lastResult.summary}</span>
@@ -220,21 +220,21 @@ export function BatchCaptureModal({
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-between border-t border-white/6 bg-neutral-950/60 px-4 py-3">
+        <div className="flex items-center justify-between border-t border-[#2A2723] bg-[#121110] px-4 py-3 font-mono">
           <div className="flex items-center gap-2">
             <button
               type="button"
               onClick={handleInsertSample}
-              className="flex items-center gap-1 rounded-md px-2 py-1 text-[11px] font-medium text-neutral-400 hover:text-neutral-200"
+              className="flex items-center gap-1 rounded-md px-2 py-1 text-[11px] font-medium text-[#8E867B] hover:text-[#F5F2EB] cursor-pointer"
             >
-              <Sparkles className="h-3 w-3 text-amber-400" />
+              <Sparkles className="h-3 w-3 text-[#D99B43]" />
               <span>Sample Batch</span>
             </button>
             {rawText && (
               <button
                 type="button"
                 onClick={() => setRawText("")}
-                className="flex items-center gap-1 rounded-md px-2 py-1 text-[11px] font-medium text-neutral-400 hover:text-rose-400"
+                className="flex items-center gap-1 rounded-md px-2 py-1 text-[11px] font-medium text-[#8E867B] hover:text-[#E05D52] cursor-pointer"
               >
                 <Trash2 className="h-3 w-3" />
                 <span>Clear</span>
@@ -243,12 +243,12 @@ export function BatchCaptureModal({
           </div>
 
           <div className="flex items-center gap-3">
-            <div className="hidden sm:flex items-center gap-1 text-[11px] text-neutral-400 font-mono">
-              <kbd className="rounded border border-neutral-700 bg-neutral-800 px-1 py-0.5 text-[10px]">
+            <div className="hidden sm:flex items-center gap-1 text-[11px] text-[#8E867B] font-mono">
+              <kbd className="rounded border border-[#2A2723] bg-[#181715] px-1 py-0.5 text-[10px]">
                 ⌘
               </kbd>
               <span>+</span>
-              <kbd className="rounded border border-neutral-700 bg-neutral-800 px-1 py-0.5 text-[10px]">
+              <kbd className="rounded border border-[#2A2723] bg-[#181715] px-1 py-0.5 text-[10px]">
                 Enter
               </kbd>
             </div>
@@ -257,11 +257,11 @@ export function BatchCaptureModal({
               type="button"
               onClick={handleBatchSubmit}
               disabled={!rawText.trim() || isPending}
-              className="flex items-center gap-2 rounded-xl bg-linear-to-r from-indigo-500 to-violet-600 px-4 py-2 text-xs font-semibold text-white shadow-lg shadow-indigo-500/25 transition-all hover:brightness-110 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40"
+              className="flex items-center gap-2 rounded-lg bg-[#D99B43] hover:bg-[#E8AF59] px-4 py-2 text-xs font-bold text-[#121110] shadow-xs transition-all disabled:cursor-not-allowed disabled:opacity-40 cursor-pointer font-sans"
             >
               {isPending ? (
                 <>
-                  <div className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                  <div className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-[#121110] border-t-transparent" />
                   <span>Dispatching...</span>
                 </>
               ) : (
