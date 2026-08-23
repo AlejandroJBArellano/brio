@@ -11,6 +11,7 @@ import {
   Bell,
   BookOpen,
   Calendar,
+  ChevronDown,
   Coins,
   Dumbbell,
   Edit3,
@@ -28,7 +29,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useEffect, useTransition } from "react";
+import { useEffect, useRef, useState, useTransition } from "react";
 
 interface HeaderStatsRibbonProps {
   user: HabiticaUser;
@@ -41,6 +42,22 @@ export function HeaderStatsRibbon({ user }: HeaderStatsRibbonProps) {
   const pathname = usePathname();
   const [isPending, startTransition] = useTransition();
   const { openModal, refreshData } = useCommandCenter();
+
+  const [isActionsOpen, setIsActionsOpen] = useState(false);
+  const actionsRef = useRef<HTMLDivElement>(null);
+
+  // Close actions dropdown on outside click
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (actionsRef.current && !actionsRef.current.contains(event.target as Node)) {
+        setIsActionsOpen(false);
+      }
+    };
+    if (isActionsOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [isActionsOpen]);
 
   const stats = user.stats;
   const isResting = user.flags?.rest || false;
@@ -107,27 +124,26 @@ export function HeaderStatsRibbon({ user }: HeaderStatsRibbonProps) {
     return pathname.startsWith(route);
   };
 
+  const NAV_ITEMS = [
+    { href: "/today", label: "Hoy", icon: Sun, shortcut: "⌘0" },
+    { href: "/tasks", label: "Tareas", icon: Zap, shortcut: "⌘1" },
+    { href: "/finance", label: "Finanzas", icon: Wallet, shortcut: "⌘2" },
+    { href: "/analytics", label: "Balance", icon: Activity, shortcut: "⌘3" },
+    { href: "/calendar", label: "Agenda", icon: Calendar, shortcut: "⌘4" },
+    { href: "/health", label: "Salud", icon: Dumbbell, shortcut: "⌘5" },
+    { href: "/vault", label: "Bóveda", icon: BookOpen, shortcut: "⌘6" },
+  ];
+
   return (
-    <header className="rounded-3xl border border-white/8 bg-neutral-900/70 p-4 sm:p-5 backdrop-blur-xl shadow-2xl transition-all space-y-4">
+    <header className="rounded-3xl border border-white/8 bg-neutral-900/70 p-4 sm:p-5 backdrop-blur-xl shadow-2xl transition-all space-y-3.5 relative z-30">
       {/* Top Row: Character ID & Gauges */}
-      <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+      <div className="flex flex-col gap-3.5 lg:flex-row lg:items-center lg:justify-between">
         {/* Left: Branding, Identity & Inn */}
         <div className="flex items-center justify-between sm:justify-start gap-4">
           <div className="flex items-center gap-3">
-            <Link
-              href="/tasks"
-              className="relative flex h-11 w-11 items-center justify-center rounded-2xl bg-linear-to-tr from-violet-600 to-indigo-500 font-mono font-bold text-white shadow-lg shadow-indigo-500/20 hover:scale-105 transition-transform"
-            >
-              <span className="text-xl">B</span>
-              <span
-                className={`absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full border-2 border-neutral-900 ${
-                  isResting ? "bg-amber-400 animate-pulse" : "bg-emerald-400"
-                }`}
-              />
-            </Link>
             <div>
               <div className="flex flex-wrap items-center gap-2">
-                <h1 className="text-base font-bold tracking-tight text-white">
+                <h1 className="text-sm sm:text-base font-bold tracking-tight text-white">
                   {session?.user?.name || user.profile.name || "Brio Commander"}
                 </h1>
                 <span className="rounded-md border border-indigo-500/30 bg-indigo-500/10 px-2 py-0.5 text-[11px] font-semibold text-indigo-400">
@@ -142,7 +158,7 @@ export function HeaderStatsRibbon({ user }: HeaderStatsRibbonProps) {
                   type="button"
                   onClick={handleToggleRest}
                   disabled={isPending}
-                  title={isResting ? "Wake from Inn" : "Rest at Inn (pause daily damage)"}
+                  title={isResting ? "Despertar de la Posada" : "Descansar en la Posada (pausar daño diario)"}
                   className={`inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-[11px] font-semibold transition-all ${
                     isResting
                       ? "border border-amber-500/40 bg-amber-500/20 text-amber-300 animate-pulse"
@@ -153,24 +169,21 @@ export function HeaderStatsRibbon({ user }: HeaderStatsRibbonProps) {
                   <span>{isResting ? "En la Posada" : "Posada"}</span>
                 </button>
               </div>
-              <p className="text-xs text-neutral-400 mt-0.5">
-                Personal Command Center & Life OS
-              </p>
             </div>
           </div>
 
           <div className="flex items-center gap-2 sm:hidden">
             <button
               onClick={() => openModal("commandPalette")}
-              aria-label="Open command palette"
-              className="flex h-8 w-8 items-center justify-center rounded-lg border border-white/10 bg-white/5 text-neutral-400"
+              aria-label="Abrir paleta de comandos"
+              className="flex h-8 w-8 items-center justify-center rounded-lg border border-white/10 bg-white/5 text-neutral-400 hover:text-white"
             >
               <Search className="h-3.5 w-3.5" />
             </button>
           </div>
         </div>
 
-        {/* Right: RPG Stat Gauges + Auth Status */}
+        {/* Right: RPG Stat Gauges + System Tools */}
         <div className="flex flex-wrap items-center gap-2.5 sm:gap-3">
           {/* Health Bar (HP) */}
           <div className="min-w-28.75 flex-1 rounded-xl border border-white/6 bg-neutral-950/60 px-3 py-1.5 sm:flex-initial">
@@ -245,10 +258,10 @@ export function HeaderStatsRibbon({ user }: HeaderStatsRibbonProps) {
             </span>
           </div>
 
-          {/* Neon Auth User Badge */}
+          {/* User Auth Badge */}
           {session?.user ? (
-            <div className="flex items-center gap-2 rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-3 py-1.5 text-xs text-emerald-300">
-              <div className="flex h-5 w-5 items-center justify-center rounded-full bg-emerald-500/20 font-bold text-[10px]">
+            <div className="flex items-center gap-2 rounded-xl border border-white/10 bg-neutral-950/60 px-2.5 py-1.5 text-xs text-neutral-200">
+              <div className="flex h-5 w-5 items-center justify-center rounded-full bg-indigo-500/20 text-indigo-300 font-bold text-[10px]">
                 {session.user.name?.[0]?.toUpperCase() || "U"}
               </div>
               <span className="hidden sm:inline font-semibold">{session.user.name}</span>
@@ -256,7 +269,7 @@ export function HeaderStatsRibbon({ user }: HeaderStatsRibbonProps) {
                 type="button"
                 onClick={handleSignOut}
                 title="Cerrar sesión"
-                className="text-neutral-400 hover:text-rose-400 ml-1 transition-colors"
+                className="text-neutral-400 hover:text-rose-400 ml-0.5 transition-colors"
               >
                 <LogOut className="h-3.5 w-3.5" />
               </button>
@@ -268,7 +281,7 @@ export function HeaderStatsRibbon({ user }: HeaderStatsRibbonProps) {
               className="flex items-center gap-1.5 rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-3 py-1.5 text-xs font-semibold text-emerald-300 hover:bg-emerald-500/20 transition-all shadow-sm"
             >
               <ShieldCheck className="h-3.5 w-3.5 text-emerald-400" />
-              <span>Neon Auth</span>
+              <span>Acceso</span>
             </button>
           )}
 
@@ -276,8 +289,8 @@ export function HeaderStatsRibbon({ user }: HeaderStatsRibbonProps) {
           <button
             type="button"
             onClick={() => openModal("notificationSettings")}
-            title="Ajustes de Notificaciones & Recordatorios"
-            className="flex h-8 w-8 items-center justify-center rounded-xl border border-white/10 bg-neutral-800/80 text-neutral-300 hover:text-white hover:border-indigo-500/50 hover:bg-indigo-500/10 transition-all"
+            title="Ajustes de Notificaciones"
+            className="flex h-8 w-8 items-center justify-center rounded-xl border border-white/8 bg-neutral-950/60 text-neutral-400 hover:text-white hover:border-white/20 transition-all"
           >
             <Bell className="h-3.5 w-3.5" />
           </button>
@@ -285,10 +298,10 @@ export function HeaderStatsRibbon({ user }: HeaderStatsRibbonProps) {
           {/* Command Palette Trigger */}
           <button
             onClick={() => openModal("commandPalette")}
-            title="Open Command Palette (⌘K)"
-            className="hidden sm:flex items-center gap-1.5 rounded-xl border border-white/10 bg-neutral-800/80 px-2.5 py-1.5 text-xs font-medium text-neutral-300 hover:border-indigo-500/50 hover:bg-indigo-500/10 hover:text-white transition-all"
+            title="Abrir Command Palette (⌘K)"
+            className="hidden sm:flex items-center gap-1.5 rounded-xl border border-white/8 bg-neutral-950/60 px-2.5 py-1.5 text-xs font-medium text-neutral-400 hover:border-white/20 hover:text-white transition-all"
           >
-            <Search className="h-3.5 w-3.5 text-neutral-400" />
+            <Search className="h-3.5 w-3.5" />
             <kbd className="rounded bg-neutral-900 px-1 py-0.5 font-mono text-[10px] text-neutral-400 border border-white/5">
               ⌘K
             </kbd>
@@ -298,172 +311,130 @@ export function HeaderStatsRibbon({ user }: HeaderStatsRibbonProps) {
           <button
             onClick={refreshData}
             disabled={isPending}
-            title="Sync State"
-            className="hidden h-8 w-8 items-center justify-center rounded-xl border border-white/10 bg-neutral-800/80 text-neutral-300 hover:text-white sm:flex"
+            title="Sincronizar estado"
+            className="hidden h-8 w-8 items-center justify-center rounded-xl border border-white/8 bg-neutral-950/60 text-neutral-400 hover:text-white hover:border-white/20 sm:flex transition-all"
           >
             <RotateCw className={`h-3.5 w-3.5 ${isPending ? "animate-spin text-indigo-400" : ""}`} />
           </button>
         </div>
       </div>
 
-      {/* Bottom Row: 7 Master Route Links + Ritual & Focus Launchers */}
-      <div className="flex flex-col xl:flex-row items-center justify-between gap-3 pt-3 border-t border-white/6">
-        {/* Route Links */}
-        <nav aria-label="Main Navigation" className="flex flex-wrap items-center gap-1 p-1 rounded-2xl bg-neutral-950/80 border border-white/8 w-full xl:w-auto overflow-x-auto no-scrollbar">
-          <Link
-            href="/today"
-            prefetch={true}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all shrink-0 ${
-              isTabActive("/today")
-                ? "bg-linear-to-r from-indigo-600 to-violet-600 text-white shadow-lg shadow-indigo-500/20"
-                : "text-neutral-400 hover:text-white hover:bg-neutral-900"
-            }`}
-          >
-            <Smartphone className="h-3.5 w-3.5" />
-            <span>📱 Hoy (Móvil)</span>
-            <kbd className="hidden md:inline-block rounded bg-black/30 px-1 text-[10px] font-mono opacity-60">
-              ⌘0
-            </kbd>
-          </Link>
-
-          <Link
-            href="/tasks"
-            prefetch={true}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all shrink-0 ${
-              isTabActive("/tasks")
-                ? "bg-indigo-600 text-white shadow-lg shadow-indigo-500/20"
-                : "text-neutral-400 hover:text-white hover:bg-neutral-900"
-            }`}
-          >
-            <Zap className="h-3.5 w-3.5" />
-            <span>⚡ Tareas</span>
-            <kbd className="hidden md:inline-block rounded bg-black/30 px-1 text-[10px] font-mono opacity-60">
-              ⌘1
-            </kbd>
-          </Link>
-
-          <Link
-            href="/finance"
-            prefetch={true}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all shrink-0 ${
-              isTabActive("/finance")
-                ? "bg-amber-500 text-neutral-950 shadow-lg shadow-amber-500/20"
-                : "text-neutral-400 hover:text-white hover:bg-neutral-900"
-            }`}
-          >
-            <Wallet className="h-3.5 w-3.5" />
-            <span>💰 Finanzas</span>
-            <kbd className="hidden md:inline-block rounded bg-black/30 px-1 text-[10px] font-mono opacity-60">
-              ⌘2
-            </kbd>
-          </Link>
-
-          <Link
-            href="/analytics"
-            prefetch={true}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all shrink-0 ${
-              isTabActive("/analytics")
-                ? "bg-violet-600 text-white shadow-lg shadow-violet-500/20"
-                : "text-neutral-400 hover:text-white hover:bg-neutral-900"
-            }`}
-          >
-            <Activity className="h-3.5 w-3.5" />
-            <span>📊 Balance</span>
-            <kbd className="hidden md:inline-block rounded bg-black/30 px-1 text-[10px] font-mono opacity-60">
-              ⌘3
-            </kbd>
-          </Link>
-
-          <Link
-            href="/calendar"
-            prefetch={true}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all shrink-0 ${
-              isTabActive("/calendar")
-                ? "bg-blue-600 text-white shadow-lg shadow-blue-500/20"
-                : "text-neutral-400 hover:text-white hover:bg-neutral-900"
-            }`}
-          >
-            <Calendar className="h-3.5 w-3.5" />
-            <span>📅 Agenda</span>
-            <kbd className="hidden md:inline-block rounded bg-black/30 px-1 text-[10px] font-mono opacity-60">
-              ⌘4
-            </kbd>
-          </Link>
-
-          <Link
-            href="/health"
-            prefetch={true}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all shrink-0 ${
-              isTabActive("/health")
-                ? "bg-emerald-600 text-white shadow-lg shadow-emerald-500/20"
-                : "text-neutral-400 hover:text-white hover:bg-neutral-900"
-            }`}
-          >
-            <Dumbbell className="h-3.5 w-3.5" />
-            <span>🏋️ Salud</span>
-            <kbd className="hidden md:inline-block rounded bg-black/30 px-1 text-[10px] font-mono opacity-60">
-              ⌘5
-            </kbd>
-          </Link>
-
-          <Link
-            href="/vault"
-            prefetch={true}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all shrink-0 ${
-              isTabActive("/vault")
-                ? "bg-cyan-600 text-white shadow-lg shadow-cyan-500/20"
-                : "text-neutral-400 hover:text-white hover:bg-neutral-900"
-            }`}
-          >
-            <BookOpen className="h-3.5 w-3.5" />
-            <span>🏛️ Bóveda</span>
-            <kbd className="hidden md:inline-block rounded bg-black/30 px-1 text-[10px] font-mono opacity-60">
-              ⌘6
-            </kbd>
-          </Link>
+      {/* Bottom Row: Clean Unified Route Links + Dropdown Actions Launcher */}
+      <div className="flex items-center justify-between gap-2 pt-2.5 border-t border-white/6">
+        {/* Main Route Links */}
+        <nav
+          aria-label="Main Navigation"
+          className="flex items-center gap-1 p-1 rounded-2xl bg-neutral-950/80 border border-white/8 overflow-x-auto no-scrollbar flex-1 sm:flex-initial"
+        >
+          {NAV_ITEMS.map((item) => {
+            const active = isTabActive(item.href);
+            const Icon = item.icon;
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                prefetch={true}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all shrink-0 ${
+                  active
+                    ? "bg-white/12 text-white border border-white/20 shadow-xs"
+                    : "text-neutral-400 hover:text-neutral-200 hover:bg-white/5 border border-transparent"
+                }`}
+              >
+                <Icon className={`h-3.5 w-3.5 ${active ? "text-white" : "text-neutral-400"}`} />
+                <span>{item.label}</span>
+                <kbd className="hidden md:inline-block rounded bg-black/30 px-1 text-[10px] font-mono opacity-50">
+                  {item.shortcut}
+                </kbd>
+              </Link>
+            );
+          })}
         </nav>
 
-        {/* Action Triggers: Focus Mode, Scratchpad & Rituals */}
-        <div className="flex flex-wrap items-center gap-2 w-full xl:w-auto justify-end">
+        {/* Quick Actions & Rituals Dropdown */}
+        <div className="relative shrink-0 z-50" ref={actionsRef}>
           <button
             type="button"
-            onClick={() => openModal("focus")}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-indigo-500/30 bg-indigo-500/10 text-xs font-semibold text-indigo-300 hover:bg-indigo-500/20 transition-all shadow-sm"
+            onClick={() => setIsActionsOpen(!isActionsOpen)}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all border shadow-sm ${
+              isActionsOpen
+                ? "bg-amber-500/20 text-amber-300 border-amber-500/40"
+                : "bg-neutral-950/80 text-neutral-300 border-white/8 hover:text-white hover:bg-white/5"
+            }`}
           >
-            <Zap className="h-3.5 w-3.5 text-indigo-400" />
-            <span>Focus Zen</span>
-            <kbd className="hidden md:inline-block text-[10px] font-mono opacity-60">⌘P</kbd>
+            <Sparkles className="h-3.5 w-3.5 text-amber-400" />
+            <span className="hidden sm:inline">Acciones</span>
+            <ChevronDown
+              className={`h-3 w-3 transition-transform duration-200 ${
+                isActionsOpen ? "rotate-180" : ""
+              }`}
+            />
           </button>
 
-          <button
-            type="button"
-            onClick={() => openModal("scratchpad")}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-white/10 bg-neutral-900 text-xs font-semibold text-neutral-300 hover:text-white transition-all shadow-sm"
-          >
-            <Edit3 className="h-3.5 w-3.5 text-neutral-400" />
-            <span>Scratchpad</span>
-            <kbd className="hidden md:inline-block text-[10px] font-mono opacity-60">⌘J</kbd>
-          </button>
+          {isActionsOpen && (
+            <div className="absolute right-0 top-full mt-2 w-56 rounded-2xl border border-white/15 bg-neutral-900/98 p-1.5 shadow-2xl shadow-black/90 backdrop-blur-3xl z-50 animate-in fade-in zoom-in-95 duration-150">
+              <button
+                type="button"
+                onClick={() => {
+                  openModal("focus");
+                  setIsActionsOpen(false);
+                }}
+                className="w-full flex items-center justify-between p-2 rounded-xl text-xs font-medium text-neutral-300 hover:text-white hover:bg-white/10 transition-colors"
+              >
+                <span className="flex items-center gap-2">
+                  <Zap className="h-3.5 w-3.5 text-indigo-400" />
+                  <span>Focus Zen</span>
+                </span>
+                <kbd className="font-mono text-[10px] text-neutral-500">⌘P</kbd>
+              </button>
 
-          <button
-            type="button"
-            onClick={() => openModal("morningRitual")}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-amber-500/30 bg-amber-500/10 text-xs font-semibold text-amber-300 hover:bg-amber-500/20 transition-all shadow-sm"
-          >
-            <Sun className="h-3.5 w-3.5 text-amber-400" />
-            <span>Ritual AM</span>
-            <kbd className="hidden lg:inline-block text-[10px] font-mono opacity-60">⌘M</kbd>
-          </button>
+              <button
+                type="button"
+                onClick={() => {
+                  openModal("scratchpad");
+                  setIsActionsOpen(false);
+                }}
+                className="w-full flex items-center justify-between p-2 rounded-xl text-xs font-medium text-neutral-300 hover:text-white hover:bg-white/10 transition-colors"
+              >
+                <span className="flex items-center gap-2">
+                  <Edit3 className="h-3.5 w-3.5 text-cyan-400" />
+                  <span>Scratchpad</span>
+                </span>
+                <kbd className="font-mono text-[10px] text-neutral-500">⌘J</kbd>
+              </button>
 
-          <button
-            type="button"
-            onClick={() => openModal("eveningReview")}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-indigo-500/30 bg-indigo-500/10 text-xs font-semibold text-indigo-300 hover:bg-indigo-500/20 transition-all shadow-sm"
-          >
-            <Moon className="h-3.5 w-3.5 text-indigo-400" />
-            <span>Cierre PM</span>
-            <kbd className="hidden lg:inline-block text-[10px] font-mono opacity-60">⌘E</kbd>
-          </button>
+              <div className="my-1 border-t border-white/6" />
+
+              <button
+                type="button"
+                onClick={() => {
+                  openModal("morningRitual");
+                  setIsActionsOpen(false);
+                }}
+                className="w-full flex items-center justify-between p-2 rounded-xl text-xs font-medium text-neutral-300 hover:text-white hover:bg-white/10 transition-colors"
+              >
+                <span className="flex items-center gap-2">
+                  <Sun className="h-3.5 w-3.5 text-amber-400" />
+                  <span>Ritual Matutino</span>
+                </span>
+                <kbd className="font-mono text-[10px] text-neutral-500">⌘M</kbd>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  openModal("eveningReview");
+                  setIsActionsOpen(false);
+                }}
+                className="w-full flex items-center justify-between p-2 rounded-xl text-xs font-medium text-neutral-300 hover:text-white hover:bg-white/10 transition-colors"
+              >
+                <span className="flex items-center gap-2">
+                  <Moon className="h-3.5 w-3.5 text-indigo-400" />
+                  <span>Cierre Nocturno</span>
+                </span>
+                <kbd className="font-mono text-[10px] text-neutral-500">⌘E</kbd>
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </header>
