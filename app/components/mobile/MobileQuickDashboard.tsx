@@ -20,18 +20,16 @@ import {
   Calendar,
   Check,
   CheckCircle2,
-  ChevronRight,
   Clock,
   Coins,
   Droplet,
   Heart,
   Pill,
   Plus,
-  Scale,
   Sparkles,
   Sun,
   Wallet,
-  Zap,
+  Zap
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState, useTransition } from "react";
@@ -44,7 +42,6 @@ interface MobileQuickDashboardProps {
   calendarSchedule: CalendarDaySchedule;
   todayRitual: RitualLog | null;
   onOpenBottomSheet: (tab?: "expense" | "task" | "water" | "weight") => void;
-  onOpenSmartFitModal: () => void;
   onOpenNotificationSettings: () => void;
   onOpenMorningRitual: () => void;
   onOpenEveningReview: () => void;
@@ -59,7 +56,6 @@ export function MobileQuickDashboard({
   calendarSchedule,
   todayRitual,
   onOpenBottomSheet,
-  onOpenSmartFitModal,
   onOpenNotificationSettings,
   onOpenMorningRitual,
   onOpenEveningReview,
@@ -279,11 +275,10 @@ export function MobileQuickDashboard({
           <button
             type="button"
             onClick={() => setActiveSuppTiming("Mañana")}
-            className={`flex-1 flex items-center justify-center gap-1 py-1.5 rounded-xl text-xs font-semibold transition-all ${
-              activeSuppTiming === "Mañana"
+            className={`flex-1 flex items-center justify-center gap-1 py-1.5 rounded-xl text-xs font-semibold transition-all ${activeSuppTiming === "Mañana"
                 ? "bg-amber-500/20 text-amber-300 border border-amber-500/40 shadow-sm"
                 : "text-neutral-400 hover:text-white"
-            }`}
+              }`}
           >
             <Sun className="size-3" />
             Mañana
@@ -291,11 +286,10 @@ export function MobileQuickDashboard({
           <button
             type="button"
             onClick={() => setActiveSuppTiming("Tarde")}
-            className={`flex-1 flex items-center justify-center gap-1 py-1.5 rounded-xl text-xs font-semibold transition-all ${
-              activeSuppTiming === "Tarde"
+            className={`flex-1 flex items-center justify-center gap-1 py-1.5 rounded-xl text-xs font-semibold transition-all ${activeSuppTiming === "Tarde"
                 ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 shadow-sm"
                 : "text-neutral-400 hover:text-white"
-            }`}
+              }`}
           >
             <Pill className="size-3" />
             Tarde
@@ -303,11 +297,10 @@ export function MobileQuickDashboard({
           <button
             type="button"
             onClick={() => setActiveSuppTiming("Todos")}
-            className={`flex-1 py-1.5 rounded-xl text-xs font-semibold transition-all ${
-              activeSuppTiming === "Todos"
+            className={`flex-1 py-1.5 rounded-xl text-xs font-semibold transition-all ${activeSuppTiming === "Todos"
                 ? "bg-white/15 text-white border border-white/20 shadow-sm"
                 : "text-neutral-400 hover:text-white"
-            }`}
+              }`}
           >
             Todos
           </button>
@@ -319,11 +312,10 @@ export function MobileQuickDashboard({
             type="button"
             disabled={isPending}
             onClick={handleBatchTakeSupplements}
-            className={`w-full py-2.5 px-3 rounded-2xl font-semibold text-xs transition-all flex items-center justify-center gap-2 shadow-md active:scale-98 ${
-              allTakenInActiveTiming
+            className={`w-full py-2.5 px-3 rounded-2xl font-semibold text-xs transition-all flex items-center justify-center gap-2 shadow-md active:scale-98 ${allTakenInActiveTiming
                 ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/40"
                 : "bg-linear-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white shadow-emerald-900/30"
-            }`}
+              }`}
           >
             <CheckCircle2 className="size-4" />
             {allTakenInActiveTiming
@@ -343,27 +335,24 @@ export function MobileQuickDashboard({
               <div
                 key={supp.id}
                 onClick={() => handleToggleSupplement(supp.id)}
-                className={`flex items-center justify-between p-3 rounded-2xl border transition-all cursor-pointer select-none active:scale-98 ${
-                  supp.taken
+                className={`flex items-center justify-between p-3 rounded-2xl border transition-all cursor-pointer select-none active:scale-98 ${supp.taken
                     ? "bg-emerald-950/20 border-emerald-500/30 text-neutral-400"
                     : "bg-neutral-800/40 border-white/6 hover:border-white/15 text-white"
-                }`}
+                  }`}
               >
                 <div className="flex items-center gap-3">
                   <div
-                    className={`flex size-5 shrink-0 items-center justify-center rounded-lg border transition-colors ${
-                      supp.taken
+                    className={`flex size-5 shrink-0 items-center justify-center rounded-lg border transition-colors ${supp.taken
                         ? "bg-emerald-500 border-emerald-400 text-neutral-950 font-bold"
                         : "border-neutral-500 bg-neutral-900"
-                    }`}
+                      }`}
                   >
                     {supp.taken && <Check className="size-3.5 stroke-3" />}
                   </div>
                   <div>
                     <span
-                      className={`text-xs font-semibold ${
-                        supp.taken ? "line-through text-neutral-400" : "text-white"
-                      }`}
+                      className={`text-xs font-semibold ${supp.taken ? "line-through text-neutral-400" : "text-white"
+                        }`}
                     >
                       {supp.name}
                     </span>
@@ -460,26 +449,23 @@ export function MobileQuickDashboard({
               <div
                 key={task.id}
                 onClick={() => handleToggleTask(task)}
-                className={`flex items-center justify-between p-3 rounded-2xl border transition-all cursor-pointer select-none active:scale-98 ${
-                  task.completed
+                className={`flex items-center justify-between p-3 rounded-2xl border transition-all cursor-pointer select-none active:scale-98 ${task.completed
                     ? "bg-indigo-950/20 border-indigo-500/30 text-neutral-400"
                     : "bg-neutral-800/40 border-white/6 hover:border-white/15 text-white"
-                }`}
+                  }`}
               >
                 <div className="flex items-center gap-3">
                   <div
-                    className={`flex size-5 shrink-0 items-center justify-center rounded-lg border transition-colors ${
-                      task.completed
+                    className={`flex size-5 shrink-0 items-center justify-center rounded-lg border transition-colors ${task.completed
                         ? "bg-indigo-500 border-indigo-400 text-white font-bold"
                         : "border-neutral-500 bg-neutral-900"
-                    }`}
+                      }`}
                   >
                     {task.completed && <Check className="size-3.5 stroke-3" />}
                   </div>
                   <span
-                    className={`text-xs font-semibold ${
-                      task.completed ? "line-through text-neutral-400" : "text-white"
-                    }`}
+                    className={`text-xs font-semibold ${task.completed ? "line-through text-neutral-400" : "text-white"
+                      }`}
                   >
                     {task.text}
                   </span>
@@ -495,11 +481,10 @@ export function MobileQuickDashboard({
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <div
-              className={`flex size-7 items-center justify-center rounded-xl border ${
-                isAntExceeded
+              className={`flex size-7 items-center justify-center rounded-xl border ${isAntExceeded
                   ? "bg-rose-500/20 text-rose-400 border-rose-500/30"
                   : "bg-amber-500/20 text-amber-400 border-amber-500/30"
-              }`}
+                }`}
             >
               <Wallet className="size-4" />
             </div>
@@ -523,13 +508,12 @@ export function MobileQuickDashboard({
 
         {/* Thermometer Status Card */}
         <div
-          className={`rounded-2xl border p-3.5 space-y-2.5 ${
-            isAntExceeded
+          className={`rounded-2xl border p-3.5 space-y-2.5 ${isAntExceeded
               ? "bg-rose-950/20 border-rose-500/40"
               : antPercent >= 80
-              ? "bg-amber-950/20 border-amber-500/40"
-              : "bg-neutral-950/60 border-white/6"
-          }`}
+                ? "bg-amber-950/20 border-amber-500/40"
+                : "bg-neutral-950/60 border-white/6"
+            }`}
         >
           <div className="flex items-center justify-between">
             <div>
@@ -541,13 +525,12 @@ export function MobileQuickDashboard({
 
             <div className="text-right">
               <span
-                className={`text-xs font-bold ${
-                  isAntExceeded
+                className={`text-xs font-bold ${isAntExceeded
                     ? "text-rose-400"
                     : antPercent >= 80
-                    ? "text-amber-400"
-                    : "text-emerald-400"
-                }`}
+                      ? "text-amber-400"
+                      : "text-emerald-400"
+                  }`}
               >
                 {isAntExceeded
                   ? `+$${(antSpent - antLimit).toFixed(0)} excedido`
@@ -560,91 +543,73 @@ export function MobileQuickDashboard({
           {/* Progress bar */}
           <div className="h-2 w-full rounded-full bg-neutral-800 overflow-hidden">
             <div
-              className={`h-full transition-all ${
-                isAntExceeded
+              className={`h-full transition-all ${isAntExceeded
                   ? "bg-rose-500"
                   : antPercent >= 80
-                  ? "bg-amber-500"
-                  : "bg-emerald-500"
-              }`}
+                    ? "bg-amber-500"
+                    : "bg-emerald-500"
+                }`}
               style={{ width: `${Math.min(100, antPercent)}%` }}
             />
           </div>
         </div>
       </div>
 
-      {/* 5. Widget de Hidratación & Composición Corporal */}
-      <div className="grid grid-cols-2 gap-3">
-        {/* Hidratación Card */}
-        <div className="rounded-3xl border border-white/8 bg-neutral-900/80 p-4 backdrop-blur-xl shadow-xl flex flex-col justify-between space-y-3">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-1.5">
-              <Droplet className="size-4 text-sky-400" />
-              <span className="text-xs font-semibold text-white">Agua</span>
+      {/* 5. Widget de Hidratación Diaria */}
+      <div className="rounded-3xl border border-white/8 bg-neutral-900/80 p-4.5 backdrop-blur-xl shadow-xl space-y-3.5">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2.5">
+            <div className="flex size-9 items-center justify-center rounded-2xl bg-sky-500/15 text-sky-400 border border-sky-500/25 shadow-sm shadow-sky-500/10">
+              <Droplet className="size-4.5" />
             </div>
-            <span className="text-[10px] font-bold text-sky-300">{waterPercent}%</span>
-          </div>
-
-          <div>
-            <div className="text-xl font-extrabold text-white">
-              {waterMl}
-              <span className="text-xs font-normal text-neutral-400">/3000ml</span>
-            </div>
-            <div className="h-1.5 w-full rounded-full bg-neutral-950 mt-1.5 overflow-hidden">
-              <div
-                className="h-full bg-linear-to-r from-sky-500 to-cyan-400 transition-all"
-                style={{ width: `${waterPercent}%` }}
-              />
+            <div>
+              <span className="text-xs font-bold text-white tracking-tight">Hidratación Diaria</span>
+              <p className="text-[10px] text-neutral-400">Meta recomendada: 3,000 ml</p>
             </div>
           </div>
-
-          <div className="grid grid-cols-2 gap-1.5 pt-1">
-            <button
-              type="button"
-              disabled={isPending}
-              onClick={() => handleQuickAddWater(250)}
-              className="py-1.5 rounded-xl bg-sky-500/10 hover:bg-sky-500/20 border border-sky-500/20 text-sky-300 text-[11px] font-bold transition-all active:scale-95 disabled:opacity-50"
-            >
-              +250ml
-            </button>
-            <button
-              type="button"
-              disabled={isPending}
-              onClick={() => handleQuickAddWater(500)}
-              className="py-1.5 rounded-xl bg-sky-500/20 hover:bg-sky-500/30 border border-sky-500/30 text-sky-200 text-[11px] font-bold transition-all active:scale-95 disabled:opacity-50"
-            >
-              +500ml
-            </button>
+          <div className="flex items-center gap-1.5">
+            <span className="text-sm font-extrabold text-white">{waterMl}</span>
+            <span className="text-xs text-neutral-400">/ 3000 ml</span>
+            <span className="ml-1 rounded-lg bg-sky-500/15 border border-sky-500/30 px-2 py-0.5 text-[10px] font-bold text-sky-300">
+              {waterPercent}%
+            </span>
           </div>
         </div>
 
-        {/* Composición Corporal Card */}
-        <div
-          onClick={onOpenSmartFitModal}
-          className="rounded-3xl border border-white/8 bg-neutral-900/80 p-4 backdrop-blur-xl shadow-xl flex flex-col justify-between space-y-3 cursor-pointer hover:border-white/15 transition-all active:scale-98"
-        >
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-1.5">
-              <Scale className="size-4 text-emerald-400" />
-              <span className="text-xs font-semibold text-white">SmartFit</span>
-            </div>
-            <ChevronRight className="size-3.5 text-neutral-500" />
-          </div>
+        {/* Progress bar */}
+        <div className="h-2 w-full rounded-full bg-neutral-950 overflow-hidden border border-white/4">
+          <div
+            className="h-full bg-linear-to-r from-sky-500 via-cyan-400 to-teal-400 transition-all duration-500"
+            style={{ width: `${Math.min(100, waterPercent)}%` }}
+          />
+        </div>
 
-          <div>
-            <div className="text-xl font-extrabold text-white">
-              {healthData.latestBodyComposition?.weightKg || 78.6}
-              <span className="text-xs font-normal text-neutral-400"> kg</span>
-            </div>
-            <div className="flex items-center gap-2 text-[10px] text-neutral-400 mt-1">
-              <span>Grasa: <strong className="text-neutral-200">{healthData.latestBodyComposition?.bodyFatPercentage || 24.6}%</strong></span>
-              <span>Músculo: <strong className="text-neutral-200">{healthData.latestBodyComposition?.skeletalMuscleKg || 33.7}kg</strong></span>
-            </div>
-          </div>
-
-          <div className="py-1.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-300 text-[11px] font-bold text-center">
-            Ver Bioimpedancia
-          </div>
+        {/* Quick Add Water Buttons */}
+        <div className="grid grid-cols-3 gap-2 pt-0.5">
+          <button
+            type="button"
+            disabled={isPending}
+            onClick={() => handleQuickAddWater(250)}
+            className="flex items-center justify-center py-2 rounded-xl bg-sky-500/10 hover:bg-sky-500/20 border border-sky-500/20 text-sky-300 text-xs font-bold transition-all active:scale-95 disabled:opacity-50"
+          >
+            +250 ml
+          </button>
+          <button
+            type="button"
+            disabled={isPending}
+            onClick={() => handleQuickAddWater(500)}
+            className="flex items-center justify-center py-2 rounded-xl bg-sky-500/15 hover:bg-sky-500/25 border border-sky-500/25 text-sky-200 text-xs font-bold transition-all active:scale-95 disabled:opacity-50"
+          >
+            +500 ml
+          </button>
+          <button
+            type="button"
+            disabled={isPending}
+            onClick={() => handleQuickAddWater(750)}
+            className="flex items-center justify-center py-2 rounded-xl bg-sky-500/20 hover:bg-sky-500/30 border border-sky-500/30 text-sky-100 text-xs font-bold transition-all active:scale-95 disabled:opacity-50"
+          >
+            +750 ml
+          </button>
         </div>
       </div>
     </div>
