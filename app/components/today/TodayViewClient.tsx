@@ -8,6 +8,7 @@ import {
 import { toggleTaskAction } from "@/app/actions/tasks";
 import { useCommandCenter } from "@/app/components/context/CommandCenterContext";
 import { getHormonalStatus } from "@/lib/hormonal";
+import { soundFx } from "@/lib/soundFx";
 import {
   CalendarDaySchedule,
   FinanceDashboardData,
@@ -32,7 +33,7 @@ import {
   Zap,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useEffect, useMemo, useState, useTransition } from "react";
+import { useMemo, useOptimistic, useState, useTransition } from "react";
 
 interface TodayViewClientProps {
   user: HabiticaUser;
@@ -44,7 +45,7 @@ interface TodayViewClientProps {
 }
 
 export function TodayViewClient({
-  user,
+  user: _user,
   tasks,
   healthData,
   financeData,
@@ -65,12 +66,44 @@ export function TodayViewClient({
 
   // Health Data
   const todayHealth = healthData.todayHealth;
-  const supplements = todayHealth?.supplements || [];
-  const [optimisticSupplements, setOptimisticSupplements] = useState(supplements);
+  const rawSupplements = todayHealth?.supplements || [];
 
-  useEffect(() => {
-    setOptimisticSupplements(supplements);
-  }, [supplements]);
+  type SupplementAction =
+    | { type: "toggle"; id: string }
+    | { type: "batch"; timing: string; taken: boolean };
+
+  const [optimisticSupplements, setOptimisticSupplements] = useOptimistic(
+    rawSupplements,
+    (state, action: SupplementAction) => {
+      if (action.type === "toggle") {
+        return state.map((s) => (s.id === action.id ? { ...s, taken: !s.taken } : s));
+      }
+      if (action.type === "batch") {
+        const term = action.timing.toLowerCase();
+        return state.map((s) => {
+          const itemTiming = (s.timing || "").toLowerCase();
+          const matches =
+            term === "todos" ||
+            (term === "mañana" &&
+              (itemTiming.includes("mañana") ||
+                itemTiming.includes("morning") ||
+                itemTiming.includes("desayuno"))) ||
+            (term === "tarde" &&
+              (itemTiming.includes("tarde") ||
+                itemTiming.includes("afternoon") ||
+                itemTiming.includes("comida") ||
+                itemTiming.includes("entreno"))) ||
+            (term === "noche" &&
+              (itemTiming.includes("noche") ||
+                itemTiming.includes("night") ||
+                itemTiming.includes("cena") ||
+                itemTiming.includes("dormir")));
+          return matches ? { ...s, taken: action.taken } : s;
+        });
+      }
+      return state;
+    }
+  );
 
   const waterMl = todayHealth?.waterMl || 0;
   const waterTarget = 3000;
@@ -127,7 +160,10 @@ export function TodayViewClient({
   const totalSupplementsTaken = optimisticSupplements.filter((s) => s.taken).length;
 
   // Must-Win Tasks
-  const mustWinIds = todayRitual?.mustWinTasks || [];
+  const mustWinIds = useMemo(
+    () => todayRitual?.mustWinTasks || [],
+    [todayRitual]
+  );
   const mustWinTasks = tasks.filter((t) => mustWinIds.includes(t.id));
   const completedMustWins = mustWinTasks.filter((t) => t.completed).length;
   const mustWinPercent =
@@ -168,42 +204,23 @@ export function TodayViewClient({
 
   // Handlers
   const handleToggleSupplement = (id: string) => {
-    setOptimisticSupplements((prev) =>
-      prev.map((s) => (s.id === id ? { ...s, taken: !s.taken } : s))
-    );
+    soundFx.supplementChecked();
     startTransition(async () => {
+      setOptimisticSupplements({ type: "toggle", id });
       await toggleSupplementAction(id);
       router.refresh();
     });
   };
 
   const handleBatchTakeSupplements = () => {
+    soundFx.supplementChecked();
     const targetValue = !allTakenInActiveTiming;
-    setOptimisticSupplements((prev) =>
-      prev.map((s) => {
-        const itemTiming = (s.timing || "").toLowerCase();
-        const term = activeSuppTiming.toLowerCase();
-        const matches =
-          term === "todos" ||
-          (term === "mañana" &&
-            (itemTiming.includes("mañana") ||
-              itemTiming.includes("morning") ||
-              itemTiming.includes("desayuno"))) ||
-          (term === "tarde" &&
-            (itemTiming.includes("tarde") ||
-              itemTiming.includes("afternoon") ||
-              itemTiming.includes("comida") ||
-              itemTiming.includes("entreno"))) ||
-          (term === "noche" &&
-            (itemTiming.includes("noche") ||
-              itemTiming.includes("night") ||
-              itemTiming.includes("cena") ||
-              itemTiming.includes("dormir")));
-
-        return matches ? { ...s, taken: targetValue } : s;
-      })
-    );
     startTransition(async () => {
+      setOptimisticSupplements({
+        type: "batch",
+        timing: activeSuppTiming,
+        taken: targetValue,
+      });
       await batchToggleSupplementsByTimingAction(
         activeSuppTiming === "Todos" ? "all" : activeSuppTiming,
         targetValue
@@ -213,12 +230,14 @@ export function TodayViewClient({
   };
 
   const handleQuickAddWater = (ml: number) => {
+    soundFx.waterLogged();
     startTransition(async () => {
       await logWaterAction(ml);
     });
   };
 
   const handleToggleTask = (task: HabiticaTask) => {
+    soundFx.taskComplete();
     startTransition(async () => {
       await toggleTaskAction(task.id, "up");
     });
@@ -232,7 +251,7 @@ export function TodayViewClient({
   return (
     <div className="space-y-6 pb-20 sm:pb-12 font-sans animate-in fade-in duration-300">
       {/* 1. HERO HEADER: Greeting & Hormonal State */}
-      <div className="rounded-xl border border-[#2A2723] bg-[#181715] p-5 sm:p-6 shadow-sm">
+      <div className="rounded-lg border border-[#2A2723] bg-[#181715] p-5 sm:p-6 shadow-sm">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
           <div>
             <div className="flex items-center gap-2 mb-1">
@@ -312,7 +331,7 @@ export function TodayViewClient({
       {/* 2. EXECUTIVE METRICS RIBBON (Responsive Grid: 1 col on mobile, 2 col on tablet, 4 col on desktop) */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5 sm:gap-4">
         {/* Metric 1: Must-Win Priorities */}
-        <div className="rounded-xl border border-[#2A2723] bg-[#181715] p-4.5 shadow-sm space-y-2.5">
+        <div className="rounded-lg border border-[#2A2723] bg-[#181715] p-4.5 shadow-sm space-y-2.5">
           <div className="flex items-center justify-between">
             <span className="font-serif text-xs font-bold text-[#F5F2EB] flex items-center gap-1.5">
               <Zap className="h-3.5 w-3.5 text-[#D99B43]" />
@@ -339,7 +358,7 @@ export function TodayViewClient({
         </div>
 
         {/* Metric 2: Daily Hydration */}
-        <div className="rounded-xl border border-[#2A2723] bg-[#181715] p-4.5 shadow-sm space-y-2.5">
+        <div className="rounded-lg border border-[#2A2723] bg-[#181715] p-4.5 shadow-sm space-y-2.5">
           <div className="flex items-center justify-between">
             <span className="font-serif text-xs font-bold text-[#F5F2EB] flex items-center gap-1.5">
               <Droplet className="h-3.5 w-3.5 text-[#4EAB9E]" />
@@ -366,7 +385,7 @@ export function TodayViewClient({
         </div>
 
         {/* Metric 3: Ant Expenses */}
-        <div className="rounded-xl border border-[#2A2723] bg-[#181715] p-4.5 shadow-sm space-y-2.5">
+        <div className="rounded-lg border border-[#2A2723] bg-[#181715] p-4.5 shadow-sm space-y-2.5">
           <div className="flex items-center justify-between">
             <span className="font-serif text-xs font-bold text-[#F5F2EB] flex items-center gap-1.5">
               <Wallet className="h-3.5 w-3.5 text-[#E05D52]" />
@@ -405,7 +424,7 @@ export function TodayViewClient({
         </div>
 
         {/* Metric 4: Supplements Progress */}
-        <div className="rounded-xl border border-[#2A2723] bg-[#181715] p-4.5 shadow-sm space-y-2.5">
+        <div className="rounded-lg border border-[#2A2723] bg-[#181715] p-4.5 shadow-sm space-y-2.5">
           <div className="flex items-center justify-between">
             <span className="font-serif text-xs font-bold text-[#F5F2EB] flex items-center gap-1.5">
               <Pill className="h-3.5 w-3.5 text-[#7EA35A]" />
@@ -443,7 +462,7 @@ export function TodayViewClient({
         {/* LEFT COLUMN: 7 Columns on Desktop */}
         <div className="lg:col-span-7 space-y-6">
           {/* Card A: Must-Win Priorities */}
-          <div className="rounded-xl border border-[#2A2723] bg-[#181715] p-5 shadow-sm space-y-4">
+          <div className="rounded-lg border border-[#2A2723] bg-[#181715] p-5 shadow-sm space-y-4">
             <div className="flex items-center justify-between pb-3 border-b border-[#2A2723]">
               <div className="flex items-center gap-2.5">
                 <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#221D16] text-[#D99B43] border border-[#D99B43]/30">
@@ -545,7 +564,7 @@ export function TodayViewClient({
           </div>
 
           {/* Card B: Agenda & Próximos Eventos de Hoy */}
-          <div className="rounded-xl border border-[#2A2723] bg-[#181715] p-5 shadow-sm space-y-4">
+          <div className="rounded-lg border border-[#2A2723] bg-[#181715] p-5 shadow-sm space-y-4">
             <div className="flex items-center justify-between pb-3 border-b border-[#2A2723]">
               <div className="flex items-center gap-2.5">
                 <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#141C1A] text-[#4EAB9E] border border-[#4EAB9E]/30">
@@ -643,7 +662,7 @@ export function TodayViewClient({
 
           {/* Card C: Hábitos Clave del Día (Dailies) */}
           {dailyTasks.length > 0 && (
-            <div className="rounded-xl border border-[#2A2723] bg-[#181715] p-5 shadow-sm space-y-4">
+            <div className="rounded-lg border border-[#2A2723] bg-[#181715] p-5 shadow-sm space-y-4">
               <div className="flex items-center justify-between pb-3 border-b border-[#2A2723]">
                 <div className="flex items-center gap-2.5">
                   <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#1C2219] text-[#7EA35A] border border-[#7EA35A]/30">
@@ -708,7 +727,7 @@ export function TodayViewClient({
         {/* RIGHT COLUMN: 5 Columns on Desktop */}
         <div className="lg:col-span-5 space-y-6">
           {/* Card D: Suplementación Inteligente */}
-          <div className="rounded-xl border border-[#2A2723] bg-[#181715] p-5 shadow-sm space-y-4">
+          <div className="rounded-lg border border-[#2A2723] bg-[#181715] p-5 shadow-sm space-y-4">
             <div className="flex items-center justify-between pb-3 border-b border-[#2A2723]">
               <div className="flex items-center gap-2.5">
                 <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#1C2219] text-[#7EA35A] border border-[#7EA35A]/30">
@@ -827,7 +846,7 @@ export function TodayViewClient({
           </div>
 
           {/* Card E: Control Rápido de Hidratación */}
-          <div className="rounded-xl border border-[#2A2723] bg-[#181715] p-5 shadow-sm space-y-4">
+          <div className="rounded-lg border border-[#2A2723] bg-[#181715] p-5 shadow-sm space-y-4">
             <div className="flex items-center justify-between pb-3 border-b border-[#2A2723]">
               <div className="flex items-center gap-2.5">
                 <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#141C1A] text-[#4EAB9E] border border-[#4EAB9E]/30">
@@ -893,7 +912,7 @@ export function TodayViewClient({
           </div>
 
           {/* Card F: Termómetro de Gastos Hormiga */}
-          <div className="rounded-xl border border-[#2A2723] bg-[#181715] p-5 shadow-sm space-y-4">
+          <div className="rounded-lg border border-[#2A2723] bg-[#181715] p-5 shadow-sm space-y-4">
             <div className="flex items-center justify-between pb-3 border-b border-[#2A2723]">
               <div className="flex items-center gap-2.5">
                 <div

@@ -1,11 +1,11 @@
 "use client";
 
 import { loginOwnerAction } from "@/app/actions/auth";
+import { BrioLogo } from "@/app/components/BrioLogo";
 import {
   AlertCircle,
   Lock,
   Mail,
-  ShieldCheck,
   Sparkles,
   X
 } from "lucide-react";
@@ -55,9 +55,7 @@ export function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps) {
         {/* Header */}
         <div className="flex items-center justify-between pb-4 border-b border-[#2A2723]">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[#221D16] border border-[#D99B43]/30 text-[#D99B43] shadow-xs">
-              <ShieldCheck className="h-5 w-5" />
-            </div>
+            <BrioLogo size="md" />
             <div>
               <h2 className="font-serif text-base font-bold text-[#F5F2EB] tracking-tight">
                 Acceso Personal a Brio OS

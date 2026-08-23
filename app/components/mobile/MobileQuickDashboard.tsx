@@ -6,6 +6,7 @@ import {
   toggleSupplementAction,
 } from "@/app/actions/health";
 import { toggleTaskAction } from "@/app/actions/tasks";
+import { soundFx } from "@/lib/soundFx";
 import {
   CalendarDaySchedule,
   FinanceDashboardData,
@@ -28,7 +29,7 @@ import {
   Zap
 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useEffect, useMemo, useState, useTransition } from "react";
+import { useMemo, useOptimistic, useState, useTransition } from "react";
 
 interface MobileQuickDashboardProps {
   user?: HabiticaUser;
@@ -64,12 +65,38 @@ export function MobileQuickDashboard({
 
   // Health Data
   const todayHealth = healthData.todayHealth;
-  const supplements = todayHealth?.supplements || [];
-  const [optimisticSupplements, setOptimisticSupplements] = useState(supplements);
+  const rawSupplements = todayHealth?.supplements || [];
 
-  useEffect(() => {
-    setOptimisticSupplements(supplements);
-  }, [supplements]);
+  type SupplementAction =
+    | { type: "toggle"; id: string }
+    | { type: "batch"; timing: string; taken: boolean };
+
+  const [optimisticSupplements, setOptimisticSupplements] = useOptimistic(
+    rawSupplements,
+    (state, action: SupplementAction) => {
+      if (action.type === "toggle") {
+        return state.map((s) => (s.id === action.id ? { ...s, taken: !s.taken } : s));
+      }
+      if (action.type === "batch") {
+        const term = action.timing.toLowerCase();
+        return state.map((s) => {
+          const itemTiming = (s.timing || "").toLowerCase();
+          const matches =
+            term === "todos" ||
+            (term === "mañana" &&
+              (itemTiming.includes("mañana") ||
+                itemTiming.includes("morning") ||
+                itemTiming.includes("desayuno"))) ||
+            (term === "tarde" &&
+              (itemTiming.includes("tarde") ||
+                itemTiming.includes("afternoon") ||
+                itemTiming.includes("comida")));
+          return matches ? { ...s, taken: action.taken } : s;
+        });
+      }
+      return state;
+    }
+  );
 
   const waterMl = todayHealth?.waterMl || 0;
   const waterPercent = Math.min(100, Math.round((waterMl / 3000) * 100));
@@ -110,36 +137,23 @@ export function MobileQuickDashboard({
 
   // Handlers
   const handleToggleSupplement = (id: string) => {
-    setOptimisticSupplements((prev) =>
-      prev.map((s) => (s.id === id ? { ...s, taken: !s.taken } : s))
-    );
+    soundFx.supplementChecked();
     startTransition(async () => {
+      setOptimisticSupplements({ type: "toggle", id });
       await toggleSupplementAction(id);
       router.refresh();
     });
   };
 
   const handleBatchTakeSupplements = () => {
+    soundFx.supplementChecked();
     const targetValue = !allTakenInActiveTiming;
-    setOptimisticSupplements((prev) =>
-      prev.map((s) => {
-        const itemTiming = (s.timing || "").toLowerCase();
-        const term = activeSuppTiming.toLowerCase();
-        const matches =
-          term === "todos" ||
-          (term === "mañana" &&
-            (itemTiming.includes("mañana") ||
-              itemTiming.includes("morning") ||
-              itemTiming.includes("desayuno"))) ||
-          (term === "tarde" &&
-            (itemTiming.includes("tarde") ||
-              itemTiming.includes("afternoon") ||
-              itemTiming.includes("comida")));
-
-        return matches ? { ...s, taken: targetValue } : s;
-      })
-    );
     startTransition(async () => {
+      setOptimisticSupplements({
+        type: "batch",
+        timing: activeSuppTiming,
+        taken: targetValue,
+      });
       await batchToggleSupplementsByTimingAction(
         activeSuppTiming === "Todos" ? "all" : activeSuppTiming,
         targetValue
@@ -149,12 +163,14 @@ export function MobileQuickDashboard({
   };
 
   const handleQuickAddWater = (ml: number) => {
+    soundFx.waterLogged();
     startTransition(async () => {
       await logWaterAction(ml);
     });
   };
 
   const handleToggleTask = (task: HabiticaTask) => {
+    soundFx.taskComplete();
     startTransition(async () => {
       await toggleTaskAction(task.id, "up");
     });

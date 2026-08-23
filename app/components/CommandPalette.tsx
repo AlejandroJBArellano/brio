@@ -2,6 +2,7 @@
 
 import { syncHevyWorkoutsAction } from "@/app/actions/health";
 import { toggleSleepAction } from "@/app/actions/tasks";
+import { BrioLogo } from "@/app/components/BrioLogo";
 import { HabiticaTag, HabiticaTask } from "@/lib/types";
 import { capitalize } from "@/lib/utils";
 import {
@@ -16,7 +17,6 @@ import {
   Moon,
   Plus,
   RotateCw,
-  Search,
   Smartphone,
   Sparkles,
   Sun,
@@ -59,13 +59,13 @@ function CommandPaletteContent({
   onOpenFinanceModal,
   onSelectMainTab,
   onSelectTask,
-  onFilterType,
+  onFilterType: _onFilterType,
   onFilterTag,
 }: CommandPaletteProps) {
   const router = useRouter();
   const [query, setQuery] = useState("");
   const [selectedIndex, setSelectedIndex] = useState(0);
-  const [isPending, startTransition] = useTransition();
+  const [_isPending, startTransition] = useTransition();
   const inputRef = useRef<HTMLInputElement>(null);
 
   // Focus on mount
@@ -309,7 +309,7 @@ function CommandPaletteContent({
         return matchTitle || matchNotes || matchTags;
       })
       .slice(0, 8);
-  }, [tasks, query]);
+  }, [tasks, query, tags]);
 
   // Filter tags based on query
   const filteredTags = useMemo(() => {
@@ -376,8 +376,8 @@ function CommandPaletteContent({
         onClick={(e) => e.stopPropagation()}
       >
         {/* Search input header */}
-        <div className="relative flex items-center border-b border-[#2A2723] px-4 py-3.5 bg-[#121110]">
-          <Search className="h-4 w-4 text-[#8E867B]" />
+        <div className="relative flex items-center gap-3 border-b border-[#2A2723] px-4 py-3 bg-[#121110]">
+          <BrioLogo size="xs" />
           <input
             ref={inputRef}
             type="text"

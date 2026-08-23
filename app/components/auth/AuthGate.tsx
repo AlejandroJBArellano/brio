@@ -1,6 +1,7 @@
 "use client";
 
 import { loginOwnerAction } from "@/app/actions/auth";
+import { BrioLogo } from "@/app/components/BrioLogo";
 import {
   AlertCircle,
   ArrowRight,
@@ -42,8 +43,8 @@ export function AuthGate() {
       <div className="relative z-10 w-full max-w-md">
         {/* Brand Header */}
         <div className="text-center mb-8 space-y-3">
-          <div className="inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-[#221D16] border border-[#D99B43]/30 text-[#D99B43] font-serif text-3xl font-bold shadow-sm">
-            B
+          <div className="flex justify-center">
+            <BrioLogo size="xl" />
           </div>
           <h1 className="font-serif text-2xl sm:text-3xl font-bold tracking-tight text-[#F5F2EB]">
             Brio OS
