@@ -264,8 +264,8 @@ export function HeaderStatsRibbon({ user }: HeaderStatsRibbonProps) {
             </span>
           </div>
 
-          {/* User Auth Badge */}
-          {session?.user ? (
+          {/* User Auth Badge (Shown when logged in) */}
+          {session?.user && (
             <div className="flex items-center gap-2 rounded-xl border border-white/10 bg-neutral-950/60 px-2.5 py-1.5 text-xs text-neutral-200">
               <div className="flex h-5 w-5 items-center justify-center rounded-full bg-indigo-500/20 text-indigo-300 font-bold text-[10px]">
                 {session.user.name?.[0]?.toUpperCase() || "U"}
@@ -280,15 +280,6 @@ export function HeaderStatsRibbon({ user }: HeaderStatsRibbonProps) {
                 <LogOut className="h-3.5 w-3.5" />
               </button>
             </div>
-          ) : (
-            <button
-              type="button"
-              onClick={() => openModal("auth")}
-              className="flex items-center gap-1.5 rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-3 py-1.5 text-xs font-semibold text-emerald-300 hover:bg-emerald-500/20 transition-all shadow-sm"
-            >
-              <ShieldCheck className="h-3.5 w-3.5 text-emerald-400" />
-              <span>Acceso</span>
-            </button>
           )}
 
           {/* Notification Settings Trigger */}
