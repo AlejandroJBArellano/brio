@@ -124,8 +124,9 @@ export function FocusModal({
   const [audioSource, setAudioSource] = useState<"synth" | "youtube">("synth");
 
   // Native Synthesizer state
-  const [currentSound, setCurrentSound] = useState<AmbientSoundType>("gamma");
+  const [currentSound, setCurrentSound] = useState<AmbientSoundType>("alpha");
   const [synthVolume, setSynthVolume] = useState(0.35);
+  const [isSynthPlaying, setIsSynthPlaying] = useState(false);
 
   // YouTube state
   const [customYouTubeTracks, setCustomYouTubeTracks] = useState<
@@ -208,6 +209,7 @@ export function FocusModal({
           setIsActive(false);
           setIsCompleted(true);
           ambientAudio.stop();
+          setIsSynthPlaying(false);
 
           // Award Habitica XP/GP upon completing deep work
           startTransition(async () => {
@@ -225,31 +227,42 @@ export function FocusModal({
     return () => clearInterval(interval);
   }, [isActive, selectedTaskId, onCompleteSession]);
 
-  // Web Audio native synthesizer playback control
-  useEffect(() => {
-    if (
-      isOpen &&
-      isActive &&
-      audioSource === "synth" &&
-      currentSound !== "none"
-    ) {
-      ambientAudio.play(currentSound, synthVolume);
-    } else {
+  const handleSelectSound = (soundId: AmbientSoundType) => {
+    setCurrentSound(soundId);
+    if (soundId === "none") {
       ambientAudio.stop();
+      setIsSynthPlaying(false);
+    } else {
+      ambientAudio.play(soundId, synthVolume);
+      setIsSynthPlaying(true);
     }
-  }, [isOpen, isActive, audioSource, currentSound, synthVolume]);
+  };
+
+  const handleToggleSynthPlay = () => {
+    if (isSynthPlaying) {
+      ambientAudio.stop();
+      setIsSynthPlaying(false);
+    } else {
+      if (currentSound !== "none") {
+        ambientAudio.play(currentSound, synthVolume);
+        setIsSynthPlaying(true);
+      }
+    }
+  };
 
   const handleStart = () => {
     setIsActive(true);
     setIsCompleted(false);
     if (audioSource === "synth" && currentSound !== "none") {
       ambientAudio.play(currentSound, synthVolume);
+      setIsSynthPlaying(true);
     }
   };
 
   const handlePause = () => {
     setIsActive(false);
     ambientAudio.stop();
+    setIsSynthPlaying(false);
   };
 
   const handleReset = () => {
@@ -257,6 +270,7 @@ export function FocusModal({
     setTimeLeft(selectedMinutes * 60);
     setIsCompleted(false);
     ambientAudio.stop();
+    setIsSynthPlaying(false);
   };
 
   const handleSelectDuration = (mins: number) => {
@@ -265,10 +279,12 @@ export function FocusModal({
     setIsActive(false);
     setIsCompleted(false);
     ambientAudio.stop();
+    setIsSynthPlaying(false);
   };
 
   const handleClose = () => {
     ambientAudio.stop();
+    setIsSynthPlaying(false);
     setIsActive(false);
     onClose();
   };
@@ -424,13 +440,12 @@ export function FocusModal({
 
           {/* Audio Source Tabs Switcher */}
           <div className="w-full pt-4 border-t border-white/8">
-            <div className="flex items-center justify-between gap-3 mb-3">
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-3 mb-3">
               <div className="flex items-center gap-2">
                 <button
                   type="button"
                   onClick={() => {
                     setAudioSource("synth");
-                    if (!isActive) ambientAudio.stop();
                   }}
                   className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all border ${
                     audioSource === "synth"
@@ -439,7 +454,7 @@ export function FocusModal({
                   }`}
                 >
                   <Headphones className="h-3.5 w-3.5" />
-                  <span>🧠 Ondas & Sintetizador Nativo</span>
+                  <span>🧠 Ondas Hz & Frecuencias</span>
                 </button>
 
                 <button
@@ -447,6 +462,7 @@ export function FocusModal({
                   onClick={() => {
                     setAudioSource("youtube");
                     ambientAudio.stop();
+                    setIsSynthPlaying(false);
                   }}
                   className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all border ${
                     audioSource === "youtube"
@@ -460,54 +476,84 @@ export function FocusModal({
               </div>
 
               {audioSource === "synth" && currentSound !== "none" && (
-                <div className="hidden sm:flex items-center gap-2 text-xs text-neutral-400">
-                  <Volume2 className="h-3.5 w-3.5 text-indigo-400" />
-                  <input
-                    type="range"
-                    min="0.05"
-                    max="1"
-                    step="0.05"
-                    value={synthVolume}
-                    onChange={(e) => {
-                      const v = parseFloat(e.target.value);
-                      setSynthVolume(v);
-                      ambientAudio.setVolume(v);
-                    }}
-                    className="w-20 h-1.5 bg-neutral-800 rounded-lg appearance-none cursor-pointer accent-indigo-500"
-                  />
+                <div className="flex items-center gap-2.5 text-xs text-neutral-300">
+                  <button
+                    type="button"
+                    onClick={handleToggleSynthPlay}
+                    className={`flex items-center gap-1.5 px-2.5 py-1 rounded-xl text-xs font-semibold transition-all border ${
+                      isSynthPlaying
+                        ? "bg-emerald-500/20 text-emerald-300 border-emerald-500/40 shadow-sm"
+                        : "bg-neutral-850 text-neutral-400 border-white/10 hover:text-white hover:bg-neutral-800"
+                    }`}
+                  >
+                    {isSynthPlaying ? (
+                      <>
+                        <Pause className="h-3 w-3 fill-current" />
+                        <span>Pausar Ondas</span>
+                      </>
+                    ) : (
+                      <>
+                        <Play className="h-3 w-3 fill-current" />
+                        <span>Sonar Ondas</span>
+                      </>
+                    )}
+                  </button>
+
+                  <div className="flex items-center gap-1.5 text-neutral-400">
+                    <Volume2 className="h-3.5 w-3.5 text-indigo-400" />
+                    <input
+                      type="range"
+                      min="0.05"
+                      max="1"
+                      step="0.05"
+                      value={synthVolume}
+                      onChange={(e) => {
+                        const v = parseFloat(e.target.value);
+                        setSynthVolume(v);
+                        ambientAudio.setVolume(v);
+                      }}
+                      className="w-20 h-1.5 bg-neutral-800 rounded-lg appearance-none cursor-pointer accent-indigo-500"
+                    />
+                  </div>
                 </div>
               )}
             </div>
 
             {/* View 1: Native Web Audio Synthesizer */}
             {audioSource === "synth" && (
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-left animate-in fade-in duration-150">
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 text-left animate-in fade-in duration-150">
                 {AMBIENT_SOUND_OPTIONS.map((snd) => {
                   const isSelected = currentSound === snd.id;
+                  const isPlayingThis = isSelected && isSynthPlaying && snd.id !== "none";
+
                   return (
                     <button
                       key={snd.id}
                       type="button"
-                      onClick={() => {
-                        setCurrentSound(snd.id);
-                        if (isActive) {
-                          if (snd.id === "none") ambientAudio.stop();
-                          else ambientAudio.play(snd.id, synthVolume);
-                        }
-                      }}
-                      className={`flex flex-col p-2.5 rounded-xl border text-xs transition-all ${
+                      onClick={() => handleSelectSound(snd.id)}
+                      className={`flex flex-col p-2.5 rounded-2xl border text-xs transition-all ${
                         isSelected
                           ? "bg-indigo-500/20 text-white border-indigo-500/50 shadow-md shadow-indigo-500/10 font-bold"
                           : "bg-neutral-900/50 text-neutral-400 border-white/6 hover:text-white hover:bg-white/5"
                       }`}
                     >
-                      <div className="flex items-center gap-1.5 text-sm mb-0.5">
-                        <span>{snd.icon}</span>
-                        <span className="font-semibold text-xs truncate">
-                          {snd.label}
+                      <div className="flex items-center justify-between gap-1 mb-1">
+                        <span className="flex items-center gap-1.5 font-semibold text-xs truncate">
+                          <span>{snd.icon}</span>
+                          <span className="truncate">{snd.label}</span>
                         </span>
+                        <div className="flex items-center gap-1">
+                          {isPlayingThis && (
+                            <span className="flex h-1.5 w-1.5 rounded-full bg-emerald-400 animate-ping shrink-0" />
+                          )}
+                          {snd.hzBadge && snd.id !== "none" && (
+                            <span className="px-1.5 py-0.5 rounded-md font-mono text-[9px] font-bold bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 shrink-0">
+                              {snd.hzBadge}
+                            </span>
+                          )}
+                        </div>
                       </div>
-                      <span className="text-[10px] text-neutral-500 font-normal truncate">
+                      <span className="text-[10px] text-neutral-500 font-normal line-clamp-2 leading-tight">
                         {snd.sublabel}
                       </span>
                     </button>

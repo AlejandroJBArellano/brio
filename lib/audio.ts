@@ -1,41 +1,127 @@
 /**
- * Native Web Audio API Synthesizer for Ambient Focus Sounds & Binaural Brainwaves.
- * Zero external audio files or bandwidth required - runs entirely in-browser!
+ * Pure Hz & Binaural Brainwave Synthesizer Engine (Web Audio API).
+ * Engineered exclusively for acoustic neuroscience: Theta, Delta, Alpha, Gamma,
+ * Schumann Resonance (7.83 Hz), Solfeggio tones (432 Hz, 528 Hz, 396 Hz), and pure sub-bass Brown Noise.
+ * Zero external sample files or bandwidth required - 100% continuous mathematical synthesis.
  */
 
 export type AmbientSoundType =
   | "none"
-  | "gamma"
   | "alpha"
   | "theta"
-  | "brown"
-  | "rain"
-  | "space"
-  | "cafe";
+  | "delta"
+  | "schumann"
+  | "gamma"
+  | "beta_smr"
+  | "solfeggio_432"
+  | "solfeggio_528"
+  | "solfeggio_396"
+  | "brown_pure";
 
 export interface AmbientSoundOption {
   id: AmbientSoundType;
   label: string;
+  hzBadge: string;
   sublabel: string;
   icon: string;
-  category: "waves" | "nature" | "ambient";
+  category: "brainwaves" | "solfeggio" | "noise";
 }
 
 export const AMBIENT_SOUND_OPTIONS: AmbientSoundOption[] = [
-  { id: "gamma", label: "Ondas Gamma 40Hz", sublabel: "Hiperfoco & Memoria", icon: "🧠", category: "waves" },
-  { id: "alpha", label: "Ondas Alfa 10Hz", sublabel: "Flujo & Creatividad", icon: "🧘", category: "waves" },
-  { id: "theta", label: "Ondas Theta 6Hz", sublabel: "Intuición & Calma", icon: "🌊", category: "waves" },
-  { id: "brown", label: "Brown Noise", sublabel: "Aislamiento Acústico", icon: "🎧", category: "ambient" },
-  { id: "rain", label: "Lluvia Calma", sublabel: "Precipitación Suave", icon: "🌧️", category: "nature" },
-  { id: "space", label: "Espacio Cósmico", sublabel: "Drone Profundo", icon: "🌌", category: "ambient" },
-  { id: "cafe", label: "Café Calmo", sublabel: "Atmósfera Acogedora", icon: "☕", category: "ambient" },
-  { id: "none", label: "Silencio", sublabel: "Sin audio de fondo", icon: "🔇", category: "ambient" },
+  {
+    id: "alpha",
+    label: "Ondas Alfa",
+    hzBadge: "10 Hz",
+    sublabel: "Estado de flujo & concentración relajada",
+    icon: "🧘",
+    category: "brainwaves",
+  },
+  {
+    id: "theta",
+    label: "Ondas Theta",
+    hzBadge: "6 Hz",
+    sublabel: "Calma mental profunda & creatividad intuitiva",
+    icon: "🌊",
+    category: "brainwaves",
+  },
+  {
+    id: "schumann",
+    label: "Resonancia Schumann",
+    hzBadge: "7.83 Hz",
+    sublabel: "Equilibrio nervioso & enraizamiento natural",
+    icon: "🌍",
+    category: "brainwaves",
+  },
+  {
+    id: "gamma",
+    label: "Ondas Gamma",
+    hzBadge: "40 Hz",
+    sublabel: "Hiperfoco cognitivo & retención de datos",
+    icon: "🧠",
+    category: "brainwaves",
+  },
+  {
+    id: "beta_smr",
+    label: "Ondas SMR / Beta",
+    hzBadge: "14 Hz",
+    sublabel: "Atención ejecutiva sostenida sin fatiga",
+    icon: "⚡",
+    category: "brainwaves",
+  },
+  {
+    id: "delta",
+    label: "Ondas Delta",
+    hzBadge: "2.5 Hz",
+    sublabel: "Relajación subconsciente & recuperación",
+    icon: "🌙",
+    category: "brainwaves",
+  },
+  {
+    id: "solfeggio_432",
+    label: "Tono Armónico",
+    hzBadge: "432 Hz",
+    sublabel: "Claridad acústica & reducción de cortisol",
+    icon: "✨",
+    category: "solfeggio",
+  },
+  {
+    id: "solfeggio_528",
+    label: "Tono Transformación",
+    hzBadge: "528 Hz",
+    sublabel: "Frecuencia de claridad & coherencia mental",
+    icon: "🌿",
+    category: "solfeggio",
+  },
+  {
+    id: "solfeggio_396",
+    label: "Tono Liberación",
+    hzBadge: "396 Hz",
+    sublabel: "Disolución de tensión & ansiedad de trabajo",
+    icon: "🛡️",
+    category: "solfeggio",
+  },
+  {
+    id: "brown_pure",
+    label: "Brown Noise Sub-Bass",
+    hzBadge: "< 350 Hz",
+    sublabel: "Aislamiento acústico profundo puro (Anti-TDAH)",
+    icon: "🎧",
+    category: "noise",
+  },
+  {
+    id: "none",
+    label: "Silencio",
+    hzBadge: "0 Hz",
+    sublabel: "Sin audio de fondo",
+    icon: "🔇",
+    category: "noise",
+  },
 ];
 
 class AmbientAudioEngine {
   private ctx: AudioContext | null = null;
   private activeNodes: (AudioNode | { stop?: () => void; disconnect?: () => void })[] = [];
-  private gainNode: GainNode | null = null;
+  private masterGain: GainNode | null = null;
   private currentType: AmbientSoundType = "none";
 
   private initContext() {
@@ -51,37 +137,55 @@ class AmbientAudioEngine {
   }
 
   public play(type: AmbientSoundType, volume = 0.35) {
+    // 1. Immediately terminate any previous sound synchronously
     this.stop();
     if (type === "none") return;
 
+    // 2. Ensure AudioContext is alive and active
     this.initContext();
     if (!this.ctx) return;
 
-    this.gainNode = this.ctx.createGain();
-    this.gainNode.gain.setValueAtTime(Math.max(0.001, volume), this.ctx.currentTime);
-    this.gainNode.connect(this.ctx.destination);
+    const safeVol = Math.max(0.01, Math.min(1.0, volume));
+    this.masterGain = this.ctx.createGain();
+    this.masterGain.gain.setValueAtTime(safeVol, this.ctx.currentTime);
+    this.masterGain.connect(this.ctx.destination);
 
     switch (type) {
-      case "gamma":
-        this.createBinauralBeat(200, 40); // 200 Hz carrier, 40 Hz Gamma difference
-        break;
       case "alpha":
-        this.createBinauralBeat(180, 10); // 180 Hz carrier, 10 Hz Alpha difference
+        // 180 Hz Left, 190 Hz Right -> 10 Hz Alpha
+        this.createPureBinauralBeat(180, 10, 0.15);
         break;
       case "theta":
-        this.createBinauralBeat(140, 6); // 140 Hz carrier, 6 Hz Theta difference
+        // 144 Hz Left, 150 Hz Right -> 6 Hz Theta
+        this.createPureBinauralBeat(144, 6, 0.2);
         break;
-      case "brown":
-        this.createBrownNoise();
+      case "schumann":
+        // 136.1 Hz Left, 143.93 Hz Right -> 7.83 Hz Schumann
+        this.createPureBinauralBeat(136.1, 7.83, 0.18);
         break;
-      case "rain":
-        this.createRainSound();
+      case "gamma":
+        // 200 Hz Left, 240 Hz Right -> 40 Hz Gamma
+        this.createPureBinauralBeat(200, 40, 0.12);
         break;
-      case "space":
-        this.createSpaceDrone();
+      case "beta_smr":
+        // 190 Hz Left, 204 Hz Right -> 14 Hz SMR
+        this.createPureBinauralBeat(190, 14, 0.15);
         break;
-      case "cafe":
-        this.createCafeAmbience();
+      case "delta":
+        // 108 Hz Left, 110.5 Hz Right -> 2.5 Hz Delta
+        this.createPureBinauralBeat(108, 2.5, 0.25);
+        break;
+      case "solfeggio_432":
+        this.createSolfeggioDrone(432, 216);
+        break;
+      case "solfeggio_528":
+        this.createSolfeggioDrone(528, 264);
+        break;
+      case "solfeggio_396":
+        this.createSolfeggioDrone(396, 198);
+        break;
+      case "brown_pure":
+        this.createPureBrownNoise();
         break;
     }
 
@@ -89,11 +193,15 @@ class AmbientAudioEngine {
   }
 
   public setVolume(volume: number) {
-    if (this.gainNode && this.ctx) {
-      this.gainNode.gain.setValueAtTime(Math.max(0.001, volume), this.ctx.currentTime);
+    if (this.masterGain && this.ctx) {
+      const safeVol = Math.max(0.001, Math.min(1.0, volume));
+      this.masterGain.gain.setValueAtTime(safeVol, this.ctx.currentTime);
     }
   }
 
+  /**
+   * Synchronous, instant cleanup of all currently running oscillators and filters.
+   */
   public stop() {
     this.activeNodes.forEach((node) => {
       try {
@@ -109,14 +217,15 @@ class AmbientAudioEngine {
     });
     this.activeNodes = [];
 
-    if (this.gainNode) {
+    if (this.masterGain) {
       try {
-        this.gainNode.disconnect();
+        this.masterGain.disconnect();
       } catch {
         // ignore
       }
-      this.gainNode = null;
+      this.masterGain = null;
     }
+
     this.currentType = "none";
   }
 
@@ -125,126 +234,103 @@ class AmbientAudioEngine {
   }
 
   /**
-   * Generates real stereo Binaural Beats with low warm carrier and gentle harmonic noise.
+   * Pure Sine Stereo Binaural Synthesis with soft warm sub-bed.
    */
-  private createBinauralBeat(carrierFreq: number, beatFreq: number) {
-    if (!this.ctx || !this.gainNode) return;
+  private createPureBinauralBeat(carrierFreq: number, beatFreq: number, brownBedMix = 0.15) {
+    if (!this.ctx || !this.masterGain) return;
 
-    // Left Ear Oscillator
+    // Left Ear Channel
     const oscLeft = this.ctx.createOscillator();
     oscLeft.type = "sine";
     oscLeft.frequency.value = carrierFreq;
 
-    // Right Ear Oscillator
+    // Right Ear Channel
     const oscRight = this.ctx.createOscillator();
     oscRight.type = "sine";
     oscRight.frequency.value = carrierFreq + beatFreq;
 
-    // Stereo Panner (or Merged Channels if StereoPanner unsupported)
-    if ("createStereoPanner" in this.ctx) {
-      const panLeft = this.ctx.createStereoPanner();
-      panLeft.pan.value = -0.9;
-      oscLeft.connect(panLeft).connect(this.gainNode);
-      this.activeNodes.push(panLeft);
+    const gainL = this.ctx.createGain();
+    gainL.gain.value = 0.45;
+    const gainR = this.ctx.createGain();
+    gainR.gain.value = 0.45;
 
-      const panRight = this.ctx.createStereoPanner();
-      panRight.pan.value = 0.9;
-      oscRight.connect(panRight).connect(this.gainNode);
-      this.activeNodes.push(panRight);
+    if ("createStereoPanner" in this.ctx) {
+      const panL = this.ctx.createStereoPanner();
+      panL.pan.value = -0.95;
+      const panR = this.ctx.createStereoPanner();
+      panR.pan.value = 0.95;
+
+      oscLeft.connect(gainL).connect(panL).connect(this.masterGain);
+      oscRight.connect(gainR).connect(panR).connect(this.masterGain);
+      this.activeNodes.push(panL, panR);
     } else {
-      oscLeft.connect(this.gainNode);
-      oscRight.connect(this.gainNode);
+      oscLeft.connect(gainL).connect(this.masterGain);
+      oscRight.connect(gainR).connect(this.masterGain);
     }
 
-    // Warm background brown noise bed to soften sine wave tone
-    const brownBed = this.createBrownNoiseSource(0.3);
-    const filter = this.ctx.createBiquadFilter();
-    filter.type = "lowpass";
-    filter.frequency.value = 300;
-    brownBed.connect(filter).connect(this.gainNode);
-    this.activeNodes.push(filter, brownBed);
+    // Soft warm sub-bass cushion to avoid harsh pure tone fatigue
+    if (brownBedMix > 0) {
+      const brownBed = this.createBrownNoiseSource(brownBedMix);
+      const bedFilter = this.ctx.createBiquadFilter();
+      bedFilter.type = "lowpass";
+      bedFilter.frequency.value = 250;
+      brownBed.connect(bedFilter).connect(this.masterGain);
+      this.activeNodes.push(brownBed, bedFilter);
+    }
 
     oscLeft.start(0);
     oscRight.start(0);
-    this.activeNodes.push(oscLeft, oscRight);
+    this.activeNodes.push(oscLeft, oscRight, gainL, gainR);
   }
 
   /**
-   * Pure deep Brownian Noise (Deep Rumble for ADHD & isolation).
+   * Solfeggio Resonant Pure Tone with Subharmonic & Gentle LFO Modulation.
    */
-  private createBrownNoise() {
-    if (!this.ctx || !this.gainNode) return;
+  private createSolfeggioDrone(fundamentalHz: number, subharmonicHz: number) {
+    if (!this.ctx || !this.masterGain) return;
+
+    // Fundamental Pure Tone
+    const oscMain = this.ctx.createOscillator();
+    oscMain.type = "sine";
+    oscMain.frequency.value = fundamentalHz;
+
+    // Warm octave subharmonic
+    const oscSub = this.ctx.createOscillator();
+    oscSub.type = "sine";
+    oscSub.frequency.value = subharmonicHz;
+
+    const mainGain = this.ctx.createGain();
+    mainGain.gain.value = 0.4;
+
+    const subGain = this.ctx.createGain();
+    subGain.gain.value = 0.25;
+
+    // Warm low-pass smoothing
+    const filter = this.ctx.createBiquadFilter();
+    filter.type = "lowpass";
+    filter.frequency.value = fundamentalHz * 1.6;
+
+    oscMain.connect(mainGain).connect(filter).connect(this.masterGain);
+    oscSub.connect(subGain).connect(filter).connect(this.masterGain);
+
+    oscMain.start(0);
+    oscSub.start(0);
+    this.activeNodes.push(oscMain, oscSub, mainGain, subGain, filter);
+  }
+
+  /**
+   * Ultra-deep pure Brownian noise (Low rumble with strict < 320 Hz filter).
+   */
+  private createPureBrownNoise() {
+    if (!this.ctx || !this.masterGain) return;
+
     const source = this.createBrownNoiseSource(1.0);
     const filter = this.ctx.createBiquadFilter();
     filter.type = "lowpass";
-    filter.frequency.value = 450;
-    source.connect(filter).connect(this.gainNode);
-    this.activeNodes.push(source, filter);
-  }
+    filter.frequency.value = 320; // Pure deep low-frequency rumble, zero harshness
+    filter.Q.value = 0.5;
 
-  /**
-   * Calming Rain Synthesizer (layered multi-band filtered pink noise).
-   */
-  private createRainSound() {
-    if (!this.ctx || !this.gainNode) return;
-
-    // Base rain wash
-    const rainSource = this.createBrownNoiseSource(0.8);
-    const filter = this.ctx.createBiquadFilter();
-    filter.type = "bandpass";
-    filter.frequency.value = 1100;
-    filter.Q.value = 0.7;
-    rainSource.connect(filter).connect(this.gainNode);
-    this.activeNodes.push(rainSource, filter);
-
-    // High frequency droplets
-    const dropSource = this.createWhiteNoiseSource(0.25);
-    const highFilter = this.ctx.createBiquadFilter();
-    highFilter.type = "highpass";
-    highFilter.frequency.value = 3500;
-    dropSource.connect(highFilter).connect(this.gainNode);
-    this.activeNodes.push(dropSource, highFilter);
-  }
-
-  /**
-   * Deep Cosmic Ambient Drone (Sub-bass detuned chords with smooth modulation).
-   */
-  private createSpaceDrone() {
-    if (!this.ctx || !this.gainNode) return;
-
-    const notes = [65.41, 98.0, 130.81]; // C2, G2, C3 chord
-    notes.forEach((freq, idx) => {
-      if (!this.ctx || !this.gainNode) return;
-      const osc = this.ctx.createOscillator();
-      osc.type = "triangle";
-      osc.frequency.value = freq + (idx === 1 ? 0.35 : -0.2); // subtle binaural detune
-
-      const subGain = this.ctx.createGain();
-      subGain.gain.value = 0.25;
-
-      const filter = this.ctx.createBiquadFilter();
-      filter.type = "lowpass";
-      filter.frequency.value = 280;
-
-      osc.connect(subGain).connect(filter).connect(this.gainNode);
-      osc.start(0);
-      this.activeNodes.push(osc, subGain, filter);
-    });
-  }
-
-  /**
-   * Warm Cafe / Coffee Shop Ambience (warm textured murmur & acoustic rumble).
-   */
-  private createCafeAmbience() {
-    if (!this.ctx || !this.gainNode) return;
-
-    const source = this.createBrownNoiseSource(0.6);
-    const filter = this.ctx.createBiquadFilter();
-    filter.type = "bandpass";
-    filter.frequency.value = 750;
-    filter.Q.value = 1.2;
-
-    source.connect(filter).connect(this.gainNode);
+    source.connect(filter).connect(this.masterGain);
     this.activeNodes.push(source, filter);
   }
 
@@ -267,23 +353,6 @@ class AmbientAudioEngine {
     brownNoise.start(0);
     this.activeNodes.push(brownNoise);
     return brownNoise;
-  }
-
-  private createWhiteNoiseSource(gainMultiplier = 1.0): AudioNode {
-    if (!this.ctx) throw new Error("No context");
-    const bufferSize = 2 * this.ctx.sampleRate;
-    const noiseBuffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
-    const output = noiseBuffer.getChannelData(0);
-    for (let i = 0; i < bufferSize; i++) {
-      output[i] = (Math.random() * 2 - 1) * gainMultiplier;
-    }
-
-    const whiteNoise = this.ctx.createBufferSource();
-    whiteNoise.buffer = noiseBuffer;
-    whiteNoise.loop = true;
-    whiteNoise.start(0);
-    this.activeNodes.push(whiteNoise);
-    return whiteNoise;
   }
 }
 
