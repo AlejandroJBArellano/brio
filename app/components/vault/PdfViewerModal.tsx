@@ -35,33 +35,33 @@ export function PdfViewerModal({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-black/85 backdrop-blur-md animate-in fade-in duration-200">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-black/85 backdrop-blur-xs animate-in fade-in duration-200 font-sans">
       <div
-        className={`flex flex-col rounded-3xl border border-white/12 bg-neutral-900 shadow-2xl overflow-hidden transition-all duration-300 ${
+        className={`flex flex-col rounded-xl border border-[#2A2723] bg-[#181715] shadow-2xl overflow-hidden transition-all duration-300 ${
           isFullscreen
             ? "w-full h-full rounded-none"
             : "w-full max-w-5xl h-[88vh]"
         }`}
       >
         {/* Header Bar */}
-        <div className="flex items-center justify-between px-5 py-3.5 border-b border-white/8 bg-neutral-950/80 backdrop-blur-xl">
+        <div className="flex items-center justify-between px-5 py-3.5 border-b border-[#2A2723] bg-[#121110]">
           <div className="flex items-center gap-3 min-w-0">
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 shrink-0">
+            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#221D16] border border-[#D99B43]/30 text-[#D99B43] shrink-0">
               <FileText className="h-4 w-4" />
             </div>
             <div className="min-w-0">
-              <h3 className="text-sm font-bold text-white truncate">
+              <h3 className="font-serif text-sm font-bold text-[#F5F2EB] truncate">
                 {title}
               </h3>
               {authorOrCreator && (
-                <p className="text-xs text-neutral-400 truncate">
+                <p className="text-xs text-[#8E867B] truncate">
                   {authorOrCreator}
                 </p>
               )}
             </div>
           </div>
 
-          <div className="flex items-center gap-1.5 shrink-0">
+          <div className="flex items-center gap-1.5 shrink-0 font-mono">
             <a
               href={
                 fileUrl.includes("/api/vault/file")
@@ -69,10 +69,10 @@ export function PdfViewerModal({
                   : fileUrl
               }
               download={fileName || title}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/6 hover:bg-white/10 text-xs font-semibold text-neutral-200 transition-all cursor-pointer"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#181715] hover:bg-[#22201D] border border-[#2A2723] text-xs font-semibold text-[#DDD6C9] hover:text-[#F5F2EB] transition-all cursor-pointer"
               title="Descargar archivo"
             >
-              <Download className="h-3.5 w-3.5 text-cyan-400" />
+              <Download className="h-3.5 w-3.5 text-[#D99B43]" />
               <span className="hidden sm:inline">Descargar</span>
             </a>
 
@@ -80,7 +80,7 @@ export function PdfViewerModal({
               href={fileUrl}
               target="_blank"
               rel="noreferrer"
-              className="p-2 rounded-xl text-neutral-400 hover:text-white hover:bg-white/6 transition-all"
+              className="p-2 rounded-lg text-[#8E867B] hover:text-[#F5F2EB] hover:bg-[#22201D] border border-[#2A2723] transition-all"
               title="Abrir en pestaña nueva"
             >
               <ExternalLink className="h-4 w-4" />
@@ -89,7 +89,7 @@ export function PdfViewerModal({
             <button
               type="button"
               onClick={() => setIsFullscreen(!isFullscreen)}
-              className="p-2 rounded-xl text-neutral-400 hover:text-white hover:bg-white/6 transition-all"
+              className="p-2 rounded-lg text-[#8E867B] hover:text-[#F5F2EB] hover:bg-[#22201D] border border-[#2A2723] transition-all cursor-pointer"
               title={isFullscreen ? "Restaurar" : "Pantalla completa"}
             >
               <Maximize2 className="h-4 w-4" />
@@ -98,7 +98,7 @@ export function PdfViewerModal({
             <button
               type="button"
               onClick={onClose}
-              className="p-2 rounded-xl text-neutral-400 hover:text-white hover:bg-white/6 transition-all ml-1"
+              className="p-2 rounded-lg text-[#8E867B] hover:text-[#F5F2EB] hover:bg-[#22201D] border border-[#2A2723] transition-all ml-1 cursor-pointer"
             >
               <X className="h-5 w-5" />
             </button>
@@ -106,7 +106,7 @@ export function PdfViewerModal({
         </div>
 
         {/* PDF Embedded View */}
-        <div className="flex-1 w-full bg-neutral-950 relative">
+        <div className="flex-1 w-full bg-[#121110] relative">
           <iframe
             src={`${fileUrl}#toolbar=1&navpanes=0`}
             title={title}

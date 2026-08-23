@@ -14,41 +14,41 @@ export function AnalyticsView({ data }: AnalyticsViewProps) {
     <div className="flex flex-col gap-6 animate-in fade-in duration-300">
       {/* Top Highlights */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="rounded-2xl border border-white/8 bg-neutral-900/60 p-4 backdrop-blur-xl shadow-xl">
-          <div className="flex items-center justify-between text-xs text-neutral-400">
+        <div className="rounded-xl border border-[#2A2723] bg-[#181715] p-4 shadow-sm">
+          <div className="flex items-center justify-between text-xs text-[#8E867B] font-mono">
             <span>Racha Actual</span>
-            <Flame className="h-4 w-4 text-amber-400" />
+            <Flame className="h-4 w-4 text-[#D99B43]" />
           </div>
-          <div className="mt-2 text-2xl font-bold font-mono text-amber-400">
+          <div className="mt-2 text-2xl font-bold font-serif text-[#D99B43]">
             {data.currentStreak} días consecutivos
           </div>
-          <div className="mt-1 text-[11px] text-neutral-500">
+          <div className="mt-1 text-[11px] text-[#8E867B] font-mono">
             Récord personal: {data.longestStreak} días
           </div>
         </div>
 
-        <div className="rounded-2xl border border-white/8 bg-neutral-900/60 p-4 backdrop-blur-xl shadow-xl">
-          <div className="flex items-center justify-between text-xs text-neutral-400">
+        <div className="rounded-xl border border-[#2A2723] bg-[#181715] p-4 shadow-sm">
+          <div className="flex items-center justify-between text-xs text-[#8E867B] font-mono">
             <span>Actividades Registradas (90d)</span>
-            <Activity className="h-4 w-4 text-indigo-400" />
+            <Activity className="h-4 w-4 text-[#DDD6C9]" />
           </div>
-          <div className="mt-2 text-2xl font-bold font-mono text-indigo-400">
+          <div className="mt-2 text-2xl font-bold font-serif text-[#F5F2EB]">
             {data.totalActivitiesLogged} acciones
           </div>
-          <div className="mt-1 text-[11px] text-neutral-500">
+          <div className="mt-1 text-[11px] text-[#8E867B]">
             Dailies, hábitos, tareas y finanzas
           </div>
         </div>
 
-        <div className="rounded-2xl border border-white/8 bg-neutral-900/60 p-4 backdrop-blur-xl shadow-xl">
-          <div className="flex items-center justify-between text-xs text-neutral-400">
+        <div className="rounded-xl border border-[#2A2723] bg-[#181715] p-4 shadow-sm">
+          <div className="flex items-center justify-between text-xs text-[#8E867B] font-mono">
             <span>Pilares de Vida Activos</span>
-            <Sparkles className="h-4 w-4 text-emerald-400" />
+            <Sparkles className="h-4 w-4 text-[#7EA35A]" />
           </div>
-          <div className="mt-2 text-2xl font-bold font-mono text-emerald-400">
+          <div className="mt-2 text-2xl font-bold font-serif text-[#7EA35A]">
             {data.activeLifePillars} categorías
           </div>
-          <div className="mt-1 text-[11px] text-neutral-500">
+          <div className="mt-1 text-[11px] text-[#8E867B]">
             Equilibrio holístico de vida
           </div>
         </div>

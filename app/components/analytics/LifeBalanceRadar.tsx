@@ -9,22 +9,22 @@ interface LifeBalanceRadarProps {
 
 export function LifeBalanceRadar({ tagDistributions }: LifeBalanceRadarProps) {
   return (
-    <div className="rounded-2xl border border-white/8 bg-neutral-900/60 p-5 backdrop-blur-xl shadow-xl">
-      <div className="flex items-center gap-2.5 pb-4 border-b border-white/6">
-        <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-violet-500/10 text-violet-400 border border-violet-500/20">
+    <div className="rounded-xl border border-[#2A2723] bg-[#181715] p-5 shadow-sm">
+      <div className="flex items-center gap-2.5 pb-4 border-b border-[#2A2723]">
+        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#221D16] text-[#D99B43] border border-[#D99B43]/30">
           <Compass className="h-4 w-4" />
         </div>
         <div>
-          <h3 className="text-sm font-bold text-white tracking-tight">
+          <h3 className="font-serif text-sm font-bold text-[#F5F2EB] tracking-tight">
             Balance de Vida por Pilares & Tags
           </h3>
-          <p className="text-xs text-neutral-400">
+          <p className="text-xs text-[#8E867B]">
             Distribución de tu energía entre salud, trabajo, estudio y finanzas
           </p>
         </div>
       </div>
 
-      <div className="mt-5 space-y-4">
+      <div className="mt-5 space-y-4 font-mono">
         {tagDistributions.map((pillar) => (
           <div key={pillar.tag} className="space-y-1.5">
             <div className="flex items-center justify-between text-xs">
@@ -33,20 +33,20 @@ export function LifeBalanceRadar({ tagDistributions }: LifeBalanceRadarProps) {
                   className="h-2.5 w-2.5 rounded-full"
                   style={{ backgroundColor: pillar.color }}
                 />
-                <span className="font-semibold text-white">
+                <span className="font-semibold text-[#F5F2EB]">
                   #{pillar.tag}
                 </span>
-                <span className="text-neutral-500 font-mono text-[11px]">
+                <span className="text-[#8E867B] font-mono text-[11px]">
                   ({pillar.count} tareas/hábitos)
                 </span>
               </div>
-              <span className="font-mono font-bold text-neutral-300">
+              <span className="font-mono font-bold text-[#DDD6C9]">
                 {pillar.percentage}%
               </span>
             </div>
 
             {/* Progress bar */}
-            <div className="relative h-2 w-full overflow-hidden rounded-full bg-neutral-950">
+            <div className="relative h-2 w-full overflow-hidden rounded-full bg-[#121110] border border-[#2A2723]">
               <div
                 className="h-full rounded-full transition-all duration-500"
                 style={{
@@ -59,8 +59,8 @@ export function LifeBalanceRadar({ tagDistributions }: LifeBalanceRadarProps) {
         ))}
       </div>
 
-      <div className="mt-5 rounded-xl border border-indigo-500/20 bg-indigo-500/5 p-3.5 text-xs text-indigo-300">
-        💡 <strong>Consejo de Equilibrio:</strong> Mantén tus pilares de <code className="font-mono text-purple-300">#Selfcare</code> y <code className="font-mono text-blue-300">#Productivity</code> en equilibrio frente a <code className="font-mono text-emerald-300">#Proficient</code> y <code className="font-mono text-cyan-300">#Estudio</code> para maximizar tu energía y evitar el burnout.
+      <div className="mt-5 rounded-lg border border-[#2A2723] bg-[#121110] p-3.5 text-xs text-[#DDD6C9] font-sans">
+        💡 <strong className="text-[#F5F2EB]">Consejo de Equilibrio:</strong> Mantén tus pilares de <code className="font-mono text-[#D99B43]">#Selfcare</code> y <code className="font-mono text-[#4EAB9E]">#Productivity</code> en equilibrio frente a <code className="font-mono text-[#7EA35A]">#Proficient</code> y <code className="font-mono text-[#E05D52]">#Estudio</code> para maximizar tu momentum y evitar la fatiga mental.
       </div>
     </div>
   );
