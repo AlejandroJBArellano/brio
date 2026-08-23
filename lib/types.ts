@@ -29,6 +29,7 @@ export interface HabiticaUser {
   preferences?: {
     timezoneOffset?: number;
     dayStart?: number;
+    sleep?: boolean;
   };
   flags?: {
     rest?: boolean;

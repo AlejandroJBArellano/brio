@@ -507,6 +507,8 @@ export class HabiticaClient {
       method: "POST",
     });
 
+    console.log({ res })
+
     return { success: true, resting: res };
   }
 

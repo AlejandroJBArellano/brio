@@ -21,11 +21,10 @@ import {
   RotateCw,
   Search,
   ShieldCheck,
-  Smartphone,
   Sparkles,
   Sun,
   Wallet,
-  Zap,
+  Zap
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -60,7 +59,7 @@ export function HeaderStatsRibbon({ user }: HeaderStatsRibbonProps) {
   }, [isActionsOpen]);
 
   const stats = user.stats;
-  const isResting = user.flags?.rest || false;
+  const isResting = Boolean(user.preferences?.sleep ?? user.flags?.rest ?? false);
   const hpPercent = calculatePercentage(stats.hp, stats.maxHealth || 50);
   const mpPercent = calculatePercentage(stats.mp, stats.maxMP || 100);
   const expPercent = calculatePercentage(stats.exp, stats.toNextLevel || 100);
@@ -159,11 +158,10 @@ export function HeaderStatsRibbon({ user }: HeaderStatsRibbonProps) {
                   onClick={handleToggleRest}
                   disabled={isPending}
                   title={isResting ? "Despertar de la Posada" : "Descansar en la Posada (pausar daño diario)"}
-                  className={`inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-[11px] font-semibold transition-all ${
-                    isResting
+                  className={`inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-[11px] font-semibold transition-all ${isResting
                       ? "border border-amber-500/40 bg-amber-500/20 text-amber-300 animate-pulse"
                       : "border border-neutral-800 bg-neutral-900/60 text-neutral-400 hover:text-neutral-200"
-                  }`}
+                    }`}
                 >
                   <Bed className="h-3 w-3" />
                   <span>{isResting ? "En la Posada" : "Posada"}</span>
@@ -190,9 +188,8 @@ export function HeaderStatsRibbon({ user }: HeaderStatsRibbonProps) {
             <div className="flex items-center justify-between text-xs">
               <span className="flex items-center gap-1 font-semibold text-rose-400 text-[11px]">
                 <Heart
-                  className={`h-3 w-3 fill-rose-500/20 text-rose-500 ${
-                    isLowHp ? "animate-pulse text-rose-400" : ""
-                  }`}
+                  className={`h-3 w-3 fill-rose-500/20 text-rose-500 ${isLowHp ? "animate-pulse text-rose-400" : ""
+                    }`}
                 />
                 HP
               </span>
@@ -202,9 +199,8 @@ export function HeaderStatsRibbon({ user }: HeaderStatsRibbonProps) {
             </div>
             <div className="mt-1 h-1.5 w-full overflow-hidden rounded-full bg-neutral-800">
               <div
-                className={`h-full transition-all duration-500 ${
-                  isLowHp ? "bg-rose-500" : "bg-linear-to-r from-rose-500 to-red-400"
-                }`}
+                className={`h-full transition-all duration-500 ${isLowHp ? "bg-rose-500" : "bg-linear-to-r from-rose-500 to-red-400"
+                  }`}
                 style={{ width: `${hpPercent}%` }}
               />
             </div>
@@ -334,11 +330,10 @@ export function HeaderStatsRibbon({ user }: HeaderStatsRibbonProps) {
                 key={item.href}
                 href={item.href}
                 prefetch={true}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all shrink-0 ${
-                  active
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all shrink-0 ${active
                     ? "bg-white/12 text-white border border-white/20 shadow-xs"
                     : "text-neutral-400 hover:text-neutral-200 hover:bg-white/5 border border-transparent"
-                }`}
+                  }`}
               >
                 <Icon className={`h-3.5 w-3.5 ${active ? "text-white" : "text-neutral-400"}`} />
                 <span>{item.label}</span>
@@ -355,18 +350,16 @@ export function HeaderStatsRibbon({ user }: HeaderStatsRibbonProps) {
           <button
             type="button"
             onClick={() => setIsActionsOpen(!isActionsOpen)}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all border shadow-sm ${
-              isActionsOpen
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all border shadow-sm ${isActionsOpen
                 ? "bg-amber-500/20 text-amber-300 border-amber-500/40"
                 : "bg-neutral-950/80 text-neutral-300 border-white/8 hover:text-white hover:bg-white/5"
-            }`}
+              }`}
           >
             <Sparkles className="h-3.5 w-3.5 text-amber-400" />
             <span className="hidden sm:inline">Acciones</span>
             <ChevronDown
-              className={`h-3 w-3 transition-transform duration-200 ${
-                isActionsOpen ? "rotate-180" : ""
-              }`}
+              className={`h-3 w-3 transition-transform duration-200 ${isActionsOpen ? "rotate-180" : ""
+                }`}
             />
           </button>
 

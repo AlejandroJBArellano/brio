@@ -51,7 +51,7 @@ export function EveningReviewModal({
 
   // Pending dailies that would damage HP at midnight
   const pendingDailies = tasks.filter((t) => t.type === "daily" && t.isDue);
-  const isResting = user.flags?.rest || false;
+  const isResting = Boolean(user.preferences?.sleep ?? user.flags?.rest ?? false);
 
   const focusTasks = tasks.filter((t) => mustWinTaskIds.includes(t.id));
   const completedFocusCount = focusTasks.filter(

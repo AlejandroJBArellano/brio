@@ -145,7 +145,7 @@ export function ModalManager({
           onClose={closeModal}
           tasks={tasks}
           tags={tags}
-          isResting={user.flags?.rest}
+          isResting={Boolean(user.preferences?.sleep ?? user.flags?.rest ?? false)}
           onOpenBatchCapture={() => openModal("batch")}
           onOpenMorningRitual={() => openModal("morningRitual")}
           onOpenEveningReview={() => openModal("eveningReview")}
