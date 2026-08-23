@@ -5,6 +5,8 @@ import {
   dismissWishlistItemAction,
   purchaseWishlistItemAction,
 } from "@/app/actions/wishlist";
+import { soundFx } from "@/lib/soundFx";
+import { calculateWorkTimeForExpense } from "@/lib/utils";
 import { WishlistDashboardData, WishlistItem, WishlistStatus } from "@/lib/types";
 import {
   Check,
@@ -39,10 +41,13 @@ export function WishlistView({ data, onRefresh }: WishlistViewProps) {
     if (!confirm(`¿Registrar compra de "${item.title}" por $${item.priceEstimated.toLocaleString("es-MX")} MXN en tus gastos?`)) return;
 
     startTransition(async () => {
-      await purchaseWishlistItemAction(item.id, {
+      const res = await purchaseWishlistItemAction(item.id, {
         actualAmount: item.priceEstimated,
         category: item.category,
       });
+      if (res.success) {
+        soundFx.transactionAdded();
+      }
       if (onRefresh) onRefresh();
     });
   };
@@ -51,7 +56,10 @@ export function WishlistView({ data, onRefresh }: WishlistViewProps) {
     if (!confirm(`¿Descartar "${item.title}"? ¡Esto sumará $${item.priceEstimated.toLocaleString("es-MX")} MXN a tu dinero ahorrado!`)) return;
 
     startTransition(async () => {
-      await dismissWishlistItemAction(item.id);
+      const res = await dismissWishlistItemAction(item.id);
+      if (res.success) {
+        soundFx.taskComplete();
+      }
       if (onRefresh) onRefresh();
     });
   };
@@ -247,6 +255,10 @@ export function WishlistView({ data, onRefresh }: WishlistViewProps) {
                         ${item.priceEstimated.toLocaleString("es-MX", { minimumFractionDigits: 2 })}
                       </span>
                       <span className="text-[10px] text-[#8E867B] font-mono">MXN</span>
+                    </div>
+                    <div className="mt-1 flex items-center gap-1.5 text-[11px] font-mono text-[#D99B43]">
+                      <Clock className="h-3 w-3 shrink-0" />
+                      <span>{calculateWorkTimeForExpense(item.priceEstimated).formattedTime}</span>
                     </div>
                   </div>
 

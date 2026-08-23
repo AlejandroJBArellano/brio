@@ -2,6 +2,7 @@
 
 import { deleteTransactionAction } from "@/app/actions/finance";
 import { FinanceDashboardData } from "@/lib/types";
+import { calculateWorkTimeForExpense } from "@/lib/utils";
 import {
   AlertCircle,
   ArrowDownRight,
@@ -142,7 +143,7 @@ export function FinanceView({ data, onRefresh }: FinanceViewProps) {
           {/* 1. Header Metrics Row */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {/* Total Incomes */}
-            <div className="rounded-xl border border-[#2A2723] bg-[#181715] p-4 shadow-sm">
+            <div className="rounded-lg border border-[#2A2723] bg-[#181715] p-4 shadow-sm">
               <div className="flex items-center justify-between text-xs text-[#8E867B] font-mono">
                 <span>Ingresos del Mes</span>
                 <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-[#1C2219] text-[#7EA35A] border border-[#7EA35A]/30">
@@ -158,7 +159,7 @@ export function FinanceView({ data, onRefresh }: FinanceViewProps) {
             </div>
 
             {/* Total Expenses */}
-            <div className="rounded-xl border border-[#2A2723] bg-[#181715] p-4 shadow-sm">
+            <div className="rounded-lg border border-[#2A2723] bg-[#181715] p-4 shadow-sm">
               <div className="flex items-center justify-between text-xs text-[#8E867B] font-mono">
                 <span>Gastos Acumulados</span>
                 <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-[#221716] text-[#E05D52] border border-[#E05D52]/30">
@@ -174,7 +175,7 @@ export function FinanceView({ data, onRefresh }: FinanceViewProps) {
             </div>
 
             {/* Net Balance */}
-            <div className="rounded-xl border border-[#2A2723] bg-[#181715] p-4 shadow-sm">
+            <div className="rounded-lg border border-[#2A2723] bg-[#181715] p-4 shadow-sm">
               <div className="flex items-center justify-between text-xs text-[#8E867B] font-mono">
                 <span>Balance Neto</span>
                 <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-[#162121] text-[#4EAB9E] border border-[#4EAB9E]/30">
@@ -203,7 +204,7 @@ export function FinanceView({ data, onRefresh }: FinanceViewProps) {
             </div>
 
             {/* Variable Budget Remaining */}
-            <div className="rounded-xl border border-[#2A2723] bg-[#181715] p-4 shadow-sm">
+            <div className="rounded-lg border border-[#2A2723] bg-[#181715] p-4 shadow-sm">
               <div className="flex items-center justify-between text-xs text-[#8E867B] font-mono">
                 <span>Presupuesto Variable Restante</span>
                 <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-[#221D16] text-[#D99B43] border border-[#D99B43]/30">
@@ -220,7 +221,7 @@ export function FinanceView({ data, onRefresh }: FinanceViewProps) {
           </div>
 
           {/* 2. Monthly Budget Thermometer Card */}
-          <div className="rounded-xl border border-[#2A2723] bg-[#181715] p-5 shadow-sm">
+          <div className="rounded-lg border border-[#2A2723] bg-[#181715] p-5 shadow-sm">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div>
                 <div className="flex items-center gap-2">
@@ -285,7 +286,7 @@ export function FinanceView({ data, onRefresh }: FinanceViewProps) {
 
           {/* 4. Category Breakdown Chips */}
           {data.categoryBreakdown.length > 0 && (
-            <div className="rounded-xl border border-[#2A2723] bg-[#181715] p-5">
+            <div className="rounded-lg border border-[#2A2723] bg-[#181715] p-5">
               <div className="flex items-center gap-2 mb-3">
                 <PieChart className="h-4 w-4 text-[#D99B43]" />
                 <h4 className="text-xs font-semibold text-[#8E867B] uppercase tracking-wider font-mono">
@@ -314,7 +315,7 @@ export function FinanceView({ data, onRefresh }: FinanceViewProps) {
           )}
 
           {/* 5. Transactions Log & Search Stream */}
-          <div className="rounded-xl border border-[#2A2723] bg-[#181715] p-5 shadow-sm">
+          <div className="rounded-lg border border-[#2A2723] bg-[#181715] p-5 shadow-sm">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[#2A2723]">
               <div className="flex items-center gap-2.5">
                 <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#22201D] text-[#DDD6C9] border border-[#2A2723]">
@@ -432,13 +433,20 @@ export function FinanceView({ data, onRefresh }: FinanceViewProps) {
                     </div>
 
                     <div className="flex items-center gap-3">
-                      <span
-                        className={`font-mono text-sm font-bold ${
-                          tx.type === "income" ? "text-[#7EA35A]" : "text-[#F5F2EB]"
-                        }`}
-                      >
-                        {tx.type === "income" ? "+" : "-"}${tx.amount.toLocaleString("es-MX", { minimumFractionDigits: 2 })}
-                      </span>
+                      <div className="flex flex-col items-end">
+                        <span
+                          className={`font-mono text-sm font-bold ${
+                            tx.type === "income" ? "text-[#7EA35A]" : "text-[#F5F2EB]"
+                          }`}
+                        >
+                          {tx.type === "income" ? "+" : "-"}${tx.amount.toLocaleString("es-MX", { minimumFractionDigits: 2 })}
+                        </span>
+                        {tx.type === "expense" && (
+                          <span className="text-[10px] font-mono text-[#D99B43]/80">
+                            ~{calculateWorkTimeForExpense(tx.amount).formattedTime}
+                          </span>
+                        )}
+                      </div>
 
                       <button
                         type="button"

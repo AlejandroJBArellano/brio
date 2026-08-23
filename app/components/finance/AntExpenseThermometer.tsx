@@ -13,7 +13,7 @@ export function AntExpenseThermometer({
   spentToday,
   dailyLimit,
   spentThisMonth,
-  onOpenNewTransaction,
+  onOpenNewTransaction: _onOpenNewTransaction,
 }: AntExpenseThermometerProps) {
   const percentUsed = Math.min(100, Math.round((spentToday / (dailyLimit || 1)) * 100));
   const remaining = Math.max(0, dailyLimit - spentToday);

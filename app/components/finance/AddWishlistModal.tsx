@@ -2,6 +2,8 @@
 
 import { createWishlistItemAction } from "@/app/actions/wishlist";
 import { WishlistPriority } from "@/lib/types";
+import { soundFx } from "@/lib/soundFx";
+import { calculateWorkTimeForExpense } from "@/lib/utils";
 import {
   Clock,
   Plus,
@@ -66,6 +68,7 @@ export function AddWishlistModal({
       });
 
       if (res.success) {
+        soundFx.click();
         if (onSuccess) onSuccess();
         onClose();
         // Reset
@@ -145,6 +148,15 @@ export function AddWishlistModal({
               />
             </div>
           </div>
+
+          {parseFloat(priceEstimated) > 0 && (
+            <div className="flex items-center gap-2 rounded-lg border border-[#3D3425] bg-[#1E1912] px-3 py-2 text-[11px] text-[#D99B43] font-sans animate-in fade-in duration-150">
+              <Clock className="h-3.5 w-3.5 shrink-0 text-[#D99B43]" />
+              <span>
+                Costo en tiempo de vida: <strong className="font-mono text-[#F5F2EB]">{calculateWorkTimeForExpense(parseFloat(priceEstimated)).formattedTime}</strong>
+              </span>
+            </div>
+          )}
 
           {/* Category & Priority */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">

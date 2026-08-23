@@ -104,3 +104,58 @@ export function calculateHabiticaToNextLevel(stats: {
   const rounded = Math.round(raw / 10) * 10;
   return Math.max(rounded, Math.round(stats.exp || 0));
 }
+
+/**
+ * Calculates how much work time (life energy) an expense represents.
+ * @param amountInMxn Amount of the expense in MXN
+ * @param monthlyIncome Monthly income in MXN (default: 25,000 MXN)
+ * @param workHoursPerMonth Hours worked per month (default: 160 hrs)
+ */
+export function calculateWorkTimeForExpense(
+  amountInMxn: number,
+  monthlyIncome: number = 25000,
+  workHoursPerMonth: number = 160
+): {
+  hourlyRate: number;
+  totalHours: number;
+  formattedTime: string;
+} {
+  const safeIncome = Math.max(1000, monthlyIncome || 25000);
+  const hourlyRate = safeIncome / Math.max(1, workHoursPerMonth);
+  const totalHours = amountInMxn / hourlyRate;
+
+  if (totalHours < 1 / 60) {
+    return {
+      hourlyRate,
+      totalHours,
+      formattedTime: "< 1 min de trabajo",
+    };
+  }
+
+  if (totalHours < 1) {
+    const mins = Math.round(totalHours * 60);
+    return {
+      hourlyRate,
+      totalHours,
+      formattedTime: `${mins} min${mins === 1 ? "" : "s"} de trabajo`,
+    };
+  }
+
+  if (totalHours < 8) {
+    const hours = Math.floor(totalHours);
+    const mins = Math.round((totalHours - hours) * 60);
+    return {
+      hourlyRate,
+      totalHours,
+      formattedTime: mins > 0 ? `${hours}h ${mins}m de trabajo` : `${hours}h de trabajo`,
+    };
+  }
+
+  const days = (totalHours / 8).toFixed(1);
+  return {
+    hourlyRate,
+    totalHours,
+    formattedTime: `${days} días de trabajo (~${Math.round(totalHours)}h)`,
+  };
+}
+
