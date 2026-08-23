@@ -444,6 +444,49 @@ export interface HevyStats {
   lastSyncedAt?: string;
 }
 
+export type MuscleGroupId =
+  | "chest"
+  | "shoulders"
+  | "upper_back"
+  | "lats"
+  | "biceps"
+  | "triceps"
+  | "forearms"
+  | "abs"
+  | "quads"
+  | "hamstrings"
+  | "glutes"
+  | "calves";
+
+export type MuscleRecoveryState = "exhausted" | "recovering" | "recovered" | "rested";
+
+export interface MuscleRecoveryItem {
+  id: MuscleGroupId;
+  name: string;
+  nameEn: string;
+  category: "upper_push" | "upper_pull" | "core" | "lower";
+  recoveryPercent: number; // 0 to 100
+  state: MuscleRecoveryState;
+  lastTrainedAt?: string;
+  hoursSinceLastTrained?: number;
+  hoursToFullRecovery: number;
+  totalSetsLast7Days: number;
+  totalVolumeLast7Days: number;
+  lastWorkoutTitle?: string;
+  recentExercises: string[];
+  recommendation: string;
+}
+
+export interface MuscleRecoverySummary {
+  overallRecoveryPercent: number;
+  readyToTrainCount: number;
+  recoveringCount: number;
+  exhaustedCount: number;
+  muscles: Record<MuscleGroupId, MuscleRecoveryItem>;
+  suggestedFocusToday: string[];
+}
+
+
 export interface HealthDashboardData {
   todayHealth: HealthLog;
   waterPercent: number;

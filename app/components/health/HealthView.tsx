@@ -34,6 +34,8 @@ import { ManageSupplementsModal } from "./ManageSupplementsModal";
 import { NutritionView } from "./nutrition/NutritionView";
 import { SmartFitModal } from "./SmartFitModal";
 
+import { MuscleRecoveryWidget } from "./MuscleRecoveryWidget";
+
 interface HealthViewProps {
   data: HealthDashboardData;
   onRefresh?: () => void;
@@ -49,7 +51,7 @@ const WORKOUT_TYPES: { id: WorkoutType; label: string; icon: string }[] = [
 
 export function HealthView({ data, onRefresh }: HealthViewProps) {
   const [activeHealthTab, setActiveHealthTab] = useState<
-    "overview" | "hormonal" | "nutrition" | "body_composition" | "hevy" | "biomarkers"
+    "overview" | "hormonal" | "nutrition" | "body_composition" | "hevy" | "recovery" | "biomarkers"
   >("overview");
   const [workoutNotes, _setWorkoutNotes] = useState("");
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
@@ -149,6 +151,19 @@ export function HealthView({ data, onRefresh }: HealthViewProps) {
 
           <button
             type="button"
+            onClick={() => setActiveHealthTab("recovery")}
+            className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-md text-xs font-semibold transition-all cursor-pointer ${
+              activeHealthTab === "recovery"
+                ? "bg-[#D99B43] text-[#121110] font-bold shadow-xs"
+                : "text-[#8E867B] hover:text-[#DDD6C9] hover:bg-[#22201D]"
+            }`}
+          >
+            <Activity className="h-3.5 w-3.5" />
+            <span>🧬 Recuperación Muscular</span>
+          </button>
+
+          <button
+            type="button"
             onClick={() => setActiveHealthTab("body_composition")}
             className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-md text-xs font-semibold transition-all cursor-pointer ${
               activeHealthTab === "body_composition"
@@ -230,8 +245,15 @@ export function HealthView({ data, onRefresh }: HealthViewProps) {
         </div>
       )}
 
+      {activeHealthTab === "recovery" && (
+        <div className="space-y-6 animate-in fade-in duration-200">
+          <MuscleRecoveryWidget recentWorkouts={data.recentHevyWorkouts} />
+        </div>
+      )}
+
       {activeHealthTab === "hevy" && (
         <div className="space-y-6 animate-in fade-in duration-200">
+          <MuscleRecoveryWidget recentWorkouts={data.recentHevyWorkouts} />
           <HevyWidget
             recentWorkouts={data.recentHevyWorkouts}
             stats={data.hevyStats}
