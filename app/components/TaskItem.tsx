@@ -2,6 +2,7 @@
 
 import { toggleTaskAction } from "@/app/actions/tasks";
 import { HabiticaTag, HabiticaTask } from "@/lib/types";
+import { soundFx } from "@/lib/soundFx";
 import { getTaskValueColor } from "@/lib/utils";
 import {
   Check,
@@ -60,6 +61,12 @@ export function TaskItem({
     e.stopPropagation();
     if (isPending) return;
 
+    if (direction === "up" && !optimisticState.completed) {
+      soundFx.taskComplete();
+    } else {
+      soundFx.click();
+    }
+
     startTransition(async () => {
       setOptimisticState(direction);
       await toggleTaskAction(task.id, direction);
@@ -73,10 +80,10 @@ export function TaskItem({
   return (
     <div
       onClick={onSelect}
-      className={`group relative flex items-center justify-between rounded-xl border p-3.5 sm:p-4 transition-all cursor-pointer select-none ${
+      className={`group relative flex items-center justify-between rounded-lg border p-3 sm:p-3.5 transition-all cursor-pointer select-none ${
         isSelected
-          ? "border-[#D99B43]/80 bg-[#1F1D1A] shadow-md ring-1 ring-[#D99B43]/40"
-          : "border-[#2A2723] bg-[#181715] hover:border-[#38332D] hover:bg-[#1D1B18]"
+          ? "border-[#D99B43] bg-[#201E1A]"
+          : "border-[#2A2723] bg-[#181715] hover:border-[#38332D] hover:bg-[#1C1A17]"
       } ${optimisticState.completed ? "opacity-45" : "opacity-100"}`}
     >
       {/* Left Column: Checkbox / Counter + Text & Meta */}

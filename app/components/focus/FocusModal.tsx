@@ -6,6 +6,7 @@ import {
   ambientAudio,
   AmbientSoundType,
 } from "@/lib/audio";
+import { soundFx } from "@/lib/soundFx";
 import { getHormonalStatus } from "@/lib/hormonal";
 import { HabiticaTask } from "@/lib/types";
 import {
@@ -128,7 +129,17 @@ export function FocusModal({
   // YouTube state
   const [customYouTubeTracks, setCustomYouTubeTracks] = useState<
     YouTubeFocusTrack[]
-  >([]);
+  >(() => {
+    if (typeof window !== "undefined") {
+      try {
+        const saved = localStorage.getItem(STORAGE_CUSTOM_YT_KEY);
+        if (saved) return JSON.parse(saved) as YouTubeFocusTrack[];
+      } catch (err) {
+        console.error("Failed to load custom YouTube focus tracks", err);
+      }
+    }
+    return [];
+  });
   const [selectedYouTubeId, setSelectedYouTubeId] = useState<string>(
     DEFAULT_YOUTUBE_TRACKS[0].id
   );
@@ -139,21 +150,7 @@ export function FocusModal({
   const [isYtVideoExpanded, setIsYtVideoExpanded] = useState(true);
 
   const [isCompleted, setIsCompleted] = useState(false);
-  const [isPending, startTransition] = useTransition();
-
-  // Load custom YouTube tracks from localStorage
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      try {
-        const saved = localStorage.getItem(STORAGE_CUSTOM_YT_KEY);
-        if (saved) {
-          setCustomYouTubeTracks(JSON.parse(saved));
-        }
-      } catch (err) {
-        console.error("Failed to load custom YouTube focus tracks", err);
-      }
-    }
-  }, []);
+  const [_isPending, startTransition] = useTransition();
 
   const saveCustomTracks = (tracks: YouTubeFocusTrack[]) => {
     setCustomYouTubeTracks(tracks);
@@ -207,6 +204,7 @@ export function FocusModal({
           setIsCompleted(true);
           ambientAudio.stop();
           setIsSynthPlaying(false);
+          soundFx.focusComplete();
 
           // Award Habitica XP/GP upon completing deep work
           startTransition(async () => {
@@ -248,6 +246,7 @@ export function FocusModal({
   };
 
   const handleStart = () => {
+    soundFx.focusStart();
     setIsActive(true);
     setIsCompleted(false);
     if (audioSource === "synth" && currentSound !== "none") {
