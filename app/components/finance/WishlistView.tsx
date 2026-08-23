@@ -329,13 +329,14 @@ export function WishlistView({ data, onRefresh }: WishlistViewProps) {
                       type="button"
                       onClick={() => handlePurchase(item)}
                       disabled={isPending}
-                      className={`flex-1 py-1.5 rounded-md font-bold text-xs transition-all cursor-pointer ${
+                      className={`flex-1 py-1.5 rounded-md font-bold text-xs transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
                         isReady
                           ? "bg-[#7EA35A] text-[#121110] hover:bg-[#8FBA66]"
                           : "bg-[#22201D] text-[#DDD6C9] hover:bg-[#2E2B27] border border-[#2A2723]"
                       }`}
                     >
-                      Comprar 🛍️
+                      <ShoppingBag className="size-3.5" />
+                      <span>Comprar</span>
                     </button>
                   </div>
                 )}

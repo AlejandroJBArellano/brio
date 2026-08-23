@@ -228,7 +228,7 @@ export function TransactionModal({
               >
                 {effectiveCategories.map((cat) => (
                   <option key={cat.id} value={cat.id} className="bg-[#181715] text-[#F5F2EB]">
-                    {cat.icon || "🏷️"} {cat.name}
+                    #{cat.id} — {cat.name}
                   </option>
                 ))}
               </select>
@@ -257,7 +257,7 @@ export function TransactionModal({
               >
                 {effectiveAccounts.map((acc) => (
                   <option key={acc.id} value={acc.id} className="bg-[#181715] text-[#F5F2EB]">
-                    {acc.icon || "💳"} {acc.name}
+                    {acc.name} (@{acc.id})
                   </option>
                 ))}
               </select>

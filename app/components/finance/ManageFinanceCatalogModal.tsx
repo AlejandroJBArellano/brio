@@ -8,18 +8,24 @@ import {
   updateFinanceAccountAction,
   updateFinanceCategoryAction,
 } from "@/app/actions/finance";
+import {
+  FinanceIcon,
+  LUCIDE_ACCOUNT_ICONS,
+  LUCIDE_CATEGORY_ICONS,
+} from "@/app/components/finance/FinanceIcon";
 import { FinanceAccount, FinanceCategory } from "@/lib/types";
 import {
   AlertCircle,
   Check,
+  Coffee,
   CreditCard,
   Edit2,
+  Home,
   Layers,
   Plus,
   Settings,
   Tag,
   Trash2,
-  Wallet,
   X,
 } from "lucide-react";
 import { useState, useTransition } from "react";
@@ -32,18 +38,12 @@ interface ManageFinanceCatalogModalProps {
   onSuccess?: () => void;
 }
 
-const PRESET_ICONS = [
-  "🍔", "☕", "🚗", "🏠", "💻", "💊", "🛍️", "💰",
-  "🐾", "✈️", "📚", "🏋️", "🎮", "⚡", "🍿", "🎁",
-  "👶", "🧹", "🎨", "🛠️", "🩺", "🎸", "🍣", "📱"
-];
-
 const ACCOUNT_TYPES = [
-  { id: "credit", label: "Tarjeta de Crédito", icon: "💳" },
-  { id: "debit", label: "Tarjeta de Débito", icon: "🏦" },
-  { id: "cash", label: "Efectivo", icon: "💵" },
-  { id: "bank", label: "Cuenta Bancaria / Ahorro", icon: "🏢" },
-  { id: "other", label: "Otra / Billetera Digital", icon: "💼" },
+  { id: "credit", label: "Tarjeta de Crédito", defaultIcon: "credit-card" },
+  { id: "debit", label: "Tarjeta de Débito", defaultIcon: "landmark" },
+  { id: "cash", label: "Efectivo", defaultIcon: "banknote" },
+  { id: "bank", label: "Cuenta Bancaria / Ahorro", defaultIcon: "building-2" },
+  { id: "other", label: "Otra / Billetera Digital", defaultIcon: "wallet" },
 ];
 
 export function ManageFinanceCatalogModal({
@@ -62,13 +62,13 @@ export function ManageFinanceCatalogModal({
   const [accountName, setAccountName] = useState("");
   const [accountId, setAccountId] = useState("");
   const [accountType, setAccountType] = useState("credit");
-  const [accountIcon, setAccountIcon] = useState("💳");
+  const [accountIcon, setAccountIcon] = useState("credit-card");
 
   // Form states for Categories
   const [editingCategoryId, setEditingCategoryId] = useState<string | null>(null);
   const [categoryName, setCategoryName] = useState("");
   const [categoryId, setCategoryId] = useState("");
-  const [categoryIcon, setCategoryIcon] = useState("🏷️");
+  const [categoryIcon, setCategoryIcon] = useState("tag");
   const [categoryIsAnt, setCategoryIsAnt] = useState(false);
   const [categoryIsFixed, setCategoryIsFixed] = useState(false);
 
@@ -79,7 +79,7 @@ export function ManageFinanceCatalogModal({
     setAccountName("");
     setAccountId("");
     setAccountType("credit");
-    setAccountIcon("💳");
+    setAccountIcon("credit-card");
     setError(null);
   };
 
@@ -87,7 +87,7 @@ export function ManageFinanceCatalogModal({
     setEditingCategoryId(null);
     setCategoryName("");
     setCategoryId("");
-    setCategoryIcon("🏷️");
+    setCategoryIcon("tag");
     setCategoryIsAnt(false);
     setCategoryIsFixed(false);
     setError(null);
@@ -98,7 +98,7 @@ export function ManageFinanceCatalogModal({
     setAccountName(acc.name);
     setAccountId(acc.id);
     setAccountType(acc.type || "credit");
-    setAccountIcon(acc.icon || "💳");
+    setAccountIcon(acc.icon || "credit-card");
     setError(null);
   };
 
@@ -106,7 +106,7 @@ export function ManageFinanceCatalogModal({
     setEditingCategoryId(cat.id);
     setCategoryName(cat.name);
     setCategoryId(cat.id);
-    setCategoryIcon(cat.icon || "🏷️");
+    setCategoryIcon(cat.icon || "tag");
     setCategoryIsAnt(Boolean(cat.isAntDefault));
     setCategoryIsFixed(Boolean(cat.isFixed));
     setError(null);
@@ -370,16 +370,16 @@ export function ManageFinanceCatalogModal({
                       <select
                         value={accountType}
                         onChange={(e) => {
-                          setAccountType(e.target.value);
-                          if (e.target.value === "cash") setAccountIcon("💵");
-                          else if (e.target.value === "debit" || e.target.value === "bank") setAccountIcon("🏦");
-                          else setAccountIcon("💳");
+                          const selectedType = e.target.value;
+                          setAccountType(selectedType);
+                          const matching = ACCOUNT_TYPES.find((t) => t.id === selectedType);
+                          if (matching) setAccountIcon(matching.defaultIcon);
                         }}
                         className="w-full rounded-lg border border-[#2A2723] bg-[#181715] px-3 py-2 text-xs text-[#F5F2EB] focus:border-[#D99B43] focus:outline-none"
                       >
                         {ACCOUNT_TYPES.map((t) => (
                           <option key={t.id} value={t.id} className="bg-[#181715] text-[#F5F2EB]">
-                            {t.icon} {t.label}
+                            {t.label}
                           </option>
                         ))}
                       </select>
@@ -387,28 +387,32 @@ export function ManageFinanceCatalogModal({
 
                     <div>
                       <label className="block text-[11px] font-sans font-medium text-[#DDD6C9] mb-1">
-                        Ícono Emoji
+                        Ícono (Lucide)
                       </label>
                       <div className="flex items-center gap-2">
-                        <input
-                          type="text"
-                          value={accountIcon}
-                          onChange={(e) => setAccountIcon(e.target.value)}
-                          className="w-14 text-center rounded-lg border border-[#2A2723] bg-[#181715] py-1.5 text-base text-[#F5F2EB] focus:border-[#D99B43] focus:outline-none"
-                        />
-                        <div className="flex items-center gap-1.5">
-                          {["💳", "🏦", "💵", "🏢", "💼"].map((ic) => (
-                            <button
-                              key={ic}
-                              type="button"
-                              onClick={() => setAccountIcon(ic)}
-                              className={`p-1.5 rounded-md text-sm transition-transform hover:scale-110 cursor-pointer ${
-                                accountIcon === ic ? "bg-[#221D16] border border-[#D99B43]/40 scale-110" : "bg-[#181715] border border-[#2A2723]"
-                              }`}
-                            >
-                              {ic}
-                            </button>
-                          ))}
+                        <div className="flex size-9 shrink-0 items-center justify-center rounded-lg border border-[#D99B43]/40 bg-[#221D16] text-[#D99B43]">
+                          <FinanceIcon icon={accountIcon} className="h-4 w-4" />
+                        </div>
+                        <div className="flex flex-wrap items-center gap-1">
+                          {LUCIDE_ACCOUNT_ICONS.map((ic) => {
+                            const IconComponent = ic.icon;
+                            const isSelected = accountIcon === ic.id;
+                            return (
+                              <button
+                                key={ic.id}
+                                type="button"
+                                onClick={() => setAccountIcon(ic.id)}
+                                title={ic.label}
+                                className={`flex size-7.5 items-center justify-center rounded-md transition-all cursor-pointer ${
+                                  isSelected
+                                    ? "bg-[#221D16] border border-[#D99B43] text-[#D99B43] scale-105 shadow-xs"
+                                    : "bg-[#181715] border border-[#2A2723] text-[#8E867B] hover:text-[#F5F2EB] hover:border-[#38332D]"
+                                }`}
+                              >
+                                <IconComponent className="h-3.5 w-3.5" />
+                              </button>
+                            );
+                          })}
                         </div>
                       </div>
                     </div>
@@ -440,7 +444,9 @@ export function ManageFinanceCatalogModal({
                       className="flex items-center justify-between p-3 rounded-lg border border-[#2A2723] bg-[#121110] hover:border-[#38332D] transition-all group"
                     >
                       <div className="flex items-center gap-3">
-                        <span className="text-xl shrink-0">{acc.icon || "💳"}</span>
+                        <div className="flex size-8 shrink-0 items-center justify-center rounded-lg border border-[#2A2723] bg-[#181715] text-[#D99B43]">
+                          <FinanceIcon icon={acc.icon || "credit-card"} className="h-4 w-4" />
+                        </div>
                         <div>
                           <div className="text-xs font-bold text-[#F5F2EB] flex items-center gap-1.5">
                             <span>{acc.name}</span>
@@ -557,27 +563,33 @@ export function ManageFinanceCatalogModal({
                   {/* Icon presets */}
                   <div>
                     <label className="block text-[11px] font-sans font-medium text-[#DDD6C9] mb-1">
-                      Ícono Emoji
+                      Ícono (Lucide)
                     </label>
-                    <div className="flex flex-wrap items-center gap-1.5 p-2 rounded-lg bg-[#181715] border border-[#2A2723]">
-                      <input
-                        type="text"
-                        value={categoryIcon}
-                        onChange={(e) => setCategoryIcon(e.target.value)}
-                        className="w-12 text-center rounded-md border border-[#2A2723] bg-[#121110] py-1 text-base text-[#F5F2EB] focus:outline-none mr-2"
-                      />
-                      {PRESET_ICONS.map((ic) => (
-                        <button
-                          key={ic}
-                          type="button"
-                          onClick={() => setCategoryIcon(ic)}
-                          className={`p-1.5 rounded-md text-sm transition-transform hover:scale-125 cursor-pointer ${
-                            categoryIcon === ic ? "bg-[#221D16] border border-[#D99B43]/40 scale-110" : "hover:bg-[#22201D]"
-                          }`}
-                        >
-                          {ic}
-                        </button>
-                      ))}
+                    <div className="flex items-center gap-2">
+                      <div className="flex size-9 shrink-0 items-center justify-center rounded-lg border border-[#D99B43]/40 bg-[#221D16] text-[#D99B43]">
+                        <FinanceIcon icon={categoryIcon} className="h-4 w-4" />
+                      </div>
+                      <div className="flex flex-wrap items-center gap-1 p-2 rounded-lg bg-[#181715] border border-[#2A2723] max-h-32 overflow-y-auto">
+                        {LUCIDE_CATEGORY_ICONS.map((ic) => {
+                          const IconComponent = ic.icon;
+                          const isSelected = categoryIcon === ic.id;
+                          return (
+                            <button
+                              key={ic.id}
+                              type="button"
+                              onClick={() => setCategoryIcon(ic.id)}
+                              title={ic.label}
+                              className={`flex size-7.5 items-center justify-center rounded-md transition-all cursor-pointer ${
+                                isSelected
+                                  ? "bg-[#221D16] border border-[#D99B43] text-[#D99B43] scale-105 shadow-xs"
+                                  : "bg-[#121110] border border-[#2A2723] text-[#8E867B] hover:text-[#F5F2EB] hover:border-[#38332D]"
+                              }`}
+                            >
+                              <IconComponent className="h-3.5 w-3.5" />
+                            </button>
+                          );
+                        })}
+                      </div>
                     </div>
                   </div>
 
@@ -591,8 +603,11 @@ export function ManageFinanceCatalogModal({
                         className="h-4 w-4 rounded border-[#2A2723] bg-[#121110] text-[#D99B43] focus:ring-[#D99B43]/20 cursor-pointer"
                       />
                       <div>
-                        <div className="text-xs font-semibold text-[#D99B43]">Gasto Hormiga 🐜</div>
-                        <div className="text-[10px] text-[#8E867B]">Marca gastos en esta categoría como antojos</div>
+                        <div className="text-xs font-semibold text-[#D99B43] flex items-center gap-1.5">
+                          <Coffee className="h-3.5 w-3.5" />
+                          <span>Gasto Hormiga (Antojo)</span>
+                        </div>
+                        <div className="text-[10px] text-[#8E867B]">Descuenta del límite diario de gustitos</div>
                       </div>
                     </label>
 
@@ -604,7 +619,10 @@ export function ManageFinanceCatalogModal({
                         className="h-4 w-4 rounded border-[#2A2723] bg-[#121110] text-[#4EAB9E] focus:ring-[#4EAB9E]/20 cursor-pointer"
                       />
                       <div>
-                        <div className="text-xs font-semibold text-[#4EAB9E]">Gasto Fijo Mensual 🏠</div>
+                        <div className="text-xs font-semibold text-[#4EAB9E] flex items-center gap-1.5">
+                          <Home className="h-3.5 w-3.5" />
+                          <span>Gasto Fijo Mensual</span>
+                        </div>
                         <div className="text-[10px] text-[#8E867B]">Se contabiliza en el presupuesto fijo del mes</div>
                       </div>
                     </label>
@@ -636,7 +654,9 @@ export function ManageFinanceCatalogModal({
                       className="flex items-center justify-between p-3 rounded-lg border border-[#2A2723] bg-[#121110] hover:border-[#38332D] transition-all group"
                     >
                       <div className="flex items-center gap-3">
-                        <span className="text-xl shrink-0">{cat.icon || "🏷️"}</span>
+                        <div className="flex size-8 shrink-0 items-center justify-center rounded-lg border border-[#2A2723] bg-[#181715] text-[#D99B43]">
+                          <FinanceIcon icon={cat.icon || "tag"} className="h-4 w-4" />
+                        </div>
                         <div>
                           <div className="text-xs font-bold text-[#F5F2EB] flex items-center gap-1.5">
                             <span>{cat.name}</span>
@@ -644,13 +664,15 @@ export function ManageFinanceCatalogModal({
                           <div className="flex items-center gap-1.5 text-[10px] text-[#8E867B] mt-0.5">
                             <span className="font-mono text-[#D99B43]">#{cat.id}</span>
                             {cat.isAntDefault && (
-                              <span className="rounded bg-[#221D16] border border-[#D99B43]/30 text-[#D99B43] px-1.5 py-0.2 text-[9px] font-bold">
-                                Hormiga 🐜
+                              <span className="rounded bg-[#221D16] border border-[#D99B43]/30 text-[#D99B43] px-1.5 py-0.2 text-[9px] font-bold flex items-center gap-1">
+                                <Coffee className="size-2.5" />
+                                <span>Hormiga</span>
                               </span>
                             )}
                             {cat.isFixed && (
-                              <span className="rounded bg-[#162121] border border-[#4EAB9E]/30 text-[#4EAB9E] px-1.5 py-0.2 text-[9px] font-bold">
-                                Fijo 🏠
+                              <span className="rounded bg-[#162121] border border-[#4EAB9E]/30 text-[#4EAB9E] px-1.5 py-0.2 text-[9px] font-bold flex items-center gap-1">
+                                <Home className="size-2.5" />
+                                <span>Fijo</span>
                               </span>
                             )}
                           </div>

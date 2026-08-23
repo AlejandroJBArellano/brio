@@ -3,9 +3,12 @@
 import { deleteTransactionAction } from "@/app/actions/finance";
 import { FinanceDashboardData } from "@/lib/types";
 import {
+  AlertCircle,
   ArrowDownRight,
   ArrowUpRight,
   Calendar,
+  CheckCircle2,
+  Coffee,
   PieChart,
   Plus,
   Search,
@@ -188,9 +191,13 @@ export function FinanceView({ data, onRefresh }: FinanceViewProps) {
               </div>
               <div className="mt-1 text-[11px] font-mono text-[#8E867B] flex items-center gap-1">
                 {isHealthyBalance ? (
-                  <span className="text-[#7EA35A] font-semibold">✓ Flujo positivo</span>
+                  <span className="text-[#7EA35A] font-semibold flex items-center gap-1">
+                    <CheckCircle2 className="size-3" /> Flujo positivo
+                  </span>
                 ) : (
-                  <span className="text-[#E05D52] font-semibold">⚠️ Déficit del mes</span>
+                  <span className="text-[#E05D52] font-semibold flex items-center gap-1">
+                    <AlertCircle className="size-3" /> Déficit del mes
+                  </span>
                 )}
               </div>
             </div>
@@ -368,11 +375,12 @@ export function FinanceView({ data, onRefresh }: FinanceViewProps) {
                   <button
                     type="button"
                     onClick={() => setActiveFilter("ant")}
-                    className={`px-2.5 py-1 rounded-md text-[11px] font-semibold transition-all cursor-pointer ${
+                    className={`px-2.5 py-1 rounded-md text-[11px] font-semibold transition-all cursor-pointer flex items-center gap-1 ${
                       activeFilter === "ant" ? "bg-[#221D16] text-[#D99B43] border border-[#D99B43]/40" : "text-[#8E867B] hover:text-[#DDD6C9]"
                     }`}
                   >
-                    Hormiga ☕
+                    <Coffee className="size-3 text-[#D99B43]" />
+                    <span>Hormiga</span>
                   </button>
                 </div>
               </div>
@@ -407,8 +415,9 @@ export function FinanceView({ data, onRefresh }: FinanceViewProps) {
                             {tx.notes || (tx.type === "income" ? "Ingreso" : "Gasto")}
                           </span>
                           {tx.isAntExpense && (
-                            <span className="rounded bg-[#221D16] border border-[#D99B43]/30 text-[#D99B43] text-[10px] px-1.5 py-0.2 font-mono font-medium">
-                              Hormiga ☕
+                            <span className="rounded bg-[#221D16] border border-[#D99B43]/30 text-[#D99B43] text-[10px] px-1.5 py-0.2 font-mono font-medium flex items-center gap-1">
+                              <Coffee className="size-2.5 text-[#D99B43]" />
+                              <span>Hormiga</span>
                             </span>
                           )}
                         </div>
