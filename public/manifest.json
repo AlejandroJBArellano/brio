@@ -4,8 +4,8 @@
   "description": "Minimalist, zero-latency personal command center and life operating system.",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#090a0f",
-  "theme_color": "#090a0f",
+  "background_color": "#121110",
+  "theme_color": "#121110",
   "orientation": "portrait",
   "icons": [
     {

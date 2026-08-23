@@ -1,89 +1,36 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
-  <defs>
-    <!-- Premium Dark Background Radial Gradient -->
-    <radialGradient id="bgGrad" cx="40%" cy="35%" r="70%">
-      <stop offset="0%" stop-color="#181b2a" />
-      <stop offset="45%" stop-color="#0d0f18" />
-      <stop offset="80%" stop-color="#07080d" />
-      <stop offset="100%" stop-color="#040407" />
-    </radialGradient>
+  <!-- Background Canvas -->
+  <rect width="512" height="512" rx="96" fill="#121110" />
+  <rect x="8" y="8" width="496" height="496" rx="88" fill="none" stroke="#2A2723" stroke-width="4" />
+  <rect x="24" y="24" width="464" height="464" rx="72" fill="none" stroke="#3D3425" stroke-width="2" stroke-opacity="0.6" />
 
-    <!-- Outer Circular Rim Gradient -->
-    <linearGradient id="borderGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#38bdf8" stop-opacity="0.9" />
-      <stop offset="30%" stop-color="#6366f1" stop-opacity="0.85" />
-      <stop offset="70%" stop-color="#a855f7" stop-opacity="0.75" />
-      <stop offset="100%" stop-color="#ec4899" stop-opacity="0.65" />
-    </linearGradient>
-
-    <!-- Electric Energy Bolt Gradient -->
-    <linearGradient id="boltGrad" x1="20%" y1="0%" x2="80%" y2="100%">
-      <stop offset="0%" stop-color="#38bdf8" />
-      <stop offset="25%" stop-color="#00d2ff" />
-      <stop offset="55%" stop-color="#6366f1" />
-      <stop offset="85%" stop-color="#a855f7" />
-      <stop offset="100%" stop-color="#ec4899" />
-    </linearGradient>
-
-    <!-- Inner Ambient Energy Core Glow -->
-    <radialGradient id="ambientGlow" cx="50%" cy="50%" r="50%">
-      <stop offset="0%" stop-color="#6366f1" stop-opacity="0.45" />
-      <stop offset="40%" stop-color="#38bdf8" stop-opacity="0.2" />
-      <stop offset="80%" stop-color="#a855f7" stop-opacity="0.05" />
-      <stop offset="100%" stop-color="#000000" stop-opacity="0" />
-    </radialGradient>
-
-    <!-- Secondary Cyan Highlight Glow -->
-    <radialGradient id="topLight" cx="35%" cy="20%" r="40%">
-      <stop offset="0%" stop-color="#38bdf8" stop-opacity="0.25" />
-      <stop offset="100%" stop-color="#38bdf8" stop-opacity="0" />
-    </radialGradient>
-
-    <!-- Multi-stage Neon Bloom Filter -->
-    <filter id="neonGlow" x="-30%" y="-30%" width="160%" height="160%">
-      <feGaussianBlur in="SourceGraphic" stdDeviation="12" result="blur1" />
-      <feGaussianBlur in="SourceGraphic" stdDeviation="24" result="blur2" />
-      <feMerge>
-        <feMergeNode in="blur2" />
-        <feMergeNode in="blur1" />
-        <feMergeNode in="SourceGraphic" />
-      </feMerge>
-    </filter>
-  </defs>
-
-  <!-- Round Circular Base -->
-  <circle cx="256" cy="256" r="248" fill="url(#bgGrad)" />
-
-  <!-- Top Rim Glass Lighting Accent -->
-  <circle cx="256" cy="256" r="248" fill="url(#topLight)" />
-
-  <!-- Outer Neon Gradient Ring -->
-  <circle cx="256" cy="256" r="244" fill="none" stroke="url(#borderGrad)" stroke-width="7" />
-
-  <!-- Subtle Inner Glass Bevel -->
-  <circle cx="256" cy="256" r="239" fill="none" stroke="#ffffff" stroke-width="1.5" stroke-opacity="0.15" />
-
-  <!-- Ambient Energy Core Field -->
-  <circle cx="256" cy="256" r="200" fill="url(#ambientGlow)" />
-
-  <!-- Geometric Brio Energy Bolt (⚡) -->
-  <g filter="url(#neonGlow)">
-    <!-- Main Angular Lightning Core -->
-    <path 
-      d="M280 64 L136 264 L244 264 L216 448 L376 232 L264 232 Z" 
-      fill="url(#boltGrad)" 
+  <!-- Monogram B (Architectural Serif + Momentum Spark) -->
+  <g id="monogram">
+    <!-- Main Vertical Pillar with Serifs -->
+    <path
+      d="M 120 100 L 210 100 L 190 136 L 168 136 L 168 376 L 194 376 L 214 412 L 106 412 L 126 376 L 148 376 L 148 136 L 120 136 Z"
+      fill="#F5F2EB"
     />
-    <!-- Specular Highlight Overlay for Sharp Definition -->
-    <path 
-      d="M276 80 L156 252 L248 252 L228 412 L356 244 L260 244 Z" 
-      fill="#ffffff" 
-      opacity="0.3" 
+
+    <!-- Upper Bow -->
+    <path
+      d="M 168 110 L 290 110 C 354 110, 390 144, 390 196 C 390 240, 356 268, 302 274 L 240 274 L 222 238 L 286 238 C 322 238, 344 224, 344 196 C 344 166, 320 148, 278 148 L 168 148 Z"
+      fill="#D99B43"
     />
-    <!-- Ultra-Fine Ridge Line -->
-    <path 
-      d="M272 96 L176 244 L252 244 L240 380 L336 254 L258 254 Z" 
-      fill="#ffffff" 
-      opacity="0.2" 
+
+    <!-- Lower Bow -->
+    <path
+      d="M 168 252 L 308 252 C 374 252, 416 288, 416 348 C 416 406, 368 412, 296 412 L 168 412 L 168 372 L 286 372 C 334 372, 368 362, 368 348 C 368 312, 334 292, 286 292 L 168 292 Z"
+      fill="#D99B43"
     />
+
+    <!-- Inlaid Precision Momentum Spark (⚡) -->
+    <path
+      d="M 300 180 L 360 180 L 250 330 L 290 330 L 210 450 L 254 290 L 220 290 Z"
+      fill="#F5F2EB"
+    />
+
+    <!-- Precision Focus Diamond -->
+    <polygon points="256,256 268,268 256,280 244,268" fill="#FFFDF7" />
   </g>
 </svg>
