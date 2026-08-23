@@ -1,7 +1,7 @@
 "use server";
 
 import { getDb } from "@/lib/db";
-import { getTodayDateStr, getWeekDateRange, toDateStr } from "@/lib/dateUtils";
+import { getWeekDateRange, toDateStr } from "@/lib/dateUtils";
 import {
   DEFAULT_NUTRITION_SETTINGS,
   MARIANA_MONT_PRESET_RECIPES,

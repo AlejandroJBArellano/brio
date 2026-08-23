@@ -25,7 +25,6 @@ import {
   Moon,
   RotateCw,
   Search,
-  ShieldCheck,
   Sparkles,
   Sun,
   Wallet,

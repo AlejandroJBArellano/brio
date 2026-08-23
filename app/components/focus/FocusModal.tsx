@@ -9,20 +9,17 @@ import {
 import { getHormonalStatus } from "@/lib/hormonal";
 import { HabiticaTask } from "@/lib/types";
 import {
-  ExternalLink,
   Headphones,
   Maximize2,
   Minimize2,
   Pause,
   Play,
   Plus,
-  Radio,
   RotateCcw,
   Sparkles,
   Trash2,
   Tv,
   Volume2,
-  VolumeX,
   X,
   Zap,
 } from "lucide-react";

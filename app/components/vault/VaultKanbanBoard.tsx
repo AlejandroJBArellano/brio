@@ -179,7 +179,7 @@ export function VaultKanbanBoard({
           return (
             <div
               key={col.id}
-              className="flex flex-col rounded-xl border border-[#2A2723] bg-[#181715] p-4 min-h-[420px]"
+              className="flex flex-col rounded-xl border border-[#2A2723] bg-[#181715] p-4 min-h-105"
             >
               {/* Column Header */}
               <div className="flex items-center justify-between pb-3 border-b border-[#2A2723] mb-3">
