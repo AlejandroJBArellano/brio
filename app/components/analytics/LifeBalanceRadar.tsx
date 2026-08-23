@@ -33,7 +33,7 @@ export function LifeBalanceRadar({ tagDistributions }: LifeBalanceRadarProps) {
                   className="h-2.5 w-2.5 rounded-full"
                   style={{ backgroundColor: pillar.color }}
                 />
-                <span className="font-semibold text-white capitalize">
+                <span className="font-semibold text-white">
                   #{pillar.tag}
                 </span>
                 <span className="text-neutral-500 font-mono text-[11px]">
@@ -60,7 +60,7 @@ export function LifeBalanceRadar({ tagDistributions }: LifeBalanceRadarProps) {
       </div>
 
       <div className="mt-5 rounded-xl border border-indigo-500/20 bg-indigo-500/5 p-3.5 text-xs text-indigo-300">
-        💡 <strong>Consejo de Equilibrio:</strong> Mantén tus pilares de <code className="font-mono text-emerald-300">#salud</code> y <code className="font-mono text-indigo-300">#deepwork</code> por encima del 20% para evitar el burnout y mantener alta tu salud de Habitica.
+        💡 <strong>Consejo de Equilibrio:</strong> Mantén tus pilares de <code className="font-mono text-purple-300">#Selfcare</code> y <code className="font-mono text-blue-300">#Productivity</code> en equilibrio frente a <code className="font-mono text-emerald-300">#Proficient</code> y <code className="font-mono text-cyan-300">#Estudio</code> para maximizar tu energía y evitar el burnout.
       </div>
     </div>
   );

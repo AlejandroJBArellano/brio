@@ -17,39 +17,45 @@ interface DailyActivityDbRow {
   expenses_count?: number | string;
 }
 
-const TAG_COLOR_MAP: Record<string, string> = {
-  health: "#10b981", // Emerald
-  salud: "#10b981",
-  deepwork: "#6366f1", // Indigo
-  foco: "#6366f1",
-  focus: "#6366f1",
-  work: "#3b82f6", // Blue
-  trabajo: "#3b82f6",
-  engineering: "#06b6d4", // Cyan
-  dev: "#06b6d4",
-  estudio: "#8b5cf6", // Purple
-  learning: "#8b5cf6",
-  finanzas: "#f59e0b", // Amber
-  money: "#f59e0b",
-  personal: "#ec4899", // Pink
-  rutina: "#14b8a6", // Teal
-  urgent: "#ef4444", // Red
-};
+const TAG_COLOR_KEYWORDS: { keyword: string; color: string }[] = [
+  { keyword: "proficient", color: "#10b981" }, // Emerald
+  { keyword: "estudio", color: "#06b6d4" }, // Cyan
+  { keyword: "selfcare", color: "#8b5cf6" }, // Purple
+  { keyword: "salud", color: "#8b5cf6" }, // Purple
+  { keyword: "health", color: "#8b5cf6" }, // Purple
+  { keyword: "metas", color: "#f59e0b" }, // Amber
+  { keyword: "personal", color: "#f59e0b" }, // Amber
+  { keyword: "productiv", color: "#3b82f6" }, // Blue
+  { keyword: "focus", color: "#3b82f6" }, // Blue
+  { keyword: "deepwork", color: "#3b82f6" }, // Blue
+  { keyword: "strata", color: "#6366f1" }, // Indigo
+  { keyword: "morning", color: "#f43f5e" }, // Rose
+  { keyword: "rutina", color: "#14b8a6" }, // Teal
+  { keyword: "arte", color: "#ec4899" }, // Pink
+  { keyword: "cleaning", color: "#14b8a6" }, // Teal
+  { keyword: "house", color: "#14b8a6" }, // Teal
+  { keyword: "inpulse", color: "#eab308" }, // Yellow
+  { keyword: "finanzas", color: "#f59e0b" }, // Amber
+];
 
 const COLOR_PALETTE = [
-  "#6366f1", // Indigo
   "#10b981", // Emerald
-  "#f59e0b", // Amber
-  "#ec4899", // Pink
-  "#8b5cf6", // Purple
   "#06b6d4", // Cyan
+  "#8b5cf6", // Purple
+  "#f59e0b", // Amber
   "#3b82f6", // Blue
+  "#6366f1", // Indigo
+  "#ec4899", // Pink
+  "#f43f5e", // Rose
   "#14b8a6", // Teal
+  "#eab308", // Yellow
 ];
 
 function getDeterministicColor(tag: string, index: number): string {
   const lower = tag.toLowerCase();
-  if (TAG_COLOR_MAP[lower]) return TAG_COLOR_MAP[lower];
+  for (const item of TAG_COLOR_KEYWORDS) {
+    if (lower.includes(item.keyword)) return item.color;
+  }
   return COLOR_PALETTE[index % COLOR_PALETTE.length];
 }
 
@@ -144,9 +150,9 @@ export async function fetchAnalyticsDataAction(): Promise<AnalyticsDashboardData
           // Resolve name from map, or if already a name use it
           const rawName = tagMap.get(tagId) || tagId;
 
-          // If still a raw UUID (unmapped), label as "general"
+          // If still a raw UUID (unmapped), label as "General"
           const isUuid = /^[0-9a-fA-F-]{20,}$/.test(rawName);
-          const tagName = isUuid ? "general" : rawName.toLowerCase();
+          const tagName = isUuid ? "General" : rawName.trim();
 
           tagCounts[tagName] = (tagCounts[tagName] || 0) + 1;
           totalTagWeights += 1;
