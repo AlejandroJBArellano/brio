@@ -14,16 +14,12 @@ import {
   HealthDashboardData,
   RitualLog,
 } from "@/lib/types";
-import { calculatePercentage } from "@/lib/utils";
 import {
-  Bell,
   Calendar,
   Check,
   CheckCircle2,
   Clock,
-  Coins,
   Droplet,
-  Heart,
   Pill,
   Plus,
   Sparkles,
@@ -35,30 +31,27 @@ import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState, useTransition } from "react";
 
 interface MobileQuickDashboardProps {
-  user: HabiticaUser;
+  user?: HabiticaUser;
   tasks: HabiticaTask[];
   healthData: HealthDashboardData;
   financeData: FinanceDashboardData;
   calendarSchedule: CalendarDaySchedule;
   todayRitual: RitualLog | null;
   onOpenBottomSheet: (tab?: "expense" | "task" | "water" | "weight") => void;
-  onOpenNotificationSettings: () => void;
+  onOpenNotificationSettings?: () => void;
   onOpenMorningRitual: () => void;
   onOpenEveningReview: () => void;
   onOpenManageSupplements: () => void;
 }
 
 export function MobileQuickDashboard({
-  user,
   tasks,
   healthData,
   financeData,
   calendarSchedule,
   todayRitual,
   onOpenBottomSheet,
-  onOpenNotificationSettings,
   onOpenMorningRitual,
-  onOpenEveningReview,
   onOpenManageSupplements,
 }: MobileQuickDashboardProps) {
   const router = useRouter();
@@ -68,11 +61,6 @@ export function MobileQuickDashboard({
   const currentHour = new Date().getHours();
   const defaultTiming = currentHour < 13 ? "Mañana" : "Tarde";
   const [activeSuppTiming, setActiveSuppTiming] = useState<"Mañana" | "Tarde" | "Todos">(defaultTiming);
-
-  // RPG User stats
-  const stats = user.stats;
-  const hpPercent = calculatePercentage(stats.hp, stats.maxHealth || 50);
-  const mpPercent = calculatePercentage(stats.mp, stats.maxMP || 100);
 
   // Health Data
   const todayHealth = healthData.todayHealth;
@@ -174,79 +162,7 @@ export function MobileQuickDashboard({
 
   return (
     <div className="space-y-4 pb-24 animate-in fade-in duration-300">
-      {/* 1. Header Compact RPG Bar */}
-      <div className="rounded-3xl border border-white/8 bg-neutral-900/80 p-4 backdrop-blur-xl shadow-xl space-y-3">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2.5">
-            <div className="flex size-9 items-center justify-center rounded-xl bg-linear-to-tr from-indigo-600 to-violet-600 font-bold text-white shadow-md text-xs">
-              ⚡
-            </div>
-            <div>
-              <div className="flex items-center gap-1.5">
-                <span className="text-sm font-bold text-white tracking-tight">
-                  {user.profile?.name || "Brio Commander"}
-                </span>
-                <span className="rounded-md bg-indigo-500/20 px-1.5 py-0.5 text-[10px] font-semibold text-indigo-300 border border-indigo-500/30 font-mono">
-                  Lv.{stats.lvl}
-                </span>
-              </div>
-              <p className="text-[11px] text-neutral-400">
-                {currentHour < 12 ? "🌅 Buenos días" : currentHour < 19 ? "☀️ Buenas tardes" : "🌙 Buenas noches"}
-              </p>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={onOpenNotificationSettings}
-              className="flex size-8 items-center justify-center rounded-xl bg-white/5 border border-white/8 text-neutral-400 hover:text-white transition-colors"
-              title="Notificaciones & Recordatorios"
-            >
-              <Bell className="size-4" />
-            </button>
-            <div className="flex items-center gap-1 px-2.5 py-1 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-300 text-xs font-semibold">
-              <Coins className="size-3.5 text-amber-400" />
-              <span>{Math.floor(stats.gp)}</span>
-            </div>
-          </div>
-        </div>
-
-        {/* Mini Gauges: HP & MP */}
-        <div className="grid grid-cols-2 gap-2 pt-1 border-t border-white/6 text-xs">
-          <div className="space-y-1">
-            <div className="flex justify-between text-[10px] font-semibold">
-              <span className="flex items-center gap-1 text-rose-400">
-                <Heart className="size-3" /> HP
-              </span>
-              <span className="text-neutral-400">{Math.round(stats.hp)}/{stats.maxHealth || 50}</span>
-            </div>
-            <div className="h-1.5 w-full rounded-full bg-neutral-950 overflow-hidden">
-              <div
-                className="h-full bg-linear-to-r from-rose-600 to-rose-400 transition-all"
-                style={{ width: `${hpPercent}%` }}
-              />
-            </div>
-          </div>
-
-          <div className="space-y-1">
-            <div className="flex justify-between text-[10px] font-semibold">
-              <span className="flex items-center gap-1 text-indigo-400">
-                <Zap className="size-3" /> MP
-              </span>
-              <span className="text-neutral-400">{Math.round(stats.mp)}/{stats.maxMP || 100}</span>
-            </div>
-            <div className="h-1.5 w-full rounded-full bg-neutral-950 overflow-hidden">
-              <div
-                className="h-full bg-linear-to-r from-indigo-600 to-indigo-400 transition-all"
-                style={{ width: `${mpPercent}%` }}
-              />
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* 2. Widget de Suplementos Inteligente por Horario */}
+      {/* 1. Widget de Suplementos Inteligente por Horario */}
       <div className="rounded-3xl border border-white/8 bg-neutral-900/80 p-4.5 backdrop-blur-xl shadow-xl space-y-3.5">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
