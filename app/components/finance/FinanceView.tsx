@@ -9,6 +9,7 @@ import {
   ArrowUpRight,
   Calendar,
   CheckCircle2,
+  Clock,
   Coffee,
   PieChart,
   Plus,
@@ -169,8 +170,9 @@ export function FinanceView({ data, onRefresh }: FinanceViewProps) {
               <div className="mt-2 text-2xl font-bold font-mono text-[#E05D52] tracking-tight">
                 -${data.totalExpensesThisMonth.toLocaleString("es-MX", { minimumFractionDigits: 2 })}
               </div>
-              <div className="mt-1 text-[11px] font-mono text-[#8E867B]">
-                Fijos: ${data.totalFixedExpensesThisMonth.toLocaleString()} • Variables: ${data.totalVariableExpensesThisMonth.toLocaleString()}
+              <div className="mt-1 text-[11px] font-mono text-[#D99B43] flex items-center gap-1">
+                <Clock className="h-3 w-3 shrink-0" />
+                <span>~{calculateWorkTimeForExpense(data.totalExpensesThisMonth).formattedTime}</span>
               </div>
             </div>
 
@@ -442,8 +444,9 @@ export function FinanceView({ data, onRefresh }: FinanceViewProps) {
                           {tx.type === "income" ? "+" : "-"}${tx.amount.toLocaleString("es-MX", { minimumFractionDigits: 2 })}
                         </span>
                         {tx.type === "expense" && (
-                          <span className="text-[10px] font-mono text-[#D99B43]/80">
-                            ~{calculateWorkTimeForExpense(tx.amount).formattedTime}
+                          <span className="text-[10px] font-mono text-[#D99B43] flex items-center gap-1">
+                            <Clock className="size-2.5 shrink-0 text-[#D99B43]" />
+                            <span>{calculateWorkTimeForExpense(tx.amount).shortFormattedTime}</span>
                           </span>
                         )}
                       </div>

@@ -118,17 +118,41 @@ export function calculateWorkTimeForExpense(
 ): {
   hourlyRate: number;
   totalHours: number;
+  daysWorked: number;
   formattedTime: string;
+  shortFormattedTime: string;
+  severity: "low" | "medium" | "high" | "critical";
+  badgeBg: string;
 } {
   const safeIncome = Math.max(1000, monthlyIncome || 25000);
   const hourlyRate = safeIncome / Math.max(1, workHoursPerMonth);
-  const totalHours = amountInMxn / hourlyRate;
+  const safeAmount = Math.max(0, amountInMxn || 0);
+  const totalHours = safeAmount / hourlyRate;
+  const daysWorked = Number((totalHours / 8).toFixed(1));
+
+  let severity: "low" | "medium" | "high" | "critical" = "low";
+  let badgeBg = "bg-emerald-500/10 text-emerald-400 border-emerald-500/20";
+
+  if (totalHours > 24) {
+    severity = "critical";
+    badgeBg = "bg-red-500/10 text-red-400 border-red-500/20";
+  } else if (totalHours > 8) {
+    severity = "high";
+    badgeBg = "bg-orange-500/10 text-orange-400 border-orange-500/20";
+  } else if (totalHours > 2) {
+    severity = "medium";
+    badgeBg = "bg-amber-500/10 text-amber-300 border-amber-500/20";
+  }
 
   if (totalHours < 1 / 60) {
     return {
       hourlyRate,
       totalHours,
+      daysWorked: 0,
       formattedTime: "< 1 min de trabajo",
+      shortFormattedTime: "<1m",
+      severity,
+      badgeBg,
     };
   }
 
@@ -137,7 +161,11 @@ export function calculateWorkTimeForExpense(
     return {
       hourlyRate,
       totalHours,
+      daysWorked: 0,
       formattedTime: `${mins} min${mins === 1 ? "" : "s"} de trabajo`,
+      shortFormattedTime: `${mins}m de vida`,
+      severity,
+      badgeBg,
     };
   }
 
@@ -147,15 +175,23 @@ export function calculateWorkTimeForExpense(
     return {
       hourlyRate,
       totalHours,
+      daysWorked,
       formattedTime: mins > 0 ? `${hours}h ${mins}m de trabajo` : `${hours}h de trabajo`,
+      shortFormattedTime: mins > 0 ? `${hours}h ${mins}m de vida` : `${hours}h de vida`,
+      severity,
+      badgeBg,
     };
   }
 
-  const days = (totalHours / 8).toFixed(1);
   return {
     hourlyRate,
     totalHours,
-    formattedTime: `${days} días de trabajo (~${Math.round(totalHours)}h)`,
+    daysWorked,
+    formattedTime: `${daysWorked} días de trabajo (~${Math.round(totalHours)}h)`,
+    shortFormattedTime: `${daysWorked} días de vida`,
+    severity,
+    badgeBg,
   };
 }
+
 

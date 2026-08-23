@@ -114,8 +114,8 @@ export function WishlistView({ data, onRefresh }: WishlistViewProps) {
           <div className="mt-2 text-2xl font-bold font-mono text-[#D99B43]">
             ${Math.round(data.stats.totalSavedImpulseValue).toLocaleString("es-MX")} MXN
           </div>
-          <div className="mt-1 text-[11px] text-[#8E867B]">
-            {data.stats.dismissedCount} caprichos evitados con éxito 🎉
+          <div className="mt-1 text-[11px] text-[#8E867B] font-mono">
+            🎉 {data.stats.dismissedCount} caprichos ({calculateWorkTimeForExpense(data.stats.totalSavedImpulseValue).shortFormattedTime} recuperados)
           </div>
         </div>
 
@@ -128,8 +128,8 @@ export function WishlistView({ data, onRefresh }: WishlistViewProps) {
           <div className="mt-2 text-2xl font-bold font-mono text-[#F5F2EB]">
             ${Math.round(data.stats.totalWishlistValue).toLocaleString("es-MX")} MXN
           </div>
-          <div className="mt-1 text-[11px] text-[#8E867B]">
-            Deseos activos presupuestados
+          <div className="mt-1 text-[11px] text-[#8E867B] font-mono">
+            ⏱️ {calculateWorkTimeForExpense(data.stats.totalWishlistValue).formattedTime}
           </div>
         </div>
       </div>
@@ -198,6 +198,8 @@ export function WishlistView({ data, onRefresh }: WishlistViewProps) {
             const isPurchased = item.status === "purchased";
             const isDismissed = item.status === "dismissed";
 
+            const workTime = calculateWorkTimeForExpense(item.priceEstimated);
+
             const percentCooling = Math.min(
               100,
               Math.round((item.daysElapsed / item.coolingDaysTotal) * 100)
@@ -256,9 +258,9 @@ export function WishlistView({ data, onRefresh }: WishlistViewProps) {
                       </span>
                       <span className="text-[10px] text-[#8E867B] font-mono">MXN</span>
                     </div>
-                    <div className="mt-1 flex items-center gap-1.5 text-[11px] font-mono text-[#D99B43]">
-                      <Clock className="h-3 w-3 shrink-0" />
-                      <span>{calculateWorkTimeForExpense(item.priceEstimated).formattedTime}</span>
+                    <div className={`mt-2 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md border text-[11px] font-mono font-medium ${workTime.badgeBg}`}>
+                      <Clock className="h-3.5 w-3.5 shrink-0" />
+                      <span>{workTime.formattedTime}</span>
                     </div>
                   </div>
 
