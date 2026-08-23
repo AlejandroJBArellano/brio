@@ -38,7 +38,7 @@ interface MobileQuickDashboardProps {
   financeData: FinanceDashboardData;
   calendarSchedule: CalendarDaySchedule;
   todayRitual: RitualLog | null;
-  onOpenBottomSheet: (tab?: "expense" | "task" | "water" | "weight") => void;
+  onOpenBottomSheet: (tab?: "expense" | "task" | "water" | "nutrition") => void;
   onOpenNotificationSettings?: () => void;
   onOpenMorningRitual: () => void;
   onOpenEveningReview: () => void;

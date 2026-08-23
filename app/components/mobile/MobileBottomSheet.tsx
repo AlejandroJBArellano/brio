@@ -1,5 +1,5 @@
 import { createTransactionAction } from "@/app/actions/finance";
-import { createBodyCompositionAction, logWaterAction } from "@/app/actions/health";
+import { logWaterAction } from "@/app/actions/health";
 import { quickAdjustPortionAction, toggleNutritionHabitAction } from "@/app/actions/nutrition";
 import { createSingleTaskAction } from "@/app/actions/tasks";
 import { FinanceAccount, FinanceCategory, FoodGroupKey } from "@/lib/types";
@@ -11,14 +11,13 @@ import {
   Droplet,
   Loader2,
   Salad,
-  Scale,
   X,
   Zap,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 
-type SheetTab = "expense" | "task" | "water" | "weight" | "nutrition";
+type SheetTab = "expense" | "task" | "water" | "nutrition";
 
 interface MobileBottomSheetProps {
   isOpen: boolean;
@@ -74,9 +73,6 @@ export function MobileBottomSheet({
   const [taskText, setTaskText] = useState<string>("");
   const [taskPriority, setTaskPriority] = useState<"normal" | "urgent" | "habit">("normal");
 
-  // Weight form state
-  const [weightKg, setWeightKg] = useState<string>("");
-  const [fatPercent, setFatPercent] = useState<string>("");
 
   if (!isOpen) return null;
 
@@ -152,30 +148,6 @@ export function MobileBottomSheet({
     });
   };
 
-  const handleWeightSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    const numWeight = parseFloat(weightKg);
-    if (!numWeight || numWeight <= 0) return;
-
-    startTransition(async () => {
-      const res = await createBodyCompositionAction({
-        weightKg: numWeight,
-        bodyFatPercentage: fatPercent ? parseFloat(fatPercent) : undefined,
-        notes: "Registro rápido desde móvil PWA",
-      });
-
-      if (res.success) {
-        setSuccessMessage(`Peso ${numWeight} kg guardado ⚖️`);
-        setTimeout(() => {
-          setWeightKg("");
-          setFatPercent("");
-          setSuccessMessage(null);
-          onClose();
-          router.refresh();
-        }, 700);
-      }
-    });
-  };
 
   const handleQuickPortion = (group: FoodGroupKey, name: string) => {
     const todayStr = getTodayDateStr();
@@ -272,18 +244,6 @@ export function MobileBottomSheet({
             >
               <Droplet className="size-3.5" />
               Agua
-            </button>
-            <button
-              type="button"
-              onClick={() => setActiveTab("weight")}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-semibold shrink-0 transition-all cursor-pointer ${
-                activeTab === "weight"
-                  ? "bg-[#1C2219] text-[#7EA35A] border border-[#7EA35A]/40 shadow-xs"
-                  : "text-[#8E867B] hover:text-[#DDD6C9]"
-              }`}
-            >
-              <Scale className="size-3.5" />
-              Peso
             </button>
           </div>
 
@@ -584,57 +544,6 @@ export function MobileBottomSheet({
             </div>
           )}
 
-          {/* 4. Peso View */}
-          {activeTab === "weight" && (
-            <form onSubmit={handleWeightSubmit} className="space-y-4">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div className="space-y-1">
-                  <label className="text-xs font-semibold text-[#8E867B] font-mono">
-                    Peso Actual (kg)
-                  </label>
-                  <input
-                    type="number"
-                    step="0.1"
-                    placeholder="78.5"
-                    value={weightKg}
-                    onChange={(e) => setWeightKg(e.target.value)}
-                    autoFocus
-                    className="w-full rounded-lg bg-[#121110] border border-[#2A2723] px-3.5 py-2.5 text-base font-bold font-mono text-[#F5F2EB] placeholder:text-[#8E867B]/50 focus:outline-none focus:border-[#7EA35A]"
-                  />
-                </div>
-
-                <div className="space-y-1">
-                  <label className="text-xs font-semibold text-[#8E867B] font-mono">
-                    % Grasa (Opcional)
-                  </label>
-                  <input
-                    type="number"
-                    step="0.1"
-                    placeholder="24.5"
-                    value={fatPercent}
-                    onChange={(e) => setFatPercent(e.target.value)}
-                    className="w-full rounded-lg bg-[#121110] border border-[#2A2723] px-3.5 py-2.5 text-base font-bold font-mono text-[#F5F2EB] placeholder:text-[#8E867B]/50 focus:outline-none focus:border-[#7EA35A]"
-                  />
-                </div>
-              </div>
-
-              {/* Submit Button */}
-              <button
-                type="submit"
-                disabled={isPending || !weightKg}
-                className="w-full py-3 rounded-lg bg-[#7EA35A] hover:bg-[#8FB866] disabled:opacity-50 text-[#121110] font-bold text-xs shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer mt-2"
-              >
-                {isPending ? (
-                  <Loader2 className="size-4 animate-spin text-[#121110]" />
-                ) : (
-                  <>
-                    <Check className="size-4 text-[#121110]" />
-                    Guardar Pesaje
-                  </>
-                )}
-              </button>
-            </form>
-          )}
         </div>
       </div>
     </div>

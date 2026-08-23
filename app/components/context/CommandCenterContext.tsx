@@ -39,7 +39,7 @@ export type ModalType =
   | "addLabReport";
 
 export interface ModalPayloadMap {
-  bottomSheet: { tab?: "expense" | "task" | "water" | "weight" | "nutrition" };
+  bottomSheet: { tab?: "expense" | "task" | "water" | "nutrition" };
   // Other modals can have custom payloads if needed
   [key: string]: unknown;
 }

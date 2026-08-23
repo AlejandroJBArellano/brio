@@ -154,7 +154,7 @@ function BrioCommandCenterContent({
   };
 
   const handleOpenBottomSheetWithTab = (
-    tab: "expense" | "task" | "water" | "weight" | "nutrition" = "expense"
+    tab: "expense" | "task" | "water" | "nutrition" = "expense"
   ) => {
     openModal("bottomSheet", { tab });
   };

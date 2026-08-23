@@ -263,7 +263,7 @@ export function ModalManager({
           accounts={financeData?.accounts}
           initialTab={
             (payload && typeof payload.tab === "string"
-              ? (payload.tab as "expense" | "task" | "water" | "weight" | "nutrition")
+              ? (payload.tab as "expense" | "task" | "water" | "nutrition")
               : "expense")
           }
           dailyAntRemaining={
