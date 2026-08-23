@@ -4,7 +4,12 @@ import { toggleSleepAction } from "@/app/actions/tasks";
 import { useCommandCenter } from "@/app/components/context/CommandCenterContext";
 import { useSession } from "@/lib/auth-client";
 import { HabiticaUser } from "@/lib/types";
-import { calculatePercentage, capitalize } from "@/lib/utils";
+import {
+  calculateHabiticaMaxMp,
+  calculateHabiticaToNextLevel,
+  calculatePercentage,
+  capitalize,
+} from "@/lib/utils";
 import {
   Activity,
   Bed,
@@ -60,9 +65,14 @@ export function HeaderStatsRibbon({ user }: HeaderStatsRibbonProps) {
 
   const stats = user.stats;
   const isResting = Boolean(user.preferences?.sleep ?? user.flags?.rest ?? false);
-  const hpPercent = calculatePercentage(stats.hp, stats.maxHealth || 50);
-  const mpPercent = calculatePercentage(stats.mp, stats.maxMP || 100);
-  const expPercent = calculatePercentage(stats.exp, stats.toNextLevel || 100);
+
+  const maxHp = stats.maxHealth || 50;
+  const maxMp = calculateHabiticaMaxMp(stats);
+  const toNextLevel = calculateHabiticaToNextLevel(stats);
+
+  const hpPercent = calculatePercentage(stats.hp, maxHp);
+  const mpPercent = calculatePercentage(stats.mp, maxMp);
+  const expPercent = calculatePercentage(stats.exp, toNextLevel);
 
   const isLowHp = stats.hp <= 15;
 
@@ -194,7 +204,7 @@ export function HeaderStatsRibbon({ user }: HeaderStatsRibbonProps) {
                 HP
               </span>
               <span className="font-mono text-[10px] text-neutral-300">
-                {Math.round(stats.hp)}/{stats.maxHealth || 50}
+                {Math.round(stats.hp)}/{maxHp}
               </span>
             </div>
             <div className="mt-1 h-1.5 w-full overflow-hidden rounded-full bg-neutral-800">
@@ -214,7 +224,7 @@ export function HeaderStatsRibbon({ user }: HeaderStatsRibbonProps) {
                 MP
               </span>
               <span className="font-mono text-[10px] text-neutral-300">
-                {Math.round(stats.mp)}/{stats.maxMP || 100}
+                {Math.round(stats.mp)}/{maxMp}
               </span>
             </div>
             <div className="mt-1 h-1.5 w-full overflow-hidden rounded-full bg-neutral-800">
@@ -233,7 +243,7 @@ export function HeaderStatsRibbon({ user }: HeaderStatsRibbonProps) {
                 EXP
               </span>
               <span className="font-mono text-[10px] text-neutral-300">
-                {Math.round(stats.exp)}/{stats.toNextLevel || 100}
+                {Math.round(stats.exp)}/{toNextLevel}
               </span>
             </div>
             <div className="mt-1 h-1.5 w-full overflow-hidden rounded-full bg-neutral-800">

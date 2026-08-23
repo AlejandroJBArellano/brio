@@ -67,3 +67,40 @@ export function capitalize(str: string): string {
   if (!str) return "";
   return str.charAt(0).toUpperCase() + str.slice(1);
 }
+
+/**
+ * Calculates Habitica's official Max MP based on Intelligence (INT).
+ * Formula: 2 * totalINT + 30 (or equipment adjusted)
+ */
+export function calculateHabiticaMaxMp(stats: {
+  int?: number;
+  buffs?: { int?: number };
+  maxMP?: number;
+  mp?: number;
+}): number {
+  if (stats.maxMP && stats.maxMP > 0) return stats.maxMP;
+  const totalInt = (stats.int || 0) + (stats.buffs?.int || 0);
+  const base = 2 * totalInt + 30;
+  return Math.max(base, Math.round(stats.mp || 0), 100);
+}
+
+/**
+ * Calculates Habitica's official XP required for next level (To Next Level / TNL).
+ * Official Habitica formula:
+ * Levels 1-4: 25 * lvl
+ * Level 5: 150
+ * Level >= 6: roundTo10(0.25 * lvl^2 + 10 * lvl + 139.75)
+ */
+export function calculateHabiticaToNextLevel(stats: {
+  lvl?: number;
+  toNextLevel?: number;
+  exp?: number;
+}): number {
+  if (stats.toNextLevel && stats.toNextLevel > 0) return stats.toNextLevel;
+  const lvl = stats.lvl || 1;
+  if (lvl < 5) return 25 * lvl;
+  if (lvl === 5) return 150;
+  const raw = 0.25 * (lvl ** 2) + 10 * lvl + 139.75;
+  const rounded = Math.round(raw / 10) * 10;
+  return Math.max(rounded, Math.round(stats.exp || 0));
+}

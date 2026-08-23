@@ -67,12 +67,12 @@ function NotificationSettingsModalContent({ onClose }: { onClose: () => void }) 
     }, 800);
   };
 
-  const handleTestNotification = () => {
+  const handleTestNotification = async () => {
     if (permission !== "granted") {
-      handleRequestPermission();
+      await handleRequestPermission();
       return;
     }
-    const success = sendBrioNotification("⚡ Brio OS — Notificación de Prueba", {
+    const success = await sendBrioNotification("⚡ Brio OS — Notificación de Prueba", {
       body: "¡Tus recordatorios inteligentes están configurados correctamente y listos!",
       tag: "test-notification",
     });

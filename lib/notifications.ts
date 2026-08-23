@@ -67,6 +67,22 @@ export function saveNotificationSettings(settings: NotificationSettings): void {
 }
 
 /**
+ * Register Service Worker for Android Chrome PWA and Web Push notifications.
+ */
+export async function registerServiceWorker(): Promise<ServiceWorkerRegistration | null> {
+  if (typeof window === "undefined" || !("serviceWorker" in navigator)) {
+    return null;
+  }
+  try {
+    const registration = await navigator.serviceWorker.register("/sw.js", { scope: "/" });
+    return registration;
+  } catch (err) {
+    console.warn("Could not register Service Worker:", err);
+    return null;
+  }
+}
+
+/**
  * Request native browser notification permission.
  */
 export async function requestNotificationPermission(): Promise<NotificationPermission> {
@@ -75,6 +91,11 @@ export async function requestNotificationPermission(): Promise<NotificationPermi
   }
 
   try {
+    // Ensure service worker is registered for Android Chrome & Mobile PWAs
+    if ("serviceWorker" in navigator) {
+      await registerServiceWorker();
+    }
+
     const permission = await Notification.requestPermission();
     if (permission === "granted") {
       const current = getNotificationSettings();
@@ -131,11 +152,13 @@ export function playNotificationChime(): void {
 
 /**
  * Send a notification if permitted.
+ * Supports ServiceWorkerRegistration.showNotification (required on Android Chrome / PWA)
+ * and falls back to standard new Notification() on desktop.
  */
-export function sendBrioNotification(
+export async function sendBrioNotification(
   title: string,
   options?: NotificationOptions & { playSound?: boolean }
-): boolean {
+): Promise<boolean> {
   if (typeof window === "undefined" || !("Notification" in window)) return false;
 
   if (Notification.permission !== "granted") return false;
@@ -146,19 +169,41 @@ export function sendBrioNotification(
       playNotificationChime();
     }
 
-    const n = new Notification(title, {
-      icon: "/favicon.ico",
-      badge: "/favicon.ico",
+    const notificationOptions: NotificationOptions = {
+      icon: "/icon-192.png",
+      badge: "/icon-192.png",
       silent: false,
       ...options,
-    });
-
-    n.onclick = () => {
-      window.focus();
-      n.close();
     };
 
-    return true;
+    // 1. Mandatory for Android Chrome & Mobile PWAs: Service Worker showNotification
+    if ("serviceWorker" in navigator) {
+      try {
+        let registration = await navigator.serviceWorker.getRegistration();
+        if (!registration) {
+          registration = (await registerServiceWorker()) ?? undefined;
+        }
+        if (registration && "showNotification" in registration) {
+          await registration.showNotification(title, notificationOptions);
+          return true;
+        }
+      } catch (swErr) {
+        console.warn("ServiceWorker notification attempt failed, trying fallback", swErr);
+      }
+    }
+
+    // 2. Fallback: Standard browser Notification constructor (Desktop / macOS)
+    try {
+      const n = new Notification(title, notificationOptions);
+      n.onclick = () => {
+        window.focus();
+        n.close();
+      };
+      return true;
+    } catch (constructorErr) {
+      console.warn("Notification constructor unavailable on this platform", constructorErr);
+      return false;
+    }
   } catch (err) {
     console.error("Failed to send notification", err);
     return false;

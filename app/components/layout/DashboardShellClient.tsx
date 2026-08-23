@@ -5,9 +5,10 @@ import { HeaderStatsRibbon } from "@/app/components/HeaderStatsRibbon";
 import { HybridOmnibar } from "@/app/components/HybridOmnibar";
 import { ModalManager } from "@/app/components/modals/ModalManager";
 import { SetupNotice } from "@/app/components/SetupNotice";
+import { registerServiceWorker } from "@/lib/notifications";
 import { HabiticaTag, HabiticaUser } from "@/lib/types";
 import { Plus } from "lucide-react";
-import { ReactNode } from "react";
+import { ReactNode, useEffect } from "react";
 
 interface DashboardShellClientProps {
   user: HabiticaUser;
@@ -23,6 +24,11 @@ export function DashboardShellClient({
   children,
 }: DashboardShellClientProps) {
   const { openModal, refreshData } = useCommandCenter();
+
+  // Register Service Worker for Android Chrome PWA and Web Push
+  useEffect(() => {
+    registerServiceWorker();
+  }, []);
 
   return (
     <div className="mx-auto flex w-full max-w-7xl flex-1 flex-col gap-5 p-4 sm:p-6 lg:p-8 relative">
