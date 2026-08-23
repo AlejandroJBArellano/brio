@@ -218,6 +218,7 @@ function BrioCommandCenterContent({
             >
               <TaskStream
                 tasks={tasks}
+                tags={tags}
                 selectedTaskId={currentSelectedTask?.id || null}
                 onSelectTask={(task) => setSelectedTask(task)}
                 activeTab={activeTaskTab}

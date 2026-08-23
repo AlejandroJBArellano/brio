@@ -1,7 +1,7 @@
 "use client";
 
 import { deleteTaskAction, toggleTaskAction } from "@/app/actions/tasks";
-import { HabiticaTask } from "@/lib/types";
+import { HabiticaTag, HabiticaTask } from "@/lib/types";
 import {
   Calendar,
   CheckCircle2,
@@ -17,6 +17,7 @@ import { TaskItem } from "./TaskItem";
 
 interface TaskStreamProps {
   tasks: HabiticaTask[];
+  tags?: HabiticaTag[];
   selectedTaskId: string | null;
   onSelectTask: (task: HabiticaTask | null) => void;
   activeTab: "all" | "dailies" | "todos" | "habits";
@@ -27,6 +28,7 @@ interface TaskStreamProps {
 
 export function TaskStream({
   tasks,
+  tags = [],
   selectedTaskId,
   onSelectTask,
   activeTab,
@@ -37,6 +39,16 @@ export function TaskStream({
   const [searchQuery, setSearchQuery] = useState("");
   const [hideCompleted, setHideCompleted] = useState(false);
   const [isPending, startTransition] = useTransition();
+
+  const tagsMap = useMemo(() => {
+    const map: Record<string, string> = {};
+    if (tags) {
+      for (const t of tags) {
+        map[t.id] = t.name;
+      }
+    }
+    return map;
+  }, [tags]);
 
   const dailies = useMemo(
     () => tasks.filter((t) => t.type === "daily"),
@@ -59,13 +71,16 @@ export function TaskStream({
       if (activeTab === "habits" && task.type !== "habit") return false;
 
       // Tag filter
-      if (
-        activeTagFilter &&
-        !task.tags?.some(
-          (t) => t.toLowerCase() === activeTagFilter.toLowerCase()
-        )
-      ) {
-        return false;
+      if (activeTagFilter) {
+        const filterLower = activeTagFilter.toLowerCase();
+        const matchesActiveTag = task.tags?.some((tagId) => {
+          const tagName = tagsMap[tagId] || tagId;
+          return (
+            tagId.toLowerCase() === filterLower ||
+            tagName.toLowerCase() === filterLower
+          );
+        });
+        if (!matchesActiveTag) return false;
       }
 
       // Hide completed dailies
@@ -78,15 +93,19 @@ export function TaskStream({
         const query = searchQuery.toLowerCase();
         const matchesText = task.text.toLowerCase().includes(query);
         const matchesNotes = task.notes?.toLowerCase().includes(query);
-        const matchesTags = task.tags?.some((tag) =>
-          tag.toLowerCase().includes(query)
-        );
+        const matchesTags = task.tags?.some((tagId) => {
+          const tagName = tagsMap[tagId] || tagId;
+          return (
+            tagId.toLowerCase().includes(query) ||
+            tagName.toLowerCase().includes(query)
+          );
+        });
         return matchesText || matchesNotes || matchesTags;
       }
 
       return true;
     });
-  }, [tasks, activeTab, activeTagFilter, hideCompleted, searchQuery]);
+  }, [tasks, tagsMap, activeTab, activeTagFilter, hideCompleted, searchQuery]);
 
   // Derived selected index from selectedTaskId
   const selectedIndex = selectedTaskId
@@ -274,6 +293,7 @@ export function TaskStream({
             <TaskItem
               key={task.id}
               task={task}
+              tagsMap={tagsMap}
               isSelected={selectedTaskId === task.id || selectedIndex === idx}
               onSelect={() => onSelectTask(task)}
             />

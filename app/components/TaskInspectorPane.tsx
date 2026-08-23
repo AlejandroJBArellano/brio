@@ -353,15 +353,21 @@ function TaskInspectorPaneContent({
           </label>
           <div className="flex flex-wrap items-center gap-1.5">
             {task.tags && task.tags.length > 0 ? (
-              task.tags.map((tag) => (
-                <span
-                  key={tag}
-                  className="inline-flex items-center gap-1 rounded-md bg-white/6 px-2 py-1 font-mono text-xs text-neutral-300 border border-white/10"
-                >
-                  <Tag className="h-3 w-3 text-neutral-400" />
-                  {tag}
-                </span>
-              ))
+              task.tags.map((tagId) => {
+                const found = tags.find((t) => t.id === tagId);
+                const tagName = found ? found.name : tagId;
+
+                return (
+                  <span
+                    key={tagId}
+                    title={tagName}
+                    className="inline-flex items-center gap-1 rounded-md bg-white/6 px-2 py-1 font-mono text-xs text-neutral-300 border border-white/10"
+                  >
+                    <Tag className="h-3 w-3 text-neutral-400" />
+                    {tagName}
+                  </span>
+                );
+              })
             ) : (
               <span className="text-xs text-neutral-500 italic">
                 No tags assigned

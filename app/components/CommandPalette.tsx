@@ -298,7 +298,14 @@ function CommandPaletteContent({
       .filter((t) => {
         const matchTitle = t.text.toLowerCase().includes(q);
         const matchNotes = t.notes?.toLowerCase().includes(q);
-        const matchTags = t.tags?.some((tag) => tag.toLowerCase().includes(q));
+        const matchTags = t.tags?.some((tagId) => {
+          const tagObj = tags.find((tag) => tag.id === tagId);
+          const tagName = tagObj ? tagObj.name : tagId;
+          return (
+            tagId.toLowerCase().includes(q) ||
+            tagName.toLowerCase().includes(q)
+          );
+        });
         return matchTitle || matchNotes || matchTags;
       })
       .slice(0, 8);

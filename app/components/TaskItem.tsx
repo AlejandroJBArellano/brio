@@ -1,7 +1,7 @@
 "use client";
 
 import { toggleTaskAction } from "@/app/actions/tasks";
-import { HabiticaTask } from "@/lib/types";
+import { HabiticaTag, HabiticaTask } from "@/lib/types";
 import { getTaskValueColor } from "@/lib/utils";
 import {
   Check,
@@ -17,12 +17,16 @@ interface TaskItemProps {
   task: HabiticaTask;
   isSelected?: boolean;
   onSelect?: () => void;
+  tags?: HabiticaTag[];
+  tagsMap?: Record<string, string>;
 }
 
 export function TaskItem({
   task,
   isSelected = false,
   onSelect,
+  tags,
+  tagsMap,
 }: TaskItemProps) {
   const [isPending, startTransition] = useTransition();
 
@@ -150,15 +154,23 @@ export function TaskItem({
 
             {task.tags && task.tags.length > 0 && (
               <div className="flex items-center gap-1.5 overflow-hidden">
-                {task.tags.slice(0, 3).map((tag, i) => (
-                  <span
-                    key={i}
-                    className="inline-flex items-center gap-0.5 rounded-md bg-white/5 px-1.5 py-0.5 text-[10px] font-medium text-neutral-300 border border-white/5 truncate max-w-24"
-                  >
-                    <Tag className="size-2.5 text-neutral-400" />
-                    {tag}
-                  </span>
-                ))}
+                {task.tags.slice(0, 3).map((tagId, i) => {
+                  const tagName =
+                    tagsMap?.[tagId] ||
+                    tags?.find((t) => t.id === tagId)?.name ||
+                    tagId;
+
+                  return (
+                    <span
+                      key={i}
+                      title={tagName}
+                      className="inline-flex items-center gap-0.5 rounded-md bg-white/5 px-1.5 py-0.5 text-[10px] font-medium text-neutral-300 border border-white/5 truncate max-w-28"
+                    >
+                      <Tag className="size-2.5 text-neutral-400 shrink-0" />
+                      <span className="truncate">{tagName}</span>
+                    </span>
+                  );
+                })}
                 {task.tags.length > 3 && (
                   <span className="text-[10px] text-neutral-400">
                     +{task.tags.length - 3}
