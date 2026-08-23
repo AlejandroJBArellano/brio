@@ -9,6 +9,7 @@ import {
 } from "@/lib/types";
 import { awardHabiticaEvent } from "@/lib/habiticaEvents";
 import { revalidatePath } from "next/cache";
+import { getTodayDateStr } from "@/lib/dateUtils";
 
 const DEFAULT_COOLING_DAYS = 30;
 
@@ -202,7 +203,7 @@ export async function purchaseWishlistItemAction(
 
     // 3. Automatically record financial transaction in Neon DB
     const txId = `tx-wish-${Date.now()}`;
-    const todayStr = new Date().toISOString().split("T")[0];
+    const todayStr = getTodayDateStr();
 
     await sql`
       INSERT INTO transactions (

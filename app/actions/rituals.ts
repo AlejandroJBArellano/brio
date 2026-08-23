@@ -6,6 +6,7 @@ import { habiticaClient } from "@/lib/habitica";
 import { awardHabiticaEvent } from "@/lib/habiticaEvents";
 import { RitualLog } from "@/lib/types";
 import { revalidatePath } from "next/cache";
+import { getTodayDateStr } from "@/lib/dateUtils";
 
 interface RitualDbRow {
   date: Date | string;
@@ -22,7 +23,7 @@ interface RitualDbRow {
 export async function fetchTodayRitualAction(): Promise<RitualLog | null> {
   try {
     const sql = getDb();
-    const todayStr = new Date().toISOString().split("T")[0];
+    const todayStr = getTodayDateStr();
 
     const rows = await sql`
       SELECT * FROM ritual_logs WHERE date = ${todayStr} LIMIT 1;
@@ -55,7 +56,7 @@ export async function saveMorningRitualAction(payload: {
 }): Promise<{ success: boolean; error?: string }> {
   try {
     const sql = getDb();
-    const todayStr = new Date().toISOString().split("T")[0];
+    const todayStr = getTodayDateStr();
     const tasksJson = JSON.stringify(payload.mustWinTasks);
 
     await sql`
@@ -97,7 +98,7 @@ export async function saveEveningReviewAction(payload: {
 }): Promise<{ success: boolean; tasksCreated?: number; error?: string }> {
   try {
     const sql = getDb();
-    const todayStr = new Date().toISOString().split("T")[0];
+    const todayStr = getTodayDateStr();
 
     await sql`
       INSERT INTO ritual_logs (date, reflection, expenses_logged)

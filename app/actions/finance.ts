@@ -12,6 +12,7 @@ import {
 } from "@/lib/types";
 import { awardHabiticaEvent } from "@/lib/habiticaEvents";
 import { revalidatePath } from "next/cache";
+import { getTodayDateStr, toDateStr } from "@/lib/dateUtils";
 
 interface WishlistDbRow {
   id: string;
@@ -82,7 +83,7 @@ export async function fetchFinanceDashboardDataAction(
   }
 
   // 2. Process Transactions
-  const todayStr = now.toISOString().split("T")[0];
+  const todayStr = getTodayDateStr();
 
   let totalExpensesThisMonth = 0;
   let totalIncomeThisMonth = 0;
@@ -96,7 +97,7 @@ export async function fetchFinanceDashboardDataAction(
   const transactions: Transaction[] = transactionRows.map((r) => {
     const amt = Number(r.amount);
     const isAnt = Boolean(r.is_ant_expense);
-    const dateStr = typeof r.date === "string" ? r.date.split("T")[0] : new Date(r.date).toISOString().split("T")[0];
+    const dateStr = toDateStr(r.date);
 
     if (r.type === "expense") {
       totalExpensesThisMonth += amt;
@@ -150,7 +151,7 @@ export async function fetchFinanceDashboardDataAction(
     title: g.title,
     targetAmount: Number(g.target_amount),
     currentAmount: Number(g.current_amount),
-    deadline: g.deadline ? g.deadline.toString().split("T")[0] : undefined,
+    deadline: g.deadline ? toDateStr(g.deadline) : undefined,
     category: g.category || "general",
     color: g.color || "#6366f1",
     createdAt: g.created_at?.toString(),
@@ -247,7 +248,7 @@ export async function createTransactionAction(payload: {
     const sql = getDb();
 
     const id = `tx-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
-    const date = payload.date || new Date().toISOString().split("T")[0];
+    const date = toDateStr(payload.date);
     const category = (payload.category || "general").toLowerCase().trim();
     const account = (payload.account || "default").toLowerCase().trim();
     const isAnt = Boolean(payload.isAntExpense);

@@ -1,6 +1,7 @@
 "use server";
 
 import { getDb } from "@/lib/db";
+import { getTodayDateStr, getWeekDateRange, toDateStr } from "@/lib/dateUtils";
 import {
   DEFAULT_NUTRITION_SETTINGS,
   MARIANA_MONT_PRESET_RECIPES,
@@ -122,20 +123,6 @@ async function getSettings(sql: SqlClient): Promise<NutritionSettings> {
 }
 
 /**
- * Formats a Date object or string as YYYY-MM-DD.
- */
-function toDateStr(date?: Date | string): string {
-  if (!date) {
-    const now = new Date();
-    return now.toISOString().split("T")[0];
-  }
-  if (typeof date === "string") {
-    return date.split("T")[0];
-  }
-  return date.toISOString().split("T")[0];
-}
-
-/**
  * Fetches the entire Nutrition Dashboard Data payload for a specific date (defaults to today).
  * Uses Promise.all to fetch all settings, daily logs, recipes, schedule, and health log adherence in parallel.
  */
@@ -145,17 +132,7 @@ export async function fetchNutritionDashboardDataAction(
   try {
     const sql = getDb();
     const todayDate = toDateStr(targetDateStr);
-
-    const currDate = new Date(`${todayDate}T12:00:00Z`);
-    const dayOfWeek = currDate.getUTCDay();
-    const diffToMonday = (dayOfWeek + 6) % 7;
-    const monday = new Date(currDate);
-    monday.setUTCDate(monday.getUTCDate() - diffToMonday);
-    const sunday = new Date(monday);
-    sunday.setUTCDate(sunday.getUTCDate() + 6);
-
-    const mondayStr = toDateStr(monday);
-    const sundayStr = toDateStr(sunday);
+    const { mondayStr, sundayStr } = getWeekDateRange(todayDate);
 
     // Parallel execution of all independent nutrition queries
     const [settings, todayLogRows, recipeRows, scheduleRows, recentLogsRows, healthLogRows] =

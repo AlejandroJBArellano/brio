@@ -11,6 +11,7 @@ import {
 } from "@/lib/types";
 import { awardHabiticaEvent } from "@/lib/habiticaEvents";
 import { revalidatePath } from "next/cache";
+import { getTodayDateStr } from "@/lib/dateUtils";
 
 /**
  * Ensures tables for hormonal tracking exist in Neon Postgres.
@@ -46,7 +47,7 @@ export async function fetchHormonalDashboardDataAction(): Promise<{
   try {
     const sql = getDb();
     await ensureHormonalTablesExist();
-    const todayStr = new Date().toISOString().split("T")[0];
+    const todayStr = getTodayDateStr();
 
     const [settingsRow, logRow] = await Promise.all([
       sql`SELECT config FROM hormonal_settings WHERE id = 'default' LIMIT 1;`,
@@ -111,7 +112,7 @@ export async function toggleHormonalChecklistItemAction(
   try {
     const sql = getDb();
     await ensureHormonalTablesExist();
-    const todayStr = new Date().toISOString().split("T")[0];
+    const todayStr = getTodayDateStr();
 
     const currentData = await fetchHormonalDashboardDataAction();
     const updatedChecklist: HormonalDailyChecklist = {

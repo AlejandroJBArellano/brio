@@ -7,6 +7,7 @@ import {
   HeatmapDay,
   LifeTagDistribution,
 } from "@/lib/types";
+import { getDaysAgoDateStr, toDateStr } from "@/lib/dateUtils";
 
 interface DailyActivityDbRow {
   date: Date | string;
@@ -59,9 +60,7 @@ export async function fetchAnalyticsDataAction(): Promise<AnalyticsDashboardData
   const sql = getDb();
 
   // 1. Fetch activity logs from Neon for the past 90 days
-  const pastDate = new Date();
-  pastDate.setDate(pastDate.getDate() - 90);
-  const pastDateStr = pastDate.toISOString().split("T")[0];
+  const pastDateStr = getDaysAgoDateStr(90);
 
   const activityRows = await sql`
     SELECT * FROM daily_activity_logs
@@ -71,7 +70,7 @@ export async function fetchAnalyticsDataAction(): Promise<AnalyticsDashboardData
 
   const activityMap = new Map<string, DailyActivityDbRow>();
   for (const row of activityRows as unknown as DailyActivityDbRow[]) {
-    const dStr = typeof row.date === "string" ? row.date.split("T")[0] : new Date(row.date).toISOString().split("T")[0];
+    const dStr = toDateStr(row.date);
     activityMap.set(dStr, row);
   }
 
@@ -84,9 +83,7 @@ export async function fetchAnalyticsDataAction(): Promise<AnalyticsDashboardData
   let runningStreak = 0;
 
   for (let i = 89; i >= 0; i--) {
-    const d = new Date();
-    d.setDate(today.getDate() - i);
-    const dateStr = d.toISOString().split("T")[0];
+    const dateStr = getDaysAgoDateStr(i);
 
     const record = activityMap.get(dateStr);
     const habitsCount = record ? Number(record.habits_count) || 0 : 0;

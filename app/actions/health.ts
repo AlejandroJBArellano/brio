@@ -22,6 +22,7 @@ import {
 import { awardHabiticaEvent } from "@/lib/habiticaEvents";
 import { revalidatePath } from "next/cache";
 import { fetchNutritionDashboardDataAction } from "./nutrition";
+import { getTodayDateStr, toDateStr } from "@/lib/dateUtils";
 
 interface LabTestReportDbRow {
   id: string;
@@ -154,7 +155,7 @@ async function getBodyCompositionLogs(sql: SqlClient): Promise<BodyCompositionLo
   if (rows.length > 0) {
     return (rows as unknown as BodyCompositionDbRow[]).map((r) => ({
       id: r.id,
-      date: typeof r.date === "string" ? r.date.split("T")[0] : new Date(r.date).toISOString().split("T")[0],
+      date: toDateStr(r.date),
       weightKg: Number(r.weight_kg),
       bodyFatPercentage: r.body_fat_percentage !== null && r.body_fat_percentage !== undefined ? Number(r.body_fat_percentage) : undefined,
       skeletalMuscleKg: r.skeletal_muscle_kg !== null && r.skeletal_muscle_kg !== undefined ? Number(r.skeletal_muscle_kg) : undefined,
@@ -208,7 +209,7 @@ async function getBiomarkersDashboardData(sql: SqlClient): Promise<BiomarkersDas
       const allBiomarkers: BiomarkerLog[] = (biomarkerRows as unknown as BiomarkerDbRow[]).map((b) => ({
         id: b.id,
         reportId: b.report_id || undefined,
-        date: typeof b.date === "string" ? b.date.split("T")[0] : new Date(b.date).toISOString().split("T")[0],
+        date: toDateStr(b.date),
         category: b.category as BiomarkerCategoryKey,
         name: b.name,
         code: b.code || undefined,
@@ -231,7 +232,7 @@ async function getBiomarkersDashboardData(sql: SqlClient): Promise<BiomarkersDas
 
         return {
           id: r.id,
-          date: typeof r.date === "string" ? r.date.split("T")[0] : new Date(r.date).toISOString().split("T")[0],
+          date: toDateStr(r.date),
           labName: r.lab_name,
           orderNumber: r.order_number || undefined,
           patientId: r.patient_id || undefined,
@@ -310,7 +311,7 @@ async function getBiomarkersDashboardData(sql: SqlClient): Promise<BiomarkersDas
  */
 export async function fetchHealthDashboardDataAction(): Promise<HealthDashboardData> {
   const sql = getDb();
-  const todayStr = new Date().toISOString().split("T")[0];
+  const todayStr = getTodayDateStr();
 
   // Parallel execution of all health domain queries
   const [
@@ -384,7 +385,7 @@ export async function fetchHealthDashboardDataAction(): Promise<HealthDashboardD
 
   // Process recent 14 days logs
   const recentLogs: HealthLog[] = (recentRows as unknown as HealthLogDbRow[]).map((r) => ({
-    date: typeof r.date === "string" ? r.date.split("T")[0] : new Date(r.date).toISOString().split("T")[0],
+    date: toDateStr(r.date),
     workoutType: r.workout_type || undefined,
     workoutNotes: r.workout_notes || undefined,
     waterMl: Number(r.water_ml) || 0,
@@ -426,7 +427,7 @@ export async function fetchHealthDashboardDataAction(): Promise<HealthDashboardD
     description: r.description || undefined,
     startTime: r.start_time instanceof Date ? r.start_time.toISOString() : (r.start_time?.toString() || new Date().toISOString()),
     endTime: r.end_time instanceof Date ? r.end_time.toISOString() : (r.end_time?.toString() || new Date().toISOString()),
-    date: typeof r.date === "string" ? r.date.split("T")[0] : new Date(r.date).toISOString().split("T")[0],
+    date: toDateStr(r.date),
     durationSeconds: Number(r.duration_seconds) || 0,
     totalVolumeKg: Number(r.total_volume_kg) || 0,
     exercisesCount: Number(r.exercises_count) || 0,
@@ -474,7 +475,7 @@ export async function logWorkoutAction(
 ): Promise<{ success: boolean; error?: string }> {
   try {
     const sql = getDb();
-    const todayStr = new Date().toISOString().split("T")[0];
+    const todayStr = getTodayDateStr();
 
     await sql`
       INSERT INTO health_logs (date, workout_type, workout_notes, updated_at)
@@ -514,7 +515,7 @@ export async function addWaterAction(
 ): Promise<{ success: boolean; newTotal?: number; error?: string }> {
   try {
     const sql = getDb();
-    const todayStr = new Date().toISOString().split("T")[0];
+    const todayStr = getTodayDateStr();
 
     await sql`
       INSERT INTO health_logs (date, water_ml, updated_at)
@@ -569,7 +570,7 @@ export async function createSupplementAction(input: {
       VALUES (${id}, ${name}, ${dosage}, ${timing}, 0, true);
     `;
 
-    const todayStr = new Date().toISOString().split("T")[0];
+    const todayStr = getTodayDateStr();
     const todayRows = await sql`
       SELECT supplements FROM health_logs WHERE date = ${todayStr} LIMIT 1;
     `;
@@ -648,7 +649,7 @@ export async function updateSupplementAction(
       WHERE id = ${id};
     `;
 
-    const todayStr = new Date().toISOString().split("T")[0];
+    const todayStr = getTodayDateStr();
     const todayRows = await sql`
       SELECT supplements FROM health_logs WHERE date = ${todayStr} LIMIT 1;
     `;
@@ -693,7 +694,7 @@ export async function deleteSupplementAction(
       DELETE FROM user_supplements WHERE id = ${id};
     `;
 
-    const todayStr = new Date().toISOString().split("T")[0];
+    const todayStr = getTodayDateStr();
     const todayRows = await sql`
       SELECT supplements FROM health_logs WHERE date = ${todayStr} LIMIT 1;
     `;
@@ -723,7 +724,7 @@ export async function toggleSupplementAction(
 ): Promise<{ success: boolean; error?: string }> {
   try {
     const sql = getDb();
-    const todayStr = new Date().toISOString().split("T")[0];
+    const todayStr = getTodayDateStr();
 
     const [catalog, current] = await Promise.all([
       getSupplementsCatalog(sql),
@@ -784,7 +785,7 @@ export async function batchToggleSupplementsByTimingAction(
 ): Promise<{ success: boolean; modifiedCount: number; error?: string }> {
   try {
     const sql = getDb();
-    const todayStr = new Date().toISOString().split("T")[0];
+    const todayStr = getTodayDateStr();
 
     const [catalog, current] = await Promise.all([
       getSupplementsCatalog(sql),
@@ -875,7 +876,7 @@ export async function logSleepAction(
 ): Promise<{ success: boolean; error?: string }> {
   try {
     const sql = getDb();
-    const todayStr = new Date().toISOString().split("T")[0];
+    const todayStr = getTodayDateStr();
 
     await sql`
       INSERT INTO health_logs (date, sleep_hours, sleep_quality, updated_at)
@@ -915,7 +916,7 @@ export async function importSamsungHealthDataAction(
     if (Array.isArray(data)) {
       for (const item of data) {
         if (item.date) {
-          const dateStr = item.date.split("T")[0];
+          const dateStr = toDateStr(item.date);
           const steps = Number(item.steps || item.step_count) || 0;
           const sleep = Number(item.sleep_hours || item.sleepDuration) || 7.5;
 
@@ -1050,7 +1051,7 @@ export async function createBodyCompositionAction(input: {
   skeletalMuscleKg?: number;
   notes?: string;
 }): Promise<{ success: boolean; id?: string; error?: string }> {
-  const dateStr = input.date || new Date().toISOString().split("T")[0];
+  const dateStr = toDateStr(input.date);
   return createBodyCompositionLogAction({
     date: dateStr,
     weightKg: input.weightKg,
@@ -1125,7 +1126,7 @@ export async function fetchRecentHevyWorkoutsAction(limit = 10): Promise<HevyWor
     description: r.description || undefined,
     startTime: r.start_time instanceof Date ? r.start_time.toISOString() : (r.start_time?.toString() || new Date().toISOString()),
     endTime: r.end_time instanceof Date ? r.end_time.toISOString() : (r.end_time?.toString() || new Date().toISOString()),
-    date: typeof r.date === "string" ? r.date.split("T")[0] : new Date(r.date).toISOString().split("T")[0],
+    date: toDateStr(r.date),
     durationSeconds: Number(r.duration_seconds) || 0,
     totalVolumeKg: Number(r.total_volume_kg) || 0,
     exercisesCount: Number(r.exercises_count) || 0,
