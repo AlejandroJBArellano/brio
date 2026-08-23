@@ -9,6 +9,7 @@ import {
   PieChart,
   Plus,
   Search,
+  Settings,
   Sparkles,
   Trash2,
   TrendingUp,
@@ -16,6 +17,7 @@ import {
 } from "lucide-react";
 import { useMemo, useState, useTransition } from "react";
 import { AntExpenseThermometer } from "./AntExpenseThermometer";
+import { ManageFinanceCatalogModal } from "./ManageFinanceCatalogModal";
 import { SavingsGoalsWidget } from "./SavingsGoalsWidget";
 import { TransactionModal } from "./TransactionModal";
 import { WishlistView } from "./WishlistView";
@@ -28,6 +30,7 @@ interface FinanceViewProps {
 export function FinanceView({ data, onRefresh }: FinanceViewProps) {
   const [subTab, setSubTab] = useState<"budget" | "wishlist">("budget");
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isManageCatalogOpen, setIsManageCatalogOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [activeFilter, setActiveFilter] = useState<"all" | "expenses" | "incomes" | "ant">("all");
   const [isPending, startTransition] = useTransition();
@@ -82,7 +85,7 @@ export function FinanceView({ data, onRefresh }: FinanceViewProps) {
   return (
     <div className="flex flex-col gap-6 animate-in fade-in duration-300">
       {/* Sub-Navigation Tabs */}
-      <div className="flex items-center justify-between border-b border-white/8 pb-3">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-white/8 pb-3">
         <div className="flex items-center gap-2 p-1 bg-neutral-950/80 rounded-2xl border border-white/8">
           <button
             type="button"
@@ -115,6 +118,15 @@ export function FinanceView({ data, onRefresh }: FinanceViewProps) {
             ) : null}
           </button>
         </div>
+
+        <button
+          type="button"
+          onClick={() => setIsManageCatalogOpen(true)}
+          className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-white/10 bg-neutral-950/80 hover:bg-white/5 text-xs font-semibold text-neutral-300 hover:text-white transition-all shadow-sm self-start sm:self-auto"
+        >
+          <Settings className="size-3.5 text-amber-400" />
+          <span>Configurar Cuentas & Categorías</span>
+        </button>
       </div>
 
       {subTab === "wishlist" ? (
@@ -441,6 +453,18 @@ export function FinanceView({ data, onRefresh }: FinanceViewProps) {
       <TransactionModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
+        onSuccess={onRefresh}
+        categories={data.categories}
+        accounts={data.accounts}
+        onOpenManageCatalog={() => setIsManageCatalogOpen(true)}
+      />
+
+      {/* Manage Finance Catalog Modal */}
+      <ManageFinanceCatalogModal
+        isOpen={isManageCatalogOpen}
+        onClose={() => setIsManageCatalogOpen(false)}
+        categories={data.categories || []}
+        accounts={data.accounts || []}
         onSuccess={onRefresh}
       />
     </div>

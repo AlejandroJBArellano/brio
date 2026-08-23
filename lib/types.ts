@@ -197,6 +197,49 @@ export interface CategoryBreakdown {
   count: number;
 }
 
+export interface FinanceCategory {
+  id: string;
+  name: string;
+  icon?: string;
+  color?: string;
+  isAntDefault?: boolean;
+  isFixed?: boolean;
+  orderIndex?: number;
+  isActive?: boolean;
+  createdAt?: string;
+}
+
+export interface FinanceAccount {
+  id: string;
+  name: string;
+  type?: "credit" | "debit" | "cash" | "bank" | "other" | string;
+  icon?: string;
+  color?: string;
+  orderIndex?: number;
+  isActive?: boolean;
+  createdAt?: string;
+}
+
+export const DEFAULT_FINANCE_CATEGORIES: FinanceCategory[] = [
+  { id: "comida", name: "Comida & Restaurantes", icon: "🍔", isAntDefault: false, isFixed: false, orderIndex: 0, isActive: true },
+  { id: "antojo", name: "Antojo / Gustito (Hormiga)", icon: "☕", isAntDefault: true, isFixed: false, orderIndex: 1, isActive: true },
+  { id: "transporte", name: "Transporte / Gasolina", icon: "🚗", isAntDefault: false, isFixed: false, orderIndex: 2, isActive: true },
+  { id: "servicios", name: "Servicios & Renta", icon: "🏠", isAntDefault: false, isFixed: true, orderIndex: 3, isActive: true },
+  { id: "suscripciones", name: "Suscripciones & Software", icon: "💻", isAntDefault: false, isFixed: true, orderIndex: 4, isActive: true },
+  { id: "salud", name: "Salud & Farmacia", icon: "💊", isAntDefault: false, isFixed: false, orderIndex: 5, isActive: true },
+  { id: "compras", name: "Compras & Ropa", icon: "🛍️", isAntDefault: false, isFixed: false, orderIndex: 6, isActive: true },
+  { id: "ingreso", name: "Sueldo / Freelance", icon: "💰", isAntDefault: false, isFixed: false, orderIndex: 7, isActive: true },
+];
+
+export const DEFAULT_FINANCE_ACCOUNTS: FinanceAccount[] = [
+  { id: "nu", name: "Tarjeta Nu", type: "credit", icon: "💳", orderIndex: 0, isActive: true },
+  { id: "bbva", name: "BBVA Débito", type: "debit", icon: "🏦", orderIndex: 1, isActive: true },
+  { id: "santander", name: "Santander", type: "credit", icon: "💳", orderIndex: 2, isActive: true },
+  { id: "efectivo", name: "Efectivo 💵", type: "cash", icon: "💵", orderIndex: 3, isActive: true },
+  { id: "hey", name: "Hey Banco", type: "debit", icon: "🏦", orderIndex: 4, isActive: true },
+  { id: "default", name: "Cuenta Principal", type: "other", icon: "💳", orderIndex: 5, isActive: true },
+];
+
 export interface FinanceDashboardData {
   currentBudget: MonthlyBudget;
   totalExpensesThisMonth: number;
@@ -211,6 +254,8 @@ export interface FinanceDashboardData {
   savingsGoals: SavingsGoal[];
   categoryBreakdown: CategoryBreakdown[];
   wishlistData?: WishlistDashboardData;
+  categories?: FinanceCategory[];
+  accounts?: FinanceAccount[];
 }
 
 export interface ParsedFinancialInput {

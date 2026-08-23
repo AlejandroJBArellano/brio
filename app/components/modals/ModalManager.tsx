@@ -88,6 +88,14 @@ const AddLabReportModal = dynamic(
   { ssr: false }
 );
 
+const ManageFinanceCatalogModal = dynamic(
+  () =>
+    import("@/app/components/finance/ManageFinanceCatalogModal").then(
+      (mod) => mod.ManageFinanceCatalogModal
+    ),
+  { ssr: false }
+);
+
 interface ModalManagerProps {
   user: HabiticaUser;
   tasks?: HabiticaTask[];
@@ -198,6 +206,19 @@ export function ModalManager({
           isOpen={true}
           onClose={closeModal}
           onSuccess={refreshData}
+          categories={financeData?.categories}
+          accounts={financeData?.accounts}
+          onOpenManageCatalog={() => openModal("manageFinanceCatalog")}
+        />
+      )}
+
+      {activeModal === "manageFinanceCatalog" && (
+        <ManageFinanceCatalogModal
+          isOpen={true}
+          onClose={closeModal}
+          categories={financeData?.categories || []}
+          accounts={financeData?.accounts || []}
+          onSuccess={refreshData}
         />
       )}
 
@@ -238,6 +259,8 @@ export function ModalManager({
         <MobileBottomSheet
           isOpen={true}
           onClose={closeModal}
+          categories={financeData?.categories}
+          accounts={financeData?.accounts}
           initialTab={
             (payload && typeof payload.tab === "string"
               ? (payload.tab as "expense" | "task" | "water" | "weight" | "nutrition")

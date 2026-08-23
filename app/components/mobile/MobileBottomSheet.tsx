@@ -2,7 +2,7 @@ import { createTransactionAction } from "@/app/actions/finance";
 import { createBodyCompositionAction, logWaterAction } from "@/app/actions/health";
 import { quickAdjustPortionAction, toggleNutritionHabitAction } from "@/app/actions/nutrition";
 import { createSingleTaskAction } from "@/app/actions/tasks";
-import { FoodGroupKey } from "@/lib/types";
+import { FinanceAccount, FinanceCategory, FoodGroupKey } from "@/lib/types";
 import { getTodayDateStr } from "@/lib/dateUtils";
 import {
   Check,
@@ -25,6 +25,8 @@ interface MobileBottomSheetProps {
   onClose: () => void;
   initialTab?: SheetTab;
   dailyAntRemaining?: number;
+  categories?: FinanceCategory[];
+  accounts?: FinanceAccount[];
 }
 
 export function MobileBottomSheet({
@@ -32,17 +34,40 @@ export function MobileBottomSheet({
   onClose,
   initialTab = "expense",
   dailyAntRemaining = 150,
+  categories = [],
+  accounts = [],
 }: MobileBottomSheetProps) {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<SheetTab>(initialTab);
   const [isPending, startTransition] = useTransition();
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
+  const effectiveCategories =
+    categories.length > 0
+      ? categories
+      : [
+          { id: "comida", name: "Comida", icon: "🍔", isAntDefault: false },
+          { id: "antojo", name: "Antojo", icon: "☕", isAntDefault: true },
+          { id: "transporte", name: "Transporte", icon: "🚗", isAntDefault: false },
+          { id: "servicios", name: "Servicios", icon: "🏠", isAntDefault: false },
+          { id: "salud", name: "Salud", icon: "💊", isAntDefault: false },
+          { id: "compras", name: "Compras", icon: "🛍️", isAntDefault: false },
+        ];
+
+  const effectiveAccounts =
+    accounts.length > 0
+      ? accounts
+      : [
+          { id: "nu", name: "Nu" },
+          { id: "bbva", name: "BBVA" },
+          { id: "efectivo", name: "Efectivo" },
+        ];
+
   // Expense form state
   const [amount, setAmount] = useState<string>("");
   const [concept, setConcept] = useState<string>("");
-  const [category, setCategory] = useState<string>("comida");
-  const [account, setAccount] = useState<string>("nu");
+  const [category, setCategory] = useState<string>(effectiveCategories[0]?.id || "comida");
+  const [account, setAccount] = useState<string>(effectiveAccounts[0]?.id || "nu");
   const [isAntExpense, setIsAntExpense] = useState<boolean>(true);
 
   // Task form state
@@ -326,25 +351,24 @@ export function MobileBottomSheet({
                 Categoría
               </label>
               <div className="flex flex-wrap gap-1.5">
-                {[
-                  { id: "comida", label: "#comida" },
-                  { id: "antojo", label: "#antojo" },
-                  { id: "transporte", label: "#transporte" },
-                  { id: "super", label: "#super" },
-                  { id: "salud", label: "#salud" },
-                  { id: "servicios", label: "#servicios" },
-                ].map((c) => (
+                {effectiveCategories.slice(0, 8).map((c) => (
                   <button
                     key={c.id}
                     type="button"
-                    onClick={() => setCategory(c.id)}
-                    className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-all ${
+                    onClick={() => {
+                      setCategory(c.id);
+                      if (c.isAntDefault || c.id === "antojo") {
+                        setIsAntExpense(true);
+                      }
+                    }}
+                    className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-all flex items-center gap-1 ${
                       category === c.id
                         ? "bg-rose-500/20 text-rose-300 border border-rose-500/40"
                         : "bg-white/5 text-neutral-400 border border-white/5 hover:text-white"
                     }`}
                   >
-                    {c.label}
+                    <span>{c.icon || "🏷️"}</span>
+                    <span>#{c.id}</span>
                   </button>
                 ))}
               </div>
@@ -352,19 +376,20 @@ export function MobileBottomSheet({
 
             {/* Account & Ant-expense row */}
             <div className="flex items-center justify-between gap-3 pt-1">
-              <div className="flex items-center gap-1.5">
-                {["nu", "bbva", "efectivo"].map((acc) => (
+              <div className="flex flex-wrap items-center gap-1.5">
+                {effectiveAccounts.map((acc) => (
                   <button
-                    key={acc}
+                    key={acc.id}
                     type="button"
-                    onClick={() => setAccount(acc)}
-                    className={`px-2 py-1 rounded-lg text-xs font-mono uppercase transition-all ${
-                      account === acc
+                    onClick={() => setAccount(acc.id)}
+                    className={`px-2 py-1 rounded-lg text-xs font-mono uppercase transition-all flex items-center gap-1 ${
+                      account === acc.id
                         ? "bg-indigo-500/20 text-indigo-300 border border-indigo-500/40"
                         : "bg-white/5 text-neutral-400 border border-white/5"
                     }`}
                   >
-                    @{acc}
+                    <span>{acc.icon || "💳"}</span>
+                    <span>@{acc.id}</span>
                   </button>
                 ))}
               </div>

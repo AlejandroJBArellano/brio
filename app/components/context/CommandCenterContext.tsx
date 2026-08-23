@@ -35,6 +35,7 @@ export type ModalType =
   | "bottomSheet"
   | "smartFit"
   | "manageSupplements"
+  | "manageFinanceCatalog"
   | "addLabReport";
 
 export interface ModalPayloadMap {

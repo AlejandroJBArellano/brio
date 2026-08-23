@@ -1,7 +1,13 @@
 "use client";
 
 import { createTransactionAction } from "@/app/actions/finance";
-import { TransactionType } from "@/lib/types";
+import {
+  DEFAULT_FINANCE_ACCOUNTS,
+  DEFAULT_FINANCE_CATEGORIES,
+  FinanceAccount,
+  FinanceCategory,
+  TransactionType,
+} from "@/lib/types";
 import { getTodayDateStr } from "@/lib/dateUtils";
 import {
   AlertCircle,
@@ -9,6 +15,7 @@ import {
   ArrowUpRight,
   Coffee,
   Plus,
+  Settings2,
   Wallet,
   X,
 } from "lucide-react";
@@ -18,38 +25,27 @@ interface TransactionModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess?: () => void;
+  categories?: FinanceCategory[];
+  accounts?: FinanceAccount[];
+  onOpenManageCatalog?: () => void;
 }
-
-const COMMON_CATEGORIES = [
-  { id: "comida", name: "Comida & Restaurantes", icon: "🍔" },
-  { id: "antojo", name: "Antojo / Gustito (Hormiga)", icon: "☕" },
-  { id: "transporte", name: "Transporte / Gasolina", icon: "🚗" },
-  { id: "servicios", name: "Servicios & Renta", icon: "🏠" },
-  { id: "suscripciones", name: "Suscripciones & Software", icon: "💻" },
-  { id: "salud", name: "Salud & Farmacia", icon: "💊" },
-  { id: "compras", name: "Compras & Ropa", icon: "🛍️" },
-  { id: "ingreso", name: "Sueldo / Freelance", icon: "💰" },
-];
-
-const COMMON_ACCOUNTS = [
-  { id: "nu", name: "Tarjeta Nu" },
-  { id: "bbva", name: "BBVA Débito" },
-  { id: "santander", name: "Santander" },
-  { id: "efectivo", name: "Efectivo 💵" },
-  { id: "hey", name: "Hey Banco" },
-  { id: "default", name: "Cuenta Principal" },
-];
 
 export function TransactionModal({
   isOpen,
   onClose,
   onSuccess,
+  categories = [],
+  accounts = [],
+  onOpenManageCatalog,
 }: TransactionModalProps) {
+  const effectiveCategories = categories.length > 0 ? categories : DEFAULT_FINANCE_CATEGORIES;
+  const effectiveAccounts = accounts.length > 0 ? accounts : DEFAULT_FINANCE_ACCOUNTS;
+
   const [type, setType] = useState<TransactionType>("expense");
   const [amount, setAmount] = useState("");
   const [concept, setConcept] = useState("");
-  const [category, setCategory] = useState("comida");
-  const [account, setAccount] = useState("nu");
+  const [category, setCategory] = useState(effectiveCategories[0]?.id || "comida");
+  const [account, setAccount] = useState(effectiveAccounts[0]?.id || "nu");
   const [isAntExpense, setIsAntExpense] = useState(false);
   const [notes, setNotes] = useState("");
   const [date, setDate] = useState(getTodayDateStr());
@@ -58,9 +54,10 @@ export function TransactionModal({
 
   if (!isOpen) return null;
 
-  const handleCategoryChange = (cat: string) => {
-    setCategory(cat);
-    if (cat === "antojo") {
+  const handleCategoryChange = (catId: string) => {
+    setCategory(catId);
+    const catObj = effectiveCategories.find((c) => c.id === catId);
+    if (catObj?.isAntDefault || catId === "antojo") {
       setIsAntExpense(true);
     }
   };
@@ -209,34 +206,58 @@ export function TransactionModal({
           {/* Category & Account */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-medium text-neutral-300 mb-1.5">
-                Categoría
-              </label>
+              <div className="flex items-center justify-between mb-1.5">
+                <label className="block text-xs font-medium text-neutral-300">
+                  Categoría
+                </label>
+                {onOpenManageCatalog && (
+                  <button
+                    type="button"
+                    onClick={onOpenManageCatalog}
+                    className="text-[10px] text-amber-400 hover:text-amber-300 flex items-center gap-1 transition-colors"
+                  >
+                    <Settings2 className="size-3" />
+                    <span>Configurar</span>
+                  </button>
+                )}
+              </div>
               <select
                 value={category}
                 onChange={(e) => handleCategoryChange(e.target.value)}
                 className="w-full rounded-xl border border-white/10 bg-neutral-950/80 px-3 py-2.5 text-xs text-white focus:border-amber-500/50 focus:outline-none focus:ring-2 focus:ring-amber-500/20"
               >
-                {COMMON_CATEGORIES.map((cat) => (
+                {effectiveCategories.map((cat) => (
                   <option key={cat.id} value={cat.id}>
-                    {cat.icon} {cat.name}
+                    {cat.icon || "🏷️"} {cat.name}
                   </option>
                 ))}
               </select>
             </div>
 
             <div>
-              <label className="block text-xs font-medium text-neutral-300 mb-1.5">
-                Cuenta / Tarjeta
-              </label>
+              <div className="flex items-center justify-between mb-1.5">
+                <label className="block text-xs font-medium text-neutral-300">
+                  Cuenta / Tarjeta
+                </label>
+                {onOpenManageCatalog && (
+                  <button
+                    type="button"
+                    onClick={onOpenManageCatalog}
+                    className="text-[10px] text-amber-400 hover:text-amber-300 flex items-center gap-1 transition-colors"
+                  >
+                    <Settings2 className="size-3" />
+                    <span>Configurar</span>
+                  </button>
+                )}
+              </div>
               <select
                 value={account}
                 onChange={(e) => setAccount(e.target.value)}
                 className="w-full rounded-xl border border-white/10 bg-neutral-950/80 px-3 py-2.5 text-xs text-white focus:border-amber-500/50 focus:outline-none focus:ring-2 focus:ring-amber-500/20"
               >
-                {COMMON_ACCOUNTS.map((acc) => (
+                {effectiveAccounts.map((acc) => (
                   <option key={acc.id} value={acc.id}>
-                    {acc.name}
+                    {acc.icon || "💳"} {acc.name}
                   </option>
                 ))}
               </select>
