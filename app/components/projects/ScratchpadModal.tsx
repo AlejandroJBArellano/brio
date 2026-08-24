@@ -15,14 +15,13 @@ interface ScratchpadModalProps {
 export function ScratchpadModal({
   isOpen,
   onClose,
-  initialContent,
+  initialContent = "",
   onSuccess,
 }: ScratchpadModalProps) {
   if (!isOpen) return null;
 
   return (
     <ScratchpadModalContent
-      key={initialContent}
       onClose={onClose}
       initialContent={initialContent}
       onSuccess={onSuccess}
@@ -42,9 +41,34 @@ function ScratchpadModalContent({
   const [content, setContent] = useState(initialContent);
   const [isSaved, setIsSaved] = useState(false);
   const [isPending, startTransition] = useTransition();
+  const [isInitialized, setIsInitialized] = useState(Boolean(initialContent));
 
-  // Debounced auto-save to Neon DB
+  // Fetch latest content from database on mount if initialContent was empty
   useEffect(() => {
+    let isMounted = true;
+    async function loadLatest() {
+      try {
+        const { fetchProjectsDashboardDataAction } = await import("@/app/actions/projects");
+        const data = await fetchProjectsDashboardDataAction();
+        if (isMounted && data.scratchpadContent) {
+          setContent(data.scratchpadContent);
+        }
+      } catch (err) {
+        console.error("Failed to load scratchpad", err);
+      } finally {
+        if (isMounted) setIsInitialized(true);
+      }
+    }
+    loadLatest();
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  // Debounced auto-save to Neon DB (only after initialized and content changes)
+  useEffect(() => {
+    if (!isInitialized) return;
+
     const timer = setTimeout(() => {
       startTransition(async () => {
         await saveScratchpadAction(content);
@@ -54,7 +78,7 @@ function ScratchpadModalContent({
     }, 1200);
 
     return () => clearTimeout(timer);
-  }, [content]);
+  }, [content, isInitialized]);
 
   const handleConvertTasks = () => {
     const lines = content.split("\n");
