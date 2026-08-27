@@ -633,14 +633,14 @@ export async function updateTransactionAction(
     const existingRows = await sql`SELECT * FROM transactions WHERE id = ${id} LIMIT 1;`;
     if (existingRows.length === 0) return { success: false, error: "Transacción no encontrada" };
 
-    const row = existingRows[0] as any;
+    const row = existingRows[0] as Record<string, unknown>;
     const amount = updates.amount !== undefined ? Number(updates.amount) : Number(row.amount);
     const type = updates.type !== undefined ? updates.type : row.type;
     const category = updates.category !== undefined ? updates.category.toLowerCase().trim() : row.category;
     const account = updates.account !== undefined ? updates.account.toLowerCase().trim() : row.account;
     const notes = updates.notes !== undefined ? updates.notes.trim() : row.notes;
     const isAntExpense = updates.isAntExpense !== undefined ? Boolean(updates.isAntExpense) : Boolean(row.is_ant_expense);
-    const date = updates.date !== undefined ? toDateStr(updates.date) : toDateStr(row.date);
+    const date = updates.date !== undefined ? toDateStr(updates.date) : toDateStr(row.date as string | Date);
 
     await sql`
       UPDATE transactions

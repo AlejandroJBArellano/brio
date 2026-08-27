@@ -435,7 +435,7 @@ export function CommitmentsView({
                   {/* Notes if any */}
                   {cmt.notes && (
                     <p className="mt-3 text-[11px] text-[#8E867B] line-clamp-2 italic bg-[#121110]/50 p-2 rounded-md border border-[#2A2723]/50">
-                      "{cmt.notes}"
+                      &ldquo;{cmt.notes}&rdquo;
                     </p>
                   )}
                 </div>

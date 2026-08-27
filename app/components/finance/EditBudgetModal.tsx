@@ -3,7 +3,7 @@
 import { updateMonthlyBudgetAction } from "@/app/actions/finance";
 import { MonthlyBudget } from "@/lib/types";
 import { Sliders, X } from "lucide-react";
-import { useEffect, useState, useTransition } from "react";
+import { useState, useTransition } from "react";
 
 interface EditBudgetModalProps {
   isOpen: boolean;
@@ -18,24 +18,41 @@ export function EditBudgetModal({
   currentBudget,
   onSuccess,
 }: EditBudgetModalProps) {
-  const [budgetedIncome, setBudgetedIncome] = useState(currentBudget.budgetedIncome.toString());
-  const [budgetedFixed, setBudgetedFixed] = useState(currentBudget.budgetedFixedExpenses.toString());
-  const [budgetedVariable, setBudgetedVariable] = useState(currentBudget.budgetedVariableExpenses.toString());
-  const [dailyAntLimit, setDailyAntLimit] = useState(currentBudget.dailyAntLimit.toString());
+  if (!isOpen) return null;
+
+  return (
+    <EditBudgetModalContent
+      key={`${currentBudget.month}-${currentBudget.year}`}
+      onClose={onClose}
+      currentBudget={currentBudget}
+      onSuccess={onSuccess}
+    />
+  );
+}
+
+function EditBudgetModalContent({
+  onClose,
+  currentBudget,
+  onSuccess,
+}: {
+  onClose: () => void;
+  currentBudget: MonthlyBudget;
+  onSuccess?: () => void;
+}) {
+  const [budgetedIncome, setBudgetedIncome] = useState(
+    currentBudget.budgetedIncome.toString()
+  );
+  const [budgetedFixed, setBudgetedFixed] = useState(
+    currentBudget.budgetedFixedExpenses.toString()
+  );
+  const [budgetedVariable, setBudgetedVariable] = useState(
+    currentBudget.budgetedVariableExpenses.toString()
+  );
+  const [dailyAntLimit, setDailyAntLimit] = useState(
+    currentBudget.dailyAntLimit.toString()
+  );
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
-
-  useEffect(() => {
-    if (isOpen) {
-      setBudgetedIncome(currentBudget.budgetedIncome.toString());
-      setBudgetedFixed(currentBudget.budgetedFixedExpenses.toString());
-      setBudgetedVariable(currentBudget.budgetedVariableExpenses.toString());
-      setDailyAntLimit(currentBudget.dailyAntLimit.toString());
-      setError(null);
-    }
-  }, [isOpen, currentBudget]);
-
-  if (!isOpen) return null;
 
   const numIncome = parseFloat(budgetedIncome) || 0;
   const numFixed = parseFloat(budgetedFixed) || 0;
@@ -70,8 +87,18 @@ export function EditBudgetModal({
   };
 
   const monthNames = [
-    "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
-    "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"
+    "Enero",
+    "Febrero",
+    "Marzo",
+    "Abril",
+    "Mayo",
+    "Junio",
+    "Julio",
+    "Agosto",
+    "Septiembre",
+    "Octubre",
+    "Noviembre",
+    "Diciembre",
   ];
   const monthLabel = `${monthNames[(currentBudget.month || 1) - 1] || "Mes actual"} ${currentBudget.year}`;
 
@@ -122,7 +149,9 @@ export function EditBudgetModal({
               className="w-full rounded-lg border border-[#2A2723] bg-[#121110] px-3.5 py-2 text-sm font-mono text-[#7EA35A] focus:border-[#7EA35A] focus:outline-none font-bold"
               placeholder="0.00"
             />
-            <span className="text-[10px] text-[#8E867B]">Ingresos netos esperados este mes</span>
+            <span className="text-[10px] text-[#8E867B]">
+              Ingresos netos esperados este mes
+            </span>
           </div>
 
           <div className="grid grid-cols-2 gap-3 pt-2 border-t border-[#2A2723]">
@@ -169,7 +198,9 @@ export function EditBudgetModal({
               className="w-full rounded-lg border border-[#2A2723] bg-[#121110] px-3.5 py-2 text-sm font-mono text-[#D99B43] focus:border-[#D99B43] focus:outline-none"
               placeholder="100.00"
             />
-            <span className="text-[10px] text-[#8E867B]">Para calibrar el termómetro hormiga</span>
+            <span className="text-[10px] text-[#8E867B]">
+              Para calibrar el termómetro hormiga
+            </span>
           </div>
 
           {/* Resulting Total Summary */}

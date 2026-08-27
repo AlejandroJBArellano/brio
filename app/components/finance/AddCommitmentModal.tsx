@@ -93,7 +93,11 @@ export function AddCommitmentModal({
     setVariableSchedule(variableSchedule.filter((_, i) => i !== index));
   };
 
-  const handleUpdateScheduleItem = (index: number, field: "date" | "amount" | "note", val: any) => {
+  const handleUpdateScheduleItem = (
+    index: number,
+    field: "date" | "amount" | "note",
+    val: string | number | boolean
+  ) => {
     const updated = [...variableSchedule];
     updated[index] = { ...updated[index], [field]: val };
     setVariableSchedule(updated);

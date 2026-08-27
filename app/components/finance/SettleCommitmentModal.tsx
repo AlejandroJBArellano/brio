@@ -30,7 +30,7 @@ export function SettleCommitmentModal({
   const [account, setAccount] = useState<string>(commitment?.defaultAccount || "dolarapp");
   const [date, setDate] = useState<string>(getTodayDateStr());
   const [notes, setNotes] = useState<string>("");
-  const [selectedScheduleItemId, setSelectedScheduleItemId] = useState<string | undefined>(undefined);
+  const [selectedScheduleItemId, _setSelectedScheduleItemId] = useState<string | undefined>(undefined);
 
   if (!isOpen || !commitment) return null;
 
@@ -38,7 +38,6 @@ export function SettleCommitmentModal({
   const currentPaid = commitment.installmentsPaid || 0;
   const totalInst = commitment.installmentsTotal || 0;
   const isInstallment = commitment.type === "installment";
-  const isVariable = commitment.type === "variable_schedule";
 
   const handleSettle = (e: React.FormEvent) => {
     e.preventDefault();
