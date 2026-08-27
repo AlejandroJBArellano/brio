@@ -3,14 +3,21 @@
 import { saveMorningRitualAction } from "@/app/actions/rituals";
 import { CalendarDaySchedule, HabiticaTask, HabiticaUser } from "@/lib/types";
 import {
+  getTaskPriorityInfo,
+  parseTaskPrefix,
+} from "@/lib/utils";
+import {
   ArrowRight,
   Check,
   Clock,
+  ListTodo,
+  Calendar,
+  Search,
   Sparkles,
   Sun,
   X,
 } from "lucide-react";
-import { useState, useTransition } from "react";
+import { useMemo, useState, useTransition } from "react";
 
 interface MorningRitualModalProps {
   isOpen: boolean;
@@ -43,7 +50,28 @@ export function MorningRitualModal({
   const [selectedTasks, setSelectedTasks] = useState<string[]>(currentMustWins);
   const [energyLevel, setEnergyLevel] = useState<number>(4);
   const [dayIntention, setDayIntention] = useState("");
+  const [filterType, setFilterType] = useState<"todo" | "daily" | "all">("todo");
+  const [searchQuery, setSearchQuery] = useState("");
   const [isPending, startTransition] = useTransition();
+
+  const filteredModalTasks = useMemo(() => {
+    return tasks.filter((t) => {
+      if (t.completed) return false;
+      if (filterType === "todo" && t.type !== "todo") return false;
+      if (filterType === "daily" && t.type !== "daily") return false;
+      if (filterType === "all" && t.type !== "todo" && t.type !== "daily")
+        return false;
+
+      if (searchQuery.trim()) {
+        const q = searchQuery.toLowerCase();
+        return (
+          t.text.toLowerCase().includes(q) ||
+          (t.notes && t.notes.toLowerCase().includes(q))
+        );
+      }
+      return true;
+    });
+  }, [tasks, filterType, searchQuery]);
 
   if (!isOpen) return null;
 
@@ -98,7 +126,7 @@ export function MorningRitualModal({
           <button
             type="button"
             onClick={onClose}
-            className="rounded-lg p-1.5 text-[#8E867B] hover:bg-[#22201D] hover:text-[#F5F2EB] transition-colors"
+            className="rounded-lg p-1.5 text-[#8E867B] hover:bg-[#22201D] hover:text-[#F5F2EB] transition-colors cursor-pointer"
           >
             <X className="h-5 w-5" />
           </button>
@@ -109,8 +137,16 @@ export function MorningRitualModal({
           <div className="mt-5 space-y-4 animate-in fade-in duration-200">
             <div className="rounded-lg border border-[#2A2723] bg-[#121110] p-4">
               <div className="flex items-center justify-between text-xs text-[#8E867B] pb-2 border-b border-[#2A2723]">
-                <span>¡Buenos días, <strong className="text-[#F5F2EB]">{user.profile.name || "Hero"}</strong>! ⚔️</span>
-                <span className="font-mono">Lvl {user.stats.lvl} {user.stats.class}</span>
+                <span>
+                  ¡Buenos días,{" "}
+                  <strong className="text-[#F5F2EB]">
+                    {user.profile.name || "Hero"}
+                  </strong>
+                  ! ⚔️
+                </span>
+                <span className="font-mono">
+                  Lvl {user.stats.lvl} {user.stats.class}
+                </span>
               </div>
               <p className="text-xs text-[#DDD6C9] mt-2">
                 Revisa tus compromisos de hoy en Google Calendar antes de comprometer tu atención:
@@ -118,26 +154,30 @@ export function MorningRitualModal({
             </div>
 
             {/* Calendar list */}
-            <div className="space-y-2 max-h-48 overflow-y-auto pr-1">
-              {schedule.events.length === 0 ? (
-                <div className="p-4 rounded-lg border border-[#2A2723] bg-[#121110] text-center text-xs text-[#8E867B]">
-                  Sin reuniones en el calendario. ¡Todo el día disponible para avanzar tareas clave!
-                </div>
-              ) : (
-                schedule.events.map((ev) => (
+            <div className="space-y-2 max-h-56 overflow-y-auto pr-1">
+              {schedule.events && schedule.events.length > 0 ? (
+                schedule.events.map((evt, i) => (
                   <div
-                    key={ev.id}
-                    className="flex items-center justify-between p-3 rounded-lg border border-[#2A2723] bg-[#121110] text-xs"
+                    key={i}
+                    className="flex items-center justify-between p-2.5 rounded-lg border border-[#2A2723] bg-[#141311] text-xs"
                   >
-                    <div className="flex items-center gap-2">
-                      <Clock className="h-3.5 w-3.5 text-[#4EAB9E]" />
-                      <span className="font-semibold text-[#F5F2EB]">{ev.title}</span>
+                    <div className="flex items-center gap-2.5">
+                      <div className="flex size-6 items-center justify-center rounded bg-[#221D16] text-[#D99B43]">
+                        <Clock className="size-3.5" />
+                      </div>
+                      <span className="font-medium text-[#F5F2EB]">
+                        {evt.title}
+                      </span>
                     </div>
                     <span className="font-mono text-[11px] text-[#8E867B]">
-                      {ev.startTimeFormatted} ({ev.durationMinutes}m)
+                      {evt.startTimeFormatted} - {evt.endTimeFormatted}
                     </span>
                   </div>
                 ))
+              ) : (
+                <div className="p-4 rounded-lg border border-dashed border-[#2A2723] bg-[#121110] text-center text-xs text-[#8E867B]">
+                  No hay reuniones programadas hoy. ¡Día libre para Deep Work! 🚀
+                </div>
               )}
             </div>
 
@@ -145,7 +185,7 @@ export function MorningRitualModal({
               <button
                 type="button"
                 onClick={() => setStep(2)}
-                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-[#D99B43] font-semibold text-xs text-[#121110] hover:bg-[#E8AF59] transition-all shadow-xs"
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-[#D99B43] font-semibold text-xs text-[#121110] hover:bg-[#E8AF59] transition-all shadow-xs cursor-pointer"
               >
                 <span>Definir 3 Must-Wins</span>
                 <ArrowRight className="h-4 w-4" />
@@ -156,62 +196,150 @@ export function MorningRitualModal({
 
         {/* Step 2: Select 3 Must-Wins */}
         {step === 2 && (
-          <div className="mt-5 space-y-4 animate-in fade-in duration-200">
+          <div className="mt-5 space-y-3.5 animate-in fade-in duration-200">
             <div className="flex items-center justify-between">
               <div>
                 <h3 className="font-serif text-sm font-bold text-[#F5F2EB] tracking-tight">
                   Elige tus 3 tareas indispensables
                 </h3>
                 <p className="text-[11px] text-[#8E867B]">
-                  Si solo pudieras completar 3 cosas hoy, ¿cuáles serían?
+                  Selecciona de tus To-Dos de proyectos lo que moverá la aguja hoy.
                 </p>
               </div>
-              <span className="font-mono text-xs font-bold text-[#D99B43]">
+              <span className="font-mono text-xs font-bold text-[#D99B43] bg-[#221D16] border border-[#3D3425] px-2 py-0.5 rounded">
                 {selectedTasks.length}/3 elegidas
               </span>
             </div>
 
-            <div className="space-y-2 max-h-60 overflow-y-auto pr-1">
-              {tasks
-                .filter((t) => !t.completed && (t.type === "todo" || t.type === "daily"))
-                .map((task) => {
+            {/* Filter Tabs & Search in Modal */}
+            <div className="flex items-center justify-between gap-2">
+              <div className="flex items-center rounded-lg border border-[#2A2723] bg-[#121110] p-0.5">
+                <button
+                  type="button"
+                  onClick={() => setFilterType("todo")}
+                  className={`flex items-center gap-1 px-2.5 py-1 rounded text-xs font-medium transition-all cursor-pointer ${
+                    filterType === "todo"
+                      ? "bg-[#1E2825] text-[#4EAB9E] font-semibold border border-[#4EAB9E]/40"
+                      : "text-[#8E867B] hover:text-[#DDD6C9]"
+                  }`}
+                >
+                  <ListTodo className="size-3" />
+                  <span>To-Dos</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setFilterType("daily")}
+                  className={`flex items-center gap-1 px-2.5 py-1 rounded text-xs font-medium transition-all cursor-pointer ${
+                    filterType === "daily"
+                      ? "bg-[#3D3425] text-[#E8AF59] font-semibold border border-[#D99B43]/40"
+                      : "text-[#8E867B] hover:text-[#DDD6C9]"
+                  }`}
+                >
+                  <Calendar className="size-3" />
+                  <span>Dailies</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setFilterType("all")}
+                  className={`flex items-center gap-1 px-2.5 py-1 rounded text-xs font-medium transition-all cursor-pointer ${
+                    filterType === "all"
+                      ? "bg-[#282622] text-[#F5F2EB] font-semibold border border-[#38332D]"
+                      : "text-[#8E867B] hover:text-[#DDD6C9]"
+                  }`}
+                >
+                  <span>Todas</span>
+                </button>
+              </div>
+
+              <div className="relative flex-1 max-w-44">
+                <Search className="absolute left-2 top-1/2 -translate-y-1/2 size-3 text-[#8E867B]" />
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Buscar..."
+                  className="w-full pl-6 pr-2.5 py-1 rounded-lg border border-[#2A2723] bg-[#121110] text-xs text-[#F5F2EB] placeholder:text-[#8E867B] focus:outline-none focus:border-[#D99B43]"
+                />
+              </div>
+            </div>
+
+            {/* Task Options List */}
+            <div className="space-y-1.5 max-h-64 overflow-y-auto pr-1">
+              {filteredModalTasks.length > 0 ? (
+                filteredModalTasks.map((task) => {
                   const isSelected = selectedTasks.includes(task.id);
+                  const { prefix, cleanTitle } = parseTaskPrefix(task.text);
+                  const prio = getTaskPriorityInfo(task.priority || 1);
 
                   return (
                     <div
                       key={task.id}
                       onClick={() => toggleTaskSelection(task.id)}
-                      className={`flex items-center justify-between p-3 rounded-lg border cursor-pointer transition-all ${
+                      className={`flex items-center justify-between p-2.5 rounded-lg border cursor-pointer transition-all ${
                         isSelected
-                          ? "border-[#D99B43]/50 bg-[#221D16] text-[#F5F2EB]"
-                          : "border-[#2A2723] bg-[#121110] text-[#DDD6C9] hover:border-[#38332D]"
+                          ? "border-[#D99B43] bg-[#221D16] text-[#F5F2EB] shadow-xs"
+                          : "border-[#2A2723] bg-[#141311] text-[#DDD6C9] hover:border-[#38332D] hover:bg-[#1A1916]"
                       }`}
                     >
-                      <div className="flex items-center gap-2.5">
+                      <div className="flex items-center gap-2.5 min-w-0 flex-1">
                         <div
-                          className={`flex h-5 w-5 items-center justify-center rounded border ${
+                          className={`flex h-4.5 w-4.5 shrink-0 items-center justify-center rounded border transition-all ${
                             isSelected
                               ? "bg-[#D99B43] border-[#D99B43] text-[#121110]"
-                              : "border-[#38332D] bg-[#181715]"
+                              : "border-[#3D3831] bg-[#121110]"
                           }`}
                         >
                           {isSelected && <Check className="h-3 w-3 stroke-3" />}
                         </div>
-                        <span className="text-xs font-medium">{task.text}</span>
+
+                        <div className="flex items-center gap-1.5 min-w-0 flex-1">
+                          {prefix && (
+                            <span className="shrink-0 rounded border border-[#38332D] bg-[#1C1A17] px-1.5 py-0.2 font-mono text-[9px] font-semibold text-[#C2BAAD]">
+                              {prefix}
+                            </span>
+                          )}
+                          <span className="text-xs font-medium truncate">
+                            {cleanTitle}
+                          </span>
+                        </div>
                       </div>
-                      <span className="text-[10px] uppercase font-mono text-[#8E867B]">
-                        {task.type}
-                      </span>
+
+                      {/* Right Meta: Priority Badge & Type */}
+                      <div className="flex items-center gap-1.5 shrink-0 ml-2">
+                        {/* Priority Badge */}
+                        <span
+                          className={`inline-flex items-center gap-1 rounded border px-1.5 py-0.2 font-mono text-[9px] font-semibold ${prio.badge}`}
+                          title={`Prioridad: ${prio.label}`}
+                        >
+                          <span className={`size-1.5 rounded-full ${prio.dot}`} />
+                          <span>{prio.shortLabel}</span>
+                        </span>
+
+                        <span
+                          className={`text-[9px] uppercase font-mono px-1 py-0.2 rounded border ${
+                            task.type === "daily"
+                              ? "border-[#3D3425] text-[#E8AF59] bg-[#221D16]"
+                              : "border-[#1E2825] text-[#4EAB9E] bg-[#141F1D]"
+                          }`}
+                        >
+                          {task.type}
+                        </span>
+                      </div>
                     </div>
                   );
-                })}
+                })
+              ) : (
+                <div className="p-6 text-center text-xs text-[#8E867B] border border-dashed border-[#2A2723] rounded-lg">
+                  No hay tareas disponibles con los filtros actuales.
+                </div>
+              )}
             </div>
 
             <div className="flex justify-between items-center pt-3 border-t border-[#2A2723]">
               <button
                 type="button"
                 onClick={() => setStep(1)}
-                className="text-xs text-[#8E867B] hover:text-[#DDD6C9]"
+                className="text-xs text-[#8E867B] hover:text-[#DDD6C9] cursor-pointer"
               >
                 Atrás
               </button>
@@ -219,7 +347,7 @@ export function MorningRitualModal({
                 type="button"
                 onClick={() => setStep(3)}
                 disabled={selectedTasks.length === 0}
-                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-[#D99B43] font-semibold text-xs text-[#121110] hover:bg-[#E8AF59] transition-all shadow-xs disabled:opacity-50"
+                className="inline-flex items-center gap-2 px-5 py-2 rounded-lg bg-[#D99B43] font-semibold text-xs text-[#121110] hover:bg-[#E8AF59] transition-all shadow-xs disabled:opacity-50 cursor-pointer"
               >
                 <span>Alinear Energía</span>
                 <ArrowRight className="h-4 w-4" />
@@ -230,7 +358,7 @@ export function MorningRitualModal({
 
         {/* Step 3: Energy & Day Intention */}
         {step === 3 && (
-          <div className="mt-5 space-y-5 animate-in fade-in duration-200">
+          <div className="mt-5 space-y-4 animate-in fade-in duration-200">
             <div>
               <label className="block text-xs font-bold text-[#F5F2EB] mb-2 font-serif">
                 ¿Cuál es tu nivel de energía física y mental hoy?
@@ -241,14 +369,16 @@ export function MorningRitualModal({
                     key={lvl.level}
                     type="button"
                     onClick={() => setEnergyLevel(lvl.level)}
-                    className={`flex flex-col items-center gap-1 p-3 rounded-lg border text-center transition-all ${
+                    className={`flex flex-col items-center gap-1 p-2.5 rounded-lg border text-center transition-all cursor-pointer ${
                       energyLevel === lvl.level
                         ? "border-[#D99B43]/50 bg-[#221D16] text-[#F5F2EB]"
                         : "border-[#2A2723] bg-[#121110] text-[#8E867B] hover:border-[#38332D]"
                     }`}
                   >
                     <span className="text-xl">{lvl.icon}</span>
-                    <span className="text-[10px] font-mono font-bold mt-1">Lvl {lvl.level}</span>
+                    <span className="text-[10px] font-medium leading-tight">
+                      {lvl.label}
+                    </span>
                   </button>
                 ))}
               </div>
@@ -256,14 +386,14 @@ export function MorningRitualModal({
 
             <div>
               <label className="block text-xs font-bold text-[#F5F2EB] mb-1.5 font-serif">
-                Intención / Mantram del Día (opcional)
+                Intención o Tema del Día (Opcional)
               </label>
               <input
                 type="text"
-                placeholder="Ej. Foco implacable en la mañana, cero multitarea..."
+                placeholder="p. ej. Foco implacable en el MVP, calma bajo presión..."
                 value={dayIntention}
                 onChange={(e) => setDayIntention(e.target.value)}
-                className="w-full rounded-lg border border-[#2A2723] bg-[#121110] px-3.5 py-2.5 text-xs text-[#F5F2EB] placeholder:text-[#8E867B] focus:border-[#D99B43] focus:outline-none transition-all"
+                className="w-full rounded-lg border border-[#2A2723] bg-[#121110] px-3.5 py-2 text-xs text-[#F5F2EB] placeholder:text-[#8E867B] focus:border-[#D99B43] focus:outline-none"
               />
             </div>
 
@@ -271,7 +401,7 @@ export function MorningRitualModal({
               <button
                 type="button"
                 onClick={() => setStep(2)}
-                className="text-xs text-[#8E867B] hover:text-[#DDD6C9]"
+                className="text-xs text-[#8E867B] hover:text-[#DDD6C9] cursor-pointer"
               >
                 Atrás
               </button>
@@ -279,10 +409,10 @@ export function MorningRitualModal({
                 type="button"
                 onClick={handleFinish}
                 disabled={isPending}
-                className="inline-flex items-center gap-2 px-6 py-2.5 rounded-lg bg-[#D99B43] font-semibold text-xs text-[#121110] hover:bg-[#E8AF59] transition-all shadow-md disabled:opacity-50"
+                className="inline-flex items-center gap-2 px-6 py-2.5 rounded-lg bg-[#D99B43] font-semibold text-xs text-[#121110] hover:bg-[#E8AF59] transition-all shadow-xs disabled:opacity-50 cursor-pointer"
               >
                 <Sparkles className="h-4 w-4" />
-                <span>{isPending ? "Activando Brio..." : "¡Iniciar el Día! 🚀"}</span>
+                <span>{isPending ? "Sellando..." : "Sellar Ritual Matutino"}</span>
               </button>
             </div>
           </div>
