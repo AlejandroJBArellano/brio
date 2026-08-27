@@ -577,7 +577,7 @@ export interface HealthDashboardData {
 // Projects & Learning Vault Models
 // ----------------------------------------------------
 
-export type ProjectStatus = "idea" | "in_progress" | "paused" | "launched";
+export type ProjectStatus = "idea" | "in_progress" | "permanent" | "paused" | "launched";
 
 export interface ProjectItem {
   id: string;

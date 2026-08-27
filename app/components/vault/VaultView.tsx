@@ -34,10 +34,11 @@ interface VaultViewProps {
 type VaultTab = "courses" | "books" | "sheet_music" | "resources" | "projects";
 
 const STATUS_LABELS: Record<ProjectStatus, { label: string; color: string }> = {
-  idea: { label: "💡 Idea", color: "border-[#D99B43]/30 bg-[#221D16] text-[#D99B43]" },
-  in_progress: { label: "⚡ En Desarrollo", color: "border-[#4EAB9E]/30 bg-[#162121] text-[#4EAB9E]" },
-  paused: { label: "⏸️ Pausado", color: "border-[#2A2723] bg-[#181715] text-[#8E867B]" },
+  permanent: { label: "♾️ Permanente", color: "border-[#4EAB9E]/40 bg-[#142321] text-[#4EAB9E]" },
+  in_progress: { label: "⚡ En Desarrollo", color: "border-[#D99B43]/30 bg-[#221D16] text-[#D99B43]" },
   launched: { label: "🚀 Lanzado", color: "border-[#7EA35A]/30 bg-[#1C2219] text-[#7EA35A]" },
+  idea: { label: "💡 Idea", color: "border-[#8E867B]/30 bg-[#1A1917] text-[#C2BAAD]" },
+  paused: { label: "⏸️ Pausado", color: "border-[#2A2723] bg-[#181715] text-[#8E867B]" },
 };
 
 export function VaultView({ data, onRefresh, onOpenScratchpad }: VaultViewProps) {
@@ -305,10 +306,11 @@ export function VaultView({ data, onRefresh, onOpenScratchpad }: VaultViewProps)
                           }
                           className={`text-[11px] font-bold px-2.5 py-1 rounded-lg border ${statusMeta.color} bg-[#121110] focus:outline-none cursor-pointer`}
                         >
-                          <option value="idea">💡 Idea</option>
+                          <option value="permanent">♾️ Permanente</option>
                           <option value="in_progress">⚡ En Desarrollo</option>
-                          <option value="paused">⏸️ Pausado</option>
                           <option value="launched">🚀 Lanzado</option>
+                          <option value="idea">💡 Idea</option>
+                          <option value="paused">⏸️ Pausado</option>
                         </select>
 
                         <button
