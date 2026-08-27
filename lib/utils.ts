@@ -24,40 +24,71 @@ export function getTaskValueColor(value: number = 0): {
   badge: string;
   dot: string;
   border: string;
+  label: string;
+  pillBg: string;
 } {
   if (value < -10) {
     return {
-      badge: "bg-red-500/10 text-red-400 border-red-500/20",
+      badge: "bg-red-500/15 text-red-400 border-red-500/30",
       dot: "bg-red-500",
       border: "border-l-red-500",
+      label: "Crítico",
+      pillBg: "bg-red-950/40 text-red-300 border-red-800/40",
     };
   }
   if (value < 0) {
     return {
-      badge: "bg-orange-500/10 text-orange-400 border-orange-500/20",
+      badge: "bg-orange-500/15 text-orange-400 border-orange-500/30",
       dot: "bg-orange-500",
       border: "border-l-orange-500",
+      label: "Urgente",
+      pillBg: "bg-orange-950/40 text-orange-300 border-orange-800/40",
     };
   }
   if (value < 5) {
     return {
-      badge: "bg-amber-500/10 text-amber-300 border-amber-500/20",
+      badge: "bg-amber-500/15 text-amber-300 border-amber-500/30",
       dot: "bg-amber-400",
       border: "border-l-amber-400",
+      label: "Regular",
+      pillBg: "bg-amber-950/40 text-amber-300 border-amber-800/40",
     };
   }
   if (value < 10) {
     return {
-      badge: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
+      badge: "bg-emerald-500/15 text-emerald-400 border-emerald-500/30",
       dot: "bg-emerald-400",
       border: "border-l-emerald-400",
+      label: "Saludable",
+      pillBg: "bg-emerald-950/40 text-emerald-300 border-emerald-800/40",
     };
   }
   return {
-    badge: "bg-sky-500/10 text-sky-400 border-sky-500/20",
+    badge: "bg-sky-500/15 text-sky-400 border-sky-500/30",
     dot: "bg-sky-400",
     border: "border-l-sky-400",
+    label: "Excelente",
+    pillBg: "bg-sky-950/40 text-sky-300 border-sky-800/40",
   };
+}
+
+/**
+ * Extracts bracket prefixes like "[Brio]" or "[Salud]" from task titles
+ * to render them cleanly as archival catalog tags.
+ */
+export function parseTaskPrefix(rawText: string): {
+  prefix: string | null;
+  cleanTitle: string;
+} {
+  if (!rawText) return { prefix: null, cleanTitle: "" };
+  const match = rawText.match(/^\[(.*?)\]\s*(.*)$/);
+  if (match && match[1]) {
+    return {
+      prefix: match[1].trim(),
+      cleanTitle: match[2].trim() || match[1].trim(),
+    };
+  }
+  return { prefix: null, cleanTitle: rawText };
 }
 
 /**

@@ -1,16 +1,20 @@
 "use client";
 
 import { toggleTaskAction } from "@/app/actions/tasks";
-import { HabiticaTag, HabiticaTask } from "@/lib/types";
 import { soundFx } from "@/lib/soundFx";
-import { getTaskValueColor } from "@/lib/utils";
+import { HabiticaTag, HabiticaTask } from "@/lib/types";
+import { getTaskValueColor, parseTaskPrefix } from "@/lib/utils";
 import {
+  Calendar,
   Check,
   CheckSquare,
+  ChevronRight,
   Flame,
+  ListTodo,
   Minus,
   Plus,
   Tag,
+  Zap,
 } from "lucide-react";
 import { useOptimistic, useTransition } from "react";
 
@@ -20,6 +24,7 @@ interface TaskItemProps {
   onSelect?: () => void;
   tags?: HabiticaTag[];
   tagsMap?: Record<string, string>;
+  showTypeBadge?: boolean;
 }
 
 export function TaskItem({
@@ -28,6 +33,7 @@ export function TaskItem({
   onSelect,
   tags,
   tagsMap,
+  showTypeBadge = false,
 }: TaskItemProps) {
   const [isPending, startTransition] = useTransition();
 
@@ -53,6 +59,7 @@ export function TaskItem({
   );
 
   const valueStyle = getTaskValueColor(task.value || 0);
+  const { prefix, cleanTitle } = parseTaskPrefix(task.text);
 
   const handleScore = (
     e: React.MouseEvent,
@@ -80,88 +87,115 @@ export function TaskItem({
   return (
     <div
       onClick={onSelect}
-      className={`group relative flex items-center justify-between rounded-lg border p-3 sm:p-3.5 transition-all cursor-pointer select-none ${
+      className={`group relative flex items-center justify-between px-3.5 py-2.5 sm:px-4 sm:py-3 transition-all cursor-pointer select-none border-b border-[#22201D] last:border-b-0 ${
         isSelected
-          ? "border-[#D99B43] bg-[#201E1A]"
-          : "border-[#2A2723] bg-[#181715] hover:border-[#38332D] hover:bg-[#1C1A17]"
+          ? "bg-[#22201D] border-l-2 border-l-[#D99B43] pl-[13px] sm:pl-[15px]"
+          : "bg-[#181715] hover:bg-[#1D1B18] border-l-2 border-l-transparent"
       } ${optimisticState.completed ? "opacity-45" : "opacity-100"}`}
     >
-      {/* Left Column: Checkbox / Counter + Text & Meta */}
-      <div className="flex items-center gap-3.5 min-w-0 flex-1">
+      {/* Columna Principal: Check / Acciones + Título + Badges */}
+      <div className="flex items-center gap-3 min-w-0 flex-1">
         {/* Checkbox (Todos & Dailies) */}
         {(task.type === "todo" || task.type === "daily") && (
           <button
             type="button"
             onClick={(e) => handleScore(e, "up")}
-            aria-label={optimisticState.completed ? "Mark as uncompleted" : "Mark as completed"}
-            className={`flex size-5.5 shrink-0 items-center justify-center rounded border transition-all ${
+            aria-label={
+              optimisticState.completed
+                ? "Marcar como pendiente"
+                : "Marcar como completada"
+            }
+            className={`flex size-5 shrink-0 items-center justify-center rounded border transition-all ${
               optimisticState.completed
                 ? "border-[#7EA35A] bg-[#7EA35A] text-[#121110] shadow-xs"
-                : "border-[#38332D] bg-[#121110] hover:border-[#D99B43]/60 hover:bg-[#D99B43]/10"
+                : "border-[#3D3831] bg-[#121110] hover:border-[#D99B43]/70 hover:bg-[#D99B43]/10"
             }`}
           >
-            {optimisticState.completed && <Check className="size-3.5 stroke-3" />}
+            {optimisticState.completed && <Check className="size-3.5 stroke-[2.5]" />}
           </button>
         )}
 
-        {/* Counters (Habits) */}
+        {/* Botones de Hábito (+ / -) */}
         {task.type === "habit" && (
           <div className="flex items-center gap-1 shrink-0">
             {task.up !== false && (
               <button
                 type="button"
                 onClick={(e) => handleScore(e, "up")}
-                aria-label="Score habit up"
-                className="flex size-6 items-center justify-center rounded border border-[#2A2723] bg-[#121110] text-[#7EA35A] hover:border-[#7EA35A]/50 hover:bg-[#7EA35A]/15 active:scale-95 transition-all"
+                aria-label="Sumar hábito"
+                title="Anotar hábito positivo (+)"
+                className="flex size-5.5 items-center justify-center rounded border border-[#38332D] bg-[#141311] text-[#7EA35A] hover:border-[#7EA35A]/60 hover:bg-[#7EA35A]/15 active:scale-95 transition-all"
               >
-                <Plus className="size-3.5" />
+                <Plus className="size-3 stroke-[2.5]" />
               </button>
             )}
             {task.down !== false && (
               <button
                 type="button"
                 onClick={(e) => handleScore(e, "down")}
-                aria-label="Score habit down"
-                className="flex size-6 items-center justify-center rounded border border-[#2A2723] bg-[#121110] text-[#E05D52] hover:border-[#E05D52]/50 hover:bg-[#E05D52]/15 active:scale-95 transition-all"
+                aria-label="Restar hábito"
+                title="Anotar hábito negativo (-)"
+                className="flex size-5.5 items-center justify-center rounded border border-[#38332D] bg-[#141311] text-[#E05D52] hover:border-[#E05D52]/60 hover:bg-[#E05D52]/15 active:scale-95 transition-all"
               >
-                <Minus className="size-3.5" />
+                <Minus className="size-3 stroke-[2.5]" />
               </button>
             )}
           </div>
         )}
 
-        {/* Task Title & Tags */}
-        <div className="min-w-0 flex-1 space-y-1">
-          <div className="flex items-center gap-2">
-            <span
-              className={`text-sm font-medium leading-snug tracking-tight text-[#F5F2EB] truncate ${
-                optimisticState.completed ? "line-through text-[#8E867B]" : ""
-              }`}
-            >
-              {task.text}
-            </span>
+        {/* Badge de Tipo si está habilitado */}
+        {showTypeBadge && (
+          <span
+            className={`hidden sm:inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-[10px] font-mono font-semibold uppercase tracking-wider shrink-0 border ${
+              task.type === "daily"
+                ? "border-[#3D3425] bg-[#221D16] text-[#E8AF59]"
+                : task.type === "habit"
+                ? "border-[#1D2619] bg-[#182014] text-[#7EA35A]"
+                : "border-[#1E2825] bg-[#141F1D] text-[#4EAB9E]"
+            }`}
+          >
+            {task.type === "daily" && <Calendar className="size-2.5" />}
+            {task.type === "habit" && <Zap className="size-2.5" />}
+            {task.type === "todo" && <ListTodo className="size-2.5" />}
+            <span>{task.type}</span>
+          </span>
+        )}
 
-            {/* Streak Flame Badge for Dailies */}
-            {task.type === "daily" && (task.streak || 0) > 0 && (
-              <span className="flex items-center gap-0.5 rounded border border-[#3D3425] bg-[#221D16] px-1.5 py-0.2 font-mono text-[10px] font-semibold text-[#D99B43] shrink-0">
-                <Flame className="size-2.5 fill-[#D99B43]" />
-                {task.streak}
+        {/* Contenedor de Título, Prefijo y Metadatos */}
+        <div className="min-w-0 flex-1 flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2.5">
+          {/* Título & Prefijo */}
+          <div className="flex items-center gap-2 min-w-0 flex-1">
+            {prefix && (
+              <span className="shrink-0 rounded border border-[#38332D] bg-[#1C1A17] px-1.5 py-0.5 font-mono text-[10px] font-medium tracking-wide text-[#C2BAAD]">
+                {prefix}
               </span>
             )}
+
+            <span
+              className={`text-xs sm:text-sm font-medium leading-snug tracking-tight text-[#F5F2EB] truncate ${
+                optimisticState.completed
+                  ? "line-through text-[#8E867B]"
+                  : "group-hover:text-white"
+              }`}
+            >
+              {cleanTitle}
+            </span>
           </div>
 
-          {/* Subtitle / Notes preview / Tags */}
-          <div className="flex flex-wrap items-center gap-2 text-xs text-[#8E867B]">
+          {/* Subtítulos / Subtareas / Tags */}
+          <div className="flex items-center gap-2 text-xs text-[#8E867B] shrink-0">
             {totalChecklistCount > 0 && (
-              <span className="flex items-center gap-1 font-mono text-[11px] text-[#8E867B]">
-                <CheckSquare className="size-3 text-[#8E867B]" />
-                {completedChecklistCount}/{totalChecklistCount}
+              <span className="inline-flex items-center gap-1 rounded bg-[#1C1A17] px-1.5 py-0.5 font-mono text-[10px] text-[#8E867B] border border-[#2A2723]">
+                <CheckSquare className="size-2.5 text-[#8E867B]" />
+                <span>
+                  {completedChecklistCount}/{totalChecklistCount}
+                </span>
               </span>
             )}
 
             {task.tags && task.tags.length > 0 && (
-              <div className="flex items-center gap-1.5 overflow-hidden">
-                {task.tags.slice(0, 3).map((tagId, i) => {
+              <div className="flex items-center gap-1.5">
+                {task.tags.slice(0, 2).map((tagId, i) => {
                   const tagName =
                     tagsMap?.[tagId] ||
                     tags?.find((t) => t.id === tagId)?.name ||
@@ -171,16 +205,16 @@ export function TaskItem({
                     <span
                       key={i}
                       title={tagName}
-                      className="inline-flex items-center gap-0.5 rounded border border-[#2E2A25] bg-[#1C1A17] px-1.5 py-0.5 text-[10px] font-medium text-[#C2BAAD] truncate max-w-28"
+                      className="inline-flex items-center gap-1 rounded border border-[#2E2A25] bg-[#191815] px-1.5 py-0.5 text-[10px] font-medium text-[#A69E91] truncate max-w-24 sm:max-w-28"
                     >
                       <Tag className="size-2.5 text-[#8E867B] shrink-0" />
                       <span className="truncate">{tagName}</span>
                     </span>
                   );
                 })}
-                {task.tags.length > 3 && (
+                {task.tags.length > 2 && (
                   <span className="text-[10px] font-mono text-[#8E867B]">
-                    +{task.tags.length - 3}
+                    +{task.tags.length - 2}
                   </span>
                 )}
               </div>
@@ -189,17 +223,51 @@ export function TaskItem({
         </div>
       </div>
 
-      {/* Right Column: Habitica RPG Value Badge */}
-      <div className="ml-3 flex items-center gap-2 shrink-0">
+      {/* Columna Derecha: Salud RPG, Métricas y Flecha */}
+      <div className="ml-3 flex items-center gap-2.5 sm:gap-4 shrink-0">
+        {/* RPG Health Status Badge */}
+        <div
+          className={`hidden md:inline-flex items-center gap-1.5 rounded border px-2 py-0.5 text-[10px] font-mono tracking-tight ${valueStyle.pillBg}`}
+          title={`Salud Habitica: ${(task.value || 0).toFixed(1)} (${valueStyle.label})`}
+        >
+          <span className={`size-1.5 rounded-full ${valueStyle.dot}`} />
+          <span>{valueStyle.label}</span>
+          <span className="opacity-70 tabular-nums text-[9px]">
+            {task.value !== undefined && task.value >= 0 ? "+" : ""}
+            {(task.value || 0).toFixed(1)}
+          </span>
+        </div>
+
+        {/* Indicador de Racha (Dailies) */}
+        {task.type === "daily" && (task.streak || 0) > 0 && (
+          <span
+            className="flex items-center gap-1 rounded border border-[#3D3425] bg-[#221D16] px-1.5 py-0.5 font-mono text-[10px] font-semibold text-[#D99B43]"
+            title={`Racha actual: ${task.streak} días consecutivos`}
+          >
+            <Flame className="size-3 fill-[#D99B43] text-[#D99B43]" />
+            <span className="tabular-nums">{task.streak}</span>
+          </span>
+        )}
+
+        {/* Contador de Hábitos */}
         {task.type === "habit" && (
-          <div className="font-mono text-xs text-[#8E867B] hidden sm:block">
-            +{optimisticState.counterUp} / -{optimisticState.counterDown}
+          <div
+            className="font-mono text-xs tabular-nums text-[#DDD6C9] bg-[#141311] px-2 py-0.5 rounded border border-[#2A2723]"
+            title="Conteo positivo / negativo"
+          >
+            <span className="text-[#7EA35A]">+{optimisticState.counterUp}</span>
+            <span className="text-[#5C564E] mx-1">/</span>
+            <span className="text-[#E05D52]">-{optimisticState.counterDown}</span>
           </div>
         )}
 
-        <div
-          className={`size-2.5 rounded-full border ${valueStyle.badge} transition-transform group-hover:scale-125`}
-          title={`Value Score: ${task.value?.toFixed(1) || 0}`}
+        {/* Flecha de Selección / Inspector */}
+        <ChevronRight
+          className={`size-3.5 transition-transform duration-200 ${
+            isSelected
+              ? "text-[#D99B43] translate-x-0.5"
+              : "text-[#5C564E] group-hover:text-[#DDD6C9]"
+          }`}
         />
       </div>
     </div>
