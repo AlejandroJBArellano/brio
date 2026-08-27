@@ -2,7 +2,6 @@
 
 import { useCommandCenter } from "@/app/components/context/CommandCenterContext";
 import { HeaderStatsRibbon } from "@/app/components/HeaderStatsRibbon";
-import { HybridOmnibar } from "@/app/components/HybridOmnibar";
 import { ModalManager } from "@/app/components/modals/ModalManager";
 import { SetupNotice } from "@/app/components/SetupNotice";
 import { registerServiceWorker } from "@/lib/notifications";
@@ -27,7 +26,7 @@ export function DashboardShellClient({
   isConfigured,
   children,
 }: DashboardShellClientProps) {
-  const { openModal, refreshData } = useCommandCenter();
+  const { openModal } = useCommandCenter();
   const router = useRouter();
 
   // Register Service Worker for Android Chrome PWA and Web Push
@@ -103,15 +102,7 @@ export function DashboardShellClient({
       {/* 2. Setup Guide Banner (Shown only when Habitica credentials absent) */}
       <SetupNotice isConfigured={isConfigured} />
 
-      {/* 3. Global Hybrid Omnibar */}
-      <HybridOmnibar
-        tags={tags}
-        onOpenBatchModal={() => openModal("batch")}
-        onOpenFinanceModal={() => openModal("finance")}
-        onRefreshFinance={refreshData}
-      />
-
-      {/* 4. Active Route Content (Rendered inside independent Suspense streaming boundary) */}
+      {/* 3. Active Route Content (Rendered inside independent Suspense streaming boundary) */}
       <main className="flex-1 w-full flex flex-col">{children}</main>
 
       {/* Floating Action Button (+) for Instant Mobile/Tablet Capture */}
