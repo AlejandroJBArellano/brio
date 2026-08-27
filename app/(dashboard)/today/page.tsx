@@ -1,4 +1,3 @@
-import { fetchCalendarScheduleAction } from "@/app/actions/calendar";
 import { fetchFinanceDashboardDataAction } from "@/app/actions/finance";
 import { fetchHealthDashboardDataAction } from "@/app/actions/health";
 import { fetchTodayRitualAction } from "@/app/actions/rituals";
@@ -22,13 +21,11 @@ async function AsyncTodayContent() {
     habiticaData,
     healthData,
     financeData,
-    calendarData,
     todayRitual,
   ] = await Promise.all([
     fetchDashboardDataAction(),
     fetchHealthDashboardDataAction(),
     fetchFinanceDashboardDataAction(),
-    fetchCalendarScheduleAction(),
     fetchTodayRitualAction(),
   ]);
 
@@ -38,8 +35,8 @@ async function AsyncTodayContent() {
       tasks={habiticaData.tasks}
       healthData={healthData}
       financeData={financeData}
-      calendarSchedule={calendarData.schedule}
       todayRitual={todayRitual}
     />
   );
 }
+

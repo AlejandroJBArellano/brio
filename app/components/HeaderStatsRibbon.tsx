@@ -1,7 +1,6 @@
 "use client";
 
 import { toggleSleepAction } from "@/app/actions/tasks";
-import { BrioLogo } from "@/app/components/BrioLogo";
 import { useCommandCenter } from "@/app/components/context/CommandCenterContext";
 import { useSession } from "@/lib/auth-client";
 import { HabiticaUser } from "@/lib/types";
@@ -147,12 +146,6 @@ export function HeaderStatsRibbon({ user }: HeaderStatsRibbonProps) {
     <header className="rounded-xl border border-[#2A2723] bg-[#181715] px-3.5 py-2.5 transition-all relative z-30 flex items-center justify-between gap-3 shadow-xs">
       {/* Left: Branding + Nav Tabs (Single Row) */}
       <div className="flex items-center gap-3 min-w-0">
-        <Link href="/today" className="shrink-0 flex items-center gap-2 hover:opacity-90 transition-opacity">
-          <BrioLogo size="sm" />
-        </Link>
-
-        <div className="hidden sm:block h-4 w-px bg-[#2A2723]" />
-
         {/* Horizontal Navigation Pills */}
         <nav className="flex items-center gap-1 overflow-x-auto no-scrollbar py-0.5">
           {NAV_ITEMS.map((item) => {
@@ -163,24 +156,21 @@ export function HeaderStatsRibbon({ user }: HeaderStatsRibbonProps) {
               <Link
                 key={item.href}
                 href={item.href}
-                className={`group flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs transition-all font-sans shrink-0 cursor-pointer ${
-                  active
+                className={`group flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs transition-all font-sans shrink-0 cursor-pointer ${active
                     ? "border border-[#3D3425] bg-[#221D16] text-[#D99B43] font-bold shadow-xs"
                     : "border border-transparent text-[#8E867B] hover:text-[#DDD6C9] hover:bg-[#1D1B18]"
-                }`}
+                  }`}
               >
                 <Icon
-                  className={`size-3.5 transition-colors ${
-                    active ? "text-[#D99B43]" : "text-[#8E867B] group-hover:text-[#DDD6C9]"
-                  }`}
+                  className={`size-3.5 transition-colors ${active ? "text-[#D99B43]" : "text-[#8E867B] group-hover:text-[#DDD6C9]"
+                    }`}
                 />
                 <span>{item.label}</span>
                 <kbd
-                  className={`hidden lg:inline-block rounded px-1 py-0.2 font-mono text-[9px] transition-colors ${
-                    active
+                  className={`hidden lg:inline-block rounded px-1 py-0.2 font-mono text-[9px] transition-colors ${active
                       ? "bg-[#2E2419] text-[#D99B43] border border-[#4A3B25]"
                       : "bg-[#141312] text-[#736B60] border border-[#22201D]"
-                  }`}
+                    }`}
                 >
                   {item.shortcut}
                 </kbd>
@@ -354,11 +344,10 @@ export function HeaderStatsRibbon({ user }: HeaderStatsRibbonProps) {
                   type="button"
                   onClick={handleToggleRest}
                   disabled={isPending}
-                  className={`w-full flex items-center justify-between p-2.5 rounded-lg border text-xs font-mono transition-all cursor-pointer ${
-                    isResting
+                  className={`w-full flex items-center justify-between p-2.5 rounded-lg border text-xs font-mono transition-all cursor-pointer ${isResting
                       ? "border-[#D99B43]/50 bg-[#D99B43]/15 text-[#E8AF59]"
                       : "border-[#2A2723] bg-[#121110] text-[#DDD6C9] hover:border-[#38332D]"
-                  }`}
+                    }`}
                 >
                   <div className="flex items-center gap-2">
                     <Bed className="size-4" />

@@ -211,7 +211,7 @@ export function VaultSkeleton() {
 
 export function TodaySkeleton() {
   return (
-    <div className="space-y-4 animate-pulse font-sans">
+    <div className="max-w-2xl mx-auto space-y-4 animate-pulse font-sans">
       <div className="h-32 rounded-xl border border-[#2A2723] bg-[#181715] p-5 space-y-3">
         <div className="h-4 w-32 rounded bg-[#22201D]" />
         <div className="h-6 w-48 rounded bg-[#22201D]" />

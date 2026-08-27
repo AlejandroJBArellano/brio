@@ -10,7 +10,6 @@ import { useCommandCenter } from "@/app/components/context/CommandCenterContext"
 import { getHormonalStatus } from "@/lib/hormonal";
 import { soundFx } from "@/lib/soundFx";
 import {
-  CalendarDaySchedule,
   FinanceDashboardData,
   HabiticaTask,
   HabiticaUser,
@@ -18,10 +17,12 @@ import {
   RitualLog,
 } from "@/lib/types";
 import {
-  Calendar as CalendarIcon,
+  ArrowRight,
+  Award,
   Check,
   CheckCircle2,
-  Clock,
+  ChevronDown,
+  ChevronUp,
   Droplet,
   Flame,
   Moon,
@@ -29,6 +30,7 @@ import {
   Plus,
   Sparkles,
   Sun,
+  Trophy,
   Wallet,
   Zap,
 } from "lucide-react";
@@ -40,7 +42,6 @@ interface TodayViewClientProps {
   tasks: HabiticaTask[];
   healthData: HealthDashboardData;
   financeData: FinanceDashboardData;
-  calendarSchedule: CalendarDaySchedule;
   todayRitual: RitualLog | null;
 }
 
@@ -49,20 +50,32 @@ export function TodayViewClient({
   tasks,
   healthData,
   financeData,
-  calendarSchedule,
   todayRitual,
 }: TodayViewClientProps) {
   const router = useRouter();
   const { openModal } = useCommandCenter();
   const [isPending, startTransition] = useTransition();
 
-  // Determine automatic timing based on current hour in Mexico City
+  // State for collapsible drawer of other tasks/habits
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [isSuppDetailsOpen, setIsSuppDetailsOpen] = useState(false);
+
+  // Time of day detection
   const currentHour = new Date().getHours();
   const defaultTiming =
     currentHour < 13 ? "Mañana" : currentHour < 19 ? "Tarde" : "Noche";
   const [activeSuppTiming, setActiveSuppTiming] = useState<
     "Mañana" | "Tarde" | "Noche" | "Todos"
   >(defaultTiming);
+
+  // Optimistic Tasks
+  const [optimisticTasks, setOptimisticTasks] = useOptimistic(
+    tasks,
+    (state, taskId: string) =>
+      state.map((t) =>
+        t.id === taskId ? { ...t, completed: !t.completed } : t
+      )
+  );
 
   // Health Data
   const todayHealth = healthData.todayHealth;
@@ -76,7 +89,9 @@ export function TodayViewClient({
     rawSupplements,
     (state, action: SupplementAction) => {
       if (action.type === "toggle") {
-        return state.map((s) => (s.id === action.id ? { ...s, taken: !s.taken } : s));
+        return state.map((s) =>
+          s.id === action.id ? { ...s, taken: !s.taken } : s
+        );
       }
       if (action.type === "batch") {
         const term = action.timing.toLowerCase();
@@ -105,11 +120,19 @@ export function TodayViewClient({
     }
   );
 
-  const waterMl = todayHealth?.waterMl || 0;
+  const rawWaterMl = todayHealth?.waterMl || 0;
+  const [optimisticWater, setOptimisticWater] = useOptimistic(
+    rawWaterMl,
+    (state, added: number) => state + added
+  );
   const waterTarget = 3000;
-  const waterPercent = Math.min(100, Math.round((waterMl / waterTarget) * 100));
+  const waterPercent = Math.min(
+    100,
+    Math.round((optimisticWater / waterTarget) * 100)
+  );
+  const isWaterComplete = optimisticWater >= waterTarget;
 
-  // Finance Data
+  // Finance Data (Ant Expenses)
   const antSpent = financeData.totalAntExpensesToday || 0;
   const antLimit = financeData.currentBudget?.dailyAntLimit || 150;
   const antRemaining =
@@ -119,6 +142,46 @@ export function TodayViewClient({
     Math.round((antSpent / Math.max(1, antLimit)) * 100)
   );
   const isAntExceeded = antSpent > antLimit;
+
+  // Must-Win Tasks
+  const mustWinIds = useMemo(
+    () => todayRitual?.mustWinTasks || [],
+    [todayRitual]
+  );
+  const mustWinTasks = useMemo(
+    () => optimisticTasks.filter((t) => mustWinIds.includes(t.id)),
+    [optimisticTasks, mustWinIds]
+  );
+  const completedMustWins = mustWinTasks.filter((t) => t.completed).length;
+  const totalMustWins = mustWinTasks.length;
+  const allMustWinsCompleted =
+    totalMustWins > 0 && completedMustWins === totalMustWins;
+
+  // Find the current active sequential task
+  const activeMustWin = useMemo(() => {
+    return mustWinTasks.find((t) => !t.completed) || null;
+  }, [mustWinTasks]);
+
+  const activeMustWinIndex = activeMustWin
+    ? mustWinTasks.findIndex((t) => t.id === activeMustWin.id)
+    : -1;
+
+  // Habitica Dailies for today (excluding must-wins)
+  const dailyTasks = useMemo(
+    () =>
+      optimisticTasks.filter(
+        (t) =>
+          t.type === "daily" ||
+          (t.type === "todo" && !mustWinIds.includes(t.id))
+      ),
+    [optimisticTasks, mustWinIds]
+  );
+
+  const pendingDailiesCount = dailyTasks.filter((t) => !t.completed).length;
+  const totalOtherPending =
+    (totalMustWins - completedMustWins > 1
+      ? totalMustWins - completedMustWins - 1
+      : 0) + pendingDailiesCount;
 
   // Filtered supplements by timing
   const filteredSupplements = useMemo(() => {
@@ -156,38 +219,10 @@ export function TodayViewClient({
   const allTakenInActiveTiming =
     filteredSupplements.length > 0 &&
     filteredSupplements.every((s) => s.taken);
-  const takenCountInActiveTiming = filteredSupplements.filter((s) => s.taken).length;
-  const totalSupplementsTaken = optimisticSupplements.filter((s) => s.taken).length;
-
-  // Must-Win Tasks
-  const mustWinIds = useMemo(
-    () => todayRitual?.mustWinTasks || [],
-    [todayRitual]
-  );
-  const mustWinTasks = tasks.filter((t) => mustWinIds.includes(t.id));
-  const completedMustWins = mustWinTasks.filter((t) => t.completed).length;
-  const mustWinPercent =
-    mustWinTasks.length > 0
-      ? Math.round((completedMustWins / mustWinTasks.length) * 100)
-      : 0;
-
-  // Habitica Dailies for today
-  const dailyTasks = useMemo(
-    () =>
-      tasks.filter(
-        (t) =>
-          t.type === "daily" ||
-          (t.type === "todo" && !mustWinIds.includes(t.id))
-      ),
-    [tasks, mustWinIds]
-  );
-
-  // Calendar Events
-  const nextEvent =
-    calendarSchedule.nextEvent ||
-    calendarSchedule.events.find(
-      (e) => e.status === "upcoming" || e.status === "now"
-    );
+  const takenCountInActiveTiming =
+    filteredSupplements.filter((s) => s.taken).length;
+  const pendingInActiveTiming =
+    filteredSupplements.length - takenCountInActiveTiming;
 
   // Circadian Hormonal Status
   const hormonalStatus = getHormonalStatus();
@@ -232,14 +267,18 @@ export function TodayViewClient({
   const handleQuickAddWater = (ml: number) => {
     soundFx.waterLogged();
     startTransition(async () => {
+      setOptimisticWater(ml);
       await logWaterAction(ml);
+      router.refresh();
     });
   };
 
   const handleToggleTask = (task: HabiticaTask) => {
     soundFx.taskComplete();
     startTransition(async () => {
+      setOptimisticTasks(task.id);
       await toggleTaskAction(task.id, "up");
+      router.refresh();
     });
   };
 
@@ -248,13 +287,18 @@ export function TodayViewClient({
   );
   const hasEveningReview = Boolean(todayRitual?.reflection);
 
+  const isMorningWindow = currentHour < 13;
+  const isEveningWindow = currentHour >= 19;
+
   return (
-    <div className="space-y-6 pb-20 sm:pb-12 font-sans animate-in fade-in duration-300">
-      {/* 1. HERO HEADER: Greeting & Hormonal State */}
-      <div className="rounded-lg border border-[#2A2723] bg-[#181715] p-5 sm:p-6 shadow-sm">
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+    <div className="max-w-2xl mx-auto space-y-4 pb-20 sm:pb-12 font-sans animate-in fade-in duration-300">
+      {/* ========================================================================= */}
+      {/* 1. HEADER CONTEXTUAL (Clean, Mobile-First)                                */}
+      {/* ========================================================================= */}
+      <div className="rounded-xl border border-[#2A2723] bg-[#181715] p-4 sm:p-5 shadow-xs">
+        <div className="flex items-center justify-between gap-3">
           <div>
-            <div className="flex items-center gap-2 mb-1">
+            <div className="flex items-center gap-2 mb-0.5">
               <span className="font-mono text-xs uppercase tracking-wider text-[#8E867B] capitalize">
                 {todayFormatted}
               </span>
@@ -263,738 +307,627 @@ export function TodayViewClient({
                 Semana {Math.ceil(new Date().getDate() / 7)}
               </span>
             </div>
-            <h1 className="font-serif text-xl sm:text-2xl font-bold tracking-tight text-[#F5F2EB]">
+            <h1 className="font-serif text-lg sm:text-xl font-bold tracking-tight text-[#F5F2EB]">
               Comando del Día
             </h1>
           </div>
 
-          {/* Circadian & Hormonal Badge + Actions */}
-          <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+          {/* Circadian Badge & Quick Ritual Openers */}
+          <div className="flex items-center gap-1.5 sm:gap-2">
             <div
-              className="flex items-center gap-2 px-3 py-1.5 rounded-lg border text-xs font-mono font-medium"
+              className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg border text-[11px] font-mono font-medium"
               style={{
                 backgroundColor: `${hormonalStatus.currentPhase.color}12`,
                 borderColor: `${hormonalStatus.currentPhase.color}35`,
                 color: hormonalStatus.currentPhase.color,
               }}
+              title={`${hormonalStatus.currentPhase.name}: ${hormonalStatus.remainingFormatted} restantes`}
             >
               <span>{hormonalStatus.currentPhase.icon}</span>
-              <span className="font-bold">{hormonalStatus.currentPhase.shortName}</span>
-              <span className="text-[10px] opacity-75">
-                ({hormonalStatus.remainingFormatted} restantes)
+              <span className="font-bold hidden xs:inline sm:inline">
+                {hormonalStatus.currentPhase.shortName}
               </span>
             </div>
 
-            <div className="flex items-center gap-1.5">
-              <button
-                type="button"
-                onClick={() => openModal("morningRitual")}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all cursor-pointer ${
-                  hasMorningRitual
-                    ? "border-[#7EA35A]/40 bg-[#1C2219] text-[#7EA35A]"
-                    : "border-[#D99B43]/40 bg-[#221D16] text-[#D99B43] hover:bg-[#2A2319]"
-                }`}
-              >
-                <Sun className="h-3.5 w-3.5" />
-                <span>Ritual AM</span>
-                {hasMorningRitual && <Check className="h-3 w-3 ml-0.5 stroke-3" />}
-              </button>
-
-              <button
-                type="button"
-                onClick={() => openModal("eveningReview")}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all cursor-pointer ${
-                  hasEveningReview
-                    ? "border-[#7EA35A]/40 bg-[#1C2219] text-[#7EA35A]"
-                    : "border-[#2A2723] bg-[#121110] text-[#8E867B] hover:text-[#DDD6C9]"
-                }`}
-              >
-                <Moon className="h-3.5 w-3.5" />
-                <span>Cierre PM</span>
-                {hasEveningReview && <Check className="h-3 w-3 ml-0.5 stroke-3" />}
-              </button>
-
-              <button
-                type="button"
-                onClick={() => openModal("focus")}
-                className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-[#38332D] bg-[#121110] text-[#DDD6C9] hover:border-[#D99B43]/40 hover:text-[#D99B43] text-xs font-semibold transition-all cursor-pointer"
-                title="Modo Focus Zen (⌘P)"
-              >
-                <Zap className="h-3.5 w-3.5 text-[#D99B43]" />
-                <span>Focus Zen</span>
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* 2. EXECUTIVE METRICS RIBBON (Responsive Grid: 1 col on mobile, 2 col on tablet, 4 col on desktop) */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5 sm:gap-4">
-        {/* Metric 1: Must-Win Priorities */}
-        <div className="rounded-lg border border-[#2A2723] bg-[#181715] p-4.5 shadow-sm space-y-2.5">
-          <div className="flex items-center justify-between">
-            <span className="font-serif text-xs font-bold text-[#F5F2EB] flex items-center gap-1.5">
-              <Zap className="h-3.5 w-3.5 text-[#D99B43]" />
-              <span>Victorias Must-Win</span>
-            </span>
-            <span className="font-mono text-[10px] font-bold text-[#D99B43] bg-[#221D16] px-1.5 py-0.5 rounded border border-[#D99B43]/30">
-              {mustWinPercent}%
-            </span>
-          </div>
-          <div className="flex items-baseline gap-1.5">
-            <span className="font-mono text-2xl font-bold text-[#F5F2EB]">
-              {completedMustWins}
-            </span>
-            <span className="font-mono text-xs text-[#8E867B]">
-              / {mustWinTasks.length || 3} tareas clave
-            </span>
-          </div>
-          <div className="h-1.5 w-full rounded-full bg-[#121110] border border-[#2A2723] overflow-hidden">
-            <div
-              className="h-full bg-[#D99B43] transition-all duration-300"
-              style={{ width: `${mustWinPercent}%` }}
-            />
-          </div>
-        </div>
-
-        {/* Metric 2: Daily Hydration */}
-        <div className="rounded-lg border border-[#2A2723] bg-[#181715] p-4.5 shadow-sm space-y-2.5">
-          <div className="flex items-center justify-between">
-            <span className="font-serif text-xs font-bold text-[#F5F2EB] flex items-center gap-1.5">
-              <Droplet className="h-3.5 w-3.5 text-[#4EAB9E]" />
-              <span>Hidratación</span>
-            </span>
-            <span className="font-mono text-[10px] font-bold text-[#4EAB9E] bg-[#141C1A] px-1.5 py-0.5 rounded border border-[#4EAB9E]/30">
-              {waterPercent}%
-            </span>
-          </div>
-          <div className="flex items-baseline gap-1.5">
-            <span className="font-mono text-2xl font-bold text-[#F5F2EB]">
-              {waterMl}
-            </span>
-            <span className="font-mono text-xs text-[#8E867B]">
-              / {waterTarget} ml
-            </span>
-          </div>
-          <div className="h-1.5 w-full rounded-full bg-[#121110] border border-[#2A2723] overflow-hidden">
-            <div
-              className="h-full bg-[#4EAB9E] transition-all duration-300"
-              style={{ width: `${waterPercent}%` }}
-            />
-          </div>
-        </div>
-
-        {/* Metric 3: Ant Expenses */}
-        <div className="rounded-lg border border-[#2A2723] bg-[#181715] p-4.5 shadow-sm space-y-2.5">
-          <div className="flex items-center justify-between">
-            <span className="font-serif text-xs font-bold text-[#F5F2EB] flex items-center gap-1.5">
-              <Wallet className="h-3.5 w-3.5 text-[#E05D52]" />
-              <span>Gastos Hormiga</span>
-            </span>
-            <span
-              className={`font-mono text-[10px] font-bold px-1.5 py-0.5 rounded border ${
-                isAntExceeded
-                  ? "bg-[#221716] text-[#E05D52] border-[#E05D52]/30"
-                  : "bg-[#141813] text-[#7EA35A] border-[#7EA35A]/30"
+            <button
+              type="button"
+              onClick={() => openModal("morningRitual")}
+              className={`p-1.5 sm:px-2.5 sm:py-1 rounded-lg text-xs font-semibold border transition-all cursor-pointer flex items-center gap-1 ${
+                hasMorningRitual
+                  ? "border-[#7EA35A]/40 bg-[#1C2219] text-[#7EA35A]"
+                  : "border-[#2A2723] bg-[#121110] text-[#8E867B] hover:text-[#DDD6C9]"
               }`}
+              title="Ritual Matutino"
             >
-              {isAntExceeded ? "Excedido" : `$${antRemaining.toFixed(0)} disp.`}
-            </span>
-          </div>
-          <div className="flex items-baseline gap-1.5">
-            <span className="font-mono text-2xl font-bold text-[#F5F2EB]">
-              ${antSpent.toFixed(0)}
-            </span>
-            <span className="font-mono text-xs text-[#8E867B]">
-              / ${antLimit} MXN
-            </span>
-          </div>
-          <div className="h-1.5 w-full rounded-full bg-[#121110] border border-[#2A2723] overflow-hidden">
-            <div
-              className={`h-full transition-all duration-300 ${
-                isAntExceeded
-                  ? "bg-[#E05D52]"
-                  : antPercent >= 80
-                  ? "bg-[#D99B43]"
-                  : "bg-[#7EA35A]"
-              }`}
-              style={{ width: `${antPercent}%` }}
-            />
-          </div>
-        </div>
+              <Sun className="h-3.5 w-3.5" />
+              <span className="hidden sm:inline">AM</span>
+              {hasMorningRitual && <Check className="h-3 w-3 stroke-3" />}
+            </button>
 
-        {/* Metric 4: Supplements Progress */}
-        <div className="rounded-lg border border-[#2A2723] bg-[#181715] p-4.5 shadow-sm space-y-2.5">
-          <div className="flex items-center justify-between">
-            <span className="font-serif text-xs font-bold text-[#F5F2EB] flex items-center gap-1.5">
-              <Pill className="h-3.5 w-3.5 text-[#7EA35A]" />
-              <span>Suplementación</span>
-            </span>
-            <span className="font-mono text-[10px] font-bold text-[#7EA35A] bg-[#1C2219] px-1.5 py-0.5 rounded border border-[#7EA35A]/30">
-              {activeSuppTiming}
-            </span>
-          </div>
-          <div className="flex items-baseline gap-1.5">
-            <span className="font-mono text-2xl font-bold text-[#F5F2EB]">
-              {totalSupplementsTaken}
-            </span>
-            <span className="font-mono text-xs text-[#8E867B]">
-              / {optimisticSupplements.length} totales hoy
-            </span>
-          </div>
-          <div className="h-1.5 w-full rounded-full bg-[#121110] border border-[#2A2723] overflow-hidden">
-            <div
-              className="h-full bg-[#7EA35A] transition-all duration-300"
-              style={{
-                width: `${
-                  optimisticSupplements.length > 0
-                    ? (totalSupplementsTaken / optimisticSupplements.length) * 100
-                    : 0
-                }%`,
-              }}
-            />
+            <button
+              type="button"
+              onClick={() => openModal("eveningReview")}
+              className={`p-1.5 sm:px-2.5 sm:py-1 rounded-lg text-xs font-semibold border transition-all cursor-pointer flex items-center gap-1 ${
+                hasEveningReview
+                  ? "border-[#7EA35A]/40 bg-[#1C2219] text-[#7EA35A]"
+                  : "border-[#2A2723] bg-[#121110] text-[#8E867B] hover:text-[#DDD6C9]"
+              }`}
+              title="Cierre Nocturno"
+            >
+              <Moon className="h-3.5 w-3.5" />
+              <span className="hidden sm:inline">PM</span>
+              {hasEveningReview && <Check className="h-3 w-3 stroke-3" />}
+            </button>
           </div>
         </div>
       </div>
 
-      {/* 3. MAIN WORKSPACE GRID: Left (Focus & Agenda) vs Right (Biometrics & Finances) */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        {/* LEFT COLUMN: 7 Columns on Desktop */}
-        <div className="lg:col-span-7 space-y-6">
-          {/* Card A: Must-Win Priorities */}
-          <div className="rounded-lg border border-[#2A2723] bg-[#181715] p-5 shadow-sm space-y-4">
-            <div className="flex items-center justify-between pb-3 border-b border-[#2A2723]">
-              <div className="flex items-center gap-2.5">
-                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#221D16] text-[#D99B43] border border-[#D99B43]/30">
-                  <Zap className="h-4 w-4" />
-                </div>
-                <div>
-                  <h3 className="font-serif text-sm font-bold text-[#F5F2EB]">
-                    Prioridades Must-Win de Hoy
-                  </h3>
-                  <p className="text-[11px] text-[#8E867B] font-mono">
-                    {completedMustWins} de {mustWinTasks.length} victorias conseguidas
-                  </p>
-                </div>
-              </div>
-
-              <button
-                type="button"
-                onClick={() => openModal("morningRitual")}
-                className="text-xs font-semibold text-[#D99B43] hover:text-[#E8AF59] transition-colors cursor-pointer"
-              >
-                Definir en Ritual AM →
-              </button>
+      {/* ========================================================================= */}
+      {/* 2. TIME-OF-DAY INTELLIGENT RITUAL BANNER (Contextual Prompts)             */}
+      {/* ========================================================================= */}
+      {isMorningWindow && !hasMorningRitual && (
+        <div className="rounded-xl border border-[#D99B43]/40 bg-[#221D16] p-4 flex items-center justify-between gap-3 shadow-xs">
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[#D99B43]/20 text-[#D99B43] border border-[#D99B43]/40">
+              <Sun className="h-4.5 w-4.5" />
             </div>
+            <div className="truncate">
+              <h3 className="font-serif text-xs sm:text-sm font-bold text-[#F5F2EB] truncate">
+                Inicia tu Ritual Matutino
+              </h3>
+              <p className="text-[11px] text-[#D99B43] font-mono truncate">
+                Define tus 3 Victorias Clave de hoy
+              </p>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={() => openModal("morningRitual")}
+            className="px-3 py-1.5 rounded-lg bg-[#D99B43] hover:bg-[#E8AF59] text-[#121110] font-bold text-xs shadow-xs transition-all cursor-pointer shrink-0 flex items-center gap-1 font-mono"
+          >
+            <span>Iniciar</span>
+            <ArrowRight className="h-3 w-3" />
+          </button>
+        </div>
+      )}
 
-            {mustWinTasks.length === 0 ? (
-              <div className="rounded-lg border border-dashed border-[#2A2723] bg-[#121110] p-6 text-center space-y-3">
-                <Sparkles className="h-8 w-8 text-[#D99B43] mx-auto opacity-80" />
-                <div>
-                  <h4 className="font-serif text-sm font-bold text-[#F5F2EB]">
-                    Aún no defines tus 3 Victorias Diarias
-                  </h4>
-                  <p className="text-xs text-[#8E867B] max-w-sm mx-auto mt-1 font-mono">
-                    Elige las 3 tareas de mayor impacto en tu Ritual Matutino para alinear tu energía dopaminérgica.
-                  </p>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => openModal("morningRitual")}
-                  className="px-4 py-2 rounded-lg bg-[#D99B43] hover:bg-[#E8AF59] text-[#121110] font-bold text-xs shadow-xs transition-all cursor-pointer inline-flex items-center gap-1.5"
-                >
-                  <Sun className="h-3.5 w-3.5" />
-                  <span>Iniciar Ritual Matutino</span>
-                </button>
-              </div>
-            ) : (
-              <div className="space-y-2">
-                {mustWinTasks.map((task, idx) => (
-                  <div
-                    key={task.id}
-                    onClick={() => handleToggleTask(task)}
-                    className={`flex items-start justify-between p-3.5 rounded-lg border transition-all cursor-pointer select-none ${
-                      task.completed
-                        ? "bg-[#141813] border-[#7EA35A]/30 text-[#8E867B]"
-                        : "bg-[#121110] border-[#2A2723] hover:border-[#D99B43]/40 text-[#F5F2EB]"
-                    }`}
-                  >
-                    <div className="flex items-start gap-3 flex-1">
-                      <div
-                        className={`flex h-5 w-5 shrink-0 items-center justify-center rounded border mt-0.5 transition-colors ${
-                          task.completed
-                            ? "bg-[#7EA35A] border-[#7EA35A] text-[#121110] font-bold"
-                            : "border-[#38332D] bg-[#181715]"
-                        }`}
-                      >
-                        {task.completed && <Check className="h-3.5 w-3.5 stroke-3" />}
-                      </div>
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <span className="font-mono text-[10px] font-bold text-[#D99B43]">
-                            #{idx + 1}
-                          </span>
-                          <span
-                            className={`text-xs font-semibold ${
-                              task.completed
-                                ? "line-through text-[#8E867B]"
-                                : "text-[#F5F2EB]"
-                            }`}
-                          >
-                            {task.text}
-                          </span>
-                        </div>
-                        {task.notes && (
-                          <p className="text-[11px] text-[#8E867B] mt-0.5 line-clamp-1 font-mono">
-                            {task.notes}
-                          </p>
-                        )}
-                      </div>
-                    </div>
+      {isEveningWindow && !hasEveningReview && (
+        <div className="rounded-xl border border-[#4EAB9E]/40 bg-[#141C1A] p-4 flex items-center justify-between gap-3 shadow-xs">
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[#4EAB9E]/20 text-[#4EAB9E] border border-[#4EAB9E]/40">
+              <Moon className="h-4.5 w-4.5" />
+            </div>
+            <div className="truncate">
+              <h3 className="font-serif text-xs sm:text-sm font-bold text-[#F5F2EB] truncate">
+                Cierre & Reflexión del Día
+              </h3>
+              <p className="text-[11px] text-[#4EAB9E] font-mono truncate">
+                Revisa tus victorias y despeja la mente
+              </p>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={() => openModal("eveningReview")}
+            className="px-3 py-1.5 rounded-lg bg-[#4EAB9E] hover:bg-[#5BBDAF] text-[#121110] font-bold text-xs shadow-xs transition-all cursor-pointer shrink-0 flex items-center gap-1 font-mono"
+          >
+            <span>Cierre PM</span>
+            <ArrowRight className="h-3 w-3" />
+          </button>
+        </div>
+      )}
 
-                    <div className="flex items-center gap-1.5 font-mono text-[10px] text-[#8E867B] shrink-0 ml-2">
-                      <span className="rounded bg-[#181715] px-1.5 py-0.5 border border-[#2A2723]">
-                        +{task.value ? Math.round(task.value * 10) : 10} XP
-                      </span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
+      {/* ========================================================================= */}
+      {/* 3. MODO FOCO SECUENCIAL: LA SIGUIENTE VICTORIA (Hero Task Execution)      */}
+      {/* ========================================================================= */}
+      <div className="rounded-xl border border-[#2A2723] bg-[#181715] p-5 shadow-sm space-y-4">
+        <div className="flex items-center justify-between pb-3 border-b border-[#2A2723]">
+          <div className="flex items-center gap-2">
+            <Zap className="h-4 w-4 text-[#D99B43]" />
+            <span className="font-serif text-xs sm:text-sm font-bold text-[#F5F2EB]">
+              Siguiente Victoria en Foco
+            </span>
           </div>
 
-          {/* Card B: Agenda & Próximos Eventos de Hoy */}
-          <div className="rounded-lg border border-[#2A2723] bg-[#181715] p-5 shadow-sm space-y-4">
-            <div className="flex items-center justify-between pb-3 border-b border-[#2A2723]">
-              <div className="flex items-center gap-2.5">
-                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#141C1A] text-[#4EAB9E] border border-[#4EAB9E]/30">
-                  <CalendarIcon className="h-4 w-4" />
-                </div>
-                <div>
-                  <h3 className="font-serif text-sm font-bold text-[#F5F2EB]">
-                    Agenda de Hoy & Reuniones
-                  </h3>
-                  <p className="text-[11px] text-[#8E867B] font-mono">
-                    {calendarSchedule.events.length} compromisos programados
-                  </p>
-                </div>
-              </div>
-
-              <span className="font-mono text-xs text-[#8E867B]">
-                {calendarSchedule.date}
+          {totalMustWins > 0 && (
+            <div className="flex items-center gap-1 font-mono text-[11px] text-[#D99B43] bg-[#221D16] px-2 py-0.5 rounded border border-[#D99B43]/30">
+              <Award className="h-3 w-3" />
+              <span>
+                {completedMustWins} de {totalMustWins} victorias
               </span>
-            </div>
-
-            {/* Next Meeting Banner */}
-            {nextEvent ? (
-              <div className="rounded-lg border border-[#4EAB9E]/30 bg-[#141C1A] p-3.5 flex items-center justify-between gap-3">
-                <div className="flex items-center gap-3 overflow-hidden">
-                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[#4EAB9E]/20 text-[#4EAB9E] border border-[#4EAB9E]/40 font-mono text-xs font-bold">
-                    {nextEvent.startTimeFormatted.split(":")[0]}h
-                  </div>
-                  <div className="truncate">
-                    <span className="font-semibold text-xs text-[#F5F2EB] block truncate">
-                      {nextEvent.title}
-                    </span>
-                    <div className="flex items-center gap-2 font-mono text-[11px] text-[#4EAB9E]">
-                      <Clock className="h-3 w-3" />
-                      <span>
-                        {nextEvent.startTimeFormatted} - {nextEvent.endTimeFormatted}
-                      </span>
-                      {nextEvent.timeUntil && (
-                        <span className="rounded bg-[#4EAB9E]/15 px-1.5 py-0.2 text-[10px]">
-                          en {nextEvent.timeUntil}
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                </div>
-
-                {nextEvent.location && (
-                  <span className="text-[11px] font-mono text-[#8E867B] truncate max-w-36 shrink-0 hidden sm:inline">
-                    {nextEvent.location}
-                  </span>
-                )}
-              </div>
-            ) : (
-              <div className="rounded-lg border border-[#2A2723] bg-[#121110] p-3 text-center text-xs text-[#8E867B] flex items-center justify-center gap-2 font-mono">
-                <Clock className="h-3.5 w-3.5" />
-                <span>Sin reuniones urgentes o pendientes para hoy</span>
-              </div>
-            )}
-
-            {/* Event Timeline List */}
-            {calendarSchedule.events.length > 0 && (
-              <div className="space-y-1.5 font-mono text-xs">
-                {calendarSchedule.events.map((ev) => (
-                  <div
-                    key={ev.id}
-                    className="flex items-center justify-between p-2.5 rounded-lg border border-[#2A2723] bg-[#121110] hover:border-[#38332D] transition-colors"
-                  >
-                    <div className="flex items-center gap-2.5 truncate">
-                      <span className="text-[11px] font-bold text-[#8E867B] w-12 shrink-0">
-                        {ev.startTimeFormatted}
-                      </span>
-                      <span className="text-[#DDD6C9] truncate font-sans text-xs">
-                        {ev.title}
-                      </span>
-                    </div>
-                    <span
-                      className={`text-[10px] px-1.5 py-0.5 rounded border capitalize shrink-0 ${
-                        ev.status === "now"
-                          ? "bg-[#141C1A] text-[#4EAB9E] border-[#4EAB9E]/30 font-bold"
-                          : ev.status === "upcoming"
-                          ? "bg-[#221D16] text-[#D99B43] border-[#D99B43]/30"
-                          : "text-[#8E867B] border-transparent"
-                      }`}
-                    >
-                      {ev.status === "now"
-                        ? "En curso"
-                        : ev.status === "upcoming"
-                        ? "Próximo"
-                        : "Pasado"}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-
-          {/* Card C: Hábitos Clave del Día (Dailies) */}
-          {dailyTasks.length > 0 && (
-            <div className="rounded-lg border border-[#2A2723] bg-[#181715] p-5 shadow-sm space-y-4">
-              <div className="flex items-center justify-between pb-3 border-b border-[#2A2723]">
-                <div className="flex items-center gap-2.5">
-                  <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#1C2219] text-[#7EA35A] border border-[#7EA35A]/30">
-                    <CheckCircle2 className="h-4 w-4" />
-                  </div>
-                  <div>
-                    <h3 className="font-serif text-sm font-bold text-[#F5F2EB]">
-                      Hábitos Diarios & Tareas
-                    </h3>
-                    <p className="text-[11px] text-[#8E867B] font-mono">
-                      {dailyTasks.filter((t) => t.completed).length} de {dailyTasks.length} completados
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="space-y-1.5">
-                {dailyTasks.slice(0, 6).map((task) => (
-                  <div
-                    key={task.id}
-                    onClick={() => handleToggleTask(task)}
-                    className={`flex items-center justify-between p-3 rounded-lg border transition-all cursor-pointer select-none ${
-                      task.completed
-                        ? "bg-[#141813] border-[#7EA35A]/30 text-[#8E867B]"
-                        : "bg-[#121110] border-[#2A2723] hover:border-[#38332D] text-[#DDD6C9]"
-                    }`}
-                  >
-                    <div className="flex items-center gap-3">
-                      <div
-                        className={`flex h-4.5 w-4.5 shrink-0 items-center justify-center rounded border transition-colors ${
-                          task.completed
-                            ? "bg-[#7EA35A] border-[#7EA35A] text-[#121110] font-bold"
-                            : "border-[#38332D] bg-[#181715]"
-                        }`}
-                      >
-                        {task.completed && <Check className="h-3 w-3 stroke-3" />}
-                      </div>
-                      <span
-                        className={`text-xs font-medium ${
-                          task.completed
-                            ? "line-through text-[#8E867B]"
-                            : "text-[#F5F2EB]"
-                        }`}
-                      >
-                        {task.text}
-                      </span>
-                    </div>
-
-                    {task.streak !== undefined && task.streak > 0 && (
-                      <span className="font-mono text-[10px] text-[#D99B43] flex items-center gap-1">
-                        <Flame className="h-3 w-3" />
-                        <span>{task.streak}</span>
-                      </span>
-                    )}
-                  </div>
-                ))}
-              </div>
             </div>
           )}
         </div>
 
-        {/* RIGHT COLUMN: 5 Columns on Desktop */}
-        <div className="lg:col-span-5 space-y-6">
-          {/* Card D: Suplementación Inteligente */}
-          <div className="rounded-lg border border-[#2A2723] bg-[#181715] p-5 shadow-sm space-y-4">
-            <div className="flex items-center justify-between pb-3 border-b border-[#2A2723]">
-              <div className="flex items-center gap-2.5">
-                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#1C2219] text-[#7EA35A] border border-[#7EA35A]/30">
-                  <Pill className="h-4 w-4" />
-                </div>
-                <div>
-                  <h3 className="font-serif text-sm font-bold text-[#F5F2EB]">
-                    Suplementación
-                  </h3>
-                  <p className="text-[11px] text-[#8E867B] font-mono">
-                    {takenCountInActiveTiming} de {filteredSupplements.length} tomados
-                  </p>
-                </div>
-              </div>
-
-              <button
-                type="button"
-                onClick={() => openModal("manageSupplements")}
-                className="text-xs font-mono text-[#D99B43] hover:text-[#E8AF59] transition-colors cursor-pointer"
-              >
-                Catálogo ⚙️
-              </button>
+        {/* Case A: No Must-Wins configured yet */}
+        {totalMustWins === 0 && (
+          <div className="rounded-lg border border-dashed border-[#2A2723] bg-[#121110] p-6 text-center space-y-3">
+            <Sparkles className="h-7 w-7 text-[#D99B43] mx-auto opacity-80" />
+            <div>
+              <h4 className="font-serif text-sm font-bold text-[#F5F2EB]">
+                Sin Victorias Must-Win definidas
+              </h4>
+              <p className="text-xs text-[#8E867B] max-w-sm mx-auto mt-1 font-mono">
+                Selecciona tus 3 tareas críticas para enfocarte sin saturación.
+              </p>
             </div>
+            <button
+              type="button"
+              onClick={() => openModal("morningRitual")}
+              className="px-4 py-2 rounded-lg bg-[#D99B43] hover:bg-[#E8AF59] text-[#121110] font-bold text-xs shadow-xs transition-all cursor-pointer inline-flex items-center gap-1.5"
+            >
+              <Sun className="h-3.5 w-3.5" />
+              <span>Definir en Ritual AM</span>
+            </button>
+          </div>
+        )}
 
-            {/* Timing Pills Filter */}
-            <div className="flex items-center gap-1 p-1 rounded-lg bg-[#121110] border border-[#2A2723] font-mono text-xs">
-              {(["Mañana", "Tarde", "Noche", "Todos"] as const).map((timing) => (
-                <button
-                  key={timing}
-                  type="button"
-                  onClick={() => setActiveSuppTiming(timing)}
-                  className={`flex-1 py-1.5 rounded-md text-center font-semibold transition-all cursor-pointer ${
-                    activeSuppTiming === timing
-                      ? "bg-[#221D16] text-[#D99B43] border border-[#D99B43]/30 shadow-xs"
-                      : "text-[#8E867B] hover:text-[#DDD6C9]"
+        {/* Case B: All Must-Wins Completed! */}
+        {allMustWinsCompleted && (
+          <div className="rounded-xl border border-[#7EA35A]/40 bg-[#141813] p-5 text-center space-y-3 animate-in zoom-in-95 duration-300">
+            <div className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-[#7EA35A]/20 text-[#7EA35A] border border-[#7EA35A]/40">
+              <Trophy className="h-6 w-6" />
+            </div>
+            <div>
+              <h4 className="font-serif text-base font-bold text-[#F5F2EB]">
+                ¡Completaste tus {totalMustWins} Victorias de Hoy!
+              </h4>
+              <p className="text-xs text-[#7EA35A] max-w-sm mx-auto mt-1 font-mono">
+                Excelente ejecución y enfoque. Tu energía dopaminérgica está en su nivel óptimo.
+              </p>
+            </div>
+          </div>
+        )}
+
+        {/* Case C: Active Sequential Task Card */}
+        {activeMustWin && (
+          <div className="space-y-4">
+            {/* Stepper Dots */}
+            <div className="flex items-center gap-2">
+              {mustWinTasks.map((task, idx) => (
+                <div
+                  key={task.id}
+                  className={`flex-1 h-1.5 rounded-full transition-all duration-300 ${
+                    task.completed
+                      ? "bg-[#7EA35A]"
+                      : idx === activeMustWinIndex
+                      ? "bg-[#D99B43]"
+                      : "bg-[#2A2723]"
                   }`}
-                >
-                  {timing}
-                </button>
+                />
               ))}
             </div>
 
-            {/* 1-Tap Batch Toggle Button */}
-            {filteredSupplements.length > 0 && (
+            {/* Active Card Body */}
+            <div className="rounded-xl border border-[#D99B43]/35 bg-[#121110] p-4.5 sm:p-5 space-y-4 shadow-sm relative overflow-hidden">
+              <div className="flex items-start justify-between gap-3">
+                <span className="font-mono text-[11px] font-bold text-[#D99B43] bg-[#221D16] px-2 py-0.5 rounded border border-[#D99B43]/30">
+                  Victoria #{activeMustWinIndex + 1} de {totalMustWins}
+                </span>
+
+                <span className="font-mono text-[11px] text-[#8E867B] bg-[#181715] px-2 py-0.5 rounded border border-[#2A2723]">
+                  +{activeMustWin.value ? Math.round(activeMustWin.value * 10) : 10} XP
+                </span>
+              </div>
+
+              <div>
+                <h3 className="font-serif text-base sm:text-lg font-bold text-[#F5F2EB] leading-snug">
+                  {activeMustWin.text}
+                </h3>
+                {activeMustWin.notes && (
+                  <p className="text-xs text-[#8E867B] font-mono mt-1.5 leading-relaxed line-clamp-2">
+                    {activeMustWin.notes}
+                  </p>
+                )}
+              </div>
+
+              {/* 1-Tap Big Complete Action Button */}
               <button
                 type="button"
                 disabled={isPending}
-                onClick={handleBatchTakeSupplements}
-                className={`w-full py-2.5 px-3 rounded-lg font-bold text-xs transition-all flex items-center justify-center gap-2 cursor-pointer shadow-xs ${
-                  allTakenInActiveTiming
-                    ? "bg-[#1C2219] text-[#7EA35A] border border-[#7EA35A]/40"
-                    : "bg-[#7EA35A] hover:bg-[#8FB866] text-[#121110]"
+                onClick={() => handleToggleTask(activeMustWin)}
+                className="w-full py-3 px-4 rounded-xl bg-[#D99B43] hover:bg-[#E8AF59] active:scale-[0.99] text-[#121110] font-bold text-xs sm:text-sm transition-all cursor-pointer flex items-center justify-center gap-2 shadow-sm font-sans"
+              >
+                <Check className="h-4 w-4 stroke-3" />
+                <span>Completar Victoria y Avanzar</span>
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Collapsible Drawer for other Must-Wins & Daily Habits */}
+        <div className="pt-1">
+          <button
+            type="button"
+            onClick={() => setIsDrawerOpen(!isDrawerOpen)}
+            className="w-full py-2 px-3 rounded-lg border border-[#2A2723] bg-[#121110] hover:bg-[#181715] text-[#8E867B] hover:text-[#DDD6C9] font-mono text-xs flex items-center justify-between transition-colors cursor-pointer"
+          >
+            <span className="flex items-center gap-2">
+              <span>Otras tareas y hábitos diarios</span>
+              {totalOtherPending > 0 && (
+                <span className="px-1.5 py-0.2 rounded-full bg-[#221D16] text-[#D99B43] font-bold text-[10px] border border-[#D99B43]/30">
+                  {totalOtherPending} pendientes
+                </span>
+              )}
+            </span>
+            {isDrawerOpen ? (
+              <ChevronUp className="h-3.5 w-3.5 text-[#8E867B]" />
+            ) : (
+              <ChevronDown className="h-3.5 w-3.5 text-[#8E867B]" />
+            )}
+          </button>
+
+          {isDrawerOpen && (
+            <div className="mt-3 space-y-4 animate-in slide-in-from-top-2 duration-200">
+              {/* Other Must-Wins */}
+              {totalMustWins > 0 && (
+                <div className="space-y-1.5">
+                  <span className="font-mono text-[10px] text-[#8E867B] uppercase tracking-wider block px-1">
+                    Victorias del Día ({completedMustWins}/{totalMustWins})
+                  </span>
+                  {mustWinTasks.map((task, idx) => (
+                    <div
+                      key={task.id}
+                      onClick={() => handleToggleTask(task)}
+                      className={`flex items-center justify-between p-3 rounded-lg border transition-all cursor-pointer select-none ${
+                        task.completed
+                          ? "bg-[#141813] border-[#7EA35A]/30 text-[#8E867B]"
+                          : "bg-[#121110] border-[#2A2723] hover:border-[#D99B43]/40 text-[#F5F2EB]"
+                      }`}
+                    >
+                      <div className="flex items-center gap-3 flex-1 min-w-0">
+                        <div
+                          className={`flex h-4.5 w-4.5 shrink-0 items-center justify-center rounded border transition-colors ${
+                            task.completed
+                              ? "bg-[#7EA35A] border-[#7EA35A] text-[#121110] font-bold"
+                              : "border-[#38332D] bg-[#181715]"
+                          }`}
+                        >
+                          {task.completed && (
+                            <Check className="h-3 w-3 stroke-3" />
+                          )}
+                        </div>
+                        <span
+                          className={`text-xs truncate ${
+                            task.completed
+                              ? "line-through text-[#8E867B]"
+                              : "text-[#F5F2EB]"
+                          }`}
+                        >
+                          #{idx + 1} {task.text}
+                        </span>
+                      </div>
+                      <span className="font-mono text-[10px] text-[#8E867B] shrink-0 ml-2">
+                        +{task.value ? Math.round(task.value * 10) : 10} XP
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* Daily Habits (Dailies) */}
+              {dailyTasks.length > 0 && (
+                <div className="space-y-1.5">
+                  <span className="font-mono text-[10px] text-[#8E867B] uppercase tracking-wider block px-1">
+                    Hábitos Diarios ({dailyTasks.filter((t) => t.completed).length}/{dailyTasks.length})
+                  </span>
+                  {dailyTasks.map((task) => (
+                    <div
+                      key={task.id}
+                      onClick={() => handleToggleTask(task)}
+                      className={`flex items-center justify-between p-3 rounded-lg border transition-all cursor-pointer select-none ${
+                        task.completed
+                          ? "bg-[#141813] border-[#7EA35A]/30 text-[#8E867B]"
+                          : "bg-[#121110] border-[#2A2723] hover:border-[#38332D] text-[#DDD6C9]"
+                      }`}
+                    >
+                      <div className="flex items-center gap-3 flex-1 min-w-0">
+                        <div
+                          className={`flex h-4.5 w-4.5 shrink-0 items-center justify-center rounded border transition-colors ${
+                            task.completed
+                              ? "bg-[#7EA35A] border-[#7EA35A] text-[#121110] font-bold"
+                              : "border-[#38332D] bg-[#181715]"
+                          }`}
+                        >
+                          {task.completed && (
+                            <Check className="h-3 w-3 stroke-3" />
+                          )}
+                        </div>
+                        <span
+                          className={`text-xs truncate ${
+                            task.completed
+                              ? "line-through text-[#8E867B]"
+                              : "text-[#F5F2EB]"
+                          }`}
+                        >
+                          {task.text}
+                        </span>
+                      </div>
+
+                      {task.streak !== undefined && task.streak > 0 && (
+                        <span className="font-mono text-[10px] text-[#D99B43] flex items-center gap-1 shrink-0 ml-2">
+                          <Flame className="h-3 w-3" />
+                          <span>{task.streak}</span>
+                        </span>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* ========================================================================= */}
+      {/* 4. BIO-CONTROL CONTEXTUAL (Supplements & Water - Only Pending Items)      */}
+      {/* ========================================================================= */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        {/* Card A: Suplementación Inteligente */}
+        <div className="rounded-xl border border-[#2A2723] bg-[#181715] p-4.5 shadow-sm space-y-3">
+          <div className="flex items-center justify-between pb-2 border-b border-[#2A2723]">
+            <div className="flex items-center gap-2">
+              <Pill className="h-4 w-4 text-[#7EA35A]" />
+              <span className="font-serif text-xs sm:text-sm font-bold text-[#F5F2EB]">
+                Suplementos ({activeSuppTiming})
+              </span>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => openModal("manageSupplements")}
+              className="text-[10px] font-mono text-[#D99B43] hover:text-[#E8AF59] transition-colors cursor-pointer"
+            >
+              Catálogo ⚙️
+            </button>
+          </div>
+
+          {/* Quick Timing Tabs */}
+          <div className="flex items-center gap-1 p-0.5 rounded-lg bg-[#121110] border border-[#2A2723] font-mono text-[11px]">
+            {(["Mañana", "Tarde", "Noche"] as const).map((timing) => (
+              <button
+                key={timing}
+                type="button"
+                onClick={() => {
+                  setActiveSuppTiming(timing);
+                  setIsSuppDetailsOpen(false);
+                }}
+                className={`flex-1 py-1 rounded-md text-center font-semibold transition-all cursor-pointer ${
+                  activeSuppTiming === timing
+                    ? "bg-[#221D16] text-[#D99B43] border border-[#D99B43]/30 shadow-2xs"
+                    : "text-[#8E867B] hover:text-[#DDD6C9]"
                 }`}
               >
-                <CheckCircle2 className="h-4 w-4" />
-                <span>
-                  {allTakenInActiveTiming
-                    ? `✓ Todos los de la ${activeSuppTiming} tomados (Desmarcar)`
-                    : `Tomar todos los de la ${activeSuppTiming} (${filteredSupplements.length})`}
-                </span>
+                {timing}
               </button>
-            )}
+            ))}
+          </div>
 
-            {/* Supplements List */}
-            {filteredSupplements.length === 0 ? (
-              <div className="rounded-lg border border-[#2A2723] bg-[#121110] p-4 text-center text-xs text-[#8E867B] font-mono">
-                No hay suplementos registrados para el turno de la {activeSuppTiming}.
+          {/* If all taken in this timing: Minimized State */}
+          {filteredSupplements.length > 0 && allTakenInActiveTiming && !isSuppDetailsOpen && (
+            <div className="rounded-lg border border-[#7EA35A]/35 bg-[#141813] p-3 flex items-center justify-between gap-2">
+              <div className="flex items-center gap-2 text-xs text-[#7EA35A] font-semibold font-mono truncate">
+                <CheckCircle2 className="h-4 w-4 shrink-0" />
+                <span className="truncate">Pack {activeSuppTiming} completado ({takenCountInActiveTiming}/{filteredSupplements.length})</span>
               </div>
-            ) : (
-              <div className="space-y-1.5">
-                {filteredSupplements.map((supp) => (
-                  <div
-                    key={supp.id}
-                    onClick={() => handleToggleSupplement(supp.id)}
-                    className={`flex items-center justify-between p-3 rounded-lg border transition-all cursor-pointer select-none ${
-                      supp.taken
-                        ? "bg-[#141813] border-[#7EA35A]/30 text-[#8E867B]"
-                        : "bg-[#121110] border-[#2A2723] hover:border-[#38332D] text-[#F5F2EB]"
-                    }`}
-                  >
-                    <div className="flex items-center gap-3">
-                      <div
-                        className={`flex h-4.5 w-4.5 shrink-0 items-center justify-center rounded border transition-colors ${
-                          supp.taken
-                            ? "bg-[#7EA35A] border-[#7EA35A] text-[#121110] font-bold"
-                            : "border-[#38332D] bg-[#181715]"
-                        }`}
-                      >
-                        {supp.taken && <Check className="h-3 w-3 stroke-3" />}
-                      </div>
-                      <div>
+              <button
+                type="button"
+                onClick={() => setIsSuppDetailsOpen(true)}
+                className="text-[10px] font-mono text-[#8E867B] hover:text-[#DDD6C9] underline cursor-pointer shrink-0"
+              >
+                Ver
+              </button>
+            </div>
+          )}
+
+          {/* If pending or user clicked 'Ver' */}
+          {(pendingInActiveTiming > 0 || isSuppDetailsOpen || filteredSupplements.length === 0) && (
+            <div className="space-y-2.5">
+              {filteredSupplements.length > 0 && (
+                <button
+                  type="button"
+                  disabled={isPending}
+                  onClick={handleBatchTakeSupplements}
+                  className={`w-full py-2.5 px-3 rounded-lg font-bold text-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-xs font-sans ${
+                    allTakenInActiveTiming
+                      ? "bg-[#1C2219] text-[#7EA35A] border border-[#7EA35A]/40"
+                      : "bg-[#7EA35A] hover:bg-[#8FB866] text-[#121110]"
+                  }`}
+                >
+                  <CheckCircle2 className="h-4 w-4" />
+                  <span>
+                    {allTakenInActiveTiming
+                      ? `✓ Desmarcar Pack de la ${activeSuppTiming}`
+                      : `Tomar Pack de la ${activeSuppTiming} (${pendingInActiveTiming})`}
+                  </span>
+                </button>
+              )}
+
+              {filteredSupplements.length === 0 ? (
+                <div className="rounded-lg border border-[#2A2723] bg-[#121110] p-3 text-center text-xs text-[#8E867B] font-mono">
+                  Sin suplementos en la {activeSuppTiming}.
+                </div>
+              ) : (
+                <div className="space-y-1.5 max-h-44 overflow-y-auto pr-0.5">
+                  {filteredSupplements.map((supp) => (
+                    <div
+                      key={supp.id}
+                      onClick={() => handleToggleSupplement(supp.id)}
+                      className={`flex items-center justify-between p-2.5 rounded-lg border transition-all cursor-pointer select-none ${
+                        supp.taken
+                          ? "bg-[#141813] border-[#7EA35A]/30 text-[#8E867B]"
+                          : "bg-[#121110] border-[#2A2723] hover:border-[#38332D] text-[#F5F2EB]"
+                      }`}
+                    >
+                      <div className="flex items-center gap-2.5 min-w-0">
+                        <div
+                          className={`flex h-4 w-4 shrink-0 items-center justify-center rounded border transition-colors ${
+                            supp.taken
+                              ? "bg-[#7EA35A] border-[#7EA35A] text-[#121110] font-bold"
+                              : "border-[#38332D] bg-[#181715]"
+                          }`}
+                        >
+                          {supp.taken && (
+                            <Check className="h-2.5 w-2.5 stroke-3" />
+                          )}
+                        </div>
                         <span
-                          className={`text-xs font-semibold ${
-                            supp.taken ? "line-through text-[#8E867B]" : "text-[#F5F2EB]"
+                          className={`text-xs truncate ${
+                            supp.taken
+                              ? "line-through text-[#8E867B]"
+                              : "text-[#F5F2EB]"
                           }`}
                         >
                           {supp.name}
                         </span>
-                        {supp.timing && (
-                          <span className="block text-[10px] text-[#8E867B] font-mono">
-                            {supp.timing}
-                          </span>
-                        )}
                       </div>
-                    </div>
 
-                    {supp.dosage && (
-                      <span className="text-[10px] font-mono px-2 py-0.5 rounded border border-[#2A2723] bg-[#181715] text-[#DDD6C9]">
-                        {supp.dosage}
-                      </span>
-                    )}
-                  </div>
-                ))}
-              </div>
-            )}
+                      {supp.dosage && (
+                        <span className="text-[10px] font-mono px-1.5 py-0.2 rounded border border-[#2A2723] bg-[#181715] text-[#DDD6C9] shrink-0 ml-1.5">
+                          {supp.dosage}
+                        </span>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+
+        {/* Card B: Control de Hidratación */}
+        <div className="rounded-xl border border-[#2A2723] bg-[#181715] p-4.5 shadow-sm space-y-3">
+          <div className="flex items-center justify-between pb-2 border-b border-[#2A2723]">
+            <div className="flex items-center gap-2">
+              <Droplet className="h-4 w-4 text-[#4EAB9E]" />
+              <span className="font-serif text-xs sm:text-sm font-bold text-[#F5F2EB]">
+                Hidratación
+              </span>
+            </div>
+
+            <span className="font-mono text-xs font-bold text-[#4EAB9E]">
+              {waterPercent}%
+            </span>
           </div>
 
-          {/* Card E: Control Rápido de Hidratación */}
-          <div className="rounded-lg border border-[#2A2723] bg-[#181715] p-5 shadow-sm space-y-4">
-            <div className="flex items-center justify-between pb-3 border-b border-[#2A2723]">
-              <div className="flex items-center gap-2.5">
-                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#141C1A] text-[#4EAB9E] border border-[#4EAB9E]/30">
-                  <Droplet className="h-4 w-4" />
-                </div>
-                <div>
-                  <h3 className="font-serif text-sm font-bold text-[#F5F2EB]">
-                    Control de Hidratación
-                  </h3>
-                  <p className="text-[11px] text-[#8E867B] font-mono">
-                    Meta óptima: {waterTarget} ml / día
-                  </p>
-                </div>
+          {/* Minimized or Active state */}
+          {isWaterComplete ? (
+            <div className="rounded-lg border border-[#4EAB9E]/35 bg-[#141C1A] p-3 flex items-center justify-between gap-2">
+              <div className="flex items-center gap-2 text-xs text-[#4EAB9E] font-semibold font-mono truncate">
+                <CheckCircle2 className="h-4 w-4 shrink-0" />
+                <span className="truncate">Meta alcanzada ({optimisticWater} / {waterTarget} ml)</span>
               </div>
-
-              <span className="font-mono text-sm font-bold text-[#4EAB9E]">
-                {waterPercent}%
-              </span>
-            </div>
-
-            <div className="flex items-baseline justify-between font-mono">
-              <span className="text-2xl font-bold text-[#F5F2EB]">
-                {waterMl} ml
-              </span>
-              <span className="text-xs text-[#8E867B]">
-                Restan: {Math.max(0, waterTarget - waterMl)} ml
-              </span>
-            </div>
-
-            <div className="h-2 w-full rounded-full bg-[#121110] border border-[#2A2723] overflow-hidden">
-              <div
-                className="h-full bg-[#4EAB9E] transition-all duration-300"
-                style={{ width: `${waterPercent}%` }}
-              />
-            </div>
-
-            <div className="grid grid-cols-3 gap-2 pt-1 font-mono">
               <button
                 type="button"
                 disabled={isPending}
                 onClick={() => handleQuickAddWater(250)}
-                className="py-2 rounded-lg bg-[#121110] hover:bg-[#141C1A] border border-[#2A2723] hover:border-[#4EAB9E]/40 text-[#4EAB9E] font-bold text-xs transition-all cursor-pointer active:scale-95 disabled:opacity-50"
+                className="px-2 py-1 rounded bg-[#121110] border border-[#4EAB9E]/30 text-[#4EAB9E] font-mono text-[10px] font-bold hover:bg-[#141C1A] cursor-pointer shrink-0"
               >
-                +250 ml
-              </button>
-              <button
-                type="button"
-                disabled={isPending}
-                onClick={() => handleQuickAddWater(500)}
-                className="py-2 rounded-lg bg-[#121110] hover:bg-[#141C1A] border border-[#2A2723] hover:border-[#4EAB9E]/40 text-[#4EAB9E] font-bold text-xs transition-all cursor-pointer active:scale-95 disabled:opacity-50"
-              >
-                +500 ml
-              </button>
-              <button
-                type="button"
-                disabled={isPending}
-                onClick={() => handleQuickAddWater(750)}
-                className="py-2 rounded-lg bg-[#121110] hover:bg-[#141C1A] border border-[#2A2723] hover:border-[#4EAB9E]/40 text-[#F5F2EB] font-bold text-xs transition-all cursor-pointer active:scale-95 disabled:opacity-50"
-              >
-                +750 ml
+                +250ml
               </button>
             </div>
-          </div>
-
-          {/* Card F: Termómetro de Gastos Hormiga */}
-          <div className="rounded-lg border border-[#2A2723] bg-[#181715] p-5 shadow-sm space-y-4">
-            <div className="flex items-center justify-between pb-3 border-b border-[#2A2723]">
-              <div className="flex items-center gap-2.5">
-                <div
-                  className={`flex h-8 w-8 items-center justify-center rounded-lg border ${
-                    isAntExceeded
-                      ? "bg-[#221716] text-[#E05D52] border-[#E05D52]/30"
-                      : "bg-[#221D16] text-[#D99B43] border-[#D99B43]/30"
-                  }`}
-                >
-                  <Wallet className="h-4 w-4" />
-                </div>
-                <div>
-                  <h3 className="font-serif text-sm font-bold text-[#F5F2EB]">
-                    Gastos Hormiga
-                  </h3>
-                  <p className="text-[11px] text-[#8E867B] font-mono">
-                    Presupuesto diario: ${antLimit} MXN
-                  </p>
-                </div>
+          ) : (
+            <div className="space-y-3">
+              <div className="flex items-baseline justify-between font-mono">
+                <span className="text-xl sm:text-2xl font-bold text-[#F5F2EB]">
+                  {optimisticWater} ml
+                </span>
+                <span className="text-[11px] text-[#8E867B]">
+                  Meta: {waterTarget} ml
+                </span>
               </div>
 
-              <button
-                type="button"
-                onClick={() => openModal("finance")}
-                className="px-2.5 py-1 rounded-lg bg-[#221716] hover:bg-[#2A1D1C] text-[#E05D52] border border-[#E05D52]/30 text-xs font-semibold transition-all cursor-pointer flex items-center gap-1 font-mono"
-              >
-                <Plus className="h-3 w-3" />
-                <span>Gasto</span>
-              </button>
-            </div>
-
-            <div
-              className={`rounded-lg border p-4 space-y-3 ${
-                isAntExceeded
-                  ? "bg-[#221716] border-[#E05D52]/40"
-                  : antPercent >= 80
-                  ? "bg-[#221D16] border-[#D99B43]/40"
-                  : "bg-[#121110] border-[#2A2723]"
-              }`}
-            >
-              <div className="flex items-center justify-between">
-                <div>
-                  <span className="font-mono text-2xl font-bold text-[#F5F2EB]">
-                    ${antSpent.toFixed(0)}
-                  </span>
-                  <span className="font-mono text-xs text-[#8E867B] ml-1">
-                    / ${antLimit} MXN
-                  </span>
-                </div>
-
-                <div className="text-right font-mono text-xs">
-                  <span
-                    className={`font-bold ${
-                      isAntExceeded
-                        ? "text-[#E05D52]"
-                        : antPercent >= 80
-                        ? "text-[#D99B43]"
-                        : "text-[#7EA35A]"
-                    }`}
-                  >
-                    {isAntExceeded
-                      ? `+$${(antSpent - antLimit).toFixed(0)} excedido`
-                      : `$${antRemaining.toFixed(0)} restante`}
-                  </span>
-                  <p className="text-[10px] text-[#8E867B]">{antPercent}% del límite</p>
-                </div>
-              </div>
-
-              <div className="h-1.5 w-full rounded-full bg-[#181715] overflow-hidden">
+              <div className="h-2 w-full rounded-full bg-[#121110] border border-[#2A2723] overflow-hidden">
                 <div
-                  className={`h-full transition-all duration-300 ${
-                    isAntExceeded
-                      ? "bg-[#E05D52]"
-                      : antPercent >= 80
-                      ? "bg-[#D99B43]"
-                      : "bg-[#7EA35A]"
-                  }`}
-                  style={{ width: `${antPercent}%` }}
+                  className="h-full bg-[#4EAB9E] transition-all duration-300"
+                  style={{ width: `${waterPercent}%` }}
                 />
               </div>
+
+              <div className="grid grid-cols-2 gap-2 pt-0.5 font-mono">
+                <button
+                  type="button"
+                  disabled={isPending}
+                  onClick={() => handleQuickAddWater(250)}
+                  className="py-2 rounded-lg bg-[#121110] hover:bg-[#141C1A] border border-[#2A2723] hover:border-[#4EAB9E]/40 text-[#4EAB9E] font-bold text-xs transition-all cursor-pointer active:scale-95 disabled:opacity-50"
+                >
+                  +250 ml
+                </button>
+                <button
+                  type="button"
+                  disabled={isPending}
+                  onClick={() => handleQuickAddWater(500)}
+                  className="py-2 rounded-lg bg-[#121110] hover:bg-[#141C1A] border border-[#2A2723] hover:border-[#4EAB9E]/40 text-[#4EAB9E] font-bold text-xs transition-all cursor-pointer active:scale-95 disabled:opacity-50"
+                >
+                  +500 ml
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* ========================================================================= */}
+      {/* 5. GASTOS HORMIGA SUTILES (Micro-Finance Tracker)                          */}
+      {/* ========================================================================= */}
+      <div className="rounded-xl border border-[#2A2723] bg-[#181715] p-4 shadow-sm">
+        <div className="flex items-center justify-between gap-3">
+          <div className="flex items-center gap-2.5 min-w-0">
+            <div
+              className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border ${
+                isAntExceeded
+                  ? "bg-[#221716] text-[#E05D52] border-[#E05D52]/30"
+                  : "bg-[#221D16] text-[#D99B43] border-[#D99B43]/30"
+              }`}
+            >
+              <Wallet className="h-4 w-4" />
+            </div>
+
+            <div className="min-w-0">
+              <div className="flex items-center gap-2">
+                <span className="font-serif text-xs font-bold text-[#F5F2EB]">
+                  Gastos Hormiga
+                </span>
+                <span
+                  className={`font-mono text-[10px] font-bold px-1.5 py-0.2 rounded border ${
+                    isAntExceeded
+                      ? "bg-[#221716] text-[#E05D52] border-[#E05D52]/30"
+                      : "bg-[#141813] text-[#7EA35A] border-[#7EA35A]/30"
+                  }`}
+                >
+                  {isAntExceeded
+                    ? `+$${(antSpent - antLimit).toFixed(0)} exc.`
+                    : `$${antRemaining.toFixed(0)} disp.`}
+                </span>
+              </div>
+              <p className="text-[11px] text-[#8E867B] font-mono truncate">
+                ${antSpent.toFixed(0)} de ${antLimit} MXN diarios ({antPercent}%)
+              </p>
             </div>
           </div>
+
+          <button
+            type="button"
+            onClick={() => openModal("finance")}
+            className="px-3 py-1.5 rounded-lg bg-[#221716] hover:bg-[#2A1D1C] text-[#E05D52] border border-[#E05D52]/30 text-xs font-semibold transition-all cursor-pointer flex items-center gap-1 font-mono shrink-0 active:scale-95"
+          >
+            <Plus className="h-3 w-3" />
+            <span>Gasto</span>
+          </button>
+        </div>
+
+        {/* Minimal Progress Line */}
+        <div className="h-1 w-full rounded-full bg-[#121110] mt-3 overflow-hidden">
+          <div
+            className={`h-full transition-all duration-300 ${
+              isAntExceeded
+                ? "bg-[#E05D52]"
+                : antPercent >= 80
+                ? "bg-[#D99B43]"
+                : "bg-[#7EA35A]"
+            }`}
+            style={{ width: `${antPercent}%` }}
+          />
         </div>
       </div>
     </div>
