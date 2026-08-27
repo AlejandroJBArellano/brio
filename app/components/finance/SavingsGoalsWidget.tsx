@@ -258,7 +258,7 @@ export function SavingsGoalsWidget({ goals, onRefresh }: SavingsGoalsWidgetProps
               className="rounded-lg border border-[#2A2723] bg-[#121110] p-4 transition-all hover:border-[#38332D]"
             >
               <div className="flex items-center justify-between">
-                <span className="text-xs font-semibold text-[#F5F2EB] tracking-tight truncate max-w-[200px]">
+                <span className="text-xs font-semibold text-[#F5F2EB] tracking-tight truncate max-w-50">
                   {goal.title}
                 </span>
                 <div className="flex items-center gap-2">

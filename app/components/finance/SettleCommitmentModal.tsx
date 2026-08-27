@@ -1,9 +1,9 @@
 "use client";
 
 import { settleCommitmentPaymentAction } from "@/app/actions/finance";
-import { FinanceAccount, FinanceCommitment, VariablePaymentScheduleItem } from "@/lib/types";
+import { FinanceAccount, FinanceCommitment } from "@/lib/types";
 import { getTodayDateStr } from "@/lib/dateUtils";
-import { AlertCircle, ArrowRight, CheckCircle2, DollarSign, Wallet, X } from "lucide-react";
+import { AlertCircle, ArrowRight, CheckCircle2, X } from "lucide-react";
 import { useState, useTransition } from "react";
 
 interface SettleCommitmentModalProps {
@@ -81,7 +81,7 @@ export function SettleCommitmentModal({
             </div>
             <div>
               <h3 className="font-serif text-base font-bold text-[#F5F2EB]">Liquidar / Registrar Pago</h3>
-              <p className="text-xs text-[#8E867B] truncate max-w-[260px]">{commitment.title}</p>
+              <p className="text-xs text-[#8E867B] truncate max-w-65">{commitment.title}</p>
             </div>
           </div>
           <button

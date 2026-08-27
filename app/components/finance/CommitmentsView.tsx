@@ -8,25 +8,17 @@ import {
   FinanceCommitment,
 } from "@/lib/types";
 import {
-  AlertCircle,
-  AlertTriangle,
-  ArrowRight,
   Calendar,
-  Check,
   CheckCircle2,
   Clock,
-  DollarSign,
   Edit2,
-  Filter,
   Hash,
   Layers,
   Plus,
   Repeat,
   Search,
-  Sparkles,
   Trash2,
   TrendingDown,
-  Wallet,
   Zap,
 } from "lucide-react";
 import { useMemo, useState, useTransition } from "react";

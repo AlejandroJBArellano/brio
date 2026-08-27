@@ -2,7 +2,7 @@
 
 import { updateMonthlyBudgetAction } from "@/app/actions/finance";
 import { MonthlyBudget } from "@/lib/types";
-import { DollarSign, Sliders, X } from "lucide-react";
+import { Sliders, X } from "lucide-react";
 import { useEffect, useState, useTransition } from "react";
 
 interface EditBudgetModalProps {
