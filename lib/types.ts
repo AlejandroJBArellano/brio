@@ -613,6 +613,29 @@ export interface ProjectsDashboardData {
 }
 
 // ----------------------------------------------------
+// Contextual Notes Models (Brio Multi-Notes)
+// ----------------------------------------------------
+
+export type NoteCategory =
+  | "idea"
+  | "decision"
+  | "technical"
+  | "meeting"
+  | "log";
+
+export interface ContextualNote {
+  id: string;
+  projectId: string;
+  taskId?: string;
+  title: string;
+  content: string;
+  category: NoteCategory;
+  tags?: string[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+// ----------------------------------------------------
 // Wishlist Anti-Impulso Models (Brio Finanzas)
 // ----------------------------------------------------
 

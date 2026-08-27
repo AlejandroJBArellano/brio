@@ -158,10 +158,54 @@ export async function updateProjectStatusAction(
     }
 
     revalidatePath("/");
+    revalidatePath("/vault");
+    revalidatePath("/projects");
+    revalidatePath("/today");
     return { success: true };
   } catch (error) {
     console.error("[Update Project Error]:", error);
     return { success: false, error: "Failed to update project" };
+  }
+}
+
+/**
+ * Server Action: Updates complete details of a project.
+ */
+export async function updateProjectDetailsAction(payload: {
+  id: string;
+  title: string;
+  description?: string;
+  status: ProjectStatus;
+  techStack?: string[];
+  repoUrl?: string;
+  liveUrl?: string;
+  progress?: number;
+}): Promise<{ success: boolean; error?: string }> {
+  try {
+    const sql = getDb();
+    const techStackJson = JSON.stringify(payload.techStack || []);
+
+    await sql`
+      UPDATE projects
+      SET title = ${payload.title},
+          description = ${payload.description || null},
+          status = ${payload.status},
+          tech_stack = ${techStackJson}::jsonb,
+          repo_url = ${payload.repoUrl || null},
+          live_url = ${payload.liveUrl || null},
+          progress = ${payload.progress ?? 0},
+          updated_at = NOW()
+      WHERE id = ${payload.id};
+    `;
+
+    revalidatePath("/");
+    revalidatePath("/vault");
+    revalidatePath("/projects");
+    revalidatePath("/today");
+    return { success: true };
+  } catch (error) {
+    console.error("[Update Project Details Error]:", error);
+    return { success: false, error: "Failed to update project details" };
   }
 }
 

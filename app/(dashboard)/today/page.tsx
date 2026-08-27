@@ -1,5 +1,7 @@
 import { fetchFinanceDashboardDataAction } from "@/app/actions/finance";
 import { fetchHealthDashboardDataAction } from "@/app/actions/health";
+import { fetchContextualNotesAction } from "@/app/actions/notes";
+import { fetchProjectsDashboardDataAction } from "@/app/actions/projects";
 import { fetchTodayRitualAction } from "@/app/actions/rituals";
 import { fetchDashboardDataAction } from "@/app/actions/tasks";
 import { TodaySkeleton } from "@/app/components/skeletons/RouteSkeletons";
@@ -22,21 +24,31 @@ async function AsyncTodayContent() {
     healthData,
     financeData,
     todayRitual,
+    projectsData,
+    contextualNotes,
   ] = await Promise.all([
     fetchDashboardDataAction(),
     fetchHealthDashboardDataAction(),
     fetchFinanceDashboardDataAction(),
     fetchTodayRitualAction(),
+    fetchProjectsDashboardDataAction().catch(() => ({
+      projects: [],
+      learningItems: [],
+      scratchpadContent: "",
+    })),
+    fetchContextualNotesAction().catch(() => []),
   ]);
 
   return (
     <TodayViewClient
       user={habiticaData.user}
       tasks={habiticaData.tasks}
+      tags={habiticaData.tags || []}
       healthData={healthData}
       financeData={financeData}
       todayRitual={todayRitual}
+      projects={projectsData.projects}
+      contextualNotes={contextualNotes}
     />
   );
 }
-

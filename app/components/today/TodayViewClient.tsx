@@ -5,21 +5,22 @@ import {
   logWaterAction,
   toggleSupplementAction,
 } from "@/app/actions/health";
-import { setMustWinTasksAction } from "@/app/actions/rituals";
-import { createSingleTaskAction, toggleTaskAction } from "@/app/actions/tasks";
+import { toggleTaskAction } from "@/app/actions/tasks";
 import { useCommandCenter } from "@/app/components/context/CommandCenterContext";
 import { getHormonalStatus } from "@/lib/hormonal";
 import { soundFx } from "@/lib/soundFx";
 import {
+  ContextualNote,
   FinanceDashboardData,
+  HabiticaTag,
   HabiticaTask,
   HabiticaUser,
   HealthDashboardData,
+  ProjectItem,
   RitualLog,
 } from "@/lib/types";
 import {
   ArrowRight,
-  Award,
   Check,
   CheckCircle2,
   ChevronDown,
@@ -31,39 +32,41 @@ import {
   Plus,
   Sparkles,
   Sun,
-  Trophy,
   Wallet,
-  X,
   Zap,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useMemo, useOptimistic, useState, useTransition } from "react";
+import { ProjectFocusCard } from "./ProjectFocusCard";
 
 interface TodayViewClientProps {
   user: HabiticaUser;
   tasks: HabiticaTask[];
+  tags?: HabiticaTag[];
   healthData: HealthDashboardData;
   financeData: FinanceDashboardData;
   todayRitual: RitualLog | null;
+  projects?: ProjectItem[];
+  contextualNotes?: ContextualNote[];
 }
 
 export function TodayViewClient({
   user: _user,
   tasks,
+  tags = [],
   healthData,
   financeData,
   todayRitual,
+  projects = [],
+  contextualNotes = [],
 }: TodayViewClientProps) {
   const router = useRouter();
   const { openModal } = useCommandCenter();
   const [isPending, startTransition] = useTransition();
 
-  // State for collapsible drawer and quick victory addition
+  // State for collapsible drawer of general habits
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [isSuppDetailsOpen, setIsSuppDetailsOpen] = useState(false);
-  const [newVictoryText, setNewVictoryText] = useState("");
-  const [isSelectingExisting, setIsSelectingExisting] = useState(false);
-  const [isAddingNewVictory, setIsAddingNewVictory] = useState(false);
 
   // Time of day detection
   const currentHour = new Date().getHours();
@@ -99,26 +102,16 @@ export function TodayViewClient({
         );
       }
       if (action.type === "batch") {
-        const term = action.timing.toLowerCase();
+        if (action.timing === "Todos") {
+          return state.map((s) => ({ ...s, taken: action.taken }));
+        }
         return state.map((s) => {
-          const itemTiming = (s.timing || "").toLowerCase();
-          const matches =
-            term === "todos" ||
-            (term === "mañana" &&
-              (itemTiming.includes("mañana") ||
-                itemTiming.includes("morning") ||
-                itemTiming.includes("desayuno"))) ||
-            (term === "tarde" &&
-              (itemTiming.includes("tarde") ||
-                itemTiming.includes("afternoon") ||
-                itemTiming.includes("comida") ||
-                itemTiming.includes("entreno"))) ||
-            (term === "noche" &&
-              (itemTiming.includes("noche") ||
-                itemTiming.includes("night") ||
-                itemTiming.includes("cena") ||
-                itemTiming.includes("dormir")));
-          return matches ? { ...s, taken: action.taken } : s;
+          const sTiming = (s.timing || "").toLowerCase();
+          const targetTiming = action.timing.toLowerCase();
+          if (sTiming.includes(targetTiming)) {
+            return { ...s, taken: action.taken };
+          }
+          return s;
         });
       }
       return state;
@@ -148,45 +141,12 @@ export function TodayViewClient({
   );
   const isAntExceeded = antSpent > antLimit;
 
-  // Must-Win Tasks
-  const mustWinIds = useMemo(
-    () => todayRitual?.mustWinTasks || [],
-    [todayRitual]
+  // General Habitica Dailies
+  const generalDailyTasks = useMemo(
+    () => optimisticTasks.filter((t) => t.type === "daily"),
+    [optimisticTasks]
   );
-  const mustWinTasks = useMemo(
-    () => optimisticTasks.filter((t) => mustWinIds.includes(t.id)),
-    [optimisticTasks, mustWinIds]
-  );
-  const completedMustWins = mustWinTasks.filter((t) => t.completed).length;
-  const totalMustWins = mustWinTasks.length;
-  const allMustWinsCompleted =
-    totalMustWins > 0 && completedMustWins === totalMustWins;
-
-  // Find the current active sequential task
-  const activeMustWin = useMemo(() => {
-    return mustWinTasks.find((t) => !t.completed) || null;
-  }, [mustWinTasks]);
-
-  const activeMustWinIndex = activeMustWin
-    ? mustWinTasks.findIndex((t) => t.id === activeMustWin.id)
-    : -1;
-
-  // Habitica Dailies for today (excluding must-wins)
-  const dailyTasks = useMemo(
-    () =>
-      optimisticTasks.filter(
-        (t) =>
-          t.type === "daily" ||
-          (t.type === "todo" && !mustWinIds.includes(t.id))
-      ),
-    [optimisticTasks, mustWinIds]
-  );
-
-  const pendingDailiesCount = dailyTasks.filter((t) => !t.completed).length;
-  const totalOtherPending =
-    (totalMustWins - completedMustWins > 1
-      ? totalMustWins - completedMustWins - 1
-      : 0) + pendingDailiesCount;
+  const pendingDailiesCount = generalDailyTasks.filter((t) => !t.completed).length;
 
   // Filtered supplements by timing
   const filteredSupplements = useMemo(() => {
@@ -287,35 +247,6 @@ export function TodayViewClient({
     });
   };
 
-  const handleAddVictory = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newVictoryText.trim()) return;
-    soundFx.taskComplete();
-    const text = newVictoryText.trim();
-    setNewVictoryText("");
-    setIsAddingNewVictory(false);
-    startTransition(async () => {
-      const res = await createSingleTaskAction(text);
-      if (res.success && res.task) {
-        const updatedIds = [...mustWinIds, res.task.id];
-        await setMustWinTasksAction(updatedIds);
-        router.refresh();
-      }
-    });
-  };
-
-  const handleSelectMustWinTask = (taskId: string) => {
-    soundFx.taskComplete();
-    startTransition(async () => {
-      const updatedIds = mustWinIds.includes(taskId)
-        ? mustWinIds
-        : [...mustWinIds, taskId];
-      await setMustWinTasksAction(updatedIds);
-      setIsSelectingExisting(false);
-      router.refresh();
-    });
-  };
-
   const hasMorningRitual = Boolean(
     todayRitual?.energyLevel ||
       todayRitual?.dayIntention ||
@@ -327,9 +258,9 @@ export function TodayViewClient({
   const isEveningWindow = currentHour >= 19;
 
   return (
-    <div className="w-full space-y-5 pb-20 sm:pb-12 font-sans animate-in fade-in duration-300">
+    <div className="w-full space-y-5 pb-24 sm:pb-16 font-sans animate-in fade-in duration-300">
       {/* ========================================================================= */}
-      {/* 1. HEADER CONTEXTUAL (Clean & Responsive)                                 */}
+      {/* 1. HEADER CONTEXTUAL                                                      */}
       {/* ========================================================================= */}
       <div className="rounded-xl border border-[#2A2723] bg-[#181715] p-4 sm:p-5 shadow-xs">
         <div className="flex items-center justify-between gap-3">
@@ -371,10 +302,11 @@ export function TodayViewClient({
             <button
               type="button"
               onClick={() => openModal("morningRitual")}
-              className={`p-1.5 sm:px-3 sm:py-1.5 rounded-lg text-xs font-semibold border transition-all cursor-pointer flex items-center gap-1.5 ${hasMorningRitual
+              className={`p-1.5 sm:px-3 sm:py-1.5 rounded-lg text-xs font-semibold border transition-all cursor-pointer flex items-center gap-1.5 ${
+                hasMorningRitual
                   ? "border-[#7EA35A]/40 bg-[#1C2219] text-[#7EA35A]"
                   : "border-[#2A2723] bg-[#121110] text-[#8E867B] hover:text-[#DDD6C9]"
-                }`}
+              }`}
               title="Ritual Matutino de Despegue"
             >
               <Sun className="h-3.5 w-3.5" />
@@ -385,10 +317,11 @@ export function TodayViewClient({
             <button
               type="button"
               onClick={() => openModal("eveningReview")}
-              className={`p-1.5 sm:px-3 sm:py-1.5 rounded-lg text-xs font-semibold border transition-all cursor-pointer flex items-center gap-1.5 ${hasEveningReview
+              className={`p-1.5 sm:px-3 sm:py-1.5 rounded-lg text-xs font-semibold border transition-all cursor-pointer flex items-center gap-1.5 ${
+                hasEveningReview
                   ? "border-[#7EA35A]/40 bg-[#1C2219] text-[#7EA35A]"
                   : "border-[#2A2723] bg-[#121110] text-[#8E867B] hover:text-[#DDD6C9]"
-                }`}
+              }`}
               title="Cierre Nocturno"
             >
               <Moon className="h-3.5 w-3.5" />
@@ -400,7 +333,7 @@ export function TodayViewClient({
       </div>
 
       {/* ========================================================================= */}
-      {/* 2. TIME-OF-DAY INTELLIGENT RITUAL BANNER (Contextual Prompts)             */}
+      {/* 2. TIME-OF-DAY RITUAL BANNER                                              */}
       {/* ========================================================================= */}
       {isMorningWindow && !hasMorningRitual && (
         <div className="rounded-xl border border-[#7EA35A]/35 bg-[#141813] p-4 sm:p-4.5 flex items-center justify-between gap-3 shadow-xs">
@@ -413,7 +346,7 @@ export function TodayViewClient({
                 Despegue Suave & Autocuidado
               </h3>
               <p className="text-xs text-[#7EA35A] font-mono truncate">
-                Despeja el cuerpo, revisa tu energía y prepara tu licuado con calma
+                Despeja el cuerpo, revisa tu energía y completa tu rutina física
               </p>
             </div>
           </div>
@@ -439,7 +372,7 @@ export function TodayViewClient({
                 Cierre & Reflexión del Día
               </h3>
               <p className="text-xs text-[#4EAB9E] font-mono truncate">
-                Revisa tus victorias, anota reflexiones y despeja tu mente
+                Revisa el avance del proyecto, anota reflexiones y despeja tu mente
               </p>
             </div>
           </div>
@@ -455,221 +388,34 @@ export function TodayViewClient({
       )}
 
       {/* ========================================================================= */}
-      {/* 3. MAIN RESPONSIVE GRID (Left: Sequential Tasks | Right: Bio & Finance)   */}
+      {/* 3. MAIN RESPONSIVE GRID (Left: Project Zen Focus | Right: Bio & Finance)  */}
       {/* ========================================================================= */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
         {/* ======================================================================= */}
-        {/* LEFT COLUMN (7 COLS): MODO FOCO SECUENCIAL Y TAREAS                     */}
+        {/* LEFT COLUMN (7 COLS): PROYECTO EN FOCO & TAREAS                         */}
         {/* ======================================================================= */}
-        <div className="lg:col-span-7 space-y-5">
-          <div className="rounded-xl border border-[#2A2723] bg-[#181715] p-5 sm:p-6 shadow-sm space-y-4">
-            <div className="flex items-center justify-between pb-3 border-b border-[#2A2723]">
-              <div className="flex items-center gap-2">
-                <Zap className="h-4 w-4 text-[#D99B43]" />
-                <span className="font-serif text-sm sm:text-base font-bold text-[#F5F2EB]">
-                  Siguiente Victoria en Foco
-                </span>
-              </div>
+        <div className="lg:col-span-7 space-y-4">
+          <ProjectFocusCard
+            projects={projects}
+            tasks={optimisticTasks}
+            tags={tags}
+            contextualNotes={contextualNotes}
+            onRefreshData={() => router.refresh()}
+          />
 
-              <div className="flex items-center gap-2">
-                {totalMustWins > 0 && (
-                  <div className="flex items-center gap-1 font-mono text-xs text-[#D99B43] bg-[#221D16] px-2.5 py-1 rounded border border-[#D99B43]/30">
-                    <Award className="h-3.5 w-3.5" />
-                    <span>
-                      {completedMustWins} de {totalMustWins} victorias
-                    </span>
-                  </div>
-                )}
-
-                {totalMustWins > 0 && totalMustWins < 3 && (
-                  <button
-                    type="button"
-                    onClick={() => setIsAddingNewVictory(!isAddingNewVictory)}
-                    className="p-1 rounded bg-[#121110] hover:bg-[#221D16] text-[#D99B43] border border-[#2A2723] hover:border-[#D99B43]/40 text-xs font-mono transition-colors cursor-pointer"
-                    title="Agregar otra victoria"
-                  >
-                    <Plus className="h-3.5 w-3.5" />
-                  </button>
-                )}
-              </div>
-            </div>
-
-            {/* Quick add inline form if user toggled '+ Victoria' */}
-            {isAddingNewVictory && (
-              <form
-                onSubmit={handleAddVictory}
-                className="flex gap-2 p-3 rounded-xl bg-[#121110] border border-[#D99B43]/40 animate-in fade-in duration-150"
-              >
-                <input
-                  type="text"
-                  value={newVictoryText}
-                  onChange={(e) => setNewVictoryText(e.target.value)}
-                  placeholder="Escribe la siguiente victoria de trabajo..."
-                  className="flex-1 rounded-lg border border-[#2A2723] bg-[#181715] px-3 py-1.5 text-xs text-[#F5F2EB] placeholder:text-[#8E867B] focus:border-[#D99B43] focus:outline-none"
-                  autoFocus
-                />
-                <button
-                  type="submit"
-                  disabled={!newVictoryText.trim() || isPending}
-                  className="px-3 py-1.5 rounded-lg bg-[#D99B43] hover:bg-[#E8AF59] text-[#121110] font-bold text-xs font-mono cursor-pointer disabled:opacity-50"
-                >
-                  Fijar
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setIsAddingNewVictory(false)}
-                  className="p-1.5 rounded-lg text-[#8E867B] hover:text-[#DDD6C9] cursor-pointer"
-                >
-                  <X className="h-4 w-4" />
-                </button>
-              </form>
-            )}
-
-            {/* Case A: No Must-Wins configured yet (Work Ignition Card) */}
-            {totalMustWins === 0 && (
-              <div className="rounded-xl border border-[#2A2723] bg-[#121110] p-5 sm:p-6 space-y-4">
-                <div>
-                  <h4 className="font-serif text-sm sm:text-base font-bold text-[#F5F2EB]">
-                    ¿En qué vas a enfocarte primero hoy?
-                  </h4>
-                  <p className="text-xs text-[#8E867B] font-mono mt-0.5">
-                    Escribe tu victoria principal de trabajo para empezar con foco claro.
-                  </p>
-                </div>
-
-                <form onSubmit={handleAddVictory} className="flex gap-2">
-                  <input
-                    type="text"
-                    value={newVictoryText}
-                    onChange={(e) => setNewVictoryText(e.target.value)}
-                    placeholder="p. ej. Terminar reporte MVP, Enviar propuesta..."
-                    className="flex-1 rounded-xl border border-[#2A2723] bg-[#181715] px-3.5 py-2.5 text-xs text-[#F5F2EB] placeholder:text-[#8E867B] focus:border-[#D99B43] focus:outline-none font-sans"
-                  />
-                  <button
-                    type="submit"
-                    disabled={!newVictoryText.trim() || isPending}
-                    className="px-4 py-2.5 rounded-xl bg-[#D99B43] hover:bg-[#E8AF59] disabled:opacity-50 text-[#121110] font-bold text-xs font-mono transition-all cursor-pointer shrink-0 shadow-xs"
-                  >
-                    + Fijar Victoria
-                  </button>
-                </form>
-
-                {dailyTasks.filter((t) => t.type === "todo" && !t.completed).length > 0 && (
-                  <div className="pt-2 border-t border-[#2A2723]">
-                    <button
-                      type="button"
-                      onClick={() => setIsSelectingExisting(!isSelectingExisting)}
-                      className="text-xs font-mono text-[#D99B43] hover:underline cursor-pointer flex items-center gap-1"
-                    >
-                      <span>O elegir de mis pendientes existentes ({dailyTasks.filter((t) => t.type === "todo" && !t.completed).length})</span>
-                      <ChevronDown className={`h-3 w-3 transition-transform ${isSelectingExisting ? "rotate-180" : ""}`} />
-                    </button>
-
-                    {isSelectingExisting && (
-                      <div className="mt-2 space-y-1 max-h-48 overflow-y-auto pr-1 animate-in fade-in duration-150">
-                        {dailyTasks
-                          .filter((t) => t.type === "todo" && !t.completed)
-                          .map((t) => (
-                            <div
-                              key={t.id}
-                              onClick={() => handleSelectMustWinTask(t.id)}
-                              className="p-2.5 rounded-lg border border-[#2A2723] bg-[#181715] hover:border-[#D99B43]/50 text-xs text-[#F5F2EB] flex items-center justify-between cursor-pointer transition-all"
-                            >
-                              <span className="truncate">{t.text}</span>
-                              <span className="text-[10px] font-mono text-[#D99B43] shrink-0 ml-2">+ Fijar</span>
-                            </div>
-                          ))}
-                      </div>
-                    )}
-                  </div>
-                )}
-              </div>
-            )}
-
-            {/* Case B: All Must-Wins Completed! */}
-            {allMustWinsCompleted && (
-              <div className="rounded-xl border border-[#7EA35A]/40 bg-[#141813] p-6 text-center space-y-3 animate-in zoom-in-95 duration-300">
-                <div className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-[#7EA35A]/20 text-[#7EA35A] border border-[#7EA35A]/40">
-                  <Trophy className="h-6 w-6" />
-                </div>
-                <div>
-                  <h4 className="font-serif text-base sm:text-lg font-bold text-[#F5F2EB]">
-                    ¡Completaste tus {totalMustWins} Victorias de Hoy!
-                  </h4>
-                  <p className="text-xs sm:text-sm text-[#7EA35A] max-w-md mx-auto mt-1 font-mono">
-                    Excelente ejecución y enfoque. Tu energía dopaminérgica está en su nivel óptimo.
-                  </p>
-                </div>
-              </div>
-            )}
-
-            {/* Case C: Active Sequential Task Card */}
-            {activeMustWin && (
-              <div className="space-y-4">
-                {/* Stepper Dots */}
-                <div className="flex items-center gap-2">
-                  {mustWinTasks.map((task, idx) => (
-                    <div
-                      key={task.id}
-                      className={`flex-1 h-1.5 rounded-full transition-all duration-300 ${task.completed
-                          ? "bg-[#7EA35A]"
-                          : idx === activeMustWinIndex
-                            ? "bg-[#D99B43]"
-                            : "bg-[#2A2723]"
-                        }`}
-                    />
-                  ))}
-                </div>
-
-                {/* Active Card Body */}
-                <div className="rounded-xl border border-[#D99B43]/35 bg-[#121110] p-5 sm:p-6 space-y-4 shadow-sm relative overflow-hidden">
-                  <div className="flex items-start justify-between gap-3">
-                    <span className="font-mono text-xs font-bold text-[#D99B43] bg-[#221D16] px-2.5 py-1 rounded border border-[#D99B43]/30">
-                      Victoria #{activeMustWinIndex + 1} de {totalMustWins}
-                    </span>
-
-                    <span className="font-mono text-xs text-[#8E867B] bg-[#181715] px-2.5 py-1 rounded border border-[#2A2723]">
-                      +{activeMustWin.value ? Math.round(activeMustWin.value * 10) : 10} XP
-                    </span>
-                  </div>
-
-                  <div>
-                    <h3 className="font-serif text-base sm:text-xl font-bold text-[#F5F2EB] leading-snug">
-                      {activeMustWin.text}
-                    </h3>
-                    {activeMustWin.notes && (
-                      <p className="text-xs sm:text-sm text-[#8E867B] font-mono mt-2 leading-relaxed">
-                        {activeMustWin.notes}
-                      </p>
-                    )}
-                  </div>
-
-                  {/* 1-Tap Big Complete Action Button */}
-                  <button
-                    type="button"
-                    disabled={isPending}
-                    onClick={() => handleToggleTask(activeMustWin)}
-                    className="w-full py-3.5 px-4 rounded-xl bg-[#D99B43] hover:bg-[#E8AF59] active:scale-[0.99] text-[#121110] font-bold text-xs sm:text-sm transition-all cursor-pointer flex items-center justify-center gap-2 shadow-sm font-sans"
-                  >
-                    <Check className="h-4 w-4 stroke-3" />
-                    <span>Completar Victoria y Avanzar</span>
-                  </button>
-                </div>
-              </div>
-            )}
-
-            {/* Collapsible Drawer for other Must-Wins & Daily Habits */}
+          {/* Collapsible Drawer for general habits / dailies */}
+          {generalDailyTasks.length > 0 && (
             <div className="pt-1">
               <button
                 type="button"
                 onClick={() => setIsDrawerOpen(!isDrawerOpen)}
-                className="w-full py-2.5 px-3.5 rounded-lg border border-[#2A2723] bg-[#121110] hover:bg-[#181715] text-[#8E867B] hover:text-[#DDD6C9] font-mono text-xs flex items-center justify-between transition-colors cursor-pointer"
+                className="w-full py-2.5 px-3.5 rounded-lg border border-[#2A2723] bg-[#181715] hover:bg-[#22201D] text-[#8E867B] hover:text-[#DDD6C9] font-mono text-xs flex items-center justify-between transition-colors cursor-pointer"
               >
                 <span className="flex items-center gap-2">
-                  <span>Otras tareas y hábitos diarios</span>
-                  {totalOtherPending > 0 && (
+                  <span>Hábitos Diarios de Habitica</span>
+                  {pendingDailiesCount > 0 && (
                     <span className="px-2 py-0.5 rounded-full bg-[#221D16] text-[#D99B43] font-bold text-[10px] border border-[#D99B43]/30">
-                      {totalOtherPending} pendientes
+                      {pendingDailiesCount} pendientes
                     </span>
                   )}
                 </span>
@@ -681,335 +427,281 @@ export function TodayViewClient({
               </button>
 
               {isDrawerOpen && (
-                <div className="mt-3 space-y-4 animate-in slide-in-from-top-2 duration-200">
-                  {/* Other Must-Wins */}
-                  {totalMustWins > 0 && (
-                    <div className="space-y-1.5">
-                      <span className="font-mono text-[10px] text-[#8E867B] uppercase tracking-wider block px-1">
-                        Victorias del Día ({completedMustWins}/{totalMustWins})
-                      </span>
-                      {mustWinTasks.map((task, idx) => (
+                <div className="mt-2 space-y-1.5 animate-in slide-in-from-top-2 duration-200">
+                  {generalDailyTasks.map((task) => (
+                    <div
+                      key={task.id}
+                      onClick={() => handleToggleTask(task)}
+                      className={`flex items-center justify-between p-3 rounded-lg border transition-all cursor-pointer select-none ${
+                        task.completed
+                          ? "bg-[#141813] border-[#7EA35A]/30 text-[#8E867B]"
+                          : "bg-[#121110] border-[#2A2723] hover:border-[#38332D] text-[#DDD6C9]"
+                      }`}
+                    >
+                      <div className="flex items-center gap-3 flex-1 min-w-0">
                         <div
-                          key={task.id}
-                          onClick={() => handleToggleTask(task)}
-                          className={`flex items-center justify-between p-3.5 rounded-lg border transition-all cursor-pointer select-none ${task.completed
-                              ? "bg-[#141813] border-[#7EA35A]/30 text-[#8E867B]"
-                              : "bg-[#121110] border-[#2A2723] hover:border-[#D99B43]/40 text-[#F5F2EB]"
-                            }`}
+                          className={`flex h-4.5 w-4.5 shrink-0 items-center justify-center rounded border transition-colors ${
+                            task.completed
+                              ? "bg-[#7EA35A] border-[#7EA35A] text-[#121110] font-bold"
+                              : "border-[#38332D] bg-[#181715]"
+                          }`}
                         >
-                          <div className="flex items-center gap-3 flex-1 min-w-0">
-                            <div
-                              className={`flex h-5 w-5 shrink-0 items-center justify-center rounded border transition-colors ${task.completed
-                                  ? "bg-[#7EA35A] border-[#7EA35A] text-[#121110] font-bold"
-                                  : "border-[#38332D] bg-[#181715]"
-                                }`}
-                            >
-                              {task.completed && (
-                                <Check className="h-3.5 w-3.5 stroke-3" />
-                              )}
-                            </div>
-                            <span
-                              className={`text-xs sm:text-sm truncate ${task.completed
-                                  ? "line-through text-[#8E867B]"
-                                  : "text-[#F5F2EB]"
-                                }`}
-                            >
-                              #{idx + 1} {task.text}
-                            </span>
-                          </div>
-                          <span className="font-mono text-[11px] text-[#8E867B] shrink-0 ml-2">
-                            +{task.value ? Math.round(task.value * 10) : 10} XP
-                          </span>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-
-                  {/* Daily Habits (Dailies) */}
-                  {dailyTasks.length > 0 && (
-                    <div className="space-y-1.5">
-                      <span className="font-mono text-[10px] text-[#8E867B] uppercase tracking-wider block px-1">
-                        Hábitos Diarios ({dailyTasks.filter((t) => t.completed).length}/{dailyTasks.length})
-                      </span>
-                      {dailyTasks.map((task) => (
-                        <div
-                          key={task.id}
-                          onClick={() => handleToggleTask(task)}
-                          className={`flex items-center justify-between p-3.5 rounded-lg border transition-all cursor-pointer select-none ${task.completed
-                              ? "bg-[#141813] border-[#7EA35A]/30 text-[#8E867B]"
-                              : "bg-[#121110] border-[#2A2723] hover:border-[#38332D] text-[#DDD6C9]"
-                            }`}
-                        >
-                          <div className="flex items-center gap-3 flex-1 min-w-0">
-                            <div
-                              className={`flex h-5 w-5 shrink-0 items-center justify-center rounded border transition-colors ${task.completed
-                                  ? "bg-[#7EA35A] border-[#7EA35A] text-[#121110] font-bold"
-                                  : "border-[#38332D] bg-[#181715]"
-                                }`}
-                            >
-                              {task.completed && (
-                                <Check className="h-3.5 w-3.5 stroke-3" />
-                              )}
-                            </div>
-                            <span
-                              className={`text-xs sm:text-sm truncate ${task.completed
-                                  ? "line-through text-[#8E867B]"
-                                  : "text-[#F5F2EB]"
-                                }`}
-                            >
-                              {task.text}
-                            </span>
-                          </div>
-
-                          {task.streak !== undefined && task.streak > 0 && (
-                            <span className="font-mono text-xs text-[#D99B43] flex items-center gap-1 shrink-0 ml-2">
-                              <Flame className="h-3.5 w-3.5" />
-                              <span>{task.streak}</span>
-                            </span>
+                          {task.completed && (
+                            <Check className="h-3 w-3 stroke-3" />
                           )}
                         </div>
-                      ))}
+                        <span
+                          className={`text-xs truncate ${
+                            task.completed
+                              ? "line-through text-[#8E867B]"
+                              : "text-[#F5F2EB]"
+                          }`}
+                        >
+                          {task.text}
+                        </span>
+                      </div>
+                      <span className="font-mono text-[10px] text-[#8E867B]">
+                        Daily
+                      </span>
                     </div>
-                  )}
+                  ))}
                 </div>
               )}
             </div>
-          </div>
+          )}
         </div>
 
         {/* ======================================================================= */}
-        {/* RIGHT COLUMN (5 COLS): BIO-CONTROL & MICRO-FINANZAS                     */}
+        {/* RIGHT COLUMN (5 COLS): BIO-CONTROL & FINANZAS HORMIGA                   */}
         {/* ======================================================================= */}
-        <div className="lg:col-span-5 space-y-4">
-          {/* Card A: Suplementación Inteligente */}
-          <div className="rounded-xl border border-[#2A2723] bg-[#181715] p-5 shadow-sm space-y-3.5">
-            <div className="flex items-center justify-between pb-2 border-b border-[#2A2723]">
+        <div className="lg:col-span-5 space-y-5">
+          {/* Suplementos Contextuales */}
+          <div className="rounded-xl border border-[#2A2723] bg-[#181715] p-5 sm:p-6 shadow-sm space-y-4">
+            <div className="flex items-center justify-between pb-3 border-b border-[#2A2723]">
               <div className="flex items-center gap-2">
                 <Pill className="h-4 w-4 text-[#7EA35A]" />
-                <span className="font-serif text-sm font-bold text-[#F5F2EB]">
-                  Suplementos ({activeSuppTiming})
+                <span className="font-serif text-sm sm:text-base font-bold text-[#F5F2EB]">
+                  Suplementos
                 </span>
               </div>
 
-              <button
-                type="button"
-                onClick={() => openModal("manageSupplements")}
-                className="text-[11px] font-mono text-[#D99B43] hover:text-[#E8AF59] transition-colors cursor-pointer"
-              >
-                Catálogo ⚙️
-              </button>
-            </div>
-
-            {/* Quick Timing Tabs */}
-            <div className="flex items-center gap-1 p-0.5 rounded-lg bg-[#121110] border border-[#2A2723] font-mono text-xs">
-              {(["Mañana", "Tarde", "Noche"] as const).map((timing) => (
-                <button
-                  key={timing}
-                  type="button"
-                  onClick={() => {
-                    setActiveSuppTiming(timing);
-                    setIsSuppDetailsOpen(false);
-                  }}
-                  className={`flex-1 py-1.5 rounded-md text-center font-semibold transition-all cursor-pointer ${activeSuppTiming === timing
-                      ? "bg-[#221D16] text-[#D99B43] border border-[#D99B43]/30 shadow-2xs"
-                      : "text-[#8E867B] hover:text-[#DDD6C9]"
-                    }`}
-                >
-                  {timing}
-                </button>
-              ))}
-            </div>
-
-            {/* If all taken in this timing: Minimized State */}
-            {filteredSupplements.length > 0 && allTakenInActiveTiming && !isSuppDetailsOpen && (
-              <div className="rounded-lg border border-[#7EA35A]/35 bg-[#141813] p-3 flex items-center justify-between gap-2">
-                <div className="flex items-center gap-2 text-xs text-[#7EA35A] font-semibold font-mono truncate">
-                  <CheckCircle2 className="h-4 w-4 shrink-0" />
-                  <span className="truncate">Pack {activeSuppTiming} completado ({takenCountInActiveTiming}/{filteredSupplements.length})</span>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setIsSuppDetailsOpen(true)}
-                  className="text-[11px] font-mono text-[#8E867B] hover:text-[#DDD6C9] underline cursor-pointer shrink-0"
-                >
-                  Ver
-                </button>
+              {/* Timing Selector Tabs */}
+              <div className="flex items-center p-0.5 rounded-lg bg-[#121110] border border-[#2A2723] font-mono text-[11px]">
+                {(["Mañana", "Tarde", "Noche", "Todos"] as const).map(
+                  (timing) => (
+                    <button
+                      key={timing}
+                      type="button"
+                      onClick={() => {
+                        setActiveSuppTiming(timing);
+                        setIsSuppDetailsOpen(false);
+                      }}
+                      className={`px-2 py-1 rounded-md text-center font-semibold transition-all cursor-pointer ${
+                        activeSuppTiming === timing
+                          ? "bg-[#221D16] text-[#D99B43] border border-[#D99B43]/30 shadow-2xs"
+                          : "text-[#8E867B] hover:text-[#DDD6C9]"
+                      }`}
+                    >
+                      {timing}
+                    </button>
+                  )
+                )}
               </div>
-            )}
+            </div>
 
-            {/* If pending or user clicked 'Ver' */}
-            {(pendingInActiveTiming > 0 || isSuppDetailsOpen || filteredSupplements.length === 0) && (
-              <div className="space-y-2.5">
-                {filteredSupplements.length > 0 && (
+            {/* Smart Summary / 1-Tap Take Action */}
+            {filteredSupplements.length > 0 ? (
+              <div className="space-y-3">
+                <div className="flex items-center justify-between text-xs font-mono">
+                  <span className="text-[#8E867B]">
+                    Turno {activeSuppTiming}:
+                  </span>
+                  <span
+                    className={
+                      allTakenInActiveTiming
+                        ? "text-[#7EA35A] font-bold"
+                        : "text-[#D99B43]"
+                    }
+                  >
+                    {takenCountInActiveTiming} de {filteredSupplements.length}{" "}
+                    tomados
+                  </span>
+                </div>
+
+                {/* 1-Tap Complete Pack Button */}
+                <button
+                  type="button"
+                  disabled={isPending}
+                  onClick={handleBatchTakeSupplements}
+                  className={`w-full py-2.5 px-3 rounded-lg font-bold text-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-xs font-sans ${
+                    allTakenInActiveTiming
+                      ? "bg-[#1C2219] text-[#7EA35A] border border-[#7EA35A]/40"
+                      : "bg-[#7EA35A] hover:bg-[#8FB866] text-[#121110]"
+                  }`}
+                >
+                  <CheckCircle2 className="h-4 w-4" />
+                  <span>
+                    {allTakenInActiveTiming
+                      ? `✓ Pack ${activeSuppTiming} Completado`
+                      : `Tomar Pack ${activeSuppTiming} (${pendingInActiveTiming} pendientes)`}
+                  </span>
+                </button>
+
+                {/* Toggle details list */}
+                <div className="pt-1">
                   <button
                     type="button"
-                    disabled={isPending}
-                    onClick={handleBatchTakeSupplements}
-                    className={`w-full py-2.5 px-3 rounded-lg font-bold text-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-xs font-sans ${allTakenInActiveTiming
-                        ? "bg-[#1C2219] text-[#7EA35A] border border-[#7EA35A]/40"
-                        : "bg-[#7EA35A] hover:bg-[#8FB866] text-[#121110]"
-                      }`}
+                    onClick={() => setIsSuppDetailsOpen(!isSuppDetailsOpen)}
+                    className="text-[11px] font-mono text-[#8E867B] hover:text-[#DDD6C9] transition-colors cursor-pointer flex items-center gap-1"
                   >
-                    <CheckCircle2 className="h-4 w-4" />
                     <span>
-                      {allTakenInActiveTiming
-                        ? `✓ Desmarcar Pack de la ${activeSuppTiming}`
-                        : `Tomar Pack de la ${activeSuppTiming} (${pendingInActiveTiming})`}
+                      {isSuppDetailsOpen
+                        ? "Ocultar lista individual"
+                        : "Ver / marcar individuales"}
                     </span>
+                    <ChevronDown
+                      className={`h-3 w-3 transition-transform ${
+                        isSuppDetailsOpen ? "rotate-180" : ""
+                      }`}
+                    />
                   </button>
-                )}
 
-                {filteredSupplements.length === 0 ? (
-                  <div className="rounded-lg border border-[#2A2723] bg-[#121110] p-3 text-center text-xs text-[#8E867B] font-mono">
-                    Sin suplementos en la {activeSuppTiming}.
-                  </div>
-                ) : (
-                  <div className="space-y-1.5 max-h-52 overflow-y-auto pr-0.5">
-                    {filteredSupplements.map((supp) => (
-                      <div
-                        key={supp.id}
-                        onClick={() => handleToggleSupplement(supp.id)}
-                        className={`flex items-center justify-between p-2.5 rounded-lg border transition-all cursor-pointer select-none ${supp.taken
-                            ? "bg-[#141813] border-[#7EA35A]/30 text-[#8E867B]"
-                            : "bg-[#121110] border-[#2A2723] hover:border-[#38332D] text-[#F5F2EB]"
+                  {isSuppDetailsOpen && (
+                    <div className="mt-2.5 space-y-1.5 max-h-48 overflow-y-auto pr-1 animate-in fade-in duration-200">
+                      {filteredSupplements.map((supp) => (
+                        <div
+                          key={supp.id}
+                          onClick={() => handleToggleSupplement(supp.id)}
+                          className={`flex items-center justify-between p-2.5 rounded-lg border transition-all cursor-pointer select-none ${
+                            supp.taken
+                              ? "bg-[#141813] border-[#7EA35A]/30 text-[#8E867B]"
+                              : "bg-[#121110] border-[#2A2723] hover:border-[#38332D] text-[#F5F2EB]"
                           }`}
-                      >
-                        <div className="flex items-center gap-2.5 min-w-0">
-                          <div
-                            className={`flex h-4 w-4 shrink-0 items-center justify-center rounded border transition-colors ${supp.taken
-                                ? "bg-[#7EA35A] border-[#7EA35A] text-[#121110] font-bold"
-                                : "border-[#38332D] bg-[#181715]"
+                        >
+                          <div className="flex items-center gap-2.5 min-w-0">
+                            <div
+                              className={`flex h-4 w-4 shrink-0 items-center justify-center rounded border transition-colors ${
+                                supp.taken
+                                  ? "bg-[#7EA35A] border-[#7EA35A] text-[#121110] font-bold"
+                                  : "border-[#38332D] bg-[#181715]"
                               }`}
-                          >
-                            {supp.taken && (
-                              <Check className="h-2.5 w-2.5 stroke-3" />
-                            )}
+                            >
+                              {supp.taken && (
+                                <Check className="h-2.5 w-2.5 stroke-3" />
+                              )}
+                            </div>
+                            <span
+                              className={`text-xs truncate ${
+                                supp.taken
+                                  ? "line-through text-[#8E867B]"
+                                  : "text-[#F5F2EB]"
+                              }`}
+                            >
+                              {supp.name}
+                            </span>
                           </div>
-                          <span
-                            className={`text-xs truncate ${supp.taken
-                                ? "line-through text-[#8E867B]"
-                                : "text-[#F5F2EB]"
-                              }`}
-                          >
-                            {supp.name}
-                          </span>
-                        </div>
-
-                        {supp.dosage && (
-                          <span className="text-[10px] font-mono px-1.5 py-0.2 rounded border border-[#2A2723] bg-[#181715] text-[#DDD6C9] shrink-0 ml-1.5">
+                          <span className="font-mono text-[10px] text-[#8E867B]">
                             {supp.dosage}
                           </span>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                )}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
               </div>
+            ) : (
+              <p className="text-xs text-[#8E867B] font-mono italic">
+                Sin suplementos programados para este turno.
+              </p>
             )}
           </div>
 
-          {/* Card B: Control de Hidratación */}
-          <div className="rounded-xl border border-[#2A2723] bg-[#181715] p-5 shadow-sm space-y-3.5">
-            <div className="flex items-center justify-between pb-2 border-b border-[#2A2723]">
+          {/* Hidratación Inteligente */}
+          <div className="rounded-xl border border-[#2A2723] bg-[#181715] p-5 sm:p-6 shadow-sm space-y-4">
+            <div className="flex items-center justify-between pb-3 border-b border-[#2A2723]">
               <div className="flex items-center gap-2">
                 <Droplet className="h-4 w-4 text-[#4EAB9E]" />
-                <span className="font-serif text-sm font-bold text-[#F5F2EB]">
+                <span className="font-serif text-sm sm:text-base font-bold text-[#F5F2EB]">
                   Hidratación
                 </span>
               </div>
-
-              <span className="font-mono text-xs font-bold text-[#4EAB9E]">
-                {waterPercent}%
+              <span className="font-mono text-xs text-[#4EAB9E] font-bold">
+                {optimisticWater} / {waterTarget} ml ({waterPercent}%)
               </span>
             </div>
 
-            {/* Minimized or Active state */}
-            {isWaterComplete ? (
-              <div className="rounded-lg border border-[#4EAB9E]/35 bg-[#141C1A] p-3 flex items-center justify-between gap-2">
-                <div className="flex items-center gap-2 text-xs text-[#4EAB9E] font-semibold font-mono truncate">
-                  <CheckCircle2 className="h-4 w-4 shrink-0" />
-                  <span className="truncate">Meta alcanzada ({optimisticWater} / {waterTarget} ml)</span>
-                </div>
+            {/* Quick 1-Tap Log Buttons */}
+            <div className="space-y-3">
+              <div className="grid grid-cols-2 gap-2">
                 <button
                   type="button"
                   disabled={isPending}
                   onClick={() => handleQuickAddWater(250)}
-                  className="px-2.5 py-1 rounded bg-[#121110] border border-[#4EAB9E]/30 text-[#4EAB9E] font-mono text-xs font-bold hover:bg-[#141C1A] cursor-pointer shrink-0"
+                  className="py-2 px-3 rounded-lg border border-[#2A2723] bg-[#121110] hover:bg-[#1C2219] hover:border-[#4EAB9E]/40 text-[#DDD6C9] hover:text-[#4EAB9E] text-xs font-mono font-semibold transition-all flex items-center justify-center gap-1.5 cursor-pointer"
                 >
-                  +250ml
+                  <Plus className="h-3 w-3" />
+                  <span>+250 ml (Vaso)</span>
+                </button>
+
+                <button
+                  type="button"
+                  disabled={isPending}
+                  onClick={() => handleQuickAddWater(500)}
+                  className="py-2 px-3 rounded-lg border border-[#2A2723] bg-[#121110] hover:bg-[#1C2219] hover:border-[#4EAB9E]/40 text-[#DDD6C9] hover:text-[#4EAB9E] text-xs font-mono font-semibold transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                >
+                  <Plus className="h-3 w-3" />
+                  <span>+500 ml (Botella)</span>
                 </button>
               </div>
-            ) : (
-              <div className="space-y-3">
-                <div className="flex items-baseline justify-between font-mono">
-                  <span className="text-xl sm:text-2xl font-bold text-[#F5F2EB]">
-                    {optimisticWater} ml
-                  </span>
-                  <span className="text-xs text-[#8E867B]">
-                    Meta: {waterTarget} ml
-                  </span>
-                </div>
 
-                <div className="h-2 w-full rounded-full bg-[#121110] border border-[#2A2723] overflow-hidden">
-                  <div
-                    className="h-full bg-[#4EAB9E] transition-all duration-300"
-                    style={{ width: `${waterPercent}%` }}
-                  />
-                </div>
-
-                <div className="grid grid-cols-2 gap-2 pt-0.5 font-mono">
-                  <button
-                    type="button"
-                    disabled={isPending}
-                    onClick={() => handleQuickAddWater(250)}
-                    className="py-2 rounded-lg bg-[#121110] hover:bg-[#141C1A] border border-[#2A2723] hover:border-[#4EAB9E]/40 text-[#4EAB9E] font-bold text-xs transition-all cursor-pointer active:scale-95 disabled:opacity-50"
-                  >
-                    +250 ml
-                  </button>
-                  <button
-                    type="button"
-                    disabled={isPending}
-                    onClick={() => handleQuickAddWater(500)}
-                    className="py-2 rounded-lg bg-[#121110] hover:bg-[#141C1A] border border-[#2A2723] hover:border-[#4EAB9E]/40 text-[#4EAB9E] font-bold text-xs transition-all cursor-pointer active:scale-95 disabled:opacity-50"
-                  >
-                    +500 ml
-                  </button>
-                </div>
+              {/* Minimal Progress Bar */}
+              <div className="h-1.5 w-full rounded-full bg-[#121110] overflow-hidden">
+                <div
+                  className="h-full bg-[#4EAB9E] transition-all duration-300 rounded-full"
+                  style={{ width: `${waterPercent}%` }}
+                />
               </div>
-            )}
+
+              {isWaterComplete && (
+                <p className="text-[11px] text-[#7EA35A] font-mono text-center font-semibold">
+                  ✓ Meta de hidratación óptima alcanzada hoy.
+                </p>
+              )}
+            </div>
           </div>
 
-          {/* Card C: Micro-Finanzas (Gastos Hormiga) */}
-          <div className="rounded-xl border border-[#2A2723] bg-[#181715] p-4.5 shadow-sm">
+          {/* Micro-Barra de Gastos Hormiga */}
+          <div className="rounded-xl border border-[#2A2723] bg-[#181715] p-4 sm:p-5 shadow-sm space-y-3">
             <div className="flex items-center justify-between gap-3">
               <div className="flex items-center gap-2.5 min-w-0">
                 <div
-                  className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border ${isAntExceeded
+                  className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border ${
+                    isAntExceeded
                       ? "bg-[#221716] text-[#E05D52] border-[#E05D52]/30"
                       : "bg-[#221D16] text-[#D99B43] border-[#D99B43]/30"
-                    }`}
+                  }`}
                 >
                   <Wallet className="h-4 w-4" />
                 </div>
-
                 <div className="min-w-0">
                   <div className="flex items-center gap-2">
-                    <span className="font-serif text-xs font-bold text-[#F5F2EB]">
+                    <span className="font-serif text-xs sm:text-sm font-bold text-[#F5F2EB]">
                       Gastos Hormiga
                     </span>
                     <span
-                      className={`font-mono text-[10px] font-bold px-1.5 py-0.2 rounded border ${isAntExceeded
+                      className={`font-mono text-[10px] font-bold px-1.5 py-0.2 rounded border ${
+                        isAntExceeded
                           ? "bg-[#221716] text-[#E05D52] border-[#E05D52]/30"
                           : "bg-[#141813] text-[#7EA35A] border-[#7EA35A]/30"
-                        }`}
+                      }`}
                     >
                       {isAntExceeded
                         ? `+$${(antSpent - antLimit).toFixed(0)} exc.`
                         : `$${antRemaining.toFixed(0)} disp.`}
                     </span>
                   </div>
-                  <p className="text-[11px] text-[#8E867B] font-mono truncate">
-                    ${antSpent.toFixed(0)} de ${antLimit} MXN diarios ({antPercent}%)
+                  <p className="font-mono text-[11px] text-[#8E867B] truncate">
+                    Gastado: ${antSpent.toFixed(0)} / ${antLimit.toFixed(0)} meta
                   </p>
                 </div>
               </div>
@@ -1017,7 +709,7 @@ export function TodayViewClient({
               <button
                 type="button"
                 onClick={() => openModal("finance")}
-                className="px-3 py-1.5 rounded-lg bg-[#221716] hover:bg-[#2A1D1C] text-[#E05D52] border border-[#E05D52]/30 text-xs font-semibold transition-all cursor-pointer flex items-center gap-1 font-mono shrink-0 active:scale-95"
+                className="px-3 py-1.5 rounded-lg bg-[#221D16] hover:bg-[#2F271D] text-[#D99B43] border border-[#D99B43]/30 text-xs font-mono font-bold transition-all cursor-pointer shrink-0 flex items-center gap-1"
               >
                 <Plus className="h-3 w-3" />
                 <span>Gasto</span>
@@ -1027,12 +719,13 @@ export function TodayViewClient({
             {/* Minimal Progress Line */}
             <div className="h-1 w-full rounded-full bg-[#121110] mt-3 overflow-hidden">
               <div
-                className={`h-full transition-all duration-300 ${isAntExceeded
+                className={`h-full transition-all duration-300 ${
+                  isAntExceeded
                     ? "bg-[#E05D52]"
                     : antPercent >= 80
-                      ? "bg-[#D99B43]"
-                      : "bg-[#7EA35A]"
-                  }`}
+                    ? "bg-[#D99B43]"
+                    : "bg-[#7EA35A]"
+                }`}
                 style={{ width: `${antPercent}%` }}
               />
             </div>
@@ -1042,4 +735,3 @@ export function TodayViewClient({
     </div>
   );
 }
-
