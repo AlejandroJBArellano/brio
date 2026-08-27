@@ -58,10 +58,6 @@ export function LifeBalanceRadar({ tagDistributions }: LifeBalanceRadarProps) {
           </div>
         ))}
       </div>
-
-      <div className="mt-5 rounded-lg border border-[#2A2723] bg-[#121110] p-3.5 text-xs text-[#DDD6C9] font-sans">
-        💡 <strong className="text-[#F5F2EB]">Consejo de Equilibrio:</strong> Mantén tus pilares de <code className="font-mono text-[#D99B43]">#Selfcare</code> y <code className="font-mono text-[#4EAB9E]">#Productivity</code> en equilibrio frente a <code className="font-mono text-[#7EA35A]">#Proficient</code> y <code className="font-mono text-[#E05D52]">#Estudio</code> para maximizar tu momentum y evitar la fatiga mental.
-      </div>
     </div>
   );
 }
