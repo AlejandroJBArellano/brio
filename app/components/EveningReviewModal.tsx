@@ -2,85 +2,122 @@
 
 import { saveEveningReviewAction } from "@/app/actions/rituals";
 import { toggleSleepAction, toggleTaskAction } from "@/app/actions/tasks";
+import { soundFx } from "@/lib/soundFx";
 import { HabiticaTask, HabiticaUser } from "@/lib/types";
 import {
+  ArrowLeft,
   ArrowRight,
   Bed,
+  Check,
   Coffee,
-  Coins,
   Heart,
   Moon,
-  ShieldCheck,
   Sparkles,
   X,
 } from "lucide-react";
-import { useState, useTransition } from "react";
+import { useMemo, useState, useTransition } from "react";
 
 interface EveningReviewModalProps {
   isOpen: boolean;
   onClose: () => void;
   user: HabiticaUser;
   tasks: HabiticaTask[];
-  mustWinTaskIds: string[];
+  mustWinTaskIds?: string[];
   totalAntSpentToday: number;
   dailyAntLimit: number;
   onSuccess?: () => void;
   onOpenNewTransaction?: () => void;
 }
 
+const FATIGUE_LEVELS = [
+  { value: 1, label: "Agotado", emoji: "🪫", color: "text-[#E05D52] border-[#E05D52]/40 bg-[#221716]" },
+  { value: 2, label: "Cansado", emoji: "😴", color: "text-[#D99B43] border-[#D99B43]/40 bg-[#221D16]" },
+  { value: 3, label: "Normal", emoji: "⚖️", color: "text-[#8E867B] border-[#8E867B]/40 bg-[#181715]" },
+  { value: 4, label: "Con Energía", emoji: "⚡", color: "text-[#7EA35A] border-[#7EA35A]/40 bg-[#141813]" },
+  { value: 5, label: "Muy Despierto", emoji: "🔋", color: "text-[#4EAB9E] border-[#4EAB9E]/40 bg-[#141C1A]" },
+];
+
 export function EveningReviewModal({
   isOpen,
   onClose,
   user,
   tasks,
-  mustWinTaskIds,
   totalAntSpentToday,
   dailyAntLimit,
   onSuccess,
   onOpenNewTransaction,
 }: EveningReviewModalProps) {
-  const [step, setStep] = useState<1 | 2 | 3 | 4 | 5>(1);
-  const [reflection, setReflection] = useState("");
-  const [gratitude, setGratitude] = useState("");
-  const [tomorrowNotes, setTomorrowNotes] = useState("");
-  const [expensesConfirmed, _setExpensesConfirmed] = useState(true);
-  const [isShutdownComplete, setIsShutdownComplete] = useState(false);
+  const [step, setStep] = useState<1 | 2 | 3>(1);
   const [isPending, startTransition] = useTransition();
+
+  // Step 2: Freeform Brain Dump
+  const [brainDump, setBrainDump] = useState("");
+
+  // Step 3: 3-Point Rest Checklist
+  const nightDailyTask = useMemo(() => {
+    return tasks.find(
+      (t) =>
+        t.type === "daily" &&
+        (t.text.toLowerCase().includes("rutina nocturna") ||
+          t.text.toLowerCase().includes("noche") ||
+          t.text.toLowerCase().includes("dormir"))
+    );
+  }, [tasks]);
+
+  const [nightRoutineDone, setNightRoutineDone] = useState<boolean>(() => {
+    return nightDailyTask ? !nightDailyTask.isDue : false;
+  });
+  const [screensOff, setScreensOff] = useState(false);
+  const [roomPrepared, setRoomPrepared] = useState(false);
+
+  // Step 3: Fatigue / Energy Level (1 to 5)
+  const [energyLevel, setEnergyLevel] = useState<number>(2);
+
+  // Completion State
+  const [isShutdownComplete, setIsShutdownComplete] = useState(false);
 
   if (!isOpen) return null;
 
-  // Pending dailies that would damage HP at midnight
+  // Pending dailies that would cause HP damage at midnight
   const pendingDailies = tasks.filter((t) => t.type === "daily" && t.isDue);
   const isResting = Boolean(user.preferences?.sleep ?? user.flags?.rest ?? false);
 
-  const focusTasks = tasks.filter((t) => mustWinTaskIds.includes(t.id));
-  const completedFocusCount = focusTasks.filter(
-    (t) => t.completed || (t.type === "daily" && !t.isDue)
-  ).length;
-
   const handleToggleDaily = (taskId: string) => {
+    soundFx.taskComplete();
     startTransition(async () => {
       await toggleTaskAction(taskId, "up");
     });
   };
 
   const handleToggleInn = () => {
+    soundFx.click();
     startTransition(async () => {
       await toggleSleepAction();
     });
   };
 
-  const handleFinish = () => {
+  const handleToggleNightRoutine = () => {
+    const nextVal = !nightRoutineDone;
+    setNightRoutineDone(nextVal);
+    soundFx.taskComplete();
+
+    // If there's an associated Habitica daily, toggle it
+    if (nightDailyTask && nextVal && nightDailyTask.isDue) {
+      startTransition(async () => {
+        await toggleTaskAction(nightDailyTask.id, "up");
+      });
+    }
+  };
+
+  const handleFinishShutdown = () => {
+    soundFx.taskComplete();
     startTransition(async () => {
       await saveEveningReviewAction({
-        reflection: [
-          reflection.trim() ? `Reflexión: ${reflection.trim()}` : "",
-          gratitude.trim() ? `Agradecimiento: ${gratitude.trim()}` : "",
-        ]
-          .filter(Boolean)
-          .join(" | ") || undefined,
-        expensesLogged: expensesConfirmed,
-        tomorrowNotes: tomorrowNotes.trim() || undefined,
+        reflection: brainDump.trim() || undefined,
+        tomorrowNotes: brainDump.trim() || undefined,
+        expensesLogged: true,
+        energyLevel,
+        nightRoutineCompleted: nightRoutineDone,
       });
 
       setIsShutdownComplete(true);
@@ -94,290 +131,388 @@ export function EveningReviewModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md animate-in fade-in duration-200">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md animate-in fade-in duration-200 font-sans">
       <div
-        className="w-full max-w-xl rounded-xl border border-[#2A2723] bg-[#181715] p-6 shadow-2xl animate-in zoom-in-95 duration-200"
+        className="w-full max-w-xl rounded-2xl border border-[#2A2723] bg-[#181715] p-6 sm:p-7 shadow-2xl animate-in zoom-in-95 duration-200 overflow-hidden relative"
         role="dialog"
       >
-        {/* Header */}
-        <div className="flex items-center justify-between pb-4 border-b border-[#2A2723]">
-          <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[#4EAB9E]/15 text-[#4EAB9E] border border-[#4EAB9E]/30">
-              <Moon className="h-5 w-5" />
+        {/* ========================================================================= */}
+        {/* SUCCESSFUL SHUTDOWN SCREEN                                                */}
+        {/* ========================================================================= */}
+        {isShutdownComplete ? (
+          <div className="py-12 text-center space-y-4 animate-in zoom-in-95 duration-300">
+            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-[#4EAB9E]/20 text-[#4EAB9E] border border-[#4EAB9E]/30 animate-pulse">
+              <Moon className="h-8 w-8" />
             </div>
-            <div>
-              <h2 className="font-serif text-base font-bold text-[#F5F2EB] tracking-tight flex items-center gap-2">
-                <span>Cierre Nocturno & Shutdown Ritual</span>
-                <span className="rounded bg-[#22201D] text-[#DDD6C9] font-mono text-[10px] px-2 py-0.5 border border-[#2A2723]">
-                  Paso {step} de 4
-                </span>
-              </h2>
-              <p className="text-xs text-[#8E867B]">
-                Protege tu salud de Habitica, revisa tus victorias y desconéctate
+            <div className="space-y-1">
+              <h3 className="font-serif text-2xl font-bold text-[#F5F2EB]">
+                Día Cerrado con Éxito
+              </h3>
+              <p className="text-xs sm:text-sm text-[#8E867B] font-mono">
+                Has protegido tu salud y vaciado tu mente. ¡Que descanses!
               </p>
             </div>
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#221D16] border border-[#D99B43]/30 text-xs font-mono text-[#D99B43]">
+              <Sparkles className="h-3.5 w-3.5" />
+              <span>+XP Ganada en Habitica</span>
+            </div>
           </div>
-
-          <button
-            type="button"
-            onClick={onClose}
-            className="rounded-lg p-1.5 text-[#8E867B] hover:bg-[#22201D] hover:text-[#F5F2EB] transition-colors"
-          >
-            <X className="h-5 w-5" />
-          </button>
-        </div>
-
-        {/* Step 1: Health & Dailies Damage Audit */}
-        {step === 1 && (
-          <div className="mt-5 space-y-4 animate-in fade-in duration-200">
-            <div className="flex items-center justify-between p-4 rounded-lg border border-[#E05D52]/30 bg-[#221716]">
+        ) : (
+          <>
+            {/* Header */}
+            <div className="flex items-center justify-between pb-4 border-b border-[#2A2723]">
               <div className="flex items-center gap-3">
-                <Heart className="h-5 w-5 text-[#E05D52]" />
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#4EAB9E]/15 text-[#4EAB9E] border border-[#4EAB9E]/30">
+                  <Moon className="h-5 w-5" />
+                </div>
                 <div>
-                  <h4 className="text-xs font-bold text-[#F5F2EB]">
-                    Auditoría de Salud de Habitica (HP: {user.stats.hp}/{user.stats.maxHealth || 50})
-                  </h4>
-                  <p className="text-[11px] text-[#DDD6C9]">
-                    {pendingDailies.length > 0
-                      ? `⚠️ Tienes ${pendingDailies.length} daily(s) pendientes. Recibirás daño a medianoche.`
-                      : "🎉 ¡Todas tus dailies están hechas! Cero daño a medianoche."}
+                  <div className="flex items-center gap-2">
+                    <h2 className="font-serif text-base sm:text-lg font-bold text-[#F5F2EB] tracking-tight">
+                      Cierre Nocturno & Desconexión
+                    </h2>
+                    <span className="rounded-md bg-[#221D16] text-[#D99B43] border border-[#D99B43]/30 font-mono text-[10px] px-2 py-0.5 font-bold">
+                      Bloque {step} de 3
+                    </span>
+                  </div>
+                  <p className="text-xs text-[#8E867B] font-mono mt-0.5">
+                    {step === 1 && "Auditoría operativa de tareas y gastos del día"}
+                    {step === 2 && "Vaciado mental para no pensar en trabajo"}
+                    {step === 3 && "Protocolo de descanso y preparación para dormir"}
                   </p>
                 </div>
               </div>
 
-              {/* Quick Inn Button */}
               <button
                 type="button"
-                onClick={handleToggleInn}
-                disabled={isPending}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
-                  isResting
-                    ? "bg-[#3D3425] text-[#E8AF59] border border-[#D99B43]/40"
-                    : "bg-[#121110] text-[#DDD6C9] hover:text-[#F5F2EB] border border-[#2A2723]"
-                }`}
+                onClick={onClose}
+                className="rounded-lg p-1.5 text-[#8E867B] hover:bg-[#22201D] hover:text-[#F5F2EB] transition-colors cursor-pointer"
               >
-                <Bed className="h-3.5 w-3.5" />
-                <span>{isResting ? "Posada Activa 🛡️" : "Dormir en Posada"}</span>
+                <X className="h-5 w-5" />
               </button>
             </div>
 
-            {/* Pending Dailies List */}
-            {pendingDailies.length > 0 && (
-              <div className="space-y-2 max-h-48 overflow-y-auto pr-1">
-                <div className="text-[11px] font-semibold text-[#8E867B] uppercase tracking-wider font-mono">
-                  Dailies por completar hoy:
-                </div>
-                {pendingDailies.map((daily) => (
-                  <div
-                    key={daily.id}
-                    className="flex items-center justify-between p-3 rounded-lg border border-[#2A2723] bg-[#121110] text-xs"
-                  >
-                    <span className="text-[#F5F2EB] font-medium">{daily.text}</span>
+            {/* ========================================================================= */}
+            {/* BLOQUE 1: CIERRE OPERATIVO & FINANZAS                                      */}
+            {/* ========================================================================= */}
+            {step === 1 && (
+              <div className="mt-5 space-y-4 animate-in fade-in duration-200">
+                {/* Habitica Health & Dailies Audit Card */}
+                <div className="p-4 rounded-xl border border-[#2A2723] bg-[#121110] space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2.5">
+                      <Heart className="h-4.5 w-4.5 text-[#E05D52]" />
+                      <div>
+                        <h4 className="text-xs font-bold text-[#F5F2EB] font-serif">
+                          Salud de Habitica (HP: {user.stats.hp}/{user.stats.maxHealth || 50})
+                        </h4>
+                        <p className="text-[11px] text-[#8E867B] font-mono">
+                          {pendingDailies.length > 0
+                            ? `⚠️ Tienes ${pendingDailies.length} daily(s) pendientes que te causarán daño a medianoche.`
+                            : "🎉 ¡Todas tus dailies del día están completas! Cero daño a medianoche."}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Inn Button */}
                     <button
                       type="button"
-                      onClick={() => handleToggleDaily(daily.id)}
+                      onClick={handleToggleInn}
                       disabled={isPending}
-                      className="px-2.5 py-1 rounded bg-[#7EA35A]/15 text-[#7EA35A] border border-[#7EA35A]/30 hover:bg-[#7EA35A]/25 text-[11px] font-semibold"
+                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-mono font-semibold transition-all cursor-pointer ${
+                        isResting
+                          ? "bg-[#3D3425] text-[#E8AF59] border border-[#D99B43]/40 shadow-xs"
+                          : "bg-[#181715] text-[#8E867B] hover:text-[#DDD6C9] border border-[#2A2723]"
+                      }`}
                     >
-                      ✓ Marcar Hecha
+                      <Bed className="h-3.5 w-3.5" />
+                      <span>{isResting ? "Posada Activa 🛡️" : "Dormir en Posada"}</span>
                     </button>
                   </div>
-                ))}
+
+                  {/* Pending Dailies Quick Checklist */}
+                  {pendingDailies.length > 0 && (
+                    <div className="space-y-1.5 pt-2 border-t border-[#2A2723] max-h-36 overflow-y-auto pr-1">
+                      {pendingDailies.map((daily) => (
+                        <div
+                          key={daily.id}
+                          className="flex items-center justify-between p-2.5 rounded-lg border border-[#2A2723] bg-[#181715] text-xs"
+                        >
+                          <span className="text-[#F5F2EB] font-medium truncate max-w-70">
+                            {daily.text}
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => handleToggleDaily(daily.id)}
+                            disabled={isPending}
+                            className="px-2.5 py-1 rounded-md bg-[#7EA35A]/15 text-[#7EA35A] border border-[#7EA35A]/30 hover:bg-[#7EA35A]/25 text-[11px] font-mono font-bold transition-colors cursor-pointer"
+                          >
+                            ✓ Marcar Hecha
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* Financial Check-in Card */}
+                <div className="rounded-xl border border-[#3D3425]/40 bg-[#121110] p-4 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2.5">
+                      <Coffee className="h-4.5 w-4.5 text-[#D99B43]" />
+                      <div>
+                        <h4 className="text-xs font-bold text-[#F5F2EB] font-serif">
+                          Gastos Hormiga & Antojos de Hoy
+                        </h4>
+                        <p className="text-[11px] text-[#8E867B] font-mono">
+                          {totalAntSpentToday <= dailyAntLimit
+                            ? `✅ Dentro de tu límite diario de $${dailyAntLimit.toFixed(0)} MXN.`
+                            : `⚠️ Excediste tu presupuesto diario por $${(totalAntSpentToday - dailyAntLimit).toFixed(2)} MXN.`}
+                        </p>
+                      </div>
+                    </div>
+
+                    <span className="font-mono text-xs font-bold text-[#D99B43] bg-[#221D16] px-2.5 py-1 rounded-md border border-[#D99B43]/30">
+                      ${totalAntSpentToday.toFixed(2)} / ${dailyAntLimit.toFixed(2)} MXN
+                    </span>
+                  </div>
+
+                  {onOpenNewTransaction && (
+                    <div className="flex justify-end pt-2 border-t border-[#2A2723]">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          onClose();
+                          onOpenNewTransaction();
+                        }}
+                        className="px-3 py-1.5 rounded-lg border border-[#D99B43]/40 bg-[#221D16] text-xs font-mono font-semibold text-[#D99B43] hover:bg-[#3D3425] transition-colors cursor-pointer"
+                      >
+                        + Registrar un Gasto
+                      </button>
+                    </div>
+                  )}
+                </div>
+
+                {/* Navigation Button */}
+                <div className="flex justify-end pt-3 border-t border-[#2A2723]">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      soundFx.click();
+                      setStep(2);
+                    }}
+                    className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#D99B43] font-bold font-mono text-xs text-[#121110] hover:bg-[#E8AF59] transition-all cursor-pointer shadow-xs"
+                  >
+                    <span>Vaciado Mental</span>
+                    <ArrowRight className="h-4 w-4" />
+                  </button>
+                </div>
               </div>
             )}
 
-            <div className="flex justify-end pt-3 border-t border-[#2A2723]">
-              <button
-                type="button"
-                onClick={() => setStep(2)}
-                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-[#D99B43] font-semibold text-xs text-[#121110] hover:bg-[#E8AF59] transition-all shadow-xs"
-              >
-                <span>Check-in Financiero</span>
-                <ArrowRight className="h-4 w-4" />
-              </button>
-            </div>
-          </div>
-        )}
+            {/* ========================================================================= */}
+            {/* BLOQUE 2: VACIADO MENTAL LIBRE (BRAIN DUMP)                               */}
+            {/* ========================================================================= */}
+            {step === 2 && (
+              <div className="mt-5 space-y-4 animate-in fade-in duration-200">
+                <div className="rounded-xl border border-[#2A2723] bg-[#121110] p-4 sm:p-5 space-y-3">
+                  <div className="space-y-1">
+                    <h3 className="font-serif text-sm font-bold text-[#F5F2EB]">
+                      Bloc de Notas Libre / Brain Dump
+                    </h3>
+                    <p className="text-xs text-[#8E867B] font-mono leading-relaxed">
+                      Vuelca cualquier idea, pendiente laboral o apunte para sacar el trabajo de tu mente y descansar sin estrés.
+                    </p>
+                  </div>
 
-        {/* Step 2: Financial Check-in */}
-        {step === 2 && (
-          <div className="mt-5 space-y-4 animate-in fade-in duration-200">
-            <div className="rounded-lg border border-[#3D3425] bg-[#121110] p-4 space-y-3">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2.5">
-                  <Coffee className="h-4 w-4 text-[#D99B43]" />
-                  <h4 className="text-xs font-bold text-[#F5F2EB] font-serif">
-                    Gastos Hormiga & Antojos de Hoy
-                  </h4>
-                </div>
-                <span className="font-mono text-xs font-bold text-[#D99B43]">
-                  ${totalAntSpentToday.toFixed(2)} / ${dailyAntLimit.toFixed(2)} MXN
-                </span>
-              </div>
-              <p className="text-xs text-[#8E867B]">
-                {totalAntSpentToday <= dailyAntLimit
-                  ? "✅ ¡Excelente! Te mantuviste dentro de tu límite diario de gastos antojo."
-                  : "⚠️ Excediste tu límite diario por $" + (totalAntSpentToday - dailyAntLimit).toFixed(2)}
-              </p>
-            </div>
-
-            <div className="flex items-center justify-between p-3 rounded-lg border border-[#2A2723] bg-[#121110]">
-              <div className="text-xs text-[#DDD6C9]">
-                ¿Registraste todos tus gastos del día?
-              </div>
-              {onOpenNewTransaction && (
-                <button
-                  type="button"
-                  onClick={() => {
-                    onClose();
-                    onOpenNewTransaction();
-                  }}
-                  className="px-3 py-1 rounded border border-[#D99B43]/40 bg-[#221D16] text-xs font-semibold text-[#D99B43] hover:bg-[#3D3425]"
-                >
-                  + Registrar un Gasto
-                </button>
-              )}
-            </div>
-
-            <div className="flex justify-between items-center pt-3 border-t border-[#2A2723]">
-              <button
-                type="button"
-                onClick={() => setStep(1)}
-                className="text-xs text-[#8E867B] hover:text-[#DDD6C9]"
-              >
-                Atrás
-              </button>
-              <button
-                type="button"
-                onClick={() => setStep(3)}
-                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-[#D99B43] font-semibold text-xs text-[#121110] hover:bg-[#E8AF59] transition-all shadow-xs"
-              >
-                <span>Revisar Victorias</span>
-                <ArrowRight className="h-4 w-4" />
-              </button>
-            </div>
-          </div>
-        )}
-
-        {/* Step 3: Wins & Gratitude */}
-        {step === 3 && (
-          <div className="mt-5 space-y-4 animate-in fade-in duration-200">
-            <div className="grid grid-cols-2 gap-3">
-              <div className="rounded-lg border border-[#2A2723] bg-[#121110] p-3.5">
-                <div className="text-[11px] text-[#8E867B]">Must-Wins Completadas</div>
-                <div className="mt-1 text-lg font-bold font-mono text-[#7EA35A]">
-                  {completedFocusCount} / {focusTasks.length || 3}
-                </div>
-              </div>
-              <div className="rounded-lg border border-[#2A2723] bg-[#121110] p-3.5">
-                <div className="text-[11px] text-[#8E867B]">Oro Acumulado</div>
-                <div className="mt-1 text-lg font-bold font-mono text-[#E8AF59] flex items-center gap-1">
-                  <Coins className="h-4 w-4" />
-                  <span>{user.stats.gp.toFixed(1)} GP</span>
-                </div>
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-xs font-bold text-[#F5F2EB] mb-1 font-serif">
-                Victoria del Día: ¿Qué salió bien hoy?
-              </label>
-              <input
-                type="text"
-                placeholder="Ej. Terminé la entrega a tiempo y entrené con energía..."
-                value={reflection}
-                onChange={(e) => setReflection(e.target.value)}
-                className="w-full rounded-lg border border-[#2A2723] bg-[#121110] px-3.5 py-2 text-xs text-[#F5F2EB] placeholder:text-[#8E867B] focus:border-[#D99B43] focus:outline-none transition-all"
-              />
-            </div>
-
-            <div>
-              <label className="block text-xs font-bold text-[#F5F2EB] mb-1 font-serif">
-                Agradecimiento: ¿Por qué te sientes agradecido hoy?
-              </label>
-              <input
-                type="text"
-                placeholder="Ej. Por la salud de mi familia, por una buena tarde..."
-                value={gratitude}
-                onChange={(e) => setGratitude(e.target.value)}
-                className="w-full rounded-lg border border-[#2A2723] bg-[#121110] px-3.5 py-2 text-xs text-[#F5F2EB] placeholder:text-[#8E867B] focus:border-[#D99B43] focus:outline-none transition-all"
-              />
-            </div>
-
-            <div className="flex justify-between items-center pt-3 border-t border-[#2A2723]">
-              <button
-                type="button"
-                onClick={() => setStep(2)}
-                className="text-xs text-[#8E867B] hover:text-[#DDD6C9]"
-              >
-                Atrás
-              </button>
-              <button
-                type="button"
-                onClick={() => setStep(4)}
-                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-[#D99B43] font-semibold text-xs text-[#121110] hover:bg-[#E8AF59] transition-all shadow-xs"
-              >
-                <span>Brain Dump & Shutdown</span>
-                <ArrowRight className="h-4 w-4" />
-              </button>
-            </div>
-          </div>
-        )}
-
-        {/* Step 4: Brain Dump & Work Shutdown */}
-        {step === 4 && (
-          <div className="mt-5 space-y-4 animate-in fade-in duration-200">
-            {isShutdownComplete ? (
-              <div className="flex flex-col items-center justify-center p-8 text-center space-y-3 animate-in zoom-in-90 duration-300">
-                <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-[#7EA35A]/15 text-[#7EA35A] border border-[#7EA35A]/30 shadow-xl">
-                  <ShieldCheck className="h-8 w-8" />
-                </div>
-                <h3 className="font-serif text-xl font-bold text-[#F5F2EB]">
-                  Shutdown de Trabajo Completo 🌙
-                </h3>
-                <p className="text-xs text-[#DDD6C9] max-w-sm">
-                  Todos tus pendientes han sido guardados. Apaga la mente laboral, descansa y recarga energía para mañana.
-                </p>
-              </div>
-            ) : (
-              <>
-                <div>
-                  <label className="block text-xs font-bold text-[#F5F2EB] mb-1.5 font-serif">
-                    🧠 Brain Dump: Vacía pendientes para mañana
-                  </label>
-                  <p className="text-[11px] text-[#8E867B] mb-2">
-                    Cada línea se convertirá automáticamente en una tarea de Habitica para tu día de mañana.
-                  </p>
                   <textarea
-                    rows={4}
-                    placeholder={"Ej:\nTerminar pruebas de integración #trabajo !urgent\n* Rutina de estiramiento 15m #salud\nComprar despensa"}
-                    value={tomorrowNotes}
-                    onChange={(e) => setTomorrowNotes(e.target.value)}
-                    className="w-full rounded-lg border border-[#2A2723] bg-[#121110] p-3 font-mono text-xs text-[#F5F2EB] placeholder:text-[#8E867B] focus:border-[#D99B43] focus:outline-none transition-all"
+                    rows={6}
+                    value={brainDump}
+                    onChange={(e) => setBrainDump(e.target.value)}
+                    placeholder="Ej. Mañana empezar directo con el fix de reportes en UNPO. No olvidar revisar la reunión de las 11am..."
+                    className="w-full rounded-xl border border-[#2A2723] bg-[#181715] p-3.5 text-xs sm:text-sm text-[#F5F2EB] placeholder:text-[#8E867B] focus:border-[#4EAB9E] focus:outline-none resize-none font-sans leading-relaxed transition-all"
+                    autoFocus
                   />
                 </div>
 
+                {/* Navigation */}
                 <div className="flex justify-between items-center pt-3 border-t border-[#2A2723]">
                   <button
                     type="button"
-                    onClick={() => setStep(3)}
-                    className="text-xs text-[#8E867B] hover:text-[#DDD6C9]"
+                    onClick={() => {
+                      soundFx.click();
+                      setStep(1);
+                    }}
+                    className="inline-flex items-center gap-1.5 text-xs font-mono text-[#8E867B] hover:text-[#DDD6C9] cursor-pointer"
                   >
-                    Atrás
+                    <ArrowLeft className="h-4 w-4" />
+                    <span>Atrás</span>
                   </button>
+
                   <button
                     type="button"
-                    onClick={handleFinish}
-                    disabled={isPending}
-                    className="inline-flex items-center gap-2 px-6 py-2.5 rounded-lg bg-[#D99B43] font-semibold text-xs text-[#121110] hover:bg-[#E8AF59] transition-all shadow-md disabled:opacity-50"
+                    onClick={() => {
+                      soundFx.click();
+                      setStep(3);
+                    }}
+                    className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#4EAB9E] font-bold font-mono text-xs text-[#121110] hover:bg-[#5BBDAF] transition-all cursor-pointer shadow-xs"
                   >
-                    <Sparkles className="h-4 w-4" />
-                    <span>{isPending ? "Cerrando jornada..." : "Work Shutdown Complete 🌙"}</span>
+                    <span>Protocolo de Sueño</span>
+                    <ArrowRight className="h-4 w-4" />
                   </button>
                 </div>
-              </>
+              </div>
             )}
-          </div>
+
+            {/* ========================================================================= */}
+            {/* BLOQUE 3: DESCONEXIÓN & PROTOCOLO DE SUEÑO                                */}
+            {/* ========================================================================= */}
+            {step === 3 && (
+              <div className="mt-5 space-y-4 animate-in fade-in duration-200">
+                {/* 3-Point Rest Checklist */}
+                <div className="rounded-xl border border-[#2A2723] bg-[#121110] p-4 sm:p-5 space-y-3">
+                  <h4 className="text-xs font-bold text-[#F5F2EB] font-serif uppercase tracking-wider text-[#8E867B]">
+                    Protocolo de Desconexión & Descanso
+                  </h4>
+
+                  <div className="space-y-2">
+                    {/* Item 1: Rutina de noche lista */}
+                    <div
+                      onClick={handleToggleNightRoutine}
+                      className={`flex items-center gap-3 p-3 rounded-xl border transition-all cursor-pointer select-none ${
+                        nightRoutineDone
+                          ? "bg-[#141813] border-[#7EA35A]/40 text-[#F5F2EB]"
+                          : "bg-[#181715] border-[#2A2723] hover:border-[#38332D] text-[#8E867B]"
+                      }`}
+                    >
+                      <div
+                        className={`flex h-5 w-5 shrink-0 items-center justify-center rounded border transition-colors ${
+                          nightRoutineDone
+                            ? "bg-[#7EA35A] border-[#7EA35A] text-[#121110] font-bold"
+                            : "border-[#38332D] bg-[#121110]"
+                        }`}
+                      >
+                        {nightRoutineDone && <Check className="h-3.5 w-3.5 stroke-3" />}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <span className="text-xs font-semibold block">
+                          Rutina de noche lista
+                        </span>
+                        {nightDailyTask && (
+                          <span className="text-[10px] text-[#8E867B] font-mono">
+                            Sincroniza con daily de Habitica
+                          </span>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Item 2: Pantallas y notificaciones en silencio */}
+                    <div
+                      onClick={() => {
+                        setScreensOff(!screensOff);
+                        soundFx.click();
+                      }}
+                      className={`flex items-center gap-3 p-3 rounded-xl border transition-all cursor-pointer select-none ${
+                        screensOff
+                          ? "bg-[#141813] border-[#7EA35A]/40 text-[#F5F2EB]"
+                          : "bg-[#181715] border-[#2A2723] hover:border-[#38332D] text-[#8E867B]"
+                      }`}
+                    >
+                      <div
+                        className={`flex h-5 w-5 shrink-0 items-center justify-center rounded border transition-colors ${
+                          screensOff
+                            ? "bg-[#7EA35A] border-[#7EA35A] text-[#121110] font-bold"
+                            : "border-[#38332D] bg-[#121110]"
+                        }`}
+                      >
+                        {screensOff && <Check className="h-3.5 w-3.5 stroke-3" />}
+                      </div>
+                      <span className="text-xs font-semibold">
+                        Pantallas apagadas / modo silencio
+                      </span>
+                    </div>
+
+                    {/* Item 3: Ambiente fresco y oscuro */}
+                    <div
+                      onClick={() => {
+                        setRoomPrepared(!roomPrepared);
+                        soundFx.click();
+                      }}
+                      className={`flex items-center gap-3 p-3 rounded-xl border transition-all cursor-pointer select-none ${
+                        roomPrepared
+                          ? "bg-[#141813] border-[#7EA35A]/40 text-[#F5F2EB]"
+                          : "bg-[#181715] border-[#2A2723] hover:border-[#38332D] text-[#8E867B]"
+                      }`}
+                    >
+                      <div
+                        className={`flex h-5 w-5 shrink-0 items-center justify-center rounded border transition-colors ${
+                          roomPrepared
+                            ? "bg-[#7EA35A] border-[#7EA35A] text-[#121110] font-bold"
+                            : "border-[#38332D] bg-[#121110]"
+                        }`}
+                      >
+                        {roomPrepared && <Check className="h-3.5 w-3.5 stroke-3" />}
+                      </div>
+                      <span className="text-xs font-semibold">
+                        Ambiente fresco y oscuro preparado
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Fatigue / Energy Selector */}
+                <div className="rounded-xl border border-[#2A2723] bg-[#121110] p-4 space-y-2.5">
+                  <span className="text-xs font-bold text-[#F5F2EB] font-serif block">
+                    Nivel de cansancio al terminar el día:
+                  </span>
+                  <div className="grid grid-cols-5 gap-1.5 font-mono text-xs">
+                    {FATIGUE_LEVELS.map((lvl) => (
+                      <button
+                        key={lvl.value}
+                        type="button"
+                        onClick={() => {
+                          setEnergyLevel(lvl.value);
+                          soundFx.click();
+                        }}
+                        className={`p-2 rounded-xl border transition-all cursor-pointer text-center flex flex-col items-center gap-1 ${
+                          energyLevel === lvl.value
+                            ? `${lvl.color} font-bold shadow-xs`
+                            : "bg-[#181715] border-[#2A2723] text-[#8E867B] hover:text-[#DDD6C9]"
+                        }`}
+                      >
+                        <span className="text-base">{lvl.emoji}</span>
+                        <span className="text-[10px] leading-tight">{lvl.label}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Final Actions */}
+                <div className="flex justify-between items-center pt-3 border-t border-[#2A2723]">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      soundFx.click();
+                      setStep(2);
+                    }}
+                    className="inline-flex items-center gap-1.5 text-xs font-mono text-[#8E867B] hover:text-[#DDD6C9] cursor-pointer"
+                  >
+                    <ArrowLeft className="h-4 w-4" />
+                    <span>Atrás</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    disabled={isPending}
+                    onClick={handleFinishShutdown}
+                    className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-[#7EA35A] hover:bg-[#8FB866] font-bold font-mono text-xs sm:text-sm text-[#121110] transition-all cursor-pointer shadow-sm disabled:opacity-50"
+                  >
+                    <Moon className="h-4 w-4" />
+                    <span>{isPending ? "Cerrando..." : "Apagado y Cierre (+XP)"}</span>
+                  </button>
+                </div>
+              </div>
+            )}
+          </>
         )}
       </div>
     </div>
