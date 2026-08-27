@@ -5,7 +5,8 @@ import {
   logWaterAction,
   toggleSupplementAction,
 } from "@/app/actions/health";
-import { toggleTaskAction } from "@/app/actions/tasks";
+import { setMustWinTasksAction } from "@/app/actions/rituals";
+import { createSingleTaskAction, toggleTaskAction } from "@/app/actions/tasks";
 import { useCommandCenter } from "@/app/components/context/CommandCenterContext";
 import { getHormonalStatus } from "@/lib/hormonal";
 import { soundFx } from "@/lib/soundFx";
@@ -32,6 +33,7 @@ import {
   Sun,
   Trophy,
   Wallet,
+  X,
   Zap,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -56,9 +58,12 @@ export function TodayViewClient({
   const { openModal } = useCommandCenter();
   const [isPending, startTransition] = useTransition();
 
-  // State for collapsible drawer of other tasks/habits
+  // State for collapsible drawer and quick victory addition
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [isSuppDetailsOpen, setIsSuppDetailsOpen] = useState(false);
+  const [newVictoryText, setNewVictoryText] = useState("");
+  const [isSelectingExisting, setIsSelectingExisting] = useState(false);
+  const [isAddingNewVictory, setIsAddingNewVictory] = useState(false);
 
   // Time of day detection
   const currentHour = new Date().getHours();
@@ -282,8 +287,39 @@ export function TodayViewClient({
     });
   };
 
+  const handleAddVictory = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newVictoryText.trim()) return;
+    soundFx.taskComplete();
+    const text = newVictoryText.trim();
+    setNewVictoryText("");
+    setIsAddingNewVictory(false);
+    startTransition(async () => {
+      const res = await createSingleTaskAction(text);
+      if (res.success && res.task) {
+        const updatedIds = [...mustWinIds, res.task.id];
+        await setMustWinTasksAction(updatedIds);
+        router.refresh();
+      }
+    });
+  };
+
+  const handleSelectMustWinTask = (taskId: string) => {
+    soundFx.taskComplete();
+    startTransition(async () => {
+      const updatedIds = mustWinIds.includes(taskId)
+        ? mustWinIds
+        : [...mustWinIds, taskId];
+      await setMustWinTasksAction(updatedIds);
+      setIsSelectingExisting(false);
+      router.refresh();
+    });
+  };
+
   const hasMorningRitual = Boolean(
-    todayRitual?.mustWinTasks && todayRitual.mustWinTasks.length > 0
+    todayRitual?.energyLevel ||
+      todayRitual?.dayIntention ||
+      (todayRitual?.mustWinTasks && todayRitual.mustWinTasks.length > 0)
   );
   const hasEveningReview = Boolean(todayRitual?.reflection);
 
@@ -339,7 +375,7 @@ export function TodayViewClient({
                   ? "border-[#7EA35A]/40 bg-[#1C2219] text-[#7EA35A]"
                   : "border-[#2A2723] bg-[#121110] text-[#8E867B] hover:text-[#DDD6C9]"
                 }`}
-              title="Ritual Matutino"
+              title="Ritual Matutino de Despegue"
             >
               <Sun className="h-3.5 w-3.5" />
               <span>Ritual AM</span>
@@ -367,26 +403,26 @@ export function TodayViewClient({
       {/* 2. TIME-OF-DAY INTELLIGENT RITUAL BANNER (Contextual Prompts)             */}
       {/* ========================================================================= */}
       {isMorningWindow && !hasMorningRitual && (
-        <div className="rounded-xl border border-[#D99B43]/40 bg-[#221D16] p-4 sm:p-4.5 flex items-center justify-between gap-3 shadow-xs">
+        <div className="rounded-xl border border-[#7EA35A]/35 bg-[#141813] p-4 sm:p-4.5 flex items-center justify-between gap-3 shadow-xs">
           <div className="flex items-center gap-3.5 min-w-0">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[#D99B43]/20 text-[#D99B43] border border-[#D99B43]/40">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[#7EA35A]/20 text-[#7EA35A] border border-[#7EA35A]/40">
               <Sun className="h-5 w-5" />
             </div>
             <div className="truncate">
               <h3 className="font-serif text-sm sm:text-base font-bold text-[#F5F2EB] truncate">
-                Inicia tu Ritual Matutino
+                Despegue Suave & Autocuidado
               </h3>
-              <p className="text-xs text-[#D99B43] font-mono truncate">
-                Define tus 3 Victorias Clave de hoy para alinear tu energía dopaminérgica
+              <p className="text-xs text-[#7EA35A] font-mono truncate">
+                Despeja el cuerpo, revisa tu energía y prepara tu licuado con calma
               </p>
             </div>
           </div>
           <button
             type="button"
             onClick={() => openModal("morningRitual")}
-            className="px-4 py-2 rounded-lg bg-[#D99B43] hover:bg-[#E8AF59] text-[#121110] font-bold text-xs shadow-xs transition-all cursor-pointer shrink-0 flex items-center gap-1.5 font-mono"
+            className="px-4 py-2 rounded-lg bg-[#7EA35A] hover:bg-[#8FB866] text-[#121110] font-bold text-xs shadow-xs transition-all cursor-pointer shrink-0 flex items-center gap-1.5 font-mono"
           >
-            <span>Iniciar Ritual</span>
+            <span>Iniciar AM</span>
             <ArrowRight className="h-3.5 w-3.5" />
           </button>
         </div>
@@ -435,36 +471,118 @@ export function TodayViewClient({
                 </span>
               </div>
 
-              {totalMustWins > 0 && (
-                <div className="flex items-center gap-1 font-mono text-xs text-[#D99B43] bg-[#221D16] px-2.5 py-1 rounded border border-[#D99B43]/30">
-                  <Award className="h-3.5 w-3.5" />
-                  <span>
-                    {completedMustWins} de {totalMustWins} victorias
-                  </span>
-                </div>
-              )}
+              <div className="flex items-center gap-2">
+                {totalMustWins > 0 && (
+                  <div className="flex items-center gap-1 font-mono text-xs text-[#D99B43] bg-[#221D16] px-2.5 py-1 rounded border border-[#D99B43]/30">
+                    <Award className="h-3.5 w-3.5" />
+                    <span>
+                      {completedMustWins} de {totalMustWins} victorias
+                    </span>
+                  </div>
+                )}
+
+                {totalMustWins > 0 && totalMustWins < 3 && (
+                  <button
+                    type="button"
+                    onClick={() => setIsAddingNewVictory(!isAddingNewVictory)}
+                    className="p-1 rounded bg-[#121110] hover:bg-[#221D16] text-[#D99B43] border border-[#2A2723] hover:border-[#D99B43]/40 text-xs font-mono transition-colors cursor-pointer"
+                    title="Agregar otra victoria"
+                  >
+                    <Plus className="h-3.5 w-3.5" />
+                  </button>
+                )}
+              </div>
             </div>
 
-            {/* Case A: No Must-Wins configured yet */}
-            {totalMustWins === 0 && (
-              <div className="rounded-lg border border-dashed border-[#2A2723] bg-[#121110] p-6 sm:p-8 text-center space-y-3">
-                <Sparkles className="h-8 w-8 text-[#D99B43] mx-auto opacity-80" />
-                <div>
-                  <h4 className="font-serif text-sm sm:text-base font-bold text-[#F5F2EB]">
-                    Sin Victorias Must-Win definidas
-                  </h4>
-                  <p className="text-xs text-[#8E867B] max-w-md mx-auto mt-1 font-mono">
-                    Selecciona tus 3 tareas críticas en el Ritual Matutino para enfocarte con claridad y sin saturación.
-                  </p>
-                </div>
+            {/* Quick add inline form if user toggled '+ Victoria' */}
+            {isAddingNewVictory && (
+              <form
+                onSubmit={handleAddVictory}
+                className="flex gap-2 p-3 rounded-xl bg-[#121110] border border-[#D99B43]/40 animate-in fade-in duration-150"
+              >
+                <input
+                  type="text"
+                  value={newVictoryText}
+                  onChange={(e) => setNewVictoryText(e.target.value)}
+                  placeholder="Escribe la siguiente victoria de trabajo..."
+                  className="flex-1 rounded-lg border border-[#2A2723] bg-[#181715] px-3 py-1.5 text-xs text-[#F5F2EB] placeholder:text-[#8E867B] focus:border-[#D99B43] focus:outline-none"
+                  autoFocus
+                />
+                <button
+                  type="submit"
+                  disabled={!newVictoryText.trim() || isPending}
+                  className="px-3 py-1.5 rounded-lg bg-[#D99B43] hover:bg-[#E8AF59] text-[#121110] font-bold text-xs font-mono cursor-pointer disabled:opacity-50"
+                >
+                  Fijar
+                </button>
                 <button
                   type="button"
-                  onClick={() => openModal("morningRitual")}
-                  className="px-4 py-2 rounded-lg bg-[#D99B43] hover:bg-[#E8AF59] text-[#121110] font-bold text-xs shadow-xs transition-all cursor-pointer inline-flex items-center gap-1.5 font-mono"
+                  onClick={() => setIsAddingNewVictory(false)}
+                  className="p-1.5 rounded-lg text-[#8E867B] hover:text-[#DDD6C9] cursor-pointer"
                 >
-                  <Sun className="h-3.5 w-3.5" />
-                  <span>Definir en Ritual AM</span>
+                  <X className="h-4 w-4" />
                 </button>
+              </form>
+            )}
+
+            {/* Case A: No Must-Wins configured yet (Work Ignition Card) */}
+            {totalMustWins === 0 && (
+              <div className="rounded-xl border border-[#2A2723] bg-[#121110] p-5 sm:p-6 space-y-4">
+                <div>
+                  <h4 className="font-serif text-sm sm:text-base font-bold text-[#F5F2EB]">
+                    ¿En qué vas a enfocarte primero hoy?
+                  </h4>
+                  <p className="text-xs text-[#8E867B] font-mono mt-0.5">
+                    Escribe tu victoria principal de trabajo para empezar con foco claro.
+                  </p>
+                </div>
+
+                <form onSubmit={handleAddVictory} className="flex gap-2">
+                  <input
+                    type="text"
+                    value={newVictoryText}
+                    onChange={(e) => setNewVictoryText(e.target.value)}
+                    placeholder="p. ej. Terminar reporte MVP, Enviar propuesta..."
+                    className="flex-1 rounded-xl border border-[#2A2723] bg-[#181715] px-3.5 py-2.5 text-xs text-[#F5F2EB] placeholder:text-[#8E867B] focus:border-[#D99B43] focus:outline-none font-sans"
+                  />
+                  <button
+                    type="submit"
+                    disabled={!newVictoryText.trim() || isPending}
+                    className="px-4 py-2.5 rounded-xl bg-[#D99B43] hover:bg-[#E8AF59] disabled:opacity-50 text-[#121110] font-bold text-xs font-mono transition-all cursor-pointer shrink-0 shadow-xs"
+                  >
+                    + Fijar Victoria
+                  </button>
+                </form>
+
+                {dailyTasks.filter((t) => t.type === "todo" && !t.completed).length > 0 && (
+                  <div className="pt-2 border-t border-[#2A2723]">
+                    <button
+                      type="button"
+                      onClick={() => setIsSelectingExisting(!isSelectingExisting)}
+                      className="text-xs font-mono text-[#D99B43] hover:underline cursor-pointer flex items-center gap-1"
+                    >
+                      <span>O elegir de mis pendientes existentes ({dailyTasks.filter((t) => t.type === "todo" && !t.completed).length})</span>
+                      <ChevronDown className={`h-3 w-3 transition-transform ${isSelectingExisting ? "rotate-180" : ""}`} />
+                    </button>
+
+                    {isSelectingExisting && (
+                      <div className="mt-2 space-y-1 max-h-48 overflow-y-auto pr-1 animate-in fade-in duration-150">
+                        {dailyTasks
+                          .filter((t) => t.type === "todo" && !t.completed)
+                          .map((t) => (
+                            <div
+                              key={t.id}
+                              onClick={() => handleSelectMustWinTask(t.id)}
+                              className="p-2.5 rounded-lg border border-[#2A2723] bg-[#181715] hover:border-[#D99B43]/50 text-xs text-[#F5F2EB] flex items-center justify-between cursor-pointer transition-all"
+                            >
+                              <span className="truncate">{t.text}</span>
+                              <span className="text-[10px] font-mono text-[#D99B43] shrink-0 ml-2">+ Fijar</span>
+                            </div>
+                          ))}
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
             )}
 

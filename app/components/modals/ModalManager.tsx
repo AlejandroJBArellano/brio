@@ -178,10 +178,7 @@ export function ModalManager({
           onClose={closeModal}
           user={user}
           tasks={tasks}
-          schedule={calendarSchedule}
-          currentMustWins={mustWinTaskIds}
-          onSuccess={(newMustWins) => {
-            setMustWinTaskIds(newMustWins);
+          onSuccess={() => {
             refreshData();
           }}
         />

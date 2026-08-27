@@ -47,24 +47,25 @@ export async function fetchTodayRitualAction(): Promise<RitualLog | null> {
 }
 
 /**
- * Server Action: Saves the Morning Kickoff ritual (Must-Wins & Energy).
+ * Server Action: Saves the Morning Kickoff ritual (Sleep, Energy & Autocuidado).
  */
 export async function saveMorningRitualAction(payload: {
-  mustWinTasks: string[];
   energyLevel: number;
+  sleepHours?: string;
+  sleepQuality?: string;
+  mustWinTasks?: string[];
   dayIntention?: string;
 }): Promise<{ success: boolean; error?: string }> {
   try {
     const sql = getDb();
     const todayStr = getTodayDateStr();
-    const tasksJson = JSON.stringify(payload.mustWinTasks);
+    const tasksJson = JSON.stringify(payload.mustWinTasks || []);
 
     await sql`
       INSERT INTO ritual_logs (date, must_win_tasks, energy_level, day_intention)
       VALUES (${todayStr}, ${tasksJson}::jsonb, ${payload.energyLevel}, ${payload.dayIntention || null})
       ON CONFLICT (date) DO UPDATE
-      SET must_win_tasks = ${tasksJson}::jsonb,
-          energy_level = ${payload.energyLevel},
+      SET energy_level = ${payload.energyLevel},
           day_intention = ${payload.dayIntention || null};
     `;
 
@@ -76,8 +77,12 @@ export async function saveMorningRitualAction(payload: {
     `;
 
     // Award Habitica XP for completing Morning Kickoff
+    const notesParts: string[] = [`Nivel de energía: ${payload.energyLevel}/5`];
+    if (payload.sleepHours) notesParts.push(`Sueño: ${payload.sleepHours}`);
+    if (payload.sleepQuality) notesParts.push(`Calidad: ${payload.sleepQuality}`);
+
     await awardHabiticaEvent("MORNING_KICKOFF", {
-      customNotes: `Nivel de energía: ${payload.energyLevel}/5${payload.dayIntention ? ` • Intención: ${payload.dayIntention}` : ""}`,
+      customNotes: notesParts.join(" • "),
     });
 
     revalidatePath("/");
@@ -87,6 +92,33 @@ export async function saveMorningRitualAction(payload: {
     return { success: false, error: "Failed to save morning ritual" };
   }
 }
+
+/**
+ * Server Action: Directly sets the Must-Win tasks from Today view.
+ */
+export async function setMustWinTasksAction(
+  taskIds: string[]
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    const sql = getDb();
+    const todayStr = getTodayDateStr();
+    const tasksJson = JSON.stringify(taskIds);
+
+    await sql`
+      INSERT INTO ritual_logs (date, must_win_tasks)
+      VALUES (${todayStr}, ${tasksJson}::jsonb)
+      ON CONFLICT (date) DO UPDATE
+      SET must_win_tasks = ${tasksJson}::jsonb;
+    `;
+
+    revalidatePath("/");
+    return { success: true };
+  } catch (error) {
+    console.error("[Set Must-Win Tasks Error]:", error);
+    return { success: false, error: "Failed to set must-win tasks" };
+  }
+}
+
 
 /**
  * Server Action: Saves the Evening Review (Reflection, Expenses check, and Brain dump).
