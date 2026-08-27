@@ -1,8 +1,13 @@
 "use client";
 
-import { contributeToSavingsGoalAction, createSavingsGoalAction } from "@/app/actions/finance";
+import {
+  contributeToSavingsGoalAction,
+  createSavingsGoalAction,
+  deleteSavingsGoalAction,
+  updateSavingsGoalAction,
+} from "@/app/actions/finance";
 import { SavingsGoal } from "@/lib/types";
-import { Plus, Target } from "lucide-react";
+import { Check, Edit2, Plus, Target, Trash2, X } from "lucide-react";
 import { useState, useTransition } from "react";
 
 interface SavingsGoalsWidgetProps {
@@ -15,6 +20,13 @@ export function SavingsGoalsWidget({ goals, onRefresh }: SavingsGoalsWidgetProps
   const [newTitle, setNewTitle] = useState("");
   const [newTarget, setNewTarget] = useState("");
   const [newCurrent, setNewCurrent] = useState("");
+
+  // Editing state
+  const [editingGoalId, setEditingGoalId] = useState<string | null>(null);
+  const [editTitle, setEditTitle] = useState("");
+  const [editTarget, setEditTarget] = useState("");
+  const [editCurrent, setEditCurrent] = useState("");
+
   const [isPending, startTransition] = useTransition();
 
   const handleQuickContribute = (goalId: string, amount: number) => {
@@ -39,6 +51,37 @@ export function SavingsGoalsWidget({ goals, onRefresh }: SavingsGoalsWidgetProps
       setNewTarget("");
       setNewCurrent("");
       setIsCreating(false);
+      if (onRefresh) onRefresh();
+    });
+  };
+
+  const handleStartEdit = (goal: SavingsGoal) => {
+    setEditingGoalId(goal.id);
+    setEditTitle(goal.title);
+    setEditTarget(goal.targetAmount.toString());
+    setEditCurrent(goal.currentAmount.toString());
+  };
+
+  const handleSaveEdit = (goalId: string) => {
+    const target = parseFloat(editTarget);
+    const current = parseFloat(editCurrent);
+    if (!editTitle.trim() || isNaN(target) || target <= 0) return;
+
+    startTransition(async () => {
+      await updateSavingsGoalAction(goalId, {
+        title: editTitle.trim(),
+        targetAmount: target,
+        currentAmount: isNaN(current) ? 0 : Math.max(0, current),
+      });
+      setEditingGoalId(null);
+      if (onRefresh) onRefresh();
+    });
+  };
+
+  const handleDeleteGoal = (goalId: string) => {
+    if (!confirm("¿Estás seguro de eliminar esta meta de ahorro?")) return;
+    startTransition(async () => {
+      await deleteSavingsGoalAction(goalId);
       if (onRefresh) onRefresh();
     });
   };
@@ -81,7 +124,7 @@ export function SavingsGoalsWidget({ goals, onRefresh }: SavingsGoalsWidgetProps
               value={newTitle}
               onChange={(e) => setNewTitle(e.target.value)}
               required
-              className="rounded-md border border-[#2A2723] bg-[#181715] px-3 py-1.5 text-xs text-[#F5F2EB] placeholder:text-[#8E867B] focus:outline-none focus:border-[#D99B43]"
+              className="rounded-md border border-[#2A2723] bg-[#181715] px-3 py-1.5 text-xs text-[#F5F2EB] placeholder:text-[#8E867B] focus:outline-hidden focus:border-[#D99B43]"
             />
             <input
               type="number"
@@ -89,14 +132,14 @@ export function SavingsGoalsWidget({ goals, onRefresh }: SavingsGoalsWidgetProps
               value={newTarget}
               onChange={(e) => setNewTarget(e.target.value)}
               required
-              className="rounded-md border border-[#2A2723] bg-[#181715] px-3 py-1.5 text-xs font-mono text-[#F5F2EB] placeholder:text-[#8E867B] focus:outline-none focus:border-[#D99B43]"
+              className="rounded-md border border-[#2A2723] bg-[#181715] px-3 py-1.5 text-xs font-mono text-[#F5F2EB] placeholder:text-[#8E867B] focus:outline-hidden focus:border-[#D99B43]"
             />
             <input
               type="number"
               placeholder="Ahorro Inicial ($)"
               value={newCurrent}
               onChange={(e) => setNewCurrent(e.target.value)}
-              className="rounded-md border border-[#2A2723] bg-[#181715] px-3 py-1.5 text-xs font-mono text-[#F5F2EB] placeholder:text-[#8E867B] focus:outline-none focus:border-[#D99B43]"
+              className="rounded-md border border-[#2A2723] bg-[#181715] px-3 py-1.5 text-xs font-mono text-[#F5F2EB] placeholder:text-[#8E867B] focus:outline-hidden focus:border-[#D99B43]"
             />
           </div>
           <div className="flex justify-end gap-2">
@@ -110,7 +153,7 @@ export function SavingsGoalsWidget({ goals, onRefresh }: SavingsGoalsWidgetProps
             <button
               type="submit"
               disabled={isPending}
-              className="px-3.5 py-1 rounded-md bg-[#D99B43] hover:bg-[#E8AF59] text-xs font-semibold text-[#121110] cursor-pointer"
+              className="px-3.5 py-1 rounded-md bg-[#D99B43] hover:bg-[#E8AF59] text-xs font-semibold text-[#121110] cursor-pointer disabled:opacity-50"
             >
               {isPending ? "Guardando..." : "Crear Meta"}
             </button>
@@ -121,8 +164,93 @@ export function SavingsGoalsWidget({ goals, onRefresh }: SavingsGoalsWidgetProps
       {/* Goals Grid */}
       <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-3.5">
         {goals.map((goal) => {
+          const isEditingThis = editingGoalId === goal.id;
           const percent = Math.min(100, Math.round((goal.currentAmount / (goal.targetAmount || 1)) * 100));
           const isCompleted = goal.currentAmount >= goal.targetAmount;
+
+          if (isEditingThis) {
+            return (
+              <div key={goal.id} className="rounded-lg border border-[#D99B43]/50 bg-[#181715] p-4 space-y-3 animate-in fade-in duration-150">
+                <div className="flex items-center justify-between text-xs font-bold text-[#F5F2EB]">
+                  <span>Editar Meta</span>
+                  <button
+                    type="button"
+                    onClick={() => setEditingGoalId(null)}
+                    className="text-[#8E867B] hover:text-[#DDD6C9] cursor-pointer"
+                  >
+                    <X className="size-3.5" />
+                  </button>
+                </div>
+
+                <div className="space-y-2">
+                  <div>
+                    <label className="block text-[10px] font-mono text-[#8E867B] mb-0.5">Título / Concepto</label>
+                    <input
+                      type="text"
+                      value={editTitle}
+                      onChange={(e) => setEditTitle(e.target.value)}
+                      className="w-full rounded border border-[#2A2723] bg-[#121110] px-2.5 py-1 text-xs text-[#F5F2EB]"
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-2">
+                    <div>
+                      <label className="block text-[10px] font-mono text-[#8E867B] mb-0.5">Monto Actual ($)</label>
+                      <input
+                        type="number"
+                        step="any"
+                        value={editCurrent}
+                        onChange={(e) => setEditCurrent(e.target.value)}
+                        className="w-full rounded border border-[#2A2723] bg-[#121110] px-2.5 py-1 text-xs font-mono text-[#F5F2EB]"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-[10px] font-mono text-[#8E867B] mb-0.5">Meta Objetivo ($)</label>
+                      <input
+                        type="number"
+                        step="any"
+                        value={editTarget}
+                        onChange={(e) => setEditTarget(e.target.value)}
+                        className="w-full rounded border border-[#2A2723] bg-[#121110] px-2.5 py-1 text-xs font-mono text-[#F5F2EB]"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex justify-between items-center pt-2 border-t border-[#2A2723]">
+                  <button
+                    type="button"
+                    onClick={() => handleDeleteGoal(goal.id)}
+                    disabled={isPending}
+                    className="flex items-center gap-1 text-[11px] text-[#E05D52] hover:underline cursor-pointer"
+                  >
+                    <Trash2 className="size-3" />
+                    <span>Eliminar</span>
+                  </button>
+
+                  <div className="flex gap-1.5">
+                    <button
+                      type="button"
+                      onClick={() => setEditingGoalId(null)}
+                      className="px-2.5 py-1 rounded bg-transparent border border-[#2A2723] text-[11px] text-[#8E867B] hover:text-[#DDD6C9] cursor-pointer"
+                    >
+                      Cancelar
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleSaveEdit(goal.id)}
+                      disabled={isPending}
+                      className="flex items-center gap-1 px-3 py-1 rounded bg-[#D99B43] hover:bg-[#E8AF59] text-[11px] font-bold text-[#121110] cursor-pointer disabled:opacity-50"
+                    >
+                      <Check className="size-3" />
+                      <span>Guardar</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            );
+          }
 
           return (
             <div
@@ -130,12 +258,22 @@ export function SavingsGoalsWidget({ goals, onRefresh }: SavingsGoalsWidgetProps
               className="rounded-lg border border-[#2A2723] bg-[#121110] p-4 transition-all hover:border-[#38332D]"
             >
               <div className="flex items-center justify-between">
-                <span className="text-xs font-semibold text-[#F5F2EB] tracking-tight">
+                <span className="text-xs font-semibold text-[#F5F2EB] tracking-tight truncate max-w-[200px]">
                   {goal.title}
                 </span>
-                <span className="text-xs font-mono font-bold text-[#D99B43]">
-                  {percent}%
-                </span>
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-mono font-bold text-[#D99B43]">
+                    {percent}%
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => handleStartEdit(goal)}
+                    className="p-1 rounded text-[#8E867B] hover:text-[#DDD6C9] hover:bg-[#181715] transition-all cursor-pointer"
+                    title="Editar meta o monto"
+                  >
+                    <Edit2 className="size-3" />
+                  </button>
+                </div>
               </div>
 
               {/* Progress bar */}
