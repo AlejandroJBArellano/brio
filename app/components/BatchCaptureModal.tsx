@@ -18,11 +18,11 @@ interface BatchCaptureModalProps {
   onClose: () => void;
 }
 
-const SAMPLE_BATCH = `Design Brio system architecture #engineering !urgent // Zero-latency focus
-* Morning 20m sprint review #daily
-+ Drink 500ml water #health
-- Check social media during deep work
-Ship Habitica batch sync feature #release // Push to prod`;
+const SAMPLE_BATCH = `Diseñar arquitectura de Brio #ingenieria !urgente // Máximo enfoque
+* Revisión de sprint 20m #daily
++ Tomar 500ml de agua #salud
+- Distraerme en redes sociales durante deep work
+Publicar versión de Brio #release // Desplegar a producción`;
 
 export function BatchCaptureModal({
   isOpen,
@@ -108,17 +108,17 @@ export function BatchCaptureModal({
             </div>
             <div>
               <h3 className="font-serif text-sm font-semibold text-[#F5F2EB]">
-                Frictionless Batch Capture
+                Captura Rápida en Lote
               </h3>
               <p className="text-[11px] text-[#8E867B]">
-                Type or paste multiple tasks and dispatch them concurrently
+                Escribe o pega múltiples tareas y envíalas simultáneamente a Habitica
               </p>
             </div>
           </div>
 
           <button
             onClick={onClose}
-            aria-label="Close modal"
+            aria-label="Cerrar modal"
             className="rounded-lg p-1 text-[#8E867B] hover:bg-[#22201D] hover:text-[#F5F2EB] cursor-pointer"
           >
             <X className="h-4 w-4" />
@@ -135,7 +135,7 @@ export function BatchCaptureModal({
                 onClick={() => handleSyntaxInsert("")}
                 className="rounded-md border border-[#2A2723] bg-[#121110] px-2 py-1 text-[#DDD6C9] hover:text-[#4EAB9E] hover:border-[#4EAB9E]/40 cursor-pointer"
               >
-                <span className="text-[#4EAB9E]">Todo</span> Standard
+                <span className="text-[#4EAB9E]">To-Do</span> Estándar
               </button>
               <button
                 type="button"
@@ -149,30 +149,30 @@ export function BatchCaptureModal({
                 onClick={() => handleSyntaxInsert("+")}
                 className="rounded-md border border-[#2A2723] bg-[#121110] px-2 py-1 text-[#DDD6C9] hover:text-[#7EA35A] hover:border-[#7EA35A]/40 cursor-pointer"
               >
-                <span className="text-[#7EA35A]">+ Habit</span>
+                <span className="text-[#7EA35A]">+ Hábito</span>
               </button>
               <button
                 type="button"
                 onClick={() => handleSyntaxInsert("-")}
                 className="rounded-md border border-[#2A2723] bg-[#121110] px-2 py-1 text-[#DDD6C9] hover:text-[#E05D52] hover:border-[#E05D52]/40 cursor-pointer"
               >
-                <span className="text-[#E05D52]">- Habit</span>
+                <span className="text-[#E05D52]">- Hábito</span>
               </button>
               <button
                 type="button"
-                onClick={() => handleSyntaxInsert("#work // Note !urgent")}
+                onClick={() => handleSyntaxInsert("#trabajo // Nota !urgente")}
                 className="rounded-md border border-[#2A2723] bg-[#121110] px-2 py-1 text-[#DDD6C9] hover:text-[#D99B43] hover:border-[#D99B43]/40 cursor-pointer"
               >
-                <span className="text-[#D99B43]">#tags //notes !priority</span>
+                <span className="text-[#D99B43]">#tags //notas !prioridad</span>
               </button>
             </div>
 
             {liveParsed.stats.total > 0 && (
               <div className="flex items-center gap-1 text-[11px] font-mono text-[#8E867B]">
                 <span>
-                  {liveParsed.stats.total} parsed (
-                  {liveParsed.stats.todos}t, {liveParsed.stats.dailies}d,{" "}
-                  {liveParsed.stats.habits}h)
+                  {liveParsed.stats.total} detectadas (
+                  {liveParsed.stats.todos} to-dos, {liveParsed.stats.dailies} dailies,{" "}
+                  {liveParsed.stats.habits} hábitos)
                 </span>
               </div>
             )}
@@ -185,7 +185,7 @@ export function BatchCaptureModal({
               value={rawText}
               onChange={(e) => setRawText(e.target.value)}
               onKeyDown={handleKeyDownInTextarea}
-              placeholder={`Buy groceries #errands\n* Morning 30m reading #growth\n+ Hydration 2L\nDeploy hotfix !urgent // Review logs first`}
+              placeholder={`Comprar despensa #casa\n* Lectura matutina 30m #estudio\n+ Tomar 2L de agua #salud\nDeploy hotfix !urgente // Revisar logs primero`}
               rows={7}
               className="w-full resize-none bg-transparent p-3.5 font-mono text-sm leading-relaxed text-[#F5F2EB] placeholder:text-[#8E867B]/50 focus:outline-none"
             />
@@ -228,7 +228,7 @@ export function BatchCaptureModal({
               className="flex items-center gap-1 rounded-md px-2 py-1 text-[11px] font-medium text-[#8E867B] hover:text-[#F5F2EB] cursor-pointer"
             >
               <Sparkles className="h-3 w-3 text-[#D99B43]" />
-              <span>Sample Batch</span>
+              <span>Cargar Ejemplo</span>
             </button>
             {rawText && (
               <button
@@ -237,7 +237,7 @@ export function BatchCaptureModal({
                 className="flex items-center gap-1 rounded-md px-2 py-1 text-[11px] font-medium text-[#8E867B] hover:text-[#E05D52] cursor-pointer"
               >
                 <Trash2 className="h-3 w-3" />
-                <span>Clear</span>
+                <span>Limpiar</span>
               </button>
             )}
           </div>
@@ -262,13 +262,13 @@ export function BatchCaptureModal({
               {isPending ? (
                 <>
                   <div className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-[#121110] border-t-transparent" />
-                  <span>Dispatching...</span>
+                  <span>Enviando...</span>
                 </>
               ) : (
                 <>
                   <Send className="h-3.5 w-3.5" />
                   <span>
-                    Batch Dispatch{" "}
+                    Enviar Tareas{" "}
                     {liveParsed.stats.total > 0
                       ? `(${liveParsed.stats.total})`
                       : ""}
