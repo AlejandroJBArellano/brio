@@ -3,7 +3,11 @@
 import { toggleTaskAction } from "@/app/actions/tasks";
 import { soundFx } from "@/lib/soundFx";
 import { HabiticaTag, HabiticaTask } from "@/lib/types";
-import { getTaskValueColor, parseTaskPrefix } from "@/lib/utils";
+import {
+  getTaskPriorityInfo,
+  getTaskValueColor,
+  parseTaskPrefix,
+} from "@/lib/utils";
 import {
   Calendar,
   Check,
@@ -59,6 +63,7 @@ export function TaskItem({
   );
 
   const valueStyle = getTaskValueColor(task.value || 0);
+  const prioStyle = getTaskPriorityInfo(task.priority || 1);
   const { prefix, cleanTitle } = parseTaskPrefix(task.text);
 
   const handleScore = (
@@ -105,7 +110,7 @@ export function TaskItem({
                 ? "Marcar como pendiente"
                 : "Marcar como completada"
             }
-            className={`flex size-5 shrink-0 items-center justify-center rounded border transition-all ${
+            className={`flex size-5 shrink-0 items-center justify-center rounded border transition-all cursor-pointer ${
               optimisticState.completed
                 ? "border-[#7EA35A] bg-[#7EA35A] text-[#121110] shadow-xs"
                 : "border-[#3D3831] bg-[#121110] hover:border-[#D99B43]/70 hover:bg-[#D99B43]/10"
@@ -124,7 +129,7 @@ export function TaskItem({
                 onClick={(e) => handleScore(e, "up")}
                 aria-label="Sumar hábito"
                 title="Anotar hábito positivo (+)"
-                className="flex size-5.5 items-center justify-center rounded border border-[#38332D] bg-[#141311] text-[#7EA35A] hover:border-[#7EA35A]/60 hover:bg-[#7EA35A]/15 active:scale-95 transition-all"
+                className="flex size-5.5 items-center justify-center rounded border border-[#38332D] bg-[#141311] text-[#7EA35A] hover:border-[#7EA35A]/60 hover:bg-[#7EA35A]/15 active:scale-95 transition-all cursor-pointer"
               >
                 <Plus className="size-3 stroke-[2.5]" />
               </button>
@@ -135,7 +140,7 @@ export function TaskItem({
                 onClick={(e) => handleScore(e, "down")}
                 aria-label="Restar hábito"
                 title="Anotar hábito negativo (-)"
-                className="flex size-5.5 items-center justify-center rounded border border-[#38332D] bg-[#141311] text-[#E05D52] hover:border-[#E05D52]/60 hover:bg-[#E05D52]/15 active:scale-95 transition-all"
+                className="flex size-5.5 items-center justify-center rounded border border-[#38332D] bg-[#141311] text-[#E05D52] hover:border-[#E05D52]/60 hover:bg-[#E05D52]/15 active:scale-95 transition-all cursor-pointer"
               >
                 <Minus className="size-3 stroke-[2.5]" />
               </button>
@@ -166,7 +171,7 @@ export function TaskItem({
           {/* Título & Prefijo */}
           <div className="flex items-center gap-2 min-w-0 flex-1">
             {prefix && (
-              <span className="shrink-0 rounded border border-[#38332D] bg-[#1C1A17] px-1.5 py-0.5 font-mono text-[10px] font-medium tracking-wide text-[#C2BAAD]">
+              <span className="shrink-0 rounded border border-[#38332D] bg-[#1C1A17] px-1.5 py-0.5 font-mono text-[10px] font-semibold tracking-wide text-[#C2BAAD]">
                 {prefix}
               </span>
             )}
@@ -223,8 +228,17 @@ export function TaskItem({
         </div>
       </div>
 
-      {/* Columna Derecha: Salud RPG, Métricas y Flecha */}
-      <div className="ml-3 flex items-center gap-2.5 sm:gap-4 shrink-0">
+      {/* Columna Derecha: Prioridad, Salud RPG, Métricas y Flecha */}
+      <div className="ml-3 flex items-center gap-2 sm:gap-3.5 shrink-0">
+        {/* Priority Badge */}
+        <span
+          className={`inline-flex items-center gap-1 rounded border px-1.5 py-0.2 font-mono text-[9px] font-semibold ${prioStyle.badge}`}
+          title={`Prioridad: ${prioStyle.label}`}
+        >
+          <span className={`size-1.5 rounded-full ${prioStyle.dot}`} />
+          <span className="hidden sm:inline">{prioStyle.shortLabel}</span>
+        </span>
+
         {/* RPG Health Status Badge */}
         <div
           className={`hidden md:inline-flex items-center gap-1.5 rounded border px-2 py-0.5 text-[10px] font-mono tracking-tight ${valueStyle.pillBg}`}
@@ -246,6 +260,16 @@ export function TaskItem({
           >
             <Flame className="size-3 fill-[#D99B43] text-[#D99B43]" />
             <span className="tabular-nums">{task.streak}</span>
+          </span>
+        )}
+
+        {/* Indicador de Descanso si no toca hoy */}
+        {task.type === "daily" && task.isDue === false && (
+          <span
+            className="hidden sm:inline-flex items-center gap-1 rounded border border-[#2E2A25] bg-[#191815] px-1.5 py-0.5 font-mono text-[9px] font-medium text-[#8E867B]"
+            title="Día de descanso: Esta tarea no está programada para hoy"
+          >
+            <span>Descanso</span>
           </span>
         )}
 

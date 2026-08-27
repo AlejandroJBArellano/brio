@@ -73,6 +73,58 @@ export function getTaskValueColor(value: number = 0): {
 }
 
 /**
+ * Returns label, color and badge styling for Habitica task priority.
+ * Habitica priority levels: 0.1 (Trivial), 1 (Easy/Low), 1.5 (Medium), 2 (Hard/Urgent)
+ */
+export function getTaskPriorityInfo(priority: number = 1): {
+  label: string;
+  shortLabel: string;
+  color: string;
+  badge: string;
+  dot: string;
+  level: number;
+} {
+  if (priority >= 2) {
+    return {
+      label: "Alta",
+      shortLabel: "Alta",
+      color: "text-red-400",
+      badge: "bg-red-950/50 text-red-300 border-red-800/50",
+      dot: "bg-red-500",
+      level: 3,
+    };
+  }
+  if (priority >= 1.5) {
+    return {
+      label: "Media",
+      shortLabel: "Media",
+      color: "text-amber-300",
+      badge: "bg-amber-950/50 text-amber-300 border-amber-800/50",
+      dot: "bg-amber-400",
+      level: 2,
+    };
+  }
+  if (priority >= 1) {
+    return {
+      label: "Baja",
+      shortLabel: "Baja",
+      color: "text-emerald-400",
+      badge: "bg-emerald-950/50 text-emerald-300 border-emerald-800/50",
+      dot: "bg-emerald-400",
+      level: 1,
+    };
+  }
+  return {
+    label: "Trivial",
+    shortLabel: "Trivial",
+    color: "text-[#8E867B]",
+    badge: "bg-[#1C1A17] text-[#8E867B] border-[#2E2A25]",
+    dot: "bg-[#8E867B]",
+    level: 0,
+  };
+}
+
+/**
  * Extracts bracket prefixes like "[Brio]" or "[Salud]" from task titles
  * to render them cleanly as archival catalog tags.
  */
