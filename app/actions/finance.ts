@@ -3,15 +3,21 @@
 import { getDb } from "@/lib/db";
 import {
   CategoryBreakdown,
+  CommitmentFrequency,
+  CommitmentStatus,
+  CommitmentSummaryStats,
+  CommitmentType,
   DEFAULT_FINANCE_ACCOUNTS,
   DEFAULT_FINANCE_CATEGORIES,
   FinanceAccount,
   FinanceCategory,
+  FinanceCommitment,
   FinanceDashboardData,
   MonthlyBudget,
   SavingsGoal,
   Transaction,
   TransactionType,
+  VariablePaymentScheduleItem,
   WishlistStatus,
 } from "@/lib/types";
 import { awardHabiticaEvent } from "@/lib/habiticaEvents";
@@ -56,6 +62,25 @@ interface AccountDbRow {
   created_at?: Date | string | null;
 }
 
+interface CommitmentDbRow {
+  id: string;
+  title: string;
+  type: string;
+  category?: string | null;
+  default_account?: string | null;
+  total_amount?: number | string | null;
+  installment_amount?: number | string | null;
+  installments_total?: number | string | null;
+  installments_paid?: number | string | null;
+  frequency?: string | null;
+  next_due_date?: Date | string | null;
+  variable_schedule?: VariablePaymentScheduleItem[] | string | null;
+  status?: string | null;
+  notes?: string | null;
+  created_at?: Date | string | null;
+  updated_at?: Date | string | null;
+}
+
 type SqlClient = { (strings: TemplateStringsArray, ...values: unknown[]): Promise<unknown[]> };
 
 export async function ensureFinanceTables(sql: SqlClient) {
@@ -83,6 +108,27 @@ export async function ensureFinanceTables(sql: SqlClient) {
       order_index INTEGER DEFAULT 0,
       is_active BOOLEAN DEFAULT TRUE,
       created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+    );
+  `;
+
+  await sql`
+    CREATE TABLE IF NOT EXISTS finance_commitments (
+      id TEXT PRIMARY KEY,
+      title TEXT NOT NULL,
+      type TEXT NOT NULL,
+      category TEXT DEFAULT 'servicios',
+      default_account TEXT DEFAULT 'dolarapp',
+      total_amount NUMERIC(12, 2),
+      installment_amount NUMERIC(12, 2),
+      installments_total INTEGER,
+      installments_paid INTEGER DEFAULT 0,
+      frequency TEXT DEFAULT 'monthly',
+      next_due_date DATE,
+      variable_schedule JSONB DEFAULT '[]'::jsonb,
+      status TEXT DEFAULT 'active',
+      notes TEXT,
+      created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+      updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
     );
   `;
 }
@@ -156,15 +202,133 @@ export async function getFinanceCatalog(sql: SqlClient): Promise<{
   }
 }
 
+function mapCommitmentRow(r: CommitmentDbRow): FinanceCommitment {
+  const totalAmount = r.total_amount ? Number(r.total_amount) : undefined;
+  const installmentAmount = r.installment_amount ? Number(r.installment_amount) : undefined;
+  const installmentsTotal = r.installments_total ? Number(r.installments_total) : undefined;
+  const installmentsPaid = Number(r.installments_paid) || 0;
+  const type = (r.type || "installment") as CommitmentType;
+  const status = (r.status || "active") as CommitmentStatus;
+
+  let variableSchedule: VariablePaymentScheduleItem[] = [];
+  if (r.variable_schedule) {
+    if (typeof r.variable_schedule === "string") {
+      try {
+        variableSchedule = JSON.parse(r.variable_schedule);
+      } catch {
+        variableSchedule = [];
+      }
+    } else if (Array.isArray(r.variable_schedule)) {
+      variableSchedule = r.variable_schedule;
+    }
+  }
+
+  // Calculate remaining installments
+  let remainingInstallments: number | undefined;
+  if (type === "installment" && installmentsTotal !== undefined) {
+    remainingInstallments = Math.max(0, installmentsTotal - installmentsPaid);
+  }
+
+  // Calculate remaining balance
+  let remainingBalance = 0;
+  if (status === "completed") {
+    remainingBalance = 0;
+  } else if (type === "installment") {
+    if (installmentAmount && remainingInstallments !== undefined) {
+      remainingBalance = installmentAmount * remainingInstallments;
+    } else if (totalAmount) {
+      remainingBalance = Math.max(0, totalAmount - (installmentsPaid * (installmentAmount || 0)));
+    }
+  } else if (type === "variable_schedule") {
+    remainingBalance = variableSchedule
+      .filter((item) => !item.isPaid)
+      .reduce((sum, item) => sum + Number(item.amount || 0), 0);
+  } else if (type === "one_time") {
+    remainingBalance = totalAmount || 0;
+  } else if (type === "recurring") {
+    remainingBalance = installmentAmount || totalAmount || 0;
+  }
+
+  // Next payment amount & next due date
+  let nextPaymentAmount = installmentAmount || totalAmount || 0;
+  let nextDueDate = r.next_due_date ? toDateStr(r.next_due_date) : undefined;
+
+  if (type === "variable_schedule") {
+    const nextUnpaid = variableSchedule.find((item) => !item.isPaid);
+    if (nextUnpaid) {
+      nextPaymentAmount = nextUnpaid.amount;
+      if (!nextDueDate || nextUnpaid.date) {
+        nextDueDate = nextUnpaid.date;
+      }
+    }
+  }
+
+  // Due date calculations
+  let isOverdue = false;
+  let daysUntilDue: number | undefined;
+  if (nextDueDate && status === "active") {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const due = new Date(nextDueDate + "T00:00:00");
+    const diffMs = due.getTime() - today.getTime();
+    daysUntilDue = Math.round(diffMs / (1000 * 60 * 60 * 24));
+    isOverdue = daysUntilDue < 0;
+  }
+
+  return {
+    id: r.id,
+    title: r.title,
+    type,
+    category: r.category || "servicios",
+    defaultAccount: r.default_account || "dolarapp",
+    totalAmount,
+    installmentAmount,
+    installmentsTotal,
+    installmentsPaid,
+    frequency: (r.frequency || "monthly") as CommitmentFrequency,
+    nextDueDate,
+    variableSchedule,
+    status,
+    notes: r.notes || undefined,
+    createdAt: r.created_at?.toString(),
+    updatedAt: r.updated_at?.toString(),
+    remainingInstallments,
+    remainingBalance,
+    nextPaymentAmount,
+    isOverdue,
+    daysUntilDue,
+  };
+}
+
+function calculateCommitmentStats(commitments: FinanceCommitment[]): CommitmentSummaryStats {
+  const active = commitments.filter((c) => c.status === "active");
+
+  const totalMonthlyCommitment = active.reduce((sum, c) => sum + (c.nextPaymentAmount || 0), 0);
+  const totalRemainingDebt = active
+    .filter((c) => c.type === "installment" || c.type === "variable_schedule" || c.type === "one_time")
+    .reduce((sum, c) => sum + (c.remainingBalance || 0), 0);
+  const dueSoonCount = active.filter((c) => c.daysUntilDue !== undefined && c.daysUntilDue <= 7).length;
+  const installmentCount = active.filter((c) => c.type === "installment").length;
+
+  return {
+    totalMonthlyCommitment,
+    totalRemainingDebt,
+    dueSoonCount,
+    activeCount: active.length,
+    installmentCount,
+  };
+}
+
 /**
- * Server Action: Fetches all financial metrics, budget thermometer, transactions, and savings goals.
- * Uses Promise.all to fetch budget, transactions, savings goals, wishlist, and catalogs concurrently.
+ * Server Action: Fetches all financial metrics, budget thermometer, transactions, savings goals, and commitments.
+ * Uses Promise.all to fetch budget, transactions, savings goals, wishlist, commitments, and catalogs concurrently.
  */
 export async function fetchFinanceDashboardDataAction(
   targetMonth?: number,
   targetYear?: number
 ): Promise<FinanceDashboardData> {
   const sql = getDb();
+  await ensureFinanceTables(sql);
 
   const now = new Date();
   const month = targetMonth || now.getMonth() + 1;
@@ -176,12 +340,13 @@ export async function fetchFinanceDashboardDataAction(
   const nextYear = month === 12 ? year + 1 : year;
   const endDate = `${nextYear}-${String(nextMonth).padStart(2, "0")}-01`;
 
-  // Parallel execution of all 5 independent queries
-  const [budgetRows, transactionRows, goalsRows, wishlistRows, catalog] = await Promise.all([
+  // Parallel execution of all 6 independent queries
+  const [budgetRows, transactionRows, goalsRows, wishlistRows, commitmentRows, catalog] = await Promise.all([
     sql`SELECT * FROM monthly_budgets WHERE id = ${budgetId} LIMIT 1;`,
     sql`SELECT * FROM transactions WHERE date >= ${startDate} AND date < ${endDate} ORDER BY date DESC, created_at DESC;`,
     sql`SELECT * FROM savings_goals ORDER BY created_at ASC;`,
     sql`SELECT * FROM wishlist_items ORDER BY created_at DESC;`,
+    sql`SELECT * FROM finance_commitments ORDER BY status ASC, next_due_date ASC NULLS LAST, created_at DESC;`,
     getFinanceCatalog(sql),
   ]);
 
@@ -288,7 +453,11 @@ export async function fetchFinanceDashboardDataAction(
   const remainingDailyAntBudget = Math.max(0, currentBudget.dailyAntLimit - totalAntExpensesToday);
   const remainingMonthlyVariableBudget = currentBudget.budgetedVariableExpenses - totalVariableExpensesThisMonth;
 
-  // 4. Process Wishlist Anti-Impulso data
+  // 4. Process Commitments
+  const commitments: FinanceCommitment[] = (commitmentRows as unknown as CommitmentDbRow[]).map(mapCommitmentRow);
+  const commitmentsStats = calculateCommitmentStats(commitments);
+
+  // 5. Process Wishlist Anti-Impulso data
   const nowMs = Date.now();
   const wishlistItems = (wishlistRows as unknown as WishlistDbRow[]).map((r) => {
     const createdAt = r.created_at
@@ -358,6 +527,8 @@ export async function fetchFinanceDashboardDataAction(
     wishlistData,
     categories: catalog.categories,
     accounts: catalog.accounts,
+    commitments,
+    commitmentsStats,
   };
 }
 
@@ -439,6 +610,55 @@ export async function deleteTransactionAction(id: string): Promise<{ success: bo
   } catch (error) {
     console.error("[Delete Transaction Error]:", error);
     return { success: false, error: "Failed to delete transaction" };
+  }
+}
+
+/**
+ * Server Action: Updates an existing transaction.
+ */
+export async function updateTransactionAction(
+  id: string,
+  updates: {
+    amount?: number;
+    type?: TransactionType;
+    category?: string;
+    account?: string;
+    notes?: string;
+    isAntExpense?: boolean;
+    date?: string;
+  }
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    const sql = getDb();
+    const existingRows = await sql`SELECT * FROM transactions WHERE id = ${id} LIMIT 1;`;
+    if (existingRows.length === 0) return { success: false, error: "Transacción no encontrada" };
+
+    const row = existingRows[0] as any;
+    const amount = updates.amount !== undefined ? Number(updates.amount) : Number(row.amount);
+    const type = updates.type !== undefined ? updates.type : row.type;
+    const category = updates.category !== undefined ? updates.category.toLowerCase().trim() : row.category;
+    const account = updates.account !== undefined ? updates.account.toLowerCase().trim() : row.account;
+    const notes = updates.notes !== undefined ? updates.notes.trim() : row.notes;
+    const isAntExpense = updates.isAntExpense !== undefined ? Boolean(updates.isAntExpense) : Boolean(row.is_ant_expense);
+    const date = updates.date !== undefined ? toDateStr(updates.date) : toDateStr(row.date);
+
+    await sql`
+      UPDATE transactions
+      SET amount = ${amount},
+          type = ${type},
+          category = ${category},
+          account = ${account},
+          notes = ${notes},
+          is_ant_expense = ${isAntExpense},
+          date = ${date}
+      WHERE id = ${id};
+    `;
+
+    revalidatePath("/");
+    return { success: true };
+  } catch (error) {
+    console.error("[Update Transaction Error]:", error);
+    return { success: false, error: "Error al actualizar la transacción" };
   }
 }
 
@@ -526,6 +746,54 @@ export async function contributeToSavingsGoalAction(
   } catch (error) {
     console.error("[Contribute Goal Error]:", error);
     return { success: false, error: "Failed to contribute to goal" };
+  }
+}
+
+export async function updateSavingsGoalAction(
+  goalId: string,
+  updates: Partial<SavingsGoal>
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    const sql = getDb();
+    const existing = await sql`SELECT * FROM savings_goals WHERE id = ${goalId} LIMIT 1;`;
+    if (existing.length === 0) return { success: false, error: "Meta no encontrada" };
+
+    const row = existing[0];
+    const title = updates.title !== undefined ? updates.title.trim() : row.title;
+    const targetAmount = updates.targetAmount !== undefined ? Number(updates.targetAmount) : Number(row.target_amount);
+    const currentAmount = updates.currentAmount !== undefined ? Number(updates.currentAmount) : Number(row.current_amount);
+    const deadline = updates.deadline !== undefined ? (updates.deadline ? toDateStr(updates.deadline) : null) : row.deadline;
+    const category = updates.category !== undefined ? updates.category : row.category;
+    const color = updates.color !== undefined ? updates.color : row.color;
+
+    await sql`
+      UPDATE savings_goals
+      SET title = ${title},
+          target_amount = ${targetAmount},
+          current_amount = ${currentAmount},
+          deadline = ${deadline},
+          category = ${category},
+          color = ${color}
+      WHERE id = ${goalId};
+    `;
+
+    revalidatePath("/");
+    return { success: true };
+  } catch (error) {
+    console.error("[Update Goal Error]:", error);
+    return { success: false, error: "Error al actualizar la meta de ahorro" };
+  }
+}
+
+export async function deleteSavingsGoalAction(goalId: string): Promise<{ success: boolean; error?: string }> {
+  try {
+    const sql = getDb();
+    await sql`DELETE FROM savings_goals WHERE id = ${goalId};`;
+    revalidatePath("/");
+    return { success: true };
+  } catch (error) {
+    console.error("[Delete Goal Error]:", error);
+    return { success: false, error: "Error al eliminar la meta de ahorro" };
   }
 }
 
@@ -727,3 +995,331 @@ export async function deleteFinanceAccountAction(id: string): Promise<{ success:
     return { success: false, error: "Error al eliminar la cuenta o tarjeta" };
   }
 }
+
+// ----------------------------------------------------
+// Finance Commitments Server Actions
+// ----------------------------------------------------
+
+export async function fetchFinanceCommitmentsAction(): Promise<FinanceCommitment[]> {
+  try {
+    const sql = getDb();
+    await ensureFinanceTables(sql);
+    const rows = await sql`
+      SELECT * FROM finance_commitments 
+      ORDER BY 
+        CASE status 
+          WHEN 'active' THEN 1 
+          WHEN 'paused' THEN 2 
+          WHEN 'completed' THEN 3 
+          ELSE 4 
+        END ASC,
+        next_due_date ASC NULLS LAST, 
+        created_at DESC;
+    `;
+    return (rows as unknown as CommitmentDbRow[]).map(mapCommitmentRow);
+  } catch (error) {
+    console.error("[fetchFinanceCommitmentsAction Error]:", error);
+    return [];
+  }
+}
+
+export async function createFinanceCommitmentAction(payload: {
+  title: string;
+  type: CommitmentType;
+  category?: string;
+  defaultAccount?: string;
+  totalAmount?: number;
+  installmentAmount?: number;
+  installmentsTotal?: number;
+  installmentsPaid?: number;
+  frequency?: CommitmentFrequency;
+  nextDueDate?: string;
+  variableSchedule?: VariablePaymentScheduleItem[];
+  notes?: string;
+}): Promise<{ success: boolean; commitment?: FinanceCommitment; error?: string }> {
+  try {
+    const sql = getDb();
+    await ensureFinanceTables(sql);
+
+    const title = payload.title?.trim();
+    if (!title) return { success: false, error: "El título o concepto del compromiso es requerido." };
+
+    const id = `cmt-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
+    const type = payload.type || "installment";
+    const category = (payload.category || "servicios").toLowerCase().trim();
+    const defaultAccount = (payload.defaultAccount || "dolarapp").toLowerCase().trim();
+    const totalAmount = payload.totalAmount !== undefined && payload.totalAmount !== null ? Number(payload.totalAmount) : null;
+    const installmentAmount = payload.installmentAmount !== undefined && payload.installmentAmount !== null ? Number(payload.installmentAmount) : null;
+    const installmentsTotal = payload.installmentsTotal !== undefined && payload.installmentsTotal !== null ? Number(payload.installmentsTotal) : null;
+    const installmentsPaid = Number(payload.installmentsPaid) || 0;
+    const frequency = payload.frequency || "monthly";
+    const nextDueDate = payload.nextDueDate ? toDateStr(payload.nextDueDate) : null;
+    const variableSchedule = JSON.stringify(payload.variableSchedule || []);
+    const notes = payload.notes?.trim() || null;
+
+    await sql`
+      INSERT INTO finance_commitments (
+        id, title, type, category, default_account, total_amount, installment_amount,
+        installments_total, installments_paid, frequency, next_due_date,
+        variable_schedule, status, notes, created_at, updated_at
+      ) VALUES (
+        ${id}, ${title}, ${type}, ${category}, ${defaultAccount}, ${totalAmount}, ${installmentAmount},
+        ${installmentsTotal}, ${installmentsPaid}, ${frequency}, ${nextDueDate},
+        ${variableSchedule}::jsonb, 'active', ${notes}, NOW(), NOW()
+      );
+    `;
+
+    revalidatePath("/");
+    return {
+      success: true,
+      commitment: mapCommitmentRow({
+        id,
+        title,
+        type,
+        category,
+        default_account: defaultAccount,
+        total_amount: totalAmount,
+        installment_amount: installmentAmount,
+        installments_total: installmentsTotal,
+        installments_paid: installmentsPaid,
+        frequency,
+        next_due_date: nextDueDate,
+        variable_schedule: payload.variableSchedule || [],
+        status: "active",
+        notes,
+        created_at: new Date().toISOString(),
+      }),
+    };
+  } catch (error) {
+    console.error("[Create Commitment Error]:", error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Error al registrar compromiso",
+    };
+  }
+}
+
+export async function updateFinanceCommitmentAction(
+  id: string,
+  updates: Partial<FinanceCommitment>
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    const sql = getDb();
+    await ensureFinanceTables(sql);
+
+    const existingRows = await sql`SELECT * FROM finance_commitments WHERE id = ${id} LIMIT 1;`;
+    if (existingRows.length === 0) return { success: false, error: "Compromiso no encontrado" };
+
+    const row = existingRows[0] as unknown as CommitmentDbRow;
+    const title = updates.title !== undefined ? updates.title.trim() : row.title;
+    const type = updates.type !== undefined ? updates.type : row.type;
+    const category = updates.category !== undefined ? updates.category.trim() : row.category;
+    const defaultAccount = updates.defaultAccount !== undefined ? updates.defaultAccount.trim() : row.default_account;
+    const totalAmount = updates.totalAmount !== undefined ? Number(updates.totalAmount) : (row.total_amount ? Number(row.total_amount) : null);
+    const installmentAmount = updates.installmentAmount !== undefined ? Number(updates.installmentAmount) : (row.installment_amount ? Number(row.installment_amount) : null);
+    const installmentsTotal = updates.installmentsTotal !== undefined ? Number(updates.installmentsTotal) : (row.installments_total ? Number(row.installments_total) : null);
+    const installmentsPaid = updates.installmentsPaid !== undefined ? Number(updates.installmentsPaid) : (row.installments_paid ? Number(row.installments_paid) : 0);
+    const frequency = updates.frequency !== undefined ? updates.frequency : row.frequency;
+    const nextDueDate = updates.nextDueDate !== undefined ? (updates.nextDueDate ? toDateStr(updates.nextDueDate) : null) : (row.next_due_date ? toDateStr(row.next_due_date) : null);
+    const variableSchedule = updates.variableSchedule !== undefined
+      ? JSON.stringify(updates.variableSchedule)
+      : (typeof row.variable_schedule === "string" ? row.variable_schedule : JSON.stringify(row.variable_schedule || []));
+    const status = updates.status !== undefined ? updates.status : row.status;
+    const notes = updates.notes !== undefined ? updates.notes?.trim() || null : row.notes;
+
+    await sql`
+      UPDATE finance_commitments
+      SET title = ${title},
+          type = ${type},
+          category = ${category},
+          default_account = ${defaultAccount},
+          total_amount = ${totalAmount},
+          installment_amount = ${installmentAmount},
+          installments_total = ${installmentsTotal},
+          installments_paid = ${installmentsPaid},
+          frequency = ${frequency},
+          next_due_date = ${nextDueDate},
+          variable_schedule = ${variableSchedule}::jsonb,
+          status = ${status},
+          notes = ${notes},
+          updated_at = NOW()
+      WHERE id = ${id};
+    `;
+
+    revalidatePath("/");
+    return { success: true };
+  } catch (error) {
+    console.error("[Update Commitment Error]:", error);
+    return { success: false, error: "Error al actualizar el compromiso" };
+  }
+}
+
+export async function deleteFinanceCommitmentAction(id: string): Promise<{ success: boolean; error?: string }> {
+  try {
+    const sql = getDb();
+    await ensureFinanceTables(sql);
+    await sql`DELETE FROM finance_commitments WHERE id = ${id};`;
+    revalidatePath("/");
+    return { success: true };
+  } catch (error) {
+    console.error("[Delete Commitment Error]:", error);
+    return { success: false, error: "Error al eliminar el compromiso" };
+  }
+}
+
+/**
+ * Server Action: Settles a payment for a commitment.
+ * Generates an expense transaction, advances progress/due date, and records activity.
+ */
+export async function settleCommitmentPaymentAction(payload: {
+  commitmentId: string;
+  amount: number;
+  account: string;
+  date?: string;
+  notes?: string;
+  scheduleItemId?: string;
+}): Promise<{ success: boolean; transactionId?: string; error?: string }> {
+  try {
+    const sql = getDb();
+    await ensureFinanceTables(sql);
+
+    const commitmentRows = await sql`
+      SELECT * FROM finance_commitments WHERE id = ${payload.commitmentId} LIMIT 1;
+    `;
+    if (commitmentRows.length === 0) {
+      return { success: false, error: "Compromiso no encontrado." };
+    }
+
+    const commitment = commitmentRows[0] as unknown as CommitmentDbRow;
+    const txId = `tx-cmt-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
+    const txDate = toDateStr(payload.date || getTodayDateStr());
+    const account = (payload.account || commitment.default_account || "dolarapp").toLowerCase().trim();
+    const category = (commitment.category || "servicios").toLowerCase().trim();
+
+    let txNotes = `Pago compromiso: ${commitment.title}`;
+    if (commitment.type === "installment") {
+      const nextInst = (Number(commitment.installments_paid) || 0) + 1;
+      const totalInst = Number(commitment.installments_total) || "?";
+      txNotes = `Cuota ${nextInst}/${totalInst} - ${commitment.title}`;
+    } else if (payload.notes) {
+      txNotes = `${commitment.title} - ${payload.notes}`;
+    }
+
+    // 1. Insert transaction into Neon DB
+    await sql`
+      INSERT INTO transactions (id, amount, type, category, account, notes, is_ant_expense, date)
+      VALUES (${txId}, ${payload.amount}, 'expense', ${category}, ${account}, ${txNotes}, FALSE, ${txDate});
+    `;
+
+    // 2. Increment daily activity log
+    await sql`
+      INSERT INTO daily_activity_logs (date, expenses_count)
+      VALUES (${txDate}, 1)
+      ON CONFLICT (date) DO UPDATE
+      SET expenses_count = daily_activity_logs.expenses_count + 1,
+          updated_at = NOW();
+    `;
+
+    // 3. Update commitment state
+    let newStatus = commitment.status || "active";
+    let newPaidCount = Number(commitment.installments_paid) || 0;
+    let newDueDate = commitment.next_due_date ? toDateStr(commitment.next_due_date) : null;
+    let newScheduleJson = typeof commitment.variable_schedule === "string" 
+      ? commitment.variable_schedule 
+      : JSON.stringify(commitment.variable_schedule || []);
+
+    if (commitment.type === "installment") {
+      newPaidCount += 1;
+      const total = Number(commitment.installments_total) || 0;
+      if (total > 0 && newPaidCount >= total) {
+        newStatus = "completed";
+      }
+      // Advance due date by 1 month if present
+      if (newDueDate) {
+        const d = new Date(newDueDate + "T00:00:00");
+        d.setMonth(d.getMonth() + 1);
+        newDueDate = toDateStr(d.toISOString());
+      }
+    } else if (commitment.type === "variable_schedule") {
+      let schedule: VariablePaymentScheduleItem[] = [];
+      try {
+        schedule = JSON.parse(newScheduleJson);
+      } catch {
+        schedule = [];
+      }
+
+      let found = false;
+      if (payload.scheduleItemId) {
+        schedule = schedule.map((item) => {
+          if (item.id === payload.scheduleItemId) {
+            found = true;
+            return { ...item, isPaid: true, paidAt: txDate, transactionId: txId };
+          }
+          return item;
+        });
+      }
+
+      if (!found) {
+        const firstUnpaid = schedule.findIndex((item) => !item.isPaid);
+        if (firstUnpaid !== -1) {
+          schedule[firstUnpaid] = {
+            ...schedule[firstUnpaid],
+            isPaid: true,
+            paidAt: txDate,
+            transactionId: txId,
+          };
+        }
+      }
+
+      const nextUnpaid = schedule.find((item) => !item.isPaid);
+      if (nextUnpaid) {
+        newDueDate = nextUnpaid.date;
+      } else {
+        newStatus = "completed";
+      }
+      newScheduleJson = JSON.stringify(schedule);
+    } else if (commitment.type === "recurring") {
+      // Advance due date by frequency
+      if (newDueDate) {
+        const d = new Date(newDueDate + "T00:00:00");
+        if (commitment.frequency === "biweekly") {
+          d.setDate(d.getDate() + 14);
+        } else if (commitment.frequency === "weekly") {
+          d.setDate(d.getDate() + 7);
+        } else if (commitment.frequency === "annual") {
+          d.setFullYear(d.getFullYear() + 1);
+        } else {
+          d.setMonth(d.getMonth() + 1);
+        }
+        newDueDate = toDateStr(d.toISOString());
+      }
+    } else if (commitment.type === "one_time") {
+      newStatus = "completed";
+    }
+
+    await sql`
+      UPDATE finance_commitments
+      SET installments_paid = ${newPaidCount},
+          status = ${newStatus},
+          next_due_date = ${newDueDate},
+          variable_schedule = ${newScheduleJson}::jsonb,
+          updated_at = NOW()
+      WHERE id = ${payload.commitmentId};
+    `;
+
+    // 4. Award Habitica XP
+    await awardHabiticaEvent("DAILY_EXPENSES_LOGGED", {
+      customNotes: `Liquidación de compromiso: $${payload.amount} • ${commitment.title}`,
+    });
+
+    revalidatePath("/");
+    return { success: true, transactionId: txId };
+  } catch (error) {
+    console.error("[Settle Commitment Payment Error]:", error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Error al procesar el pago del compromiso",
+    };
+  }
+}
+

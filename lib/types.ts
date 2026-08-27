@@ -241,6 +241,52 @@ export const DEFAULT_FINANCE_ACCOUNTS: FinanceAccount[] = [
   { id: "default", name: "Cuenta Principal", type: "other", icon: "💳", orderIndex: 5, isActive: true },
 ];
 
+export type CommitmentType = "installment" | "variable_schedule" | "recurring" | "one_time";
+export type CommitmentFrequency = "monthly" | "biweekly" | "weekly" | "annual" | "custom";
+export type CommitmentStatus = "active" | "completed" | "paused";
+
+export interface VariablePaymentScheduleItem {
+  id: string;
+  date: string; // YYYY-MM-DD
+  amount: number;
+  note?: string;
+  isPaid: boolean;
+  paidAt?: string;
+  transactionId?: string;
+}
+
+export interface FinanceCommitment {
+  id: string;
+  title: string;
+  type: CommitmentType;
+  category: string;
+  defaultAccount: string;
+  totalAmount?: number;
+  installmentAmount?: number;
+  installmentsTotal?: number;
+  installmentsPaid?: number;
+  frequency: CommitmentFrequency;
+  nextDueDate?: string; // YYYY-MM-DD
+  variableSchedule: VariablePaymentScheduleItem[];
+  status: CommitmentStatus;
+  notes?: string;
+  createdAt?: string;
+  updatedAt?: string;
+  remainingInstallments?: number;
+  remainingBalance?: number;
+  nextPaymentAmount?: number;
+  isOverdue?: boolean;
+  daysUntilDue?: number;
+}
+
+export interface CommitmentSummaryStats {
+  totalMonthlyCommitment: number;
+  totalRemainingDebt: number;
+  dueSoonCount: number;
+  activeCount: number;
+  installmentCount: number;
+}
+
 export interface FinanceDashboardData {
   currentBudget: MonthlyBudget;
   totalExpensesThisMonth: number;
@@ -257,6 +303,8 @@ export interface FinanceDashboardData {
   wishlistData?: WishlistDashboardData;
   categories?: FinanceCategory[];
   accounts?: FinanceAccount[];
+  commitments?: FinanceCommitment[];
+  commitmentsStats?: CommitmentSummaryStats;
 }
 
 export interface ParsedFinancialInput {
