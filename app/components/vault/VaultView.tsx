@@ -18,9 +18,8 @@ import {
   Music,
   Plus,
   Trash2,
-  UploadCloud,
   Video,
-  X,
+  X
 } from "lucide-react";
 import { useState, useTransition } from "react";
 import { AddVaultItemModal } from "./AddVaultItemModal";
@@ -104,65 +103,6 @@ export function VaultView({ data, onRefresh, onOpenScratchpad }: VaultViewProps)
 
   return (
     <div className="flex flex-col gap-6 animate-in fade-in duration-300">
-      {/* 1. Header Metrics Ribbon */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        {/* Courses Metric */}
-        <div className="rounded-xl border border-[#2A2723] bg-[#181715] p-4 shadow-sm">
-          <div className="flex items-center justify-between text-xs text-[#8E867B] font-mono">
-            <span>Cursos en Marcha</span>
-            <GraduationCap className="h-4 w-4 text-[#D99B43]" />
-          </div>
-          <div className="mt-2 text-2xl font-bold font-serif text-[#F5F2EB]">
-            {data.stats.coursesCompleted || 0} / {data.stats.totalCourses || 0}
-          </div>
-          <div className="mt-1 text-[11px] text-[#8E867B]">
-            Certificaciones y talleres completados
-          </div>
-        </div>
-
-        {/* Books Metric */}
-        <div className="rounded-xl border border-[#2A2723] bg-[#181715] p-4 shadow-sm">
-          <div className="flex items-center justify-between text-xs text-[#8E867B] font-mono">
-            <span>Libros Leídos</span>
-            <BookOpen className="h-4 w-4 text-[#D99B43]" />
-          </div>
-          <div className="mt-2 text-2xl font-bold font-serif text-[#D99B43]">
-            {data.stats.booksCompleted} / {data.stats.totalBooks}
-          </div>
-          <div className="mt-1 text-[11px] text-[#8E867B]">
-            Páginas & síntesis asimiladas
-          </div>
-        </div>
-
-        {/* Sheet Music Metric */}
-        <div className="rounded-xl border border-[#2A2723] bg-[#181715] p-4 shadow-sm">
-          <div className="flex items-center justify-between text-xs text-[#8E867B] font-mono">
-            <span>Repertorio Dominado</span>
-            <Music className="h-4 w-4 text-[#4EAB9E]" />
-          </div>
-          <div className="mt-2 text-2xl font-bold font-serif text-[#4EAB9E]">
-            {data.stats.sheetMusicMastered} / {data.stats.totalSheetMusic}
-          </div>
-          <div className="mt-1 text-[11px] text-[#8E867B]">
-            Piezas musicales en repertorio
-          </div>
-        </div>
-
-        {/* S3 Storage Status */}
-        <div className="rounded-xl border border-[#2A2723] bg-[#181715] p-4 shadow-sm">
-          <div className="flex items-center justify-between text-xs text-[#8E867B] font-mono">
-            <span>Bóveda AWS S3</span>
-            <UploadCloud className="h-4 w-4 text-[#7EA35A]" />
-          </div>
-          <div className="mt-2 text-lg font-bold font-mono text-[#7EA35A] flex items-center gap-1.5">
-            <span className="h-2 w-2 rounded-full bg-[#7EA35A]" />
-            <span>S3 Online</span>
-          </div>
-          <div className="mt-1 text-[10px] text-[#8E867B] font-mono truncate">
-            brio-media-vault-2026
-          </div>
-        </div>
-      </div>
 
       {/* 2. Top Navigation Bar: Sub-Tabs & Action Buttons */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#2A2723] pb-3">
@@ -171,11 +111,10 @@ export function VaultView({ data, onRefresh, onOpenScratchpad }: VaultViewProps)
           <button
             type="button"
             onClick={() => setActiveTab("courses")}
-            className={`flex items-center gap-2 px-3.5 py-1.5 rounded-md text-xs font-semibold transition-all shrink-0 cursor-pointer ${
-              activeTab === "courses"
-                ? "bg-[#D99B43] text-[#121110] font-bold shadow-xs"
-                : "text-[#8E867B] hover:text-[#DDD6C9] hover:bg-[#22201D]"
-            }`}
+            className={`flex items-center gap-2 px-3.5 py-1.5 rounded-md text-xs font-semibold transition-all shrink-0 cursor-pointer ${activeTab === "courses"
+              ? "bg-[#D99B43] text-[#121110] font-bold shadow-xs"
+              : "text-[#8E867B] hover:text-[#DDD6C9] hover:bg-[#22201D]"
+              }`}
           >
             <GraduationCap className="h-3.5 w-3.5" />
             <span>🎓 Cursos</span>
@@ -187,11 +126,10 @@ export function VaultView({ data, onRefresh, onOpenScratchpad }: VaultViewProps)
           <button
             type="button"
             onClick={() => setActiveTab("books")}
-            className={`flex items-center gap-2 px-3.5 py-1.5 rounded-md text-xs font-semibold transition-all shrink-0 cursor-pointer ${
-              activeTab === "books"
-                ? "bg-[#D99B43] text-[#121110] font-bold shadow-xs"
-                : "text-[#8E867B] hover:text-[#DDD6C9] hover:bg-[#22201D]"
-            }`}
+            className={`flex items-center gap-2 px-3.5 py-1.5 rounded-md text-xs font-semibold transition-all shrink-0 cursor-pointer ${activeTab === "books"
+              ? "bg-[#D99B43] text-[#121110] font-bold shadow-xs"
+              : "text-[#8E867B] hover:text-[#DDD6C9] hover:bg-[#22201D]"
+              }`}
           >
             <BookOpen className="h-3.5 w-3.5" />
             <span>📚 Libros</span>
@@ -203,11 +141,10 @@ export function VaultView({ data, onRefresh, onOpenScratchpad }: VaultViewProps)
           <button
             type="button"
             onClick={() => setActiveTab("sheet_music")}
-            className={`flex items-center gap-2 px-3.5 py-1.5 rounded-md text-xs font-semibold transition-all shrink-0 cursor-pointer ${
-              activeTab === "sheet_music"
-                ? "bg-[#4EAB9E] text-[#121110] font-bold shadow-xs"
-                : "text-[#8E867B] hover:text-[#DDD6C9] hover:bg-[#22201D]"
-            }`}
+            className={`flex items-center gap-2 px-3.5 py-1.5 rounded-md text-xs font-semibold transition-all shrink-0 cursor-pointer ${activeTab === "sheet_music"
+              ? "bg-[#4EAB9E] text-[#121110] font-bold shadow-xs"
+              : "text-[#8E867B] hover:text-[#DDD6C9] hover:bg-[#22201D]"
+              }`}
           >
             <Music className="h-3.5 w-3.5" />
             <span>🎼 Partituras</span>
@@ -219,11 +156,10 @@ export function VaultView({ data, onRefresh, onOpenScratchpad }: VaultViewProps)
           <button
             type="button"
             onClick={() => setActiveTab("resources")}
-            className={`flex items-center gap-2 px-3.5 py-1.5 rounded-md text-xs font-semibold transition-all shrink-0 cursor-pointer ${
-              activeTab === "resources"
-                ? "bg-[#D99B43] text-[#121110] font-bold shadow-xs"
-                : "text-[#8E867B] hover:text-[#DDD6C9] hover:bg-[#22201D]"
-            }`}
+            className={`flex items-center gap-2 px-3.5 py-1.5 rounded-md text-xs font-semibold transition-all shrink-0 cursor-pointer ${activeTab === "resources"
+              ? "bg-[#D99B43] text-[#121110] font-bold shadow-xs"
+              : "text-[#8E867B] hover:text-[#DDD6C9] hover:bg-[#22201D]"
+              }`}
           >
             <Video className="h-3.5 w-3.5" />
             <span>📺 Watchlist & Recursos</span>
@@ -235,11 +171,10 @@ export function VaultView({ data, onRefresh, onOpenScratchpad }: VaultViewProps)
           <button
             type="button"
             onClick={() => setActiveTab("projects")}
-            className={`flex items-center gap-2 px-3.5 py-1.5 rounded-md text-xs font-semibold transition-all shrink-0 cursor-pointer ${
-              activeTab === "projects"
-                ? "bg-[#7EA35A] text-[#121110] font-bold shadow-xs"
-                : "text-[#8E867B] hover:text-[#DDD6C9] hover:bg-[#22201D]"
-            }`}
+            className={`flex items-center gap-2 px-3.5 py-1.5 rounded-md text-xs font-semibold transition-all shrink-0 cursor-pointer ${activeTab === "projects"
+              ? "bg-[#7EA35A] text-[#121110] font-bold shadow-xs"
+              : "text-[#8E867B] hover:text-[#DDD6C9] hover:bg-[#22201D]"
+              }`}
           >
             <Code2 className="h-3.5 w-3.5" />
             <span>🛠️ Proyectos</span>
@@ -279,10 +214,10 @@ export function VaultView({ data, onRefresh, onOpenScratchpad }: VaultViewProps)
                   activeTab === "courses"
                     ? "course"
                     : activeTab === "books"
-                    ? "book"
-                    : activeTab === "resources"
-                    ? "video"
-                    : "sheet_music"
+                      ? "book"
+                      : activeTab === "resources"
+                        ? "video"
+                        : "sheet_music"
                 )
               }
               className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-[#D99B43] hover:bg-[#E8AF59] text-xs font-bold text-[#121110] shadow-xs transition-all cursor-pointer"
@@ -292,10 +227,10 @@ export function VaultView({ data, onRefresh, onOpenScratchpad }: VaultViewProps)
                 {activeTab === "courses"
                   ? "Agregar Curso"
                   : activeTab === "books"
-                  ? "Agregar Libro (S3)"
-                  : activeTab === "resources"
-                  ? "Guardar Video/Link"
-                  : "Subir Partitura (S3)"}
+                    ? "Agregar Libro (S3)"
+                    : activeTab === "resources"
+                      ? "Guardar Video/Link"
+                      : "Subir Partitura (S3)"}
               </span>
             </button>
           )}
