@@ -110,7 +110,7 @@ export function ModalManager({
   user,
   tasks = [],
   tags = [],
-  calendarSchedule = {
+  calendarSchedule: _calendarSchedule = {
     date: getTodayDateStr(),
     events: [],
     totalMeetingMinutes: 0,
@@ -129,7 +129,7 @@ export function ModalManager({
     setActiveTaskTab,
     setActiveTagFilter,
     mustWinTaskIds,
-    setMustWinTaskIds,
+    setMustWinTaskIds: _setMustWinTaskIds,
     refreshData,
   } = useCommandCenter();
 

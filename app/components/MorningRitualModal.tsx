@@ -48,7 +48,7 @@ const DEFAULT_SELF_CARE_ITEMS = [
 export function MorningRitualModal({
   isOpen,
   onClose,
-  user,
+  user: _user,
   tasks,
   onSuccess,
 }: MorningRitualModalProps) {
@@ -76,7 +76,7 @@ export function MorningRitualModal({
     );
   }, [dailyTasks]);
 
-  const [selectedDailyId, setSelectedDailyId] = useState<string | null>(
+  const [selectedDailyId, _setSelectedDailyId] = useState<string | null>(
     autoMorningDaily?.id || null
   );
 
