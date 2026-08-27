@@ -58,6 +58,17 @@ export interface HabiticaTask {
   completed?: boolean; // For todos
   isDue?: boolean; // For dailies
   streak?: number; // For dailies
+  repeat?: {
+    m?: boolean;
+    t?: boolean;
+    w?: boolean;
+    th?: boolean;
+    f?: boolean;
+    s?: boolean;
+    su?: boolean;
+  };
+  frequency?: "daily" | "weekly" | "monthly" | "yearly";
+  everyX?: number;
   up?: boolean; // For habits
   down?: boolean; // For habits
   counterUp?: number; // For habits
@@ -77,6 +88,16 @@ export interface HabiticaTaskPayload {
   up?: boolean;
   down?: boolean;
   frequency?: "daily" | "weekly" | "monthly" | "yearly";
+  repeat?: {
+    m?: boolean;
+    t?: boolean;
+    w?: boolean;
+    th?: boolean;
+    f?: boolean;
+    s?: boolean;
+    su?: boolean;
+  };
+  everyX?: number;
   checklist?: Array<{ id?: string; text: string; completed?: boolean }>;
   date?: string;
 }

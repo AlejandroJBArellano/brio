@@ -10,6 +10,7 @@ import {
 import { HabiticaTag, HabiticaTask } from "@/lib/types";
 import { capitalize, getTaskValueColor } from "@/lib/utils";
 import {
+  Calendar,
   Check,
   Flame,
   Save,
@@ -56,8 +57,36 @@ function TaskInspectorPaneContent({
   const [notes, setNotes] = useState(task.notes || "");
   const [priority, setPriority] = useState<number>(task.priority || 1);
   const [newChecklistText, setNewChecklistText] = useState("");
+  const defaultRepeat = task.repeat || {
+    m: true,
+    t: true,
+    w: true,
+    th: true,
+    f: true,
+    s: true,
+    su: true,
+  };
+  const [repeatDays, setRepeatDays] = useState(defaultRepeat);
   const [isPending, startTransition] = useTransition();
   const [hasSaved, setHasSaved] = useState(false);
+
+  const handleToggleDay = (
+    dayKey: "m" | "t" | "w" | "th" | "f" | "s" | "su"
+  ) => {
+    const updated = {
+      ...repeatDays,
+      [dayKey]: !(repeatDays[dayKey] ?? true),
+    };
+    setRepeatDays(updated);
+    startTransition(async () => {
+      await updateTaskAction(task.id, {
+        repeat: updated,
+        frequency: "weekly",
+      });
+      setHasSaved(true);
+      setTimeout(() => setHasSaved(false), 2000);
+    });
+  };
 
   const valueStyle = getTaskValueColor(task.value || 0);
 
@@ -222,15 +251,63 @@ function TaskInspectorPaneContent({
 
         {/* Daily Streak & Habit Counter badges */}
         {task.type === "daily" && (
-          <div className="flex items-center justify-between rounded-lg border border-[#3D3425] bg-[#221D16] p-2.5 text-xs text-[#D99B43]">
-            <div className="flex items-center gap-2">
-              <Flame className="h-4 w-4 fill-[#D99B43] text-[#D99B43]" />
-              <span className="font-semibold">Racha Diaria</span>
+          <>
+            <div className="flex items-center justify-between rounded-lg border border-[#3D3425] bg-[#221D16] p-2.5 text-xs text-[#D99B43]">
+              <div className="flex items-center gap-2">
+                <Flame className="h-4 w-4 fill-[#D99B43] text-[#D99B43]" />
+                <span className="font-semibold">Racha Diaria</span>
+              </div>
+              <span className="font-mono font-bold text-[#E8AF59]">
+                {task.streak || 0} días consecutivos
+              </span>
             </div>
-            <span className="font-mono font-bold text-[#E8AF59]">
-              {task.streak || 0} días consecutivos
-            </span>
-          </div>
+
+            {/* Daily Repeat Days Configuration */}
+            <div className="rounded-lg border border-[#2A2723] bg-[#141311] p-3 space-y-2.5">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-1.5 text-xs text-[#DDD6C9]">
+                  <Calendar className="size-3.5 text-[#E8AF59]" />
+                  <span className="font-semibold">Días que repite (Semanal)</span>
+                </div>
+                <span className="text-[10px] font-mono text-[#D99B43]">
+                  {task.isDue !== false ? "🟢 Toca hoy" : "😴 Descanso hoy"}
+                </span>
+              </div>
+
+              <div className="grid grid-cols-7 gap-1">
+                {[
+                  { key: "m", label: "L", title: "Lunes" },
+                  { key: "t", label: "M", title: "Martes" },
+                  { key: "w", label: "M", title: "Miércoles" },
+                  { key: "th", label: "J", title: "Jueves" },
+                  { key: "f", label: "V", title: "Viernes" },
+                  { key: "s", label: "S", title: "Sábado" },
+                  { key: "su", label: "D", title: "Domingo" },
+                ].map(({ key, label, title }) => {
+                  const dayKey = key as "m" | "t" | "w" | "th" | "f" | "s" | "su";
+                  const isDayActive = repeatDays[dayKey] ?? true;
+                  return (
+                    <button
+                      key={key}
+                      type="button"
+                      title={title}
+                      onClick={() => handleToggleDay(dayKey)}
+                      className={`py-1.5 rounded text-center text-xs font-mono font-semibold transition-all cursor-pointer border ${
+                        isDayActive
+                          ? "bg-[#3D3425] text-[#E8AF59] border-[#D99B43]/50 shadow-xs"
+                          : "bg-[#181715] text-[#5C564E] border-[#2A2723] hover:text-[#8E867B]"
+                      }`}
+                    >
+                      {label}
+                    </button>
+                  );
+                })}
+              </div>
+              <p className="text-[10px] text-[#8E867B]">
+                Los días apagados no vencerán hoy ni te restarán salud en Habitica.
+              </p>
+            </div>
+          </>
         )}
 
         {task.type === "habit" && (
