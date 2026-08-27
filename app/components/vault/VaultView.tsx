@@ -6,23 +6,28 @@ import {
   updateProjectStatusAction,
 } from "@/app/actions/projects";
 import {
+  ProjectItem,
   ProjectStatus,
   VaultDashboardData,
   VaultItemCategory,
 } from "@/lib/types";
+import { matchTasksToProject } from "@/lib/projectMatcher";
 import {
   BookOpen,
+  ChevronRight,
   Code2,
   ExternalLink,
   GraduationCap,
+  ListTodo,
   Music,
   Plus,
   Trash2,
   Video,
-  X
+  X,
 } from "lucide-react";
 import { useState, useTransition } from "react";
 import { AddVaultItemModal } from "./AddVaultItemModal";
+import { ProjectDossierDrawer } from "./ProjectDossierDrawer";
 import { VaultKanbanBoard } from "./VaultKanbanBoard";
 
 interface VaultViewProps {
@@ -45,6 +50,7 @@ export function VaultView({ data, onRefresh, onOpenScratchpad }: VaultViewProps)
   const [activeTab, setActiveTab] = useState<VaultTab>("courses");
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [addModalCategory, setAddModalCategory] = useState<VaultItemCategory>("course");
+  const [selectedProject, setSelectedProject] = useState<ProjectItem | null>(null);
 
   // Project creator modal state
   const [isNewProjectModalOpen, setIsNewProjectModalOpen] = useState(false);
@@ -291,14 +297,20 @@ export function VaultView({ data, onRefresh, onOpenScratchpad }: VaultViewProps)
             ) : (
               data.projects.map((proj) => {
                 const statusMeta = STATUS_LABELS[proj.status] || STATUS_LABELS.idea;
+                const metrics = matchTasksToProject(proj, data.tasks || []);
+
                 return (
                   <div
                     key={proj.id}
-                    className="group rounded-xl border border-[#2A2723] bg-[#181715] p-5 shadow-sm hover:border-[#38332D] transition-all flex flex-col justify-between"
+                    onClick={() => setSelectedProject(proj)}
+                    className="group rounded-xl border border-[#2A2723] bg-[#181715] hover:border-[#38332D] hover:bg-[#1D1B18] p-5 shadow-sm transition-all flex flex-col justify-between cursor-pointer space-y-4"
                   >
                     <div className="space-y-3">
                       {/* Status and Action delete */}
-                      <div className="flex items-center justify-between font-mono">
+                      <div
+                        className="flex items-center justify-between font-mono"
+                        onClick={(e) => e.stopPropagation()}
+                      >
                         <select
                           value={proj.status}
                           onChange={(e) =>
@@ -324,7 +336,7 @@ export function VaultView({ data, onRefresh, onOpenScratchpad }: VaultViewProps)
 
                       {/* Title & Description */}
                       <div>
-                        <h4 className="font-serif text-base font-bold text-[#F5F2EB] tracking-tight">
+                        <h4 className="font-serif text-base font-bold text-[#F5F2EB] tracking-tight group-hover:text-white transition-colors">
                           {proj.title}
                         </h4>
                         {proj.description && (
@@ -332,6 +344,27 @@ export function VaultView({ data, onRefresh, onOpenScratchpad }: VaultViewProps)
                             {proj.description}
                           </p>
                         )}
+                      </div>
+
+                      {/* Live Habitica Task Progress Bar */}
+                      <div className="space-y-1.5 pt-1">
+                        <div className="flex items-center justify-between text-[11px] font-mono">
+                          <span className="text-[#8E867B] flex items-center gap-1.5">
+                            <ListTodo className="size-3 text-[#D99B43]" />
+                            <span>
+                              {metrics.completedCount}/{metrics.totalCount} tareas listas
+                            </span>
+                          </span>
+                          <span className="font-bold text-[#DDD6C9]">
+                            {metrics.progressPercent}%
+                          </span>
+                        </div>
+                        <div className="relative h-1.5 w-full overflow-hidden rounded-full bg-[#121110] border border-[#2A2723]">
+                          <div
+                            className="h-full rounded-full bg-linear-to-r from-[#D99B43] to-[#4EAB9E] transition-all duration-500"
+                            style={{ width: `${metrics.progressPercent}%` }}
+                          />
+                        </div>
                       </div>
 
                       {/* Tech Stack Badges */}
@@ -349,9 +382,12 @@ export function VaultView({ data, onRefresh, onOpenScratchpad }: VaultViewProps)
                       )}
                     </div>
 
-                    {/* Links */}
-                    {(proj.repoUrl || proj.liveUrl) && (
-                      <div className="pt-4 mt-4 border-t border-[#2A2723] flex items-center gap-3 text-xs font-mono">
+                    {/* Links & Open Dossier Button */}
+                    <div
+                      className="pt-3 border-t border-[#2A2723] flex items-center justify-between text-xs font-mono"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <div className="flex items-center gap-3">
                         {proj.repoUrl && (
                           <a
                             href={proj.repoUrl}
@@ -375,7 +411,16 @@ export function VaultView({ data, onRefresh, onOpenScratchpad }: VaultViewProps)
                           </a>
                         )}
                       </div>
-                    )}
+
+                      <button
+                        type="button"
+                        onClick={() => setSelectedProject(proj)}
+                        className="inline-flex items-center gap-1 text-[11px] font-semibold text-[#D99B43] hover:text-[#E8AF59] transition-colors cursor-pointer"
+                      >
+                        <span>Dossier</span>
+                        <ChevronRight className="size-3 stroke-[2.5]" />
+                      </button>
+                    </div>
                   </div>
                 );
               })
@@ -390,6 +435,15 @@ export function VaultView({ data, onRefresh, onOpenScratchpad }: VaultViewProps)
         onClose={() => setIsAddModalOpen(false)}
         defaultCategory={addModalCategory}
         onSuccess={onRefresh}
+      />
+
+      {/* Project Dossier Slide-Over Drawer */}
+      <ProjectDossierDrawer
+        project={selectedProject}
+        tasks={data.tasks}
+        tags={data.tags}
+        onClose={() => setSelectedProject(null)}
+        onRefresh={onRefresh}
       />
 
       {/* New Project Modal */}

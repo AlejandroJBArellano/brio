@@ -695,6 +695,8 @@ export interface VaultDashboardData {
   documents: VaultItem[];
   projects: ProjectItem[];
   scratchpadContent: string;
+  tasks?: HabiticaTask[];
+  tags?: HabiticaTag[];
   stats: {
     totalBooks: number;
     booksCompleted: number;

@@ -16,6 +16,7 @@ import {
   VaultItemStatus,
 } from "@/lib/types";
 import { awardHabiticaEvent } from "@/lib/habiticaEvents";
+import { getCachedHabiticaTags, getCachedHabiticaTasks } from "@/lib/dal/habitica";
 import { revalidatePath } from "next/cache";
 
 interface VaultDbRow {
@@ -64,10 +65,12 @@ interface ScratchpadDbRow {
 export async function fetchVaultDashboardDataAction(): Promise<VaultDashboardData> {
   const sql = getDb();
 
-  const [rows, projectRows, scratchRows] = await Promise.all([
+  const [rows, projectRows, scratchRows, tasks, tags] = await Promise.all([
     sql`SELECT * FROM vault_items ORDER BY updated_at DESC;`,
     sql`SELECT * FROM projects ORDER BY updated_at DESC;`,
     sql`SELECT content FROM scratchpad_notes WHERE id = 'default' LIMIT 1;`,
+    getCachedHabiticaTasks().catch(() => []),
+    getCachedHabiticaTags().catch(() => []),
   ]);
 
   const allItems: VaultItem[] = (rows as unknown as VaultDbRow[]).map((r) => {
@@ -127,6 +130,8 @@ export async function fetchVaultDashboardDataAction(): Promise<VaultDashboardDat
     documents,
     projects,
     scratchpadContent,
+    tasks: tasks || [],
+    tags: tags || [],
     stats: {
       totalBooks: books.length,
       booksCompleted: books.filter((b) => b.status === "completed").length,
