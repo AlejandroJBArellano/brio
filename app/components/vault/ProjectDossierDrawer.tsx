@@ -66,7 +66,7 @@ const STATUS_CONFIG: Record<
 export function ProjectDossierDrawer({
   project,
   tasks = [],
-  tags = [],
+  tags: _tags = [],
   onClose,
   onRefresh,
 }: ProjectDossierDrawerProps) {
@@ -76,17 +76,18 @@ export function ProjectDossierDrawer({
 
   // Edit Mode State
   const [isEditing, setIsEditing] = useState(false);
-  const [editTitle, setEditTitle] = useState("");
-  const [editDescription, setEditDescription] = useState("");
-  const [editStatus, setEditStatus] = useState<ProjectStatus>("in_progress");
-  const [editTechStack, setEditTechStack] = useState("");
-  const [editRepoUrl, setEditRepoUrl] = useState("");
-  const [editLiveUrl, setEditLiveUrl] = useState("");
-  const [editProgress, setEditProgress] = useState(0);
+  const [editTitle, setEditTitle] = useState(() => project?.title || "");
+  const [editDescription, setEditDescription] = useState(() => project?.description || "");
+  const [editStatus, setEditStatus] = useState<ProjectStatus>(() => project?.status || "in_progress");
+  const [editTechStack, setEditTechStack] = useState(() =>
+    Array.isArray(project?.techStack) ? project.techStack.join(", ") : ""
+  );
+  const [editRepoUrl, setEditRepoUrl] = useState(() => project?.repoUrl || "");
+  const [editLiveUrl, setEditLiveUrl] = useState(() => project?.liveUrl || "");
+  const [editProgress, setEditProgress] = useState(() => project?.progress || 0);
   const [isConfirmingDelete, setIsConfirmingDelete] = useState(false);
 
-  // Sync edit form state when project opens
-  useEffect(() => {
+  const handleOpenEdit = () => {
     if (project) {
       setEditTitle(project.title || "");
       setEditDescription(project.description || "");
@@ -95,10 +96,10 @@ export function ProjectDossierDrawer({
       setEditRepoUrl(project.repoUrl || "");
       setEditLiveUrl(project.liveUrl || "");
       setEditProgress(project.progress || 0);
-      setIsEditing(false);
       setIsConfirmingDelete(false);
     }
-  }, [project]);
+    setIsEditing(true);
+  };
 
   // Close on Escape key
   useEffect(() => {
@@ -223,7 +224,7 @@ export function ProjectDossierDrawer({
               {/* Edit Mode Toggle Button */}
               <button
                 type="button"
-                onClick={() => setIsEditing(!isEditing)}
+                onClick={() => (isEditing ? setIsEditing(false) : handleOpenEdit())}
                 className={`px-3 py-1 rounded-lg text-xs font-mono font-semibold border transition-all cursor-pointer flex items-center gap-1.5 ${
                   isEditing
                     ? "bg-[#221D16] text-[#D99B43] border-[#D99B43]/50"

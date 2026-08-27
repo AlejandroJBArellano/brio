@@ -823,7 +823,7 @@ export function ProjectFocusCard({
               })
             ) : (
               <div className="col-span-full rounded-xl border border-dashed border-[#2A2723] p-8 text-center text-xs text-[#8E867B] font-mono">
-                No hay notas en este proyecto. ¡Crea una con el botón "+ Nueva Nota"!
+                No hay notas en este proyecto. ¡Crea una con el botón &quot;+ Nueva Nota&quot;!
               </div>
             )}
           </div>
