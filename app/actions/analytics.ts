@@ -32,6 +32,9 @@ const TAG_COLOR_KEYWORDS: { keyword: string; color: string }[] = [
   { keyword: "morning", color: "#f43f5e" }, // Rose
   { keyword: "rutina", color: "#14b8a6" }, // Teal
   { keyword: "arte", color: "#ec4899" }, // Pink
+  { keyword: "música", color: "#ec4899" }, // Pink
+  { keyword: "musica", color: "#ec4899" }, // Pink
+  { keyword: "cello", color: "#ec4899" }, // Pink
   { keyword: "cleaning", color: "#14b8a6" }, // Teal
   { keyword: "house", color: "#14b8a6" }, // Teal
   { keyword: "inpulse", color: "#eab308" }, // Yellow
