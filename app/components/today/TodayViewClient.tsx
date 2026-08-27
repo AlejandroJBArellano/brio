@@ -26,14 +26,11 @@ import {
   ChevronDown,
   ChevronUp,
   Droplet,
-  Flame,
   Moon,
   Pill,
   Plus,
-  Sparkles,
   Sun,
   Wallet,
-  Zap,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useMemo, useOptimistic, useState, useTransition } from "react";

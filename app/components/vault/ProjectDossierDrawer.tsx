@@ -11,9 +11,7 @@ import { HabiticaTag, HabiticaTask, ProjectItem, ProjectStatus } from "@/lib/typ
 import { matchTasksToProject } from "@/lib/projectMatcher";
 import { getTaskPriorityInfo, parseTaskPrefix } from "@/lib/utils";
 import {
-  AlertTriangle,
   Check,
-  CheckSquare,
   Code2,
   Edit2,
   ExternalLink,
@@ -482,7 +480,7 @@ export function ProjectDossierDrawer({
 
                 <div className="h-2 w-full rounded-full bg-[#1A1917] overflow-hidden">
                   <div
-                    className="h-full rounded-full bg-gradient-to-r from-[#D99B43] to-[#7EA35A] transition-all duration-300"
+                    className="h-full rounded-full bg-linear-to-r from-[#D99B43] to-[#7EA35A] transition-all duration-300"
                     style={{ width: `${metrics.progressPercent}%` }}
                   />
                 </div>

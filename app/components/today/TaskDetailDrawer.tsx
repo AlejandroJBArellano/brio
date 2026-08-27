@@ -5,16 +5,11 @@ import { toggleChecklistItemAction, toggleTaskAction } from "@/app/actions/tasks
 import { soundFx } from "@/lib/soundFx";
 import { ContextualNote, HabiticaTask } from "@/lib/types";
 import {
-  Award,
-  Calendar,
   Check,
   CheckCircle2,
   FileText,
   ListTodo,
   Plus,
-  Sparkles,
-  Tag,
-  Trash2,
   X,
 } from "lucide-react";
 import { useState, useTransition } from "react";
@@ -89,7 +84,7 @@ export function TaskDetailDrawer({
       <div className="absolute inset-0" onClick={onClose} />
 
       <div
-        className="relative w-full sm:w-[50vw] xl:w-[48vw] min-w-[340px] max-w-[900px] h-full bg-[#181715] border-l border-[#2A2723] p-6 sm:p-8 shadow-2xl flex flex-col justify-between overflow-y-auto animate-in slide-in-from-right duration-250 space-y-6 z-10"
+        className="relative w-full sm:w-[50vw] xl:w-[48vw] min-w-85 max-w-225 h-full bg-[#181715] border-l border-[#2A2723] p-6 sm:p-8 shadow-2xl flex flex-col justify-between overflow-y-auto animate-in slide-in-from-right duration-250 space-y-6 z-10"
         role="dialog"
       >
         {/* Header */}

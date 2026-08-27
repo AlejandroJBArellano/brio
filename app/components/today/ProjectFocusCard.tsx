@@ -13,11 +13,9 @@ import {
   HabiticaTask,
   NoteCategory,
   ProjectItem,
-  ProjectStatus,
 } from "@/lib/types";
 import {
   Check,
-  ChevronDown,
   Edit2,
   ExternalLink,
   FileText,
@@ -26,7 +24,6 @@ import {
   Layers,
   ListTodo,
   Plus,
-  Sparkles,
   Tag,
   Trash2,
   X,
@@ -570,7 +567,7 @@ export function ProjectFocusCard({
           </form>
 
           {/* Filtered Tasks List */}
-          <div className="space-y-2 max-h-[420px] overflow-y-auto pr-1">
+          <div className="space-y-2 max-h-105 overflow-y-auto pr-1">
             {projectTasks.length > 0 ? (
               projectTasks.map((task) => (
                 <div
@@ -769,7 +766,7 @@ export function ProjectFocusCard({
           )}
 
           {/* Notes Grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-[420px] overflow-y-auto pr-1">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-105 overflow-y-auto pr-1">
             {filteredProjectNotes.length > 0 ? (
               filteredProjectNotes.map((note) => {
                 const meta = CATEGORY_META[note.category] || CATEGORY_META.idea;

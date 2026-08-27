@@ -10,15 +10,11 @@ import {
   ChevronDown,
   ChevronUp,
   Headphones,
-  Maximize2,
-  Minimize2,
   Pause,
   Play,
   RotateCcw,
-  Sparkles,
   Volume2,
   VolumeX,
-  X,
   Zap,
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";

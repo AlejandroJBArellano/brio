@@ -1,20 +1,16 @@
 "use client";
 
 import { saveMorningRitualAction } from "@/app/actions/rituals";
-import { toggleChecklistItemAction, toggleTaskAction } from "@/app/actions/tasks";
+import { toggleChecklistItemAction } from "@/app/actions/tasks";
 import { soundFx } from "@/lib/soundFx";
 import { HabiticaTask, HabiticaUser } from "@/lib/types";
 import {
   Check,
-  ChevronDown,
   Droplet,
-  Flame,
   Moon,
-  Pill,
   Sparkles,
   Sun,
   X,
-  Zap,
 } from "lucide-react";
 import { useMemo, useOptimistic, useState, useTransition } from "react";
 
