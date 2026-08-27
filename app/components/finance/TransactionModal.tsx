@@ -1,11 +1,12 @@
 "use client";
 
-import { createTransactionAction } from "@/app/actions/finance";
+import { createTransactionAction, updateTransactionAction } from "@/app/actions/finance";
 import {
   DEFAULT_FINANCE_ACCOUNTS,
   DEFAULT_FINANCE_CATEGORIES,
   FinanceAccount,
   FinanceCategory,
+  Transaction,
   TransactionType,
 } from "@/lib/types";
 import { getTodayDateStr } from "@/lib/dateUtils";
@@ -17,12 +18,13 @@ import {
   ArrowUpRight,
   Clock,
   Coffee,
+  Edit2,
   Plus,
   Settings2,
   Wallet,
   X,
 } from "lucide-react";
-import { useState, useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
 
 interface TransactionModalProps {
   isOpen: boolean;
@@ -30,6 +32,8 @@ interface TransactionModalProps {
   onSuccess?: () => void;
   categories?: FinanceCategory[];
   accounts?: FinanceAccount[];
+  transactionToEdit?: Transaction | null;
+  budgetedIncome?: number;
   onOpenManageCatalog?: () => void;
 }
 
@@ -39,21 +43,44 @@ export function TransactionModal({
   onSuccess,
   categories = [],
   accounts = [],
+  transactionToEdit,
+  budgetedIncome,
   onOpenManageCatalog,
 }: TransactionModalProps) {
+  const isEditing = Boolean(transactionToEdit);
   const effectiveCategories = categories.length > 0 ? categories : DEFAULT_FINANCE_CATEGORIES;
   const effectiveAccounts = accounts.length > 0 ? accounts : DEFAULT_FINANCE_ACCOUNTS;
 
-  const [type, setType] = useState<TransactionType>("expense");
-  const [amount, setAmount] = useState("");
-  const [concept, setConcept] = useState("");
-  const [category, setCategory] = useState(effectiveCategories[0]?.id || "comida");
-  const [account, setAccount] = useState(effectiveAccounts[0]?.id || "nu");
-  const [isAntExpense, setIsAntExpense] = useState(false);
+  const [type, setType] = useState<TransactionType>(transactionToEdit?.type || "expense");
+  const [amount, setAmount] = useState(transactionToEdit?.amount?.toString() || "");
+  const [concept, setConcept] = useState(transactionToEdit?.notes || "");
+  const [category, setCategory] = useState(transactionToEdit?.category || effectiveCategories[0]?.id || "comida");
+  const [account, setAccount] = useState(transactionToEdit?.account || effectiveAccounts[0]?.id || "nu");
+  const [isAntExpense, setIsAntExpense] = useState(Boolean(transactionToEdit?.isAntExpense));
   const [notes, setNotes] = useState("");
-  const [date, setDate] = useState(getTodayDateStr());
+  const [date, setDate] = useState(transactionToEdit?.date || getTodayDateStr());
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
+
+  useEffect(() => {
+    if (transactionToEdit) {
+      setType(transactionToEdit.type);
+      setAmount(transactionToEdit.amount.toString());
+      setConcept(transactionToEdit.notes || "");
+      setCategory(transactionToEdit.category || effectiveCategories[0]?.id || "comida");
+      setAccount(transactionToEdit.account || effectiveAccounts[0]?.id || "nu");
+      setIsAntExpense(Boolean(transactionToEdit.isAntExpense));
+      setDate(transactionToEdit.date || getTodayDateStr());
+    } else {
+      setType("expense");
+      setAmount("");
+      setConcept("");
+      setCategory(effectiveCategories[0]?.id || "comida");
+      setAccount(effectiveAccounts[0]?.id || "nu");
+      setIsAntExpense(false);
+      setDate(getTodayDateStr());
+    }
+  }, [transactionToEdit, isOpen]);
 
   if (!isOpen) return null;
 
@@ -80,26 +107,45 @@ export function TransactionModal({
 
     setError(null);
     startTransition(async () => {
-      const res = await createTransactionAction({
-        amount: numAmount,
-        type,
-        concept: concept.trim(),
-        category,
-        account,
-        isAntExpense: type === "expense" ? isAntExpense : false,
-        notes: notes.trim() || undefined,
-        date,
-      });
+      if (isEditing && transactionToEdit) {
+        const res = await updateTransactionAction(transactionToEdit.id, {
+          amount: numAmount,
+          type,
+          category,
+          account,
+          notes: concept.trim(),
+          isAntExpense: type === "expense" ? isAntExpense : false,
+          date,
+        });
 
-      if (res.success) {
-        soundFx.transactionAdded();
-        setAmount("");
-        setConcept("");
-        setNotes("");
-        onClose();
-        if (onSuccess) onSuccess();
+        if (res.success) {
+          onClose();
+          if (onSuccess) onSuccess();
+        } else {
+          setError(res.error || "No se pudo actualizar la transacción");
+        }
       } else {
-        setError(res.error || "No se pudo guardar la transacción");
+        const res = await createTransactionAction({
+          amount: numAmount,
+          type,
+          concept: concept.trim(),
+          category,
+          account,
+          isAntExpense: type === "expense" ? isAntExpense : false,
+          notes: notes.trim() || undefined,
+          date,
+        });
+
+        if (res.success) {
+          soundFx.transactionAdded();
+          setAmount("");
+          setConcept("");
+          setNotes("");
+          onClose();
+          if (onSuccess) onSuccess();
+        } else {
+          setError(res.error || "No se pudo guardar la transacción");
+        }
       }
     });
   };
@@ -113,15 +159,15 @@ export function TransactionModal({
         {/* Header */}
         <div className="flex items-center justify-between pb-4 border-b border-[#2A2723]">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[#221D16] text-[#D99B43] border border-[#D99B43]/30">
-              <Wallet className="h-5 w-5" />
+            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#221D16] text-[#D99B43] border border-[#D99B43]/30">
+              {isEditing ? <Edit2 className="h-5 w-5" /> : <Wallet className="h-5 w-5" />}
             </div>
             <div>
               <h2 className="font-serif text-lg font-bold text-[#F5F2EB] tracking-tight">
-                Registrar Movimiento en Brio Finanzas
+                {isEditing ? "Editar Movimiento" : "Registrar Movimiento en Brio Finanzas"}
               </h2>
               <p className="text-xs text-[#8E867B]">
-                Guarda tus gastos e ingresos con latencia cero en Neon DB
+                {isEditing ? "Modifica los datos del registro" : "Guarda tus gastos e ingresos con latencia cero en Neon DB"}
               </p>
             </div>
           </div>
@@ -191,7 +237,7 @@ export function TransactionModal({
               />
             </div>
             {type === "expense" && parseFloat(amount) > 0 && (() => {
-              const workTime = calculateWorkTimeForExpense(parseFloat(amount));
+              const workTime = calculateWorkTimeForExpense(parseFloat(amount), budgetedIncome);
               return (
                 <div className={`mt-2 flex items-center justify-between rounded-lg border px-3 py-2 text-[11px] font-sans animate-in fade-in duration-150 ${workTime.badgeBg}`}>
                   <div className="flex items-center gap-2">

@@ -11,10 +11,12 @@ import {
   CheckCircle2,
   Clock,
   Coffee,
+  Edit2,
   PieChart,
   Plus,
   Search,
   Settings,
+  Sliders,
   Sparkles,
   Trash2,
   TrendingUp,
@@ -22,10 +24,13 @@ import {
 } from "lucide-react";
 import { useMemo, useState, useTransition } from "react";
 import { AntExpenseThermometer } from "./AntExpenseThermometer";
+import { CommitmentsView } from "./CommitmentsView";
+import { EditBudgetModal } from "./EditBudgetModal";
 import { ManageFinanceCatalogModal } from "./ManageFinanceCatalogModal";
 import { SavingsGoalsWidget } from "./SavingsGoalsWidget";
 import { TransactionModal } from "./TransactionModal";
 import { WishlistView } from "./WishlistView";
+import { Transaction } from "@/lib/types";
 
 interface FinanceViewProps {
   data: FinanceDashboardData;
@@ -33,9 +38,11 @@ interface FinanceViewProps {
 }
 
 export function FinanceView({ data, onRefresh }: FinanceViewProps) {
-  const [subTab, setSubTab] = useState<"budget" | "wishlist">("budget");
+  const [subTab, setSubTab] = useState<"budget" | "wishlist" | "commitments">("budget");
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
   const [isManageCatalogOpen, setIsManageCatalogOpen] = useState(false);
+  const [isEditBudgetOpen, setIsEditBudgetOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [activeFilter, setActiveFilter] = useState<"all" | "expenses" | "incomes" | "ant">("all");
   const [isPending, startTransition] = useTransition();
@@ -87,15 +94,18 @@ export function FinanceView({ data, onRefresh }: FinanceViewProps) {
     });
   };
 
+  const activeCommitmentsCount = data.commitments?.filter((c) => c.status === "active").length || 0;
+  const dueSoonCommitmentsCount = data.commitmentsStats?.dueSoonCount || 0;
+
   return (
     <div className="flex flex-col gap-6 animate-in fade-in duration-300">
       {/* Sub-Navigation Tabs */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#2A2723] pb-3">
-        <div className="flex items-center gap-1.5 p-1 bg-[#181715] rounded-lg border border-[#2A2723]">
+        <div className="flex items-center gap-1.5 p-1 bg-[#181715] rounded-lg border border-[#2A2723] overflow-x-auto">
           <button
             type="button"
             onClick={() => setSubTab("budget")}
-            className={`flex items-center gap-2 px-3.5 py-1.5 rounded-md text-xs font-semibold transition-all cursor-pointer ${
+            className={`flex items-center gap-2 px-3.5 py-1.5 rounded-md text-xs font-semibold transition-all cursor-pointer whitespace-nowrap ${
               subTab === "budget"
                 ? "bg-[#D99B43] text-[#121110] shadow-xs font-bold"
                 : "text-[#8E867B] hover:text-[#DDD6C9] hover:bg-[#22201D]"
@@ -107,8 +117,30 @@ export function FinanceView({ data, onRefresh }: FinanceViewProps) {
 
           <button
             type="button"
+            onClick={() => setSubTab("commitments")}
+            className={`flex items-center gap-2 px-3.5 py-1.5 rounded-md text-xs font-semibold transition-all cursor-pointer whitespace-nowrap ${
+              subTab === "commitments"
+                ? "bg-[#D99B43] text-[#121110] shadow-xs font-bold"
+                : "text-[#8E867B] hover:text-[#DDD6C9] hover:bg-[#22201D]"
+            }`}
+          >
+            <Clock className="h-3.5 w-3.5" />
+            <span>Compromisos & Cuentas por Pagar</span>
+            {dueSoonCommitmentsCount > 0 ? (
+              <span className="px-1.5 py-0.2 rounded font-mono text-[10px] bg-[#E05D52] text-white font-bold animate-pulse">
+                {dueSoonCommitmentsCount}
+              </span>
+            ) : activeCommitmentsCount > 0 ? (
+              <span className="px-1.5 py-0.2 rounded font-mono text-[10px] bg-[#121110] text-[#D99B43] border border-[#D99B43]/30">
+                {activeCommitmentsCount}
+              </span>
+            ) : null}
+          </button>
+
+          <button
+            type="button"
             onClick={() => setSubTab("wishlist")}
-            className={`flex items-center gap-2 px-3.5 py-1.5 rounded-md text-xs font-semibold transition-all cursor-pointer ${
+            className={`flex items-center gap-2 px-3.5 py-1.5 rounded-md text-xs font-semibold transition-all cursor-pointer whitespace-nowrap ${
               subTab === "wishlist"
                 ? "bg-[#4EAB9E] text-[#121110] shadow-xs font-bold"
                 : "text-[#8E867B] hover:text-[#DDD6C9] hover:bg-[#22201D]"
@@ -137,6 +169,14 @@ export function FinanceView({ data, onRefresh }: FinanceViewProps) {
       {subTab === "wishlist" ? (
         <WishlistView
           data={data.wishlistData || defaultWishlistData}
+          onRefresh={onRefresh}
+        />
+      ) : subTab === "commitments" ? (
+        <CommitmentsView
+          commitments={data.commitments || []}
+          stats={data.commitmentsStats}
+          categories={data.categories || []}
+          accounts={data.accounts || []}
           onRefresh={onRefresh}
         />
       ) : (
@@ -239,14 +279,26 @@ export function FinanceView({ data, onRefresh }: FinanceViewProps) {
                 </p>
               </div>
 
-              <button
-                type="button"
-                onClick={() => setIsModalOpen(true)}
-                className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-[#D99B43] text-[#121110] font-semibold text-xs hover:bg-[#E8AF59] shadow-xs transition-all cursor-pointer"
-              >
-                <Plus className="h-4 w-4" />
-                <span>Registrar Movimiento (⌘F)</span>
-              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setIsEditBudgetOpen(true)}
+                  className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg border border-[#2A2723] bg-[#121110] text-[#DDD6C9] hover:text-[#F5F2EB] hover:bg-[#22201D] font-semibold text-xs transition-all cursor-pointer shadow-xs"
+                  title="Ajustar límites y metas de presupuesto del mes"
+                >
+                  <Sliders className="h-3.5 w-3.5 text-[#D99B43]" />
+                  <span>Ajustar Presupuesto</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setIsModalOpen(true)}
+                  className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-[#D99B43] text-[#121110] font-semibold text-xs hover:bg-[#E8AF59] shadow-xs transition-all cursor-pointer"
+                >
+                  <Plus className="h-4 w-4" />
+                  <span>Registrar Movimiento (⌘F)</span>
+                </button>
+              </div>
             </div>
 
             {/* Big Progress Bar */}
@@ -289,29 +341,49 @@ export function FinanceView({ data, onRefresh }: FinanceViewProps) {
           {/* 4. Category Breakdown Chips */}
           {data.categoryBreakdown.length > 0 && (
             <div className="rounded-lg border border-[#2A2723] bg-[#181715] p-5">
-              <div className="flex items-center gap-2 mb-3">
-                <PieChart className="h-4 w-4 text-[#D99B43]" />
-                <h4 className="text-xs font-semibold text-[#8E867B] uppercase tracking-wider font-mono">
-                  Distribución de Gastos por Categoría
-                </h4>
+              <div className="flex items-center justify-between gap-2 mb-3">
+                <div className="flex items-center gap-2">
+                  <PieChart className="h-4 w-4 text-[#D99B43]" />
+                  <h4 className="text-xs font-semibold text-[#8E867B] uppercase tracking-wider font-mono">
+                    Distribución de Gastos por Categoría
+                  </h4>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setIsManageCatalogOpen(true)}
+                  className="flex items-center gap-1 text-[11px] font-mono text-[#D99B43] hover:underline cursor-pointer"
+                >
+                  <Settings className="size-3" />
+                  <span>Editar Categorías</span>
+                </button>
               </div>
               <div className="flex flex-wrap gap-2.5">
-                {data.categoryBreakdown.map((cat) => (
-                  <div
-                    key={cat.category}
-                    className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-[#2A2723] bg-[#121110] text-xs font-mono"
-                  >
-                    <span className="font-semibold text-[#DDD6C9] capitalize">
-                      #{cat.category}
-                    </span>
-                    <span className="text-[#8E867B]">
-                      ${cat.total.toLocaleString()}
-                    </span>
-                    <span className="rounded bg-[#221D16] text-[#D99B43] border border-[#D99B43]/30 px-1.5 py-0.5 text-[10px] font-bold">
-                      {cat.percentage}%
-                    </span>
-                  </div>
-                ))}
+                {data.categoryBreakdown.map((cat) => {
+                  const isFiltered = searchQuery.toLowerCase().trim() === cat.category.toLowerCase().trim();
+                  return (
+                    <button
+                      key={cat.category}
+                      type="button"
+                      onClick={() => setSearchQuery(isFiltered ? "" : cat.category)}
+                      className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border text-xs font-mono transition-all cursor-pointer ${
+                        isFiltered
+                          ? "bg-[#221D16] border-[#D99B43] text-[#D99B43]"
+                          : "bg-[#121110] border-[#2A2723] text-[#DDD6C9] hover:border-[#38332D]"
+                      }`}
+                      title={`Filtrar por #${cat.category}`}
+                    >
+                      <span className="font-semibold capitalize">
+                        #{cat.category}
+                      </span>
+                      <span className="text-[#8E867B]">
+                        ${cat.total.toLocaleString()}
+                      </span>
+                      <span className="rounded bg-[#221D16] text-[#D99B43] border border-[#D99B43]/30 px-1.5 py-0.5 text-[10px] font-bold">
+                        {cat.percentage}%
+                      </span>
+                    </button>
+                  );
+                })}
               </div>
             </div>
           )}
@@ -344,6 +416,15 @@ export function FinanceView({ data, onRefresh }: FinanceViewProps) {
                     onChange={(e) => setSearchQuery(e.target.value)}
                     className="rounded-lg border border-[#2A2723] bg-[#121110] pl-8 pr-3 py-1.5 text-xs text-[#F5F2EB] placeholder:text-[#8E867B] focus:border-[#D99B43] focus:outline-none transition-all"
                   />
+                  {searchQuery && (
+                    <button
+                      type="button"
+                      onClick={() => setSearchQuery("")}
+                      className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[10px] text-[#8E867B] hover:text-[#DDD6C9]"
+                    >
+                      ✕
+                    </button>
+                  )}
                 </div>
 
                 {/* Filter Pills */}
@@ -451,15 +532,28 @@ export function FinanceView({ data, onRefresh }: FinanceViewProps) {
                         )}
                       </div>
 
-                      <button
-                        type="button"
-                        onClick={() => handleDeleteTransaction(tx.id)}
-                        disabled={isPending}
-                        className="opacity-0 group-hover:opacity-100 p-1.5 text-[#8E867B] hover:text-[#E05D52] hover:bg-[#221716] rounded-md transition-all cursor-pointer"
-                        title="Eliminar transacción"
-                      >
-                        <Trash2 className="h-3.5 w-3.5" />
-                      </button>
+                      <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setEditingTransaction(tx);
+                            setIsModalOpen(true);
+                          }}
+                          className="p-1.5 text-[#8E867B] hover:text-[#DDD6C9] hover:bg-[#22201D] rounded-md transition-all cursor-pointer"
+                          title="Editar transacción"
+                        >
+                          <Edit2 className="h-3.5 w-3.5" />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleDeleteTransaction(tx.id)}
+                          disabled={isPending}
+                          className="p-1.5 text-[#8E867B] hover:text-[#E05D52] hover:bg-[#221716] rounded-md transition-all cursor-pointer"
+                          title="Eliminar transacción"
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </button>
+                      </div>
                     </div>
                   </div>
                 ))
@@ -469,10 +563,15 @@ export function FinanceView({ data, onRefresh }: FinanceViewProps) {
         </>
       )}
 
-      {/* Transaction Modal */}
+      {/* Transaction Modal (New or Edit) */}
       <TransactionModal
         isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
+        onClose={() => {
+          setIsModalOpen(false);
+          setEditingTransaction(null);
+        }}
+        transactionToEdit={editingTransaction}
+        budgetedIncome={data.currentBudget.budgetedIncome}
         onSuccess={onRefresh}
         categories={data.categories}
         accounts={data.accounts}
@@ -485,6 +584,14 @@ export function FinanceView({ data, onRefresh }: FinanceViewProps) {
         onClose={() => setIsManageCatalogOpen(false)}
         categories={data.categories || []}
         accounts={data.accounts || []}
+        onSuccess={onRefresh}
+      />
+
+      {/* Edit Monthly Budget Modal */}
+      <EditBudgetModal
+        isOpen={isEditBudgetOpen}
+        onClose={() => setIsEditBudgetOpen(false)}
+        currentBudget={data.currentBudget}
         onSuccess={onRefresh}
       />
     </div>
