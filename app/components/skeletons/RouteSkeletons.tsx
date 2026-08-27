@@ -211,27 +211,29 @@ export function VaultSkeleton() {
 
 export function TodaySkeleton() {
   return (
-    <div className="max-w-2xl mx-auto space-y-4 animate-pulse font-sans">
-      <div className="h-32 rounded-xl border border-[#2A2723] bg-[#181715] p-5 space-y-3">
+    <div className="w-full space-y-5 animate-pulse font-sans">
+      <div className="h-24 rounded-xl border border-[#2A2723] bg-[#181715] p-5 space-y-3">
         <div className="h-4 w-32 rounded bg-[#22201D]" />
         <div className="h-6 w-48 rounded bg-[#22201D]" />
       </div>
-      <div className="grid grid-cols-2 gap-3">
-        <div className="h-24 rounded-xl border border-[#2A2723] bg-[#181715] p-4 space-y-2">
-          <div className="h-3 w-16 rounded bg-[#22201D]" />
-          <div className="h-5 w-20 rounded bg-[#22201D]" />
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
+        <div className="lg:col-span-7 space-y-4">
+          <div className="h-72 rounded-xl border border-[#2A2723] bg-[#181715] p-5 space-y-4">
+            <div className="h-5 w-40 rounded bg-[#22201D]" />
+            <div className="h-28 rounded-lg bg-[#121110] border border-[#2A2723]" />
+            <div className="h-10 rounded-lg bg-[#22201D]/60" />
+          </div>
         </div>
-        <div className="h-24 rounded-xl border border-[#2A2723] bg-[#181715] p-4 space-y-2">
-          <div className="h-3 w-16 rounded bg-[#22201D]" />
-          <div className="h-5 w-20 rounded bg-[#22201D]" />
-        </div>
-      </div>
-      <div className="h-48 rounded-xl border border-[#2A2723] bg-[#181715] p-4 space-y-2">
-        <div className="h-4 w-28 rounded bg-[#22201D]" />
-        <div className="space-y-2">
-          {[1, 2, 3].map((i) => (
-            <div key={i} className="h-8 rounded-md bg-[#121110] border border-[#2A2723]" />
-          ))}
+        <div className="lg:col-span-5 space-y-4">
+          <div className="h-48 rounded-xl border border-[#2A2723] bg-[#181715] p-4.5 space-y-3">
+            <div className="h-4 w-32 rounded bg-[#22201D]" />
+            <div className="h-24 rounded-lg bg-[#121110] border border-[#2A2723]" />
+          </div>
+          <div className="h-36 rounded-xl border border-[#2A2723] bg-[#181715] p-4.5 space-y-3">
+            <div className="h-4 w-28 rounded bg-[#22201D]" />
+            <div className="h-16 rounded-lg bg-[#121110] border border-[#2A2723]" />
+          </div>
+          <div className="h-20 rounded-xl border border-[#2A2723] bg-[#181715] p-4" />
         </div>
       </div>
     </div>
