@@ -13,6 +13,7 @@ import {
   ChevronDown,
   Dumbbell,
   Edit3,
+  FolderGit2,
   LogOut,
   Moon,
   Plus,
@@ -98,21 +99,25 @@ export function HeaderStatsRibbon({ user }: HeaderStatsRibbonProps) {
             break;
           case "2":
             e.preventDefault();
-            router.push("/finance");
+            router.push("/projects");
             break;
           case "3":
             e.preventDefault();
-            router.push("/analytics");
+            router.push("/finance");
             break;
           case "4":
             e.preventDefault();
-            router.push("/calendar");
+            router.push("/analytics");
             break;
           case "5":
             e.preventDefault();
-            router.push("/health");
+            router.push("/calendar");
             break;
           case "6":
+            e.preventDefault();
+            router.push("/health");
+            break;
+          case "7":
             e.preventDefault();
             router.push("/vault");
             break;
@@ -132,11 +137,12 @@ export function HeaderStatsRibbon({ user }: HeaderStatsRibbonProps) {
   const NAV_ITEMS = [
     { href: "/today", label: "Hoy", icon: Sun, shortcut: "⌘0" },
     { href: "/tasks", label: "Tareas", icon: Zap, shortcut: "⌘1" },
-    { href: "/finance", label: "Finanzas", icon: Wallet, shortcut: "⌘2" },
-    { href: "/analytics", label: "Balance", icon: Activity, shortcut: "⌘3" },
-    { href: "/calendar", label: "Agenda", icon: Calendar, shortcut: "⌘4" },
-    { href: "/health", label: "Salud", icon: Dumbbell, shortcut: "⌘5" },
-    { href: "/vault", label: "Bóveda", icon: BookOpen, shortcut: "⌘6" },
+    { href: "/projects", label: "Proyectos", icon: FolderGit2, shortcut: "⌘2" },
+    { href: "/finance", label: "Finanzas", icon: Wallet, shortcut: "⌘3" },
+    { href: "/analytics", label: "Balance", icon: Activity, shortcut: "⌘4" },
+    { href: "/calendar", label: "Agenda", icon: Calendar, shortcut: "⌘5" },
+    { href: "/health", label: "Salud", icon: Dumbbell, shortcut: "⌘6" },
+    { href: "/vault", label: "Bóveda", icon: BookOpen, shortcut: "⌘7" },
   ];
 
   const userName = session?.user?.name || user.profile.name || "Alejandro";

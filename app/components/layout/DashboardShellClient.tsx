@@ -73,17 +73,20 @@ export function DashboardShellClient({
           router.push("/tasks");
         } else if (key === "2" && !isInputActive) {
           e.preventDefault();
-          router.push("/finance");
+          router.push("/projects");
         } else if (key === "3" && !isInputActive) {
           e.preventDefault();
-          router.push("/analytics");
+          router.push("/finance");
         } else if (key === "4" && !isInputActive) {
           e.preventDefault();
-          router.push("/calendar");
+          router.push("/analytics");
         } else if (key === "5" && !isInputActive) {
           e.preventDefault();
-          router.push("/health");
+          router.push("/calendar");
         } else if (key === "6" && !isInputActive) {
+          e.preventDefault();
+          router.push("/health");
+        } else if (key === "7" && !isInputActive) {
           e.preventDefault();
           router.push("/vault");
         }
@@ -133,24 +136,28 @@ export function DashboardShellClient({
               <kbd className="rounded bg-[#181715] px-1 py-0.5 text-[#DDD6C9] border border-[#2A2723]">⌘1</kbd> Tareas
             </Link>
             •
+            <Link href="/projects" className="hover:text-[#F5F2EB] inline-flex items-center gap-0.5">
+              <kbd className="rounded bg-[#181715] px-1 py-0.5 text-[#DDD6C9] border border-[#2A2723]">⌘2</kbd> Proyectos
+            </Link>
+            •
             <Link href="/finance" className="hover:text-[#F5F2EB] inline-flex items-center gap-0.5">
-              <kbd className="rounded bg-[#181715] px-1 py-0.5 text-[#DDD6C9] border border-[#2A2723]">⌘2</kbd> Finanzas
+              <kbd className="rounded bg-[#181715] px-1 py-0.5 text-[#DDD6C9] border border-[#2A2723]">⌘3</kbd> Finanzas
             </Link>
             •
             <Link href="/analytics" className="hover:text-[#F5F2EB] inline-flex items-center gap-0.5">
-              <kbd className="rounded bg-[#181715] px-1 py-0.5 text-[#DDD6C9] border border-[#2A2723]">⌘3</kbd> Balance
+              <kbd className="rounded bg-[#181715] px-1 py-0.5 text-[#DDD6C9] border border-[#2A2723]">⌘4</kbd> Balance
             </Link>
             •
             <Link href="/calendar" className="hover:text-[#F5F2EB] inline-flex items-center gap-0.5">
-              <kbd className="rounded bg-[#181715] px-1 py-0.5 text-[#DDD6C9] border border-[#2A2723]">⌘4</kbd> Agenda
+              <kbd className="rounded bg-[#181715] px-1 py-0.5 text-[#DDD6C9] border border-[#2A2723]">⌘5</kbd> Agenda
             </Link>
             •
             <Link href="/health" className="hover:text-[#F5F2EB] inline-flex items-center gap-0.5">
-              <kbd className="rounded bg-[#181715] px-1 py-0.5 text-[#DDD6C9] border border-[#2A2723]">⌘5</kbd> Salud
+              <kbd className="rounded bg-[#181715] px-1 py-0.5 text-[#DDD6C9] border border-[#2A2723]">⌘6</kbd> Salud
             </Link>
             •
             <Link href="/vault" className="hover:text-[#F5F2EB] inline-flex items-center gap-0.5">
-              <kbd className="rounded bg-[#181715] px-1 py-0.5 text-[#DDD6C9] border border-[#2A2723]">⌘6</kbd> Proyectos
+              <kbd className="rounded bg-[#181715] px-1 py-0.5 text-[#DDD6C9] border border-[#2A2723]">⌘7</kbd> Bóveda
             </Link>
           </span>
           <span>•</span>

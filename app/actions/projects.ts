@@ -2,6 +2,8 @@
 
 import { getDb } from "@/lib/db";
 import {
+  HabiticaTag,
+  HabiticaTask,
   LearningItem,
   LearningItemType,
   LearningStatus,
@@ -10,6 +12,7 @@ import {
   ProjectStatus,
 } from "@/lib/types";
 import { awardHabiticaEvent } from "@/lib/habiticaEvents";
+import { getCachedHabiticaTags, getCachedHabiticaTasks } from "@/lib/dal/habitica";
 import { revalidatePath } from "next/cache";
 
 interface ProjectDbRow {
@@ -38,6 +41,43 @@ interface LearningDbRow {
 
 interface ScratchpadDbRow {
   content?: string;
+}
+
+export interface ProjectsPageData {
+  projects: ProjectItem[];
+  tasks: HabiticaTask[];
+  tags: HabiticaTag[];
+}
+
+/**
+ * Server Action: Fetches all projects with Habitica tasks and tags for the dedicated /projects page.
+ */
+export async function fetchProjectsPageDataAction(): Promise<ProjectsPageData> {
+  const sql = getDb();
+
+  const [projectRows, tasks, tags] = await Promise.all([
+    sql`SELECT * FROM projects ORDER BY updated_at DESC;`,
+    getCachedHabiticaTasks().catch(() => []),
+    getCachedHabiticaTags().catch(() => []),
+  ]);
+
+  const projects: ProjectItem[] = (projectRows as unknown as ProjectDbRow[]).map((p) => ({
+    id: p.id,
+    title: p.title,
+    description: p.description || undefined,
+    status: p.status as ProjectStatus,
+    techStack: Array.isArray(p.tech_stack) ? p.tech_stack : [],
+    repoUrl: p.repo_url || undefined,
+    liveUrl: p.live_url || undefined,
+    progress: Number(p.progress) || 0,
+    createdAt: p.created_at?.toString(),
+  }));
+
+  return {
+    projects,
+    tasks,
+    tags,
+  };
 }
 
 /**
@@ -110,6 +150,9 @@ export async function createProjectAction(payload: {
     `;
 
     revalidatePath("/");
+    revalidatePath("/projects");
+    revalidatePath("/vault");
+    revalidatePath("/today");
     return { success: true };
   } catch (error) {
     console.error("[Create Project Error]:", error);
@@ -217,6 +260,9 @@ export async function deleteProjectAction(id: string): Promise<{ success: boolea
     const sql = getDb();
     await sql`DELETE FROM projects WHERE id = ${id};`;
     revalidatePath("/");
+    revalidatePath("/projects");
+    revalidatePath("/vault");
+    revalidatePath("/today");
     return { success: true };
   } catch (error) {
     console.error("[Delete Project Error]:", error);
