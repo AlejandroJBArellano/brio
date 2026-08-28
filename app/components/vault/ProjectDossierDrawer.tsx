@@ -9,6 +9,11 @@ import { createSingleTaskAction, toggleTaskAction } from "@/app/actions/tasks";
 import { soundFx } from "@/lib/soundFx";
 import { HabiticaTag, HabiticaTask, ProjectItem, ProjectStatus } from "@/lib/types";
 import { matchTasksToProject } from "@/lib/projectMatcher";
+import {
+  classifyUrl,
+  extractAndClassifyLinks,
+  partitionLinksForDb,
+} from "@/lib/urlClassifier";
 import { getTaskPriorityInfo, parseTaskPrefix } from "@/lib/utils";
 import {
   Check,
@@ -82,8 +87,10 @@ export function ProjectDossierDrawer({
   const [editTechStack, setEditTechStack] = useState(() =>
     Array.isArray(project?.techStack) ? project.techStack.join(", ") : ""
   );
-  const [editRepoUrl, setEditRepoUrl] = useState(() => project?.repoUrl || "");
-  const [editLiveUrl, setEditLiveUrl] = useState(() => project?.liveUrl || "");
+  const [editUrls, setEditUrls] = useState<string[]>(() => {
+    const classified = extractAndClassifyLinks(project?.repoUrl, project?.liveUrl);
+    return classified.length > 0 ? classified.map((l) => l.url) : [""];
+  });
   const [editProgress, setEditProgress] = useState(() => project?.progress || 0);
   const [isConfirmingDelete, setIsConfirmingDelete] = useState(false);
 
@@ -93,8 +100,8 @@ export function ProjectDossierDrawer({
       setEditDescription(project.description || "");
       setEditStatus(project.status || "in_progress");
       setEditTechStack(Array.isArray(project.techStack) ? project.techStack.join(", ") : "");
-      setEditRepoUrl(project.repoUrl || "");
-      setEditLiveUrl(project.liveUrl || "");
+      const classified = extractAndClassifyLinks(project.repoUrl, project.liveUrl);
+      setEditUrls(classified.length > 0 ? classified.map((l) => l.url) : [""]);
       setEditProgress(project.progress || 0);
       setIsConfirmingDelete(false);
     }
@@ -166,6 +173,9 @@ export function ProjectDossierDrawer({
       .map((s) => s.trim())
       .filter(Boolean);
 
+    const validUrls = editUrls.map((u) => u.trim()).filter(Boolean);
+    const { repoUrl, liveUrl } = partitionLinksForDb(validUrls);
+
     startTransition(async () => {
       await updateProjectDetailsAction({
         id: project.id,
@@ -173,8 +183,8 @@ export function ProjectDossierDrawer({
         description: editDescription.trim() || undefined,
         status: editStatus,
         techStack: techArray,
-        repoUrl: editRepoUrl.trim() || undefined,
-        liveUrl: editLiveUrl.trim() || undefined,
+        repoUrl,
+        liveUrl,
         progress: editProgress,
       });
 
@@ -258,34 +268,35 @@ export function ProjectDossierDrawer({
             </div>
           )}
 
-          {/* Links Ribbon */}
-          {!isEditing && (project.repoUrl || project.liveUrl) && (
-            <div className="flex items-center gap-3 pt-1 text-xs font-mono">
-              {project.liveUrl && (
-                <a
-                  href={project.liveUrl}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-[#162121] border border-[#4EAB9E]/40 text-[#4EAB9E] hover:underline font-semibold"
-                >
-                  <Globe className="size-3.5" />
-                  <span>Sitio Web / Live</span>
-                  <ExternalLink className="size-3 opacity-70" />
-                </a>
-              )}
-              {project.repoUrl && (
-                <a
-                  href={project.repoUrl}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-[#121110] border border-[#2A2723] text-[#DDD6C9] hover:text-[#F5F2EB]"
-                >
-                  <Code2 className="size-3.5" />
-                  <span>Repositorio</span>
-                  <ExternalLink className="size-3 opacity-70" />
-                </a>
-              )}
-            </div>
+          {/* Dynamic Auto-Classified Links Ribbon */}
+          {!isEditing && (
+            (() => {
+              const classifiedLinks = extractAndClassifyLinks(project.repoUrl, project.liveUrl);
+              if (classifiedLinks.length === 0) return null;
+
+              return (
+                <div className="flex flex-wrap items-center gap-2 pt-1 text-xs font-mono">
+                  {classifiedLinks.map((link, idx) => (
+                    <a
+                      key={idx}
+                      href={link.url}
+                      target="_blank"
+                      rel="noreferrer"
+                      className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md border text-xs font-mono transition-all hover:scale-102 cursor-pointer ${link.badgeStyle}`}
+                      title={link.url}
+                    >
+                      {link.category === "git" ? (
+                        <Code2 className="size-3.5" />
+                      ) : (
+                        <Globe className="size-3.5" />
+                      )}
+                      <span className="font-semibold">{link.label}</span>
+                      <ExternalLink className="size-3 opacity-60" />
+                    </a>
+                  ))}
+                </div>
+              );
+            })()
           )}
         </div>
 
@@ -321,13 +332,12 @@ export function ProjectDossierDrawer({
                 {/* Description */}
                 <div className="space-y-1">
                   <label className="block text-xs font-mono text-[#8E867B]">
-                    Descripción / Propósito:
+                    Descripción / Resumen:
                   </label>
                   <textarea
                     rows={3}
                     value={editDescription}
                     onChange={(e) => setEditDescription(e.target.value)}
-                    placeholder="Descripción técnica, objetivos o contexto..."
                     className="w-full rounded-lg border border-[#2A2723] bg-[#121110] p-2.5 text-xs text-[#F5F2EB] focus:outline-none focus:border-[#D99B43] resize-none font-sans"
                   />
                 </div>
@@ -381,32 +391,63 @@ export function ProjectDossierDrawer({
                   />
                 </div>
 
-                {/* Repo URL & Live URL */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <div className="space-y-1">
-                    <label className="block text-xs font-mono text-[#8E867B]">
-                      URL de Repositorio (Git):
+                {/* Dynamic Smart Links Section */}
+                <div className="space-y-2 pt-2 border-t border-[#2A2723]">
+                  <div className="flex items-center justify-between">
+                    <label className="block text-xs font-mono text-[#8E867B] font-semibold">
+                      🔗 Enlaces & Recursos (Autoclasificación):
                     </label>
-                    <input
-                      type="url"
-                      value={editRepoUrl}
-                      onChange={(e) => setEditRepoUrl(e.target.value)}
-                      placeholder="https://github.com/..."
-                      className="w-full rounded-lg border border-[#2A2723] bg-[#121110] p-2 text-xs text-[#F5F2EB] focus:outline-none focus:border-[#D99B43] font-mono"
-                    />
+                    <button
+                      type="button"
+                      onClick={() => setEditUrls((prev) => [...prev, ""])}
+                      className="text-[11px] font-mono text-[#D99B43] hover:underline cursor-pointer flex items-center gap-1"
+                    >
+                      <Plus className="size-3" />
+                      <span>+ Agregar enlace</span>
+                    </button>
                   </div>
 
-                  <div className="space-y-1">
-                    <label className="block text-xs font-mono text-[#8E867B]">
-                      URL Sitio Web / Staging:
-                    </label>
-                    <input
-                      type="url"
-                      value={editLiveUrl}
-                      onChange={(e) => setEditLiveUrl(e.target.value)}
-                      placeholder="https://..."
-                      className="w-full rounded-lg border border-[#2A2723] bg-[#121110] p-2 text-xs text-[#F5F2EB] focus:outline-none focus:border-[#D99B43] font-mono"
-                    />
+                  <div className="space-y-2">
+                    {editUrls.map((url, idx) => {
+                      const classification = url.trim() ? classifyUrl(url) : null;
+                      return (
+                        <div key={idx} className="space-y-1.5 bg-[#121110] p-2.5 rounded-lg border border-[#2A2723]">
+                          <div className="flex items-center gap-2">
+                            <input
+                              type="text"
+                              value={url}
+                              onChange={(e) => {
+                                const updated = [...editUrls];
+                                updated[idx] = e.target.value;
+                                setEditUrls(updated);
+                              }}
+                              placeholder="https://github.com/..., https://strata.us, https://figma.com/..."
+                              className="flex-1 rounded-md border border-[#2A2723] bg-[#181715] px-2.5 py-1.5 text-xs text-[#F5F2EB] focus:outline-none focus:border-[#D99B43] font-mono"
+                            />
+                            {editUrls.length > 1 && (
+                              <button
+                                type="button"
+                                onClick={() => setEditUrls(editUrls.filter((_, i) => i !== idx))}
+                                className="p-1 text-[#8E867B] hover:text-[#E05D52] transition-colors cursor-pointer"
+                                title="Eliminar enlace"
+                              >
+                                <Trash2 className="size-3.5" />
+                              </button>
+                            )}
+                          </div>
+
+                          {/* Live Auto-Classification Pill */}
+                          {classification && classification.url && (
+                            <div className="flex items-center gap-2 pt-0.5">
+                              <span className="text-[10px] text-[#8E867B] font-mono">Origen detectado:</span>
+                              <span className={`text-[10px] font-mono px-2 py-0.5 rounded border ${classification.badgeStyle}`}>
+                                {classification.label}
+                              </span>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
                   </div>
                 </div>
 

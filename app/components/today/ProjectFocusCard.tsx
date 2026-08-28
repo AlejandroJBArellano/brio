@@ -15,7 +15,13 @@ import {
   ProjectItem,
 } from "@/lib/types";
 import {
+  classifyUrl,
+  extractAndClassifyLinks,
+  partitionLinksForDb,
+} from "@/lib/urlClassifier";
+import {
   Check,
+  Code2,
   Edit2,
   ExternalLink,
   FileText,
@@ -244,8 +250,16 @@ export function ProjectFocusCard({
   const [projectEditTitle, setProjectEditTitle] = useState("");
   const [projectEditDescription, setProjectEditDescription] = useState("");
   const [projectEditTechStack, setProjectEditTechStack] = useState("");
-  const [projectEditRepoUrl, setProjectEditRepoUrl] = useState("");
-  const [projectEditLiveUrl, setProjectEditLiveUrl] = useState("");
+  const [projectEditUrls, setProjectEditUrls] = useState<string[]>([""]);
+
+  const handleOpenEditProject = () => {
+    setProjectEditTitle(activeProject.title);
+    setProjectEditDescription(activeProject.description || "");
+    setProjectEditTechStack(activeProject.techStack?.join(", ") || "");
+    const classified = extractAndClassifyLinks(activeProject.repoUrl, activeProject.liveUrl);
+    setProjectEditUrls(classified.length > 0 ? classified.map((l) => l.url) : [""]);
+    setIsEditingProject(true);
+  };
 
   const handleSaveProjectEdit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -257,6 +271,9 @@ export function ProjectFocusCard({
       .map((s) => s.trim())
       .filter(Boolean);
 
+    const validUrls = projectEditUrls.map((u) => u.trim()).filter(Boolean);
+    const { repoUrl, liveUrl } = partitionLinksForDb(validUrls);
+
     startTransition(async () => {
       await updateProjectDetailsAction({
         id: activeProject.id,
@@ -264,8 +281,8 @@ export function ProjectFocusCard({
         description: projectEditDescription.trim() || undefined,
         status: activeProject.status,
         techStack: techArray,
-        repoUrl: projectEditRepoUrl.trim() || undefined,
-        liveUrl: projectEditLiveUrl.trim() || undefined,
+        repoUrl,
+        liveUrl,
         progress: activeProject.progress,
       });
 
@@ -343,14 +360,7 @@ export function ProjectFocusCard({
             {/* Quick Edit Project Button */}
             <button
               type="button"
-              onClick={() => {
-                setProjectEditTitle(activeProject.title);
-                setProjectEditDescription(activeProject.description || "");
-                setProjectEditTechStack(activeProject.techStack?.join(", ") || "");
-                setProjectEditRepoUrl(activeProject.repoUrl || "");
-                setProjectEditLiveUrl(activeProject.liveUrl || "");
-                setIsEditingProject(true);
-              }}
+              onClick={handleOpenEditProject}
               className="px-2.5 py-1.5 rounded-lg border border-[#2A2723] bg-[#121110] hover:bg-[#221D16] text-[#8E867B] hover:text-[#D99B43] text-xs font-mono transition-colors cursor-pointer flex items-center gap-1"
               title="Editar título, descripción o enlaces del proyecto"
             >
@@ -419,31 +429,63 @@ export function ProjectFocusCard({
                   />
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <div className="space-y-1">
-                    <label className="block text-xs font-mono text-[#8E867B]">
-                      Repositorio Git:
+                {/* Dynamic Smart Links Manager */}
+                <div className="space-y-2 pt-2 border-t border-[#2A2723]">
+                  <div className="flex items-center justify-between">
+                    <label className="block text-xs font-mono text-[#8E867B] font-semibold">
+                      🔗 Enlaces & Recursos (Autoclasificación):
                     </label>
-                    <input
-                      type="url"
-                      value={projectEditRepoUrl}
-                      onChange={(e) => setProjectEditRepoUrl(e.target.value)}
-                      placeholder="https://github.com/..."
-                      className="w-full rounded-lg border border-[#2A2723] bg-[#121110] p-2 text-xs text-[#F5F2EB] focus:outline-none focus:border-[#D99B43] font-mono"
-                    />
+                    <button
+                      type="button"
+                      onClick={() => setProjectEditUrls((prev) => [...prev, ""])}
+                      className="text-[11px] font-mono text-[#D99B43] hover:underline cursor-pointer flex items-center gap-1"
+                    >
+                      <Plus className="h-3 w-3" />
+                      <span>+ Agregar link</span>
+                    </button>
                   </div>
 
-                  <div className="space-y-1">
-                    <label className="block text-xs font-mono text-[#8E867B]">
-                      URL Live / Staging:
-                    </label>
-                    <input
-                      type="url"
-                      value={projectEditLiveUrl}
-                      onChange={(e) => setProjectEditLiveUrl(e.target.value)}
-                      placeholder="https://..."
-                      className="w-full rounded-lg border border-[#2A2723] bg-[#121110] p-2 text-xs text-[#F5F2EB] focus:outline-none focus:border-[#D99B43] font-mono"
-                    />
+                  <div className="space-y-2 max-h-48 overflow-y-auto pr-1">
+                    {projectEditUrls.map((url, idx) => {
+                      const classification = url.trim() ? classifyUrl(url) : null;
+                      return (
+                        <div key={idx} className="space-y-1 bg-[#121110] p-2 rounded-lg border border-[#2A2723]">
+                          <div className="flex items-center gap-2">
+                            <input
+                              type="text"
+                              value={url}
+                              onChange={(e) => {
+                                const updated = [...projectEditUrls];
+                                updated[idx] = e.target.value;
+                                setProjectEditUrls(updated);
+                              }}
+                              placeholder="https://github.com/..., https://strata.us, https://figma.com/..."
+                              className="flex-1 rounded-md border border-[#2A2723] bg-[#181715] px-2.5 py-1.5 text-xs text-[#F5F2EB] focus:outline-none focus:border-[#D99B43] font-mono"
+                            />
+                            {projectEditUrls.length > 1 && (
+                              <button
+                                type="button"
+                                onClick={() => setProjectEditUrls(projectEditUrls.filter((_, i) => i !== idx))}
+                                className="p-1 text-[#8E867B] hover:text-[#E05D52] transition-colors cursor-pointer"
+                                title="Eliminar enlace"
+                              >
+                                <Trash2 className="h-3.5 w-3.5" />
+                              </button>
+                            )}
+                          </div>
+
+                          {/* Live Auto-Classification Pill */}
+                          {classification && classification.url && (
+                            <div className="flex items-center gap-2 pt-0.5">
+                              <span className="text-[10px] text-[#8E867B] font-mono">Origen detectado:</span>
+                              <span className={`text-[10px] font-mono px-2 py-0.5 rounded border ${classification.badgeStyle}`}>
+                                {classification.label}
+                              </span>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
                   </div>
                 </div>
 
@@ -838,43 +880,45 @@ export function ProjectFocusCard({
               Enlaces Directos & Repositorios
             </h4>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-              {activeProject.repoUrl ? (
-                <a
-                  href={activeProject.repoUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center justify-between p-3.5 rounded-xl border border-[#2A2723] bg-[#181715] hover:border-[#D99B43]/50 text-xs font-mono text-[#DDD6C9] transition-all"
-                >
-                  <div className="flex items-center gap-2.5">
-                    <FolderGit2 className="h-4 w-4 text-[#D99B43]" />
-                    <span>Repositorio Git</span>
-                  </div>
-                  <ExternalLink className="h-3.5 w-3.5 text-[#8E867B]" />
-                </a>
-              ) : (
-                <div className="p-3 rounded-lg border border-[#2A2723] bg-[#181715] text-xs font-mono text-[#8E867B]">
-                  Sin repositorio vinculado
-                </div>
-              )}
+              {(() => {
+                const classifiedLinks = extractAndClassifyLinks(
+                  activeProject.repoUrl,
+                  activeProject.liveUrl
+                );
 
-              {activeProject.liveUrl ? (
-                <a
-                  href={activeProject.liveUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center justify-between p-3.5 rounded-xl border border-[#2A2723] bg-[#181715] hover:border-[#7EA35A]/50 text-xs font-mono text-[#DDD6C9] transition-all"
-                >
-                  <div className="flex items-center gap-2.5">
-                    <Globe className="h-4 w-4 text-[#7EA35A]" />
-                    <span>Despliegue / Staging</span>
-                  </div>
-                  <ExternalLink className="h-3.5 w-3.5 text-[#8E867B]" />
-                </a>
-              ) : (
-                <div className="p-3 rounded-lg border border-[#2A2723] bg-[#181715] text-xs font-mono text-[#8E867B]">
-                  Sin URL de despliegue
-                </div>
-              )}
+                if (classifiedLinks.length === 0) {
+                  return (
+                    <div className="col-span-full p-4 rounded-xl border border-dashed border-[#2A2723] bg-[#181715] text-center text-xs font-mono text-[#8E867B]">
+                      Sin enlaces ni repositorios vinculados. ¡Agrégalos con el botón &quot;Editar&quot;!
+                    </div>
+                  );
+                }
+
+                return classifiedLinks.map((link, idx) => (
+                  <a
+                    key={idx}
+                    href={link.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={`flex items-center justify-between p-3.5 rounded-xl border transition-all hover:scale-101 ${link.badgeStyle}`}
+                  >
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      {link.category === "git" ? (
+                        <FolderGit2 className="h-4 w-4 shrink-0 text-[#DDD6C9]" />
+                      ) : (
+                        <Globe className="h-4 w-4 shrink-0 text-[#4EAB9E]" />
+                      )}
+                      <div className="truncate">
+                        <div className="text-xs font-bold font-mono">{link.label}</div>
+                        <div className="text-[10px] text-[#8E867B] font-mono truncate opacity-80">
+                          {link.url}
+                        </div>
+                      </div>
+                    </div>
+                    <ExternalLink className="h-3.5 w-3.5 shrink-0 opacity-60 ml-2" />
+                  </a>
+                ));
+              })()}
             </div>
           </div>
 
