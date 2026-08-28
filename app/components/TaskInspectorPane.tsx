@@ -2,13 +2,14 @@
 
 import {
   addChecklistItemAction,
+  convertTaskTypeAction,
   deleteChecklistItemAction,
   deleteTaskAction,
   toggleChecklistItemAction,
   updateTaskAction,
 } from "@/app/actions/tasks";
 import { HabiticaTag, HabiticaTask } from "@/lib/types";
-import { capitalize, getTaskValueColor } from "@/lib/utils";
+import { getTaskValueColor } from "@/lib/utils";
 import {
   Calendar,
   Check,
@@ -69,6 +70,16 @@ function TaskInspectorPaneContent({
   const [repeatDays, setRepeatDays] = useState(defaultRepeat);
   const [isPending, startTransition] = useTransition();
   const [hasSaved, setHasSaved] = useState(false);
+
+  const handleConvertType = (targetType: "daily" | "habit" | "todo") => {
+    if (!task || isPending || task.type === targetType) return;
+    startTransition(async () => {
+      const res = await convertTaskTypeAction(task.id, targetType);
+      if (res.success) {
+        onClose();
+      }
+    });
+  };
 
   const handleToggleDay = (
     dayKey: "m" | "t" | "w" | "th" | "f" | "s" | "su"
@@ -147,17 +158,23 @@ function TaskInspectorPaneContent({
       {/* Top Bar Header */}
       <div className="flex items-center justify-between border-b border-[#2A2723] px-4 py-3">
         <div className="flex items-center gap-2">
-          <span
-            className={`rounded px-2 py-0.5 text-[11px] font-mono font-semibold border ${
+          <select
+            value={task.type}
+            onChange={(e) => handleConvertType(e.target.value as "daily" | "habit" | "todo")}
+            disabled={isPending}
+            className={`rounded px-2 py-0.5 text-[11px] font-mono font-semibold border cursor-pointer focus:outline-none transition-all ${
               task.type === "daily"
                 ? "border-[#3D3425] bg-[#221D16] text-[#D99B43]"
                 : task.type === "habit"
                 ? "border-[#7EA35A]/30 bg-[#1C2219] text-[#7EA35A]"
                 : "border-[#4EAB9E]/30 bg-[#162121] text-[#4EAB9E]"
             }`}
+            title="Cambiar tipo de tarea (Daily, Hábito, To-Do)"
           >
-            {capitalize(task.type)}
-          </span>
+            <option value="daily" className="bg-[#181715] text-[#D99B43]">Daily</option>
+            <option value="habit" className="bg-[#181715] text-[#7EA35A]">Hábito</option>
+            <option value="todo" className="bg-[#181715] text-[#4EAB9E]">To-Do</option>
+          </select>
           <span className="text-xs text-[#8E867B] font-mono">
             ID: {task.id.slice(0, 8)}...
           </span>

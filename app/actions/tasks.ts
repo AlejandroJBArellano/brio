@@ -167,11 +167,61 @@ export async function deleteTaskAction(
 ): Promise<{ success: boolean; error?: string }> {
   try {
     const res = await habiticaClient.deleteTask(taskId);
-    revalidatePath("/");
+    revalidatePath("/", "layout");
+    revalidatePath("/today");
+    revalidatePath("/tasks");
     return { success: res.success };
   } catch (error: unknown) {
     const message =
       error instanceof Error ? error.message : "Failed to delete task";
+    return { success: false, error: message };
+  }
+}
+
+/**
+ * Server Action: Convert Task Type (daily <-> habit <-> todo)
+ */
+export async function convertTaskTypeAction(
+  taskId: string,
+  targetType: "daily" | "habit" | "todo"
+): Promise<{ success: boolean; newTask?: HabiticaTask; error?: string }> {
+  try {
+    const tasks = await habiticaClient.getUserTasks();
+    const task = tasks.find((t) => t.id === taskId);
+    if (!task) {
+      return { success: false, error: "Task not found" };
+    }
+
+    if (task.type === targetType) {
+      return { success: true, newTask: task };
+    }
+
+    let finalNotes = task.notes || "";
+    if (targetType === "habit" && task.checklist && task.checklist.length > 0) {
+      const checklistText = task.checklist.map((c) => `• ${c.text}`).join("\n");
+      finalNotes = finalNotes ? `${finalNotes}\n\n${checklistText}` : checklistText;
+    }
+
+    const payload: HabiticaTaskPayload = {
+      type: targetType,
+      text: task.text,
+      notes: finalNotes,
+      priority: task.priority || 1,
+      tags: task.tags || [],
+      up: targetType === "habit" ? true : undefined,
+      down: targetType === "habit" ? false : undefined,
+    };
+
+    const newTask = await habiticaClient.createTask(payload);
+    await habiticaClient.deleteTask(taskId);
+
+    revalidatePath("/", "layout");
+    revalidatePath("/today");
+    revalidatePath("/tasks");
+    return { success: true, newTask };
+  } catch (error: unknown) {
+    const message =
+      error instanceof Error ? error.message : "Failed to convert task type";
     return { success: false, error: message };
   }
 }
@@ -186,12 +236,30 @@ export async function toggleSleepAction(): Promise<{
 }> {
   try {
     const res = await habiticaClient.toggleSleep();
-    revalidatePath("/");
+    revalidatePath("/", "layout");
+    revalidatePath("/today");
+    revalidatePath("/tasks");
     return { success: res.success, resting: res.resting };
   } catch (error: unknown) {
     const message =
       error instanceof Error ? error.message : "Failed to toggle inn sleep";
     return { success: false, error: message };
+  }
+}
+
+/**
+ * Server Action: Force Sync & Run Cron for Habitica
+ */
+export async function syncHabiticaDataAction(): Promise<{ success: boolean }> {
+  try {
+    await habiticaClient.runCron();
+    revalidatePath("/", "layout");
+    revalidatePath("/today");
+    revalidatePath("/tasks");
+    return { success: true };
+  } catch (error) {
+    console.error("[Sync Habitica Action Error]:", error);
+    return { success: false };
   }
 }
 
