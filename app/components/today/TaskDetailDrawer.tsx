@@ -113,9 +113,8 @@ export function TaskDetailDrawer({
           {/* Title */}
           <div>
             <h3
-              className={`font-serif text-lg sm:text-xl font-bold text-[#F5F2EB] ${
-                task.completed ? "line-through text-[#8E867B]" : ""
-              }`}
+              className={`font-serif text-lg sm:text-xl font-bold text-[#F5F2EB] ${task.completed ? "line-through text-[#8E867B]" : ""
+                }`}
             >
               {task.text}
             </h3>
@@ -149,28 +148,25 @@ export function TaskDetailDrawer({
                   <div
                     key={item.id}
                     onClick={() => item.id && handleToggleChecklist(item.id)}
-                    className={`flex items-center justify-between p-2.5 rounded-lg border transition-all cursor-pointer select-none ${
-                      item.completed
-                        ? "bg-[#141813] border-[#7EA35A]/30 text-[#8E867B]"
-                        : "bg-[#181715] border-[#2A2723] hover:border-[#38332D] text-[#F5F2EB]"
-                    }`}
+                    className={`flex items-center justify-between p-2.5 rounded-lg border transition-all cursor-pointer select-none ${item.completed
+                      ? "bg-[#141813] border-[#7EA35A]/30 text-[#8E867B]"
+                      : "bg-[#181715] border-[#2A2723] hover:border-[#38332D] text-[#F5F2EB]"
+                      }`}
                   >
                     <div className="flex items-center gap-2.5 min-w-0">
                       <div
-                        className={`flex h-4.5 w-4.5 shrink-0 items-center justify-center rounded border transition-colors ${
-                          item.completed
-                            ? "bg-[#7EA35A] border-[#7EA35A] text-[#121110] font-bold"
-                            : "border-[#38332D] bg-[#121110]"
-                        }`}
+                        className={`flex h-4.5 w-4.5 shrink-0 items-center justify-center rounded border transition-colors ${item.completed
+                          ? "bg-[#7EA35A] border-[#7EA35A] text-[#121110] font-bold"
+                          : "border-[#38332D] bg-[#121110]"
+                          }`}
                       >
                         {item.completed && <Check className="h-3 w-3 stroke-3" />}
                       </div>
                       <span
-                        className={`text-xs ${
-                          item.completed
-                            ? "line-through text-[#8E867B]"
-                            : "text-[#F5F2EB]"
-                        }`}
+                        className={`text-xs ${item.completed
+                          ? "line-through text-[#8E867B]"
+                          : "text-[#F5F2EB]"
+                          }`}
                       >
                         {item.text}
                       </span>
@@ -186,7 +182,7 @@ export function TaskDetailDrawer({
             <div className="flex items-center justify-between pb-2 border-b border-[#2A2723]">
               <div className="flex items-center gap-1.5 text-xs font-serif font-bold text-[#F5F2EB]">
                 <FileText className="h-4 w-4 text-[#4EAB9E]" />
-                <span>Notas Contextuales de esta Tarea ({linkedNotes.length})</span>
+                <span>Notas de la Tarea</span>
               </div>
 
               <button
@@ -255,7 +251,7 @@ export function TaskDetailDrawer({
             ) : (
               !isAddingNote && (
                 <p className="text-[11px] text-[#8E867B] font-mono italic">
-                  Sin notas vinculadas aún. Agrega apuntes para no perder contexto.
+                  Sin notas.
                 </p>
               )
             )}
@@ -268,17 +264,16 @@ export function TaskDetailDrawer({
             type="button"
             disabled={task.completed || isPending}
             onClick={handleCompleteTask}
-            className={`w-full py-3 px-4 rounded-xl font-bold text-xs sm:text-sm font-sans transition-all flex items-center justify-center gap-2 cursor-pointer shadow-sm ${
-              task.completed
-                ? "bg-[#1C2219] text-[#7EA35A] border border-[#7EA35A]/40 opacity-75 cursor-not-allowed"
-                : "bg-[#7EA35A] hover:bg-[#8FB866] text-[#121110] active:scale-[0.99]"
-            }`}
+            className={`w-full py-3 px-4 rounded-xl font-bold text-xs sm:text-sm font-sans transition-all flex items-center justify-center gap-2 cursor-pointer shadow-sm ${task.completed
+              ? "bg-[#1C2219] text-[#7EA35A] border border-[#7EA35A]/40 opacity-75 cursor-not-allowed"
+              : "bg-[#7EA35A] hover:bg-[#8FB866] text-[#121110] active:scale-[0.99]"
+              }`}
           >
             <CheckCircle2 className="h-4 w-4" />
             <span>
               {task.completed
-                ? "✓ Tarea Completada"
-                : "Completar Tarea (+XP)"}
+                ? "Completada"
+                : "Completar"}
             </span>
           </button>
         </div>
