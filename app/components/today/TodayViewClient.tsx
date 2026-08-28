@@ -25,13 +25,12 @@ import {
   Check,
   CheckCircle2,
   ChevronDown,
-  ChevronUp,
   Droplet,
   Moon,
   Pill,
   Plus,
   Sun,
-  Wallet,
+  Wallet
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useMemo, useOptimistic, useState, useTransition } from "react";
@@ -247,8 +246,8 @@ export function TodayViewClient({
 
   const hasMorningRitual = Boolean(
     todayRitual?.energyLevel ||
-      todayRitual?.dayIntention ||
-      (todayRitual?.mustWinTasks && todayRitual.mustWinTasks.length > 0)
+    todayRitual?.dayIntention ||
+    (todayRitual?.mustWinTasks && todayRitual.mustWinTasks.length > 0)
   );
   const hasEveningReview = Boolean(todayRitual?.reflection);
 
@@ -300,11 +299,10 @@ export function TodayViewClient({
             <button
               type="button"
               onClick={() => openModal("morningRitual")}
-              className={`p-1.5 sm:px-3 sm:py-1.5 rounded-lg text-xs font-semibold border transition-all cursor-pointer flex items-center gap-1.5 ${
-                hasMorningRitual
+              className={`p-1.5 sm:px-3 sm:py-1.5 rounded-lg text-xs font-semibold border transition-all cursor-pointer flex items-center gap-1.5 ${hasMorningRitual
                   ? "border-[#7EA35A]/40 bg-[#1C2219] text-[#7EA35A]"
                   : "border-[#2A2723] bg-[#121110] text-[#8E867B] hover:text-[#DDD6C9]"
-              }`}
+                }`}
               title="Ritual Matutino de Despegue"
             >
               <Sun className="h-3.5 w-3.5" />
@@ -315,11 +313,10 @@ export function TodayViewClient({
             <button
               type="button"
               onClick={() => openModal("eveningReview")}
-              className={`p-1.5 sm:px-3 sm:py-1.5 rounded-lg text-xs font-semibold border transition-all cursor-pointer flex items-center gap-1.5 ${
-                hasEveningReview
+              className={`p-1.5 sm:px-3 sm:py-1.5 rounded-lg text-xs font-semibold border transition-all cursor-pointer flex items-center gap-1.5 ${hasEveningReview
                   ? "border-[#7EA35A]/40 bg-[#1C2219] text-[#7EA35A]"
                   : "border-[#2A2723] bg-[#121110] text-[#8E867B] hover:text-[#DDD6C9]"
-              }`}
+                }`}
               title="Cierre Nocturno"
             >
               <Moon className="h-3.5 w-3.5" />
@@ -400,73 +397,6 @@ export function TodayViewClient({
             contextualNotes={contextualNotes}
             onRefreshData={() => router.refresh()}
           />
-
-          {/* Collapsible Drawer for general habits / dailies */}
-          {generalDailyTasks.length > 0 && (
-            <div className="pt-1">
-              <button
-                type="button"
-                onClick={() => setIsDrawerOpen(!isDrawerOpen)}
-                className="w-full py-2.5 px-3.5 rounded-lg border border-[#2A2723] bg-[#181715] hover:bg-[#22201D] text-[#8E867B] hover:text-[#DDD6C9] font-mono text-xs flex items-center justify-between transition-colors cursor-pointer"
-              >
-                <span className="flex items-center gap-2">
-                  <span>Hábitos Diarios de Habitica</span>
-                  {pendingDailiesCount > 0 && (
-                    <span className="px-2 py-0.5 rounded-full bg-[#221D16] text-[#D99B43] font-bold text-[10px] border border-[#D99B43]/30">
-                      {pendingDailiesCount} pendientes
-                    </span>
-                  )}
-                </span>
-                {isDrawerOpen ? (
-                  <ChevronUp className="h-4 w-4 text-[#8E867B]" />
-                ) : (
-                  <ChevronDown className="h-4 w-4 text-[#8E867B]" />
-                )}
-              </button>
-
-              {isDrawerOpen && (
-                <div className="mt-2 space-y-1.5 animate-in slide-in-from-top-2 duration-200">
-                  {generalDailyTasks.map((task) => (
-                    <div
-                      key={task.id}
-                      onClick={() => handleToggleTask(task)}
-                      className={`flex items-center justify-between p-3 rounded-lg border transition-all cursor-pointer select-none ${
-                        task.completed
-                          ? "bg-[#141813] border-[#7EA35A]/30 text-[#8E867B]"
-                          : "bg-[#121110] border-[#2A2723] hover:border-[#38332D] text-[#DDD6C9]"
-                      }`}
-                    >
-                      <div className="flex items-center gap-3 flex-1 min-w-0">
-                        <div
-                          className={`flex h-4.5 w-4.5 shrink-0 items-center justify-center rounded border transition-colors ${
-                            task.completed
-                              ? "bg-[#7EA35A] border-[#7EA35A] text-[#121110] font-bold"
-                              : "border-[#38332D] bg-[#181715]"
-                          }`}
-                        >
-                          {task.completed && (
-                            <Check className="h-3 w-3 stroke-3" />
-                          )}
-                        </div>
-                        <span
-                          className={`text-xs truncate ${
-                            task.completed
-                              ? "line-through text-[#8E867B]"
-                              : "text-[#F5F2EB]"
-                          }`}
-                        >
-                          {task.text}
-                        </span>
-                      </div>
-                      <span className="font-mono text-[10px] text-[#8E867B]">
-                        Daily
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
         </div>
 
         {/* ======================================================================= */}
@@ -494,11 +424,10 @@ export function TodayViewClient({
                         setActiveSuppTiming(timing);
                         setIsSuppDetailsOpen(false);
                       }}
-                      className={`px-2 py-1 rounded-md text-center font-semibold transition-all cursor-pointer ${
-                        activeSuppTiming === timing
+                      className={`px-2 py-1 rounded-md text-center font-semibold transition-all cursor-pointer ${activeSuppTiming === timing
                           ? "bg-[#221D16] text-[#D99B43] border border-[#D99B43]/30 shadow-2xs"
                           : "text-[#8E867B] hover:text-[#DDD6C9]"
-                      }`}
+                        }`}
                     >
                       {timing}
                     </button>
@@ -531,11 +460,10 @@ export function TodayViewClient({
                   type="button"
                   disabled={isPending}
                   onClick={handleBatchTakeSupplements}
-                  className={`w-full py-2.5 px-3 rounded-lg font-bold text-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-xs font-sans ${
-                    allTakenInActiveTiming
+                  className={`w-full py-2.5 px-3 rounded-lg font-bold text-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-xs font-sans ${allTakenInActiveTiming
                       ? "bg-[#1C2219] text-[#7EA35A] border border-[#7EA35A]/40"
                       : "bg-[#7EA35A] hover:bg-[#8FB866] text-[#121110]"
-                  }`}
+                    }`}
                 >
                   <CheckCircle2 className="h-4 w-4" />
                   <span>
@@ -558,9 +486,8 @@ export function TodayViewClient({
                         : "Ver / marcar individuales"}
                     </span>
                     <ChevronDown
-                      className={`h-3 w-3 transition-transform ${
-                        isSuppDetailsOpen ? "rotate-180" : ""
-                      }`}
+                      className={`h-3 w-3 transition-transform ${isSuppDetailsOpen ? "rotate-180" : ""
+                        }`}
                     />
                   </button>
 
@@ -570,30 +497,27 @@ export function TodayViewClient({
                         <div
                           key={supp.id}
                           onClick={() => handleToggleSupplement(supp.id)}
-                          className={`flex items-center justify-between p-2.5 rounded-lg border transition-all cursor-pointer select-none ${
-                            supp.taken
+                          className={`flex items-center justify-between p-2.5 rounded-lg border transition-all cursor-pointer select-none ${supp.taken
                               ? "bg-[#141813] border-[#7EA35A]/30 text-[#8E867B]"
                               : "bg-[#121110] border-[#2A2723] hover:border-[#38332D] text-[#F5F2EB]"
-                          }`}
+                            }`}
                         >
                           <div className="flex items-center gap-2.5 min-w-0">
                             <div
-                              className={`flex h-4 w-4 shrink-0 items-center justify-center rounded border transition-colors ${
-                                supp.taken
+                              className={`flex h-4 w-4 shrink-0 items-center justify-center rounded border transition-colors ${supp.taken
                                   ? "bg-[#7EA35A] border-[#7EA35A] text-[#121110] font-bold"
                                   : "border-[#38332D] bg-[#181715]"
-                              }`}
+                                }`}
                             >
                               {supp.taken && (
                                 <Check className="h-2.5 w-2.5 stroke-3" />
                               )}
                             </div>
                             <span
-                              className={`text-xs truncate ${
-                                supp.taken
+                              className={`text-xs truncate ${supp.taken
                                   ? "line-through text-[#8E867B]"
                                   : "text-[#F5F2EB]"
-                              }`}
+                                }`}
                             >
                               {supp.name}
                             </span>
@@ -673,11 +597,10 @@ export function TodayViewClient({
             <div className="flex items-center justify-between gap-3">
               <div className="flex items-center gap-2.5 min-w-0">
                 <div
-                  className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border ${
-                    isAntExceeded
+                  className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border ${isAntExceeded
                       ? "bg-[#221716] text-[#E05D52] border-[#E05D52]/30"
                       : "bg-[#221D16] text-[#D99B43] border-[#D99B43]/30"
-                  }`}
+                    }`}
                 >
                   <Wallet className="h-4 w-4" />
                 </div>
@@ -687,11 +610,10 @@ export function TodayViewClient({
                       Gastos Hormiga
                     </span>
                     <span
-                      className={`font-mono text-[10px] font-bold px-1.5 py-0.2 rounded border ${
-                        isAntExceeded
+                      className={`font-mono text-[10px] font-bold px-1.5 py-0.2 rounded border ${isAntExceeded
                           ? "bg-[#221716] text-[#E05D52] border-[#E05D52]/30"
                           : "bg-[#141813] text-[#7EA35A] border-[#7EA35A]/30"
-                      }`}
+                        }`}
                     >
                       {isAntExceeded
                         ? `+$${(antSpent - antLimit).toFixed(0)} exc.`
@@ -717,13 +639,12 @@ export function TodayViewClient({
             {/* Minimal Progress Line */}
             <div className="h-1 w-full rounded-full bg-[#121110] mt-3 overflow-hidden">
               <div
-                className={`h-full transition-all duration-300 ${
-                  isAntExceeded
+                className={`h-full transition-all duration-300 ${isAntExceeded
                     ? "bg-[#E05D52]"
                     : antPercent >= 80
-                    ? "bg-[#D99B43]"
-                    : "bg-[#7EA35A]"
-                }`}
+                      ? "bg-[#D99B43]"
+                      : "bg-[#7EA35A]"
+                  }`}
                 style={{ width: `${antPercent}%` }}
               />
             </div>
