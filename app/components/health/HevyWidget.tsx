@@ -4,8 +4,6 @@ import { syncHevyWorkoutsAction } from "@/app/actions/health";
 import { HevyStats, HevyWorkout } from "@/lib/types";
 import {
   Check,
-  ChevronDown,
-  ChevronUp,
   Clock,
   Copy,
   Dumbbell,
@@ -33,9 +31,6 @@ export function HevyWidget({
   onRefresh,
 }: HevyWidgetProps) {
   const [isPending, startTransition] = useTransition();
-  const [expandedWorkoutId, setExpandedWorkoutId] = useState<string | null>(
-    recentWorkouts[0]?.id || null
-  );
   const [showWebhookInfo, setShowWebhookInfo] = useState(false);
   const [copiedWebhook, setCopiedWebhook] = useState(false);
   const [syncFeedback, setSyncFeedback] = useState<{
@@ -45,7 +40,6 @@ export function HevyWidget({
 
   const latestWorkout = recentWorkouts[0];
   const totalWorkouts = stats?.totalWorkouts || recentWorkouts.length;
-  const _totalVolume = stats?.totalVolumeKg || 0;
 
   const handleSync = () => {
     setSyncFeedback(null);
@@ -97,15 +91,8 @@ export function HevyWidget({
             <div className="flex items-center gap-2">
               <h3 className="font-serif text-base font-bold text-[#F5F2EB] tracking-tight flex items-center gap-2">
                 Hevy Tracker Integrado
-                <span className="inline-flex items-center gap-1 rounded-md bg-[#221D16] px-2 py-0.5 text-[10px] font-mono font-bold text-[#D99B43] border border-[#D99B43]/30">
-                  <span className="h-1.5 w-1.5 rounded-full bg-[#D99B43]" />
-                  API PRO
-                </span>
               </h3>
             </div>
-            <p className="text-xs text-[#8E867B] mt-0.5 font-mono">
-              Sincronización de fuerza, rutinas, series y volumen en tiempo real
-            </p>
           </div>
         </div>
 
@@ -137,11 +124,10 @@ export function HevyWidget({
       {/* Sync Feedback Alert */}
       {syncFeedback && (
         <div
-          className={`mt-4 p-3 rounded-lg border text-xs font-semibold flex items-center justify-between animate-in fade-in duration-200 ${
-            syncFeedback.type === "success"
-              ? "bg-[#1C2219] border-[#7EA35A]/30 text-[#7EA35A]"
-              : "bg-[#2A1715] border-[#E05D52]/30 text-[#E05D52]"
-          }`}
+          className={`mt-4 p-3 rounded-lg border text-xs font-semibold flex items-center justify-between animate-in fade-in duration-200 ${syncFeedback.type === "success"
+            ? "bg-[#1C2219] border-[#7EA35A]/30 text-[#7EA35A]"
+            : "bg-[#2A1715] border-[#E05D52]/30 text-[#E05D52]"
+            }`}
         >
           <div className="flex items-center gap-2">
             {syncFeedback.type === "success" ? (
@@ -262,169 +248,6 @@ export function HevyWidget({
             {latestWorkout ? `${latestWorkout.exercisesCount} ejercicios` : "-"}
           </div>
         </div>
-      </div>
-
-      {/* 4. Latest Workouts List & Detailed Exercise Breakdown */}
-      <div className="mt-6 space-y-3">
-        <div className="flex items-center justify-between">
-          <h4 className="font-serif text-xs font-bold text-[#DDD6C9] uppercase tracking-wider">
-            Sesiones de Entrenamiento Recientes
-          </h4>
-          <span className="text-[11px] text-[#8E867B] font-mono">
-            {recentWorkouts.length} sincronizadas
-          </span>
-        </div>
-
-        {recentWorkouts.length === 0 ? (
-          <div className="p-8 text-center rounded-lg border border-dashed border-[#2A2723] bg-[#121110]">
-            <Dumbbell className="h-8 w-8 text-[#8E867B] mx-auto mb-2 opacity-50" />
-            <p className="text-xs text-[#8E867B] mb-3">
-              Aún no hay entrenamientos de Hevy sincronizados localmente en Brio.
-            </p>
-            <button
-              type="button"
-              onClick={handleSync}
-              disabled={isPending}
-              className="px-4 py-2 rounded-lg bg-[#D99B43] hover:bg-[#E8AF59] text-[#121110] font-bold text-xs transition-all shadow-xs inline-flex items-center gap-2 cursor-pointer"
-            >
-              <RefreshCw className={`h-3.5 w-3.5 ${isPending ? "animate-spin" : ""}`} />
-              <span>Realizar primera sincronización</span>
-            </button>
-          </div>
-        ) : (
-          <div className="space-y-2.5">
-            {recentWorkouts.map((workout) => {
-              const isExpanded = expandedWorkoutId === workout.id;
-
-              return (
-                <div
-                  key={workout.id}
-                  className={`rounded-lg border transition-all overflow-hidden ${
-                    isExpanded
-                      ? "border-[#D99B43]/40 bg-[#121110]"
-                      : "border-[#2A2723] bg-[#121110] hover:border-[#38332D]"
-                  }`}
-                >
-                  {/* Workout Header Bar */}
-                  <button
-                    type="button"
-                    onClick={() =>
-                      setExpandedWorkoutId(isExpanded ? null : workout.id)
-                    }
-                    className="w-full p-4 flex items-center justify-between text-left transition-colors hover:bg-[#181715] cursor-pointer"
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className="flex h-9 w-9 items-center justify-center rounded-md bg-[#221D16] border border-[#D99B43]/30 text-[#D99B43] font-bold font-mono text-xs shrink-0">
-                        {workout.title.slice(0, 2).toUpperCase()}
-                      </div>
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <span className="text-sm font-bold text-[#F5F2EB] tracking-tight font-serif">
-                            {workout.title}
-                          </span>
-                          <span className="text-[11px] font-mono text-[#8E867B] bg-[#181715] px-2 py-0.5 rounded border border-[#2A2723]">
-                            {workout.date}
-                          </span>
-                        </div>
-                        <div className="flex items-center gap-3 text-[11px] text-[#8E867B] mt-0.5 font-mono">
-                          <span>{workout.exercisesCount} ejercicios</span>
-                          <span>•</span>
-                          <span>{workout.setsCount} series</span>
-                          <span>•</span>
-                          <span className="text-[#7EA35A] font-mono font-semibold">
-                            {Math.round(workout.totalVolumeKg).toLocaleString("es-MX")} kg
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs font-mono text-[#8E867B] hidden sm:inline">
-                        {formatDuration(workout.durationSeconds)}
-                      </span>
-                      <div className="p-1 rounded text-[#8E867B] hover:text-[#F5F2EB]">
-                        {isExpanded ? (
-                          <ChevronUp className="h-4 w-4" />
-                        ) : (
-                          <ChevronDown className="h-4 w-4" />
-                        )}
-                      </div>
-                    </div>
-                  </button>
-
-                  {/* Expanded Exercise Breakdown */}
-                  {isExpanded && (
-                    <div className="p-4 pt-0 border-t border-[#2A2723] mt-1 space-y-3 animate-in fade-in duration-200">
-                      {workout.description && (
-                        <p className="text-xs text-[#8E867B] italic bg-[#181715] p-2.5 rounded-md border border-[#2A2723]">
-                          {workout.description}
-                        </p>
-                      )}
-
-                      <div className="space-y-2.5">
-                        {workout.exercises.map((exercise, idx) => (
-                          <div
-                            key={idx}
-                            className="p-3 rounded-md border border-[#2A2723] bg-[#181715] space-y-2"
-                          >
-                            <div className="flex items-center justify-between">
-                              <span className="text-xs font-bold text-[#DDD6C9]">
-                                {exercise.title}
-                              </span>
-                              <span className="text-[10px] font-mono text-[#8E867B]">
-                                {exercise.sets.length} {exercise.sets.length === 1 ? "set" : "sets"}
-                              </span>
-                            </div>
-
-                            {exercise.notes && (
-                              <p className="text-[11px] text-[#D99B43]/80 italic">
-                                💬 {exercise.notes}
-                              </p>
-                            )}
-
-                            {/* Sets Chips */}
-                            <div className="flex flex-wrap gap-1.5">
-                              {exercise.sets.map((set, sIdx) => {
-                                const isWarmup = set.type === "warmup";
-                                const isFailure = set.type === "failure";
-                                const isDrop = set.type === "drop";
-
-                                const badgeColor = isWarmup
-                                  ? "bg-[#221D16] border-[#D99B43]/30 text-[#D99B43]"
-                                  : isFailure
-                                  ? "bg-[#2A1715] border-[#E05D52]/30 text-[#E05D52]"
-                                  : isDrop
-                                  ? "bg-[#221D16] border-[#D99B43]/30 text-[#D99B43]"
-                                  : "bg-[#121110] border-[#2A2723] text-[#DDD6C9]";
-
-                                return (
-                                  <span
-                                    key={sIdx}
-                                    className={`inline-flex items-center gap-1 px-2 py-0.5 rounded border text-[10px] font-mono font-medium ${badgeColor}`}
-                                  >
-                                    <span className="opacity-60">
-                                      {isWarmup ? "W" : isFailure ? "F" : isDrop ? "D" : `${sIdx + 1}`}:
-                                    </span>
-                                    <span>
-                                      {set.reps ? `${set.reps} reps` : ""}
-                                      {set.weightKg ? ` @ ${Number(set.weightKg.toFixed(1))}kg` : ""}
-                                      {set.durationSeconds ? ` (${set.durationSeconds}s)` : ""}
-                                      {set.rpe ? ` • RPE ${set.rpe}` : ""}
-                                    </span>
-                                  </span>
-                                );
-                              })}
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                </div>
-              );
-            })}
-          </div>
-        )}
       </div>
     </div>
   );

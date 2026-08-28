@@ -4,27 +4,26 @@ import {
   addWaterAction,
   importSamsungHealthDataAction,
   logSleepAction,
-  logWorkoutAction,
   toggleSupplementAction,
 } from "@/app/actions/health";
-import { HealthDashboardData, WorkoutType } from "@/lib/types";
+import { toDateStr } from "@/lib/dateUtils";
+import { HealthDashboardData } from "@/lib/types";
 import {
   Activity,
+  ArrowRight,
   Check,
-  CheckCircle2,
   Droplet,
   Dumbbell,
   Flame,
   FlaskConical,
-  Heart,
   Moon,
-  Plus,
   Pill,
+  Plus,
+  Salad,
+  Scale,
   Settings2,
   UploadCloud,
-  Salad,
-  X,
-  Zap,
+  X
 } from "lucide-react";
 import { useState, useTransition } from "react";
 import { BiomarkersView } from "./biomarkers/BiomarkersView";
@@ -32,29 +31,26 @@ import { BodyCompositionWidget } from "./BodyCompositionWidget";
 import { HevyWidget } from "./HevyWidget";
 import { HormonalCircadianWidget } from "./HormonalCircadianWidget";
 import { ManageSupplementsModal } from "./ManageSupplementsModal";
+import { MuscleRecoveryWidget } from "./MuscleRecoveryWidget";
 import { NutritionView } from "./nutrition/NutritionView";
 import { SmartFitModal } from "./SmartFitModal";
-
-import { MuscleRecoveryWidget } from "./MuscleRecoveryWidget";
 
 interface HealthViewProps {
   data: HealthDashboardData;
   onRefresh?: () => void;
 }
 
-const WORKOUT_TYPES: { id: WorkoutType; label: string; icon: string }[] = [
-  { id: "gym", label: "Gym / Fuerza 🏋️", icon: "🏋️" },
-  { id: "cardio", label: "Running / Cardio 🏃", icon: "🏃" },
-  { id: "mobility", label: "Movilidad / Yoga 🧘", icon: "🧘" },
-  { id: "sports", label: "Deportes / Fútbol ⚽", icon: "⚽" },
-  { id: "rest", label: "Descanso Activo 🛌", icon: "🛌" },
-];
+export type HealthMainTab = "daily" | "training" | "nutrition" | "biometrics";
 
 export function HealthView({ data, onRefresh }: HealthViewProps) {
-  const [activeHealthTab, setActiveHealthTab] = useState<
-    "overview" | "hormonal" | "nutrition" | "body_composition" | "hevy" | "recovery" | "biomarkers"
-  >("overview");
-  const [workoutNotes, _setWorkoutNotes] = useState("");
+  // Main 4 Core Health Pillars
+  const [activeHealthTab, setActiveHealthTab] = useState<HealthMainTab>("daily");
+
+  // Sub-tab selectors for composite pillars
+  const [trainingSubTab, setTrainingSubTab] = useState<"hevy" | "recovery">("hevy");
+  const [biometricsSubTab, setBiometricsSubTab] = useState<"biomarkers" | "composition">("biomarkers");
+
+  // Modals and state
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
   const [isManageSupplementsOpen, setIsManageSupplementsOpen] = useState(false);
   const [isSmartFitModalOpen, setIsSmartFitModalOpen] = useState(false);
@@ -62,13 +58,6 @@ export function HealthView({ data, onRefresh }: HealthViewProps) {
   const [sleepHours, setSleepHours] = useState(data.todayHealth.sleepHours || 10.0);
   const [sleepQuality, setSleepQuality] = useState(data.todayHealth.sleepQuality || 4);
   const [isPending, startTransition] = useTransition();
-
-  const handleWorkoutCheckin = (type: WorkoutType) => {
-    startTransition(async () => {
-      await logWorkoutAction(type, workoutNotes.trim() || undefined);
-      if (onRefresh) onRefresh();
-    });
-  };
 
   const handleAddWater = (amount: number) => {
     startTransition(async () => {
@@ -103,181 +92,108 @@ export function HealthView({ data, onRefresh }: HealthViewProps) {
 
   return (
     <div className="flex flex-col gap-6 animate-in fade-in duration-300">
-      {/* 0. Health Sub-module Navigation Ribbon */}
+      {/* 0. HEALTH 4-PILLAR NAVIGATION RIBBON */}
       <div className="flex flex-wrap items-center justify-between gap-3 p-2 rounded-xl border border-[#2A2723] bg-[#181715] shadow-sm">
         <div className="flex flex-wrap items-center gap-1.5 p-1 rounded-lg bg-[#121110] border border-[#2A2723]">
+          {/* 1. Ritmo & Hábitos */}
           <button
             type="button"
-            onClick={() => setActiveHealthTab("overview")}
-            className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-md text-xs font-semibold transition-all cursor-pointer ${
-              activeHealthTab === "overview"
+            onClick={() => setActiveHealthTab("daily")}
+            className={`flex items-center gap-2 px-3.5 py-1.5 rounded-md text-xs font-semibold transition-all cursor-pointer ${activeHealthTab === "daily"
                 ? "bg-[#D99B43] text-[#121110] font-bold shadow-xs"
                 : "text-[#8E867B] hover:text-[#DDD6C9] hover:bg-[#22201D]"
-            }`}
+              }`}
           >
-            <Activity className="h-3.5 w-3.5" />
-            <span>Resumen & Hábitos</span>
+            <Flame className={`h-3.5 w-3.5 ${activeHealthTab === "daily" ? "text-[#121110]" : "text-[#D99B43]"}`} />
+            <span>Ritmo & Hábitos</span>
           </button>
 
+          {/* 2. Entrenamiento */}
           <button
             type="button"
-            onClick={() => setActiveHealthTab("hormonal")}
-            className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-md text-xs font-semibold transition-all cursor-pointer ${
-              activeHealthTab === "hormonal"
+            onClick={() => setActiveHealthTab("training")}
+            className={`flex items-center gap-2 px-3.5 py-1.5 rounded-md text-xs font-semibold transition-all cursor-pointer ${activeHealthTab === "training"
                 ? "bg-[#D99B43] text-[#121110] font-bold shadow-xs"
                 : "text-[#8E867B] hover:text-[#DDD6C9] hover:bg-[#22201D]"
-            }`}
+              }`}
           >
-            <Flame className="h-3.5 w-3.5 text-[#D99B43]" />
-            <span>🔥 Ritmo Hormonal 24h</span>
+            <Dumbbell className="h-3.5 w-3.5" />
+            <span>Entrenamiento</span>
+            {data.weeklyWorkoutsCount > 0 && (
+              <span
+                className={`ml-0.5 rounded px-1.5 py-0.2 text-[9px] font-mono font-bold ${activeHealthTab === "training"
+                    ? "bg-[#121110] text-[#D99B43]"
+                    : "bg-[#221D16] text-[#D99B43] border border-[#D99B43]/30"
+                  }`}
+              >
+                {data.weeklyWorkoutsCount} sem
+              </span>
+            )}
           </button>
 
+          {/* 3. Nutrición */}
           <button
             type="button"
             onClick={() => setActiveHealthTab("nutrition")}
-            className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-md text-xs font-semibold transition-all cursor-pointer ${
-              activeHealthTab === "nutrition"
+            className={`flex items-center gap-2 px-3.5 py-1.5 rounded-md text-xs font-semibold transition-all cursor-pointer ${activeHealthTab === "nutrition"
                 ? "bg-[#7EA35A] text-[#121110] font-bold shadow-xs"
                 : "text-[#8E867B] hover:text-[#DDD6C9] hover:bg-[#22201D]"
-            }`}
+              }`}
           >
             <Salad className="h-3.5 w-3.5" />
-            <span>Nutrición & Mariana Mont</span>
+            <span>Nutrición</span>
             {data.nutritionData && (
-              <span className="ml-1 rounded bg-[#121110] px-1.5 py-0.2 text-[9px] font-mono text-[#DDD6C9]">
+              <span
+                className={`ml-0.5 rounded px-1.5 py-0.2 text-[9px] font-mono font-bold ${activeHealthTab === "nutrition"
+                    ? "bg-[#121110] text-[#7EA35A]"
+                    : "bg-[#1C2219] text-[#7EA35A] border border-[#7EA35A]/30"
+                  }`}
+              >
                 {data.nutritionData.todayLog.calculatedMacros.kcal} kcal
               </span>
             )}
           </button>
 
+          {/* 4. Biometría & Labs */}
           <button
             type="button"
-            onClick={() => setActiveHealthTab("recovery")}
-            className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-md text-xs font-semibold transition-all cursor-pointer ${
-              activeHealthTab === "recovery"
-                ? "bg-[#D99B43] text-[#121110] font-bold shadow-xs"
-                : "text-[#8E867B] hover:text-[#DDD6C9] hover:bg-[#22201D]"
-            }`}
-          >
-            <Activity className="h-3.5 w-3.5" />
-            <span>🧬 Recuperación Muscular</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setActiveHealthTab("body_composition")}
-            className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-md text-xs font-semibold transition-all cursor-pointer ${
-              activeHealthTab === "body_composition"
+            onClick={() => setActiveHealthTab("biometrics")}
+            className={`flex items-center gap-2 px-3.5 py-1.5 rounded-md text-xs font-semibold transition-all cursor-pointer ${activeHealthTab === "biometrics"
                 ? "bg-[#4EAB9E] text-[#121110] font-bold shadow-xs"
                 : "text-[#8E867B] hover:text-[#DDD6C9] hover:bg-[#22201D]"
-            }`}
-          >
-            <Heart className="h-3.5 w-3.5" />
-            <span>Composición Corporal</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setActiveHealthTab("hevy")}
-            className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-md text-xs font-semibold transition-all cursor-pointer ${
-              activeHealthTab === "hevy"
-                ? "bg-[#D99B43] text-[#121110] font-bold shadow-xs"
-                : "text-[#8E867B] hover:text-[#DDD6C9] hover:bg-[#22201D]"
-            }`}
-          >
-            <Dumbbell className="h-3.5 w-3.5" />
-            <span>Hevy Gym Tracker</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setActiveHealthTab("biomarkers")}
-            className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-md text-xs font-semibold transition-all cursor-pointer ${
-              activeHealthTab === "biomarkers"
-                ? "bg-[#4EAB9E] text-[#121110] font-bold shadow-xs"
-                : "text-[#8E867B] hover:text-[#DDD6C9] hover:bg-[#22201D]"
-            }`}
+              }`}
           >
             <FlaskConical className="h-3.5 w-3.5" />
-            <span>Estudios & Biomarcadores</span>
+            <span>Biometría & Labs</span>
             {data.biomarkersData && (
-              <span className="ml-1 rounded bg-[#121110] px-1.5 py-0.2 text-[9px] font-mono text-[#4EAB9E]">
+              <span
+                className={`ml-0.5 rounded px-1.5 py-0.2 text-[9px] font-mono font-bold ${activeHealthTab === "biometrics"
+                    ? "bg-[#121110] text-[#4EAB9E]"
+                    : "bg-[#162121] text-[#4EAB9E] border border-[#4EAB9E]/30"
+                  }`}
+              >
                 {data.biomarkersData.totalBiomarkersTracked} pruebas
               </span>
             )}
           </button>
         </div>
-
-        {/* Habitica RPG Gamification Status Badge */}
-        <div className="hidden lg:flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#221D16] border border-[#D99B43]/30 text-xs font-mono text-[#D99B43]">
-          <Zap className="size-3.5 fill-[#D99B43]" />
-          <span>Habitica RPG Vinculado</span>
-        </div>
       </div>
 
-      {/* RENDER ACTIVE TAB */}
-      {activeHealthTab === "hormonal" && (
+      {/* ========================================================================= */}
+      {/* 1. PILAR: RITMO & HÁBITOS (DAILY COMMAND HUB)                              */}
+      {/* ========================================================================= */}
+      {activeHealthTab === "daily" && (
         <div className="space-y-6 animate-in fade-in duration-200">
+          {/* Hormonal Circadian Engine & 7 Androgenic Pillars */}
           <HormonalCircadianWidget
-            onOpenHevy={() => setActiveHealthTab("hevy")}
-            onOpenPantry={() => setActiveHealthTab("nutrition")}
-          />
-        </div>
-      )}
-
-      {activeHealthTab === "nutrition" && data.nutritionData && (
-        <NutritionView
-          data={data.nutritionData}
-          onOpenManageSupplements={() => setIsManageSupplementsOpen(true)}
-          onRefresh={onRefresh}
-        />
-      )}
-
-      {activeHealthTab === "biomarkers" && (
-        <BiomarkersView
-          data={data.biomarkersData}
-          onRefresh={onRefresh}
-        />
-      )}
-
-      {activeHealthTab === "body_composition" && (
-        <div className="space-y-6 animate-in fade-in duration-200">
-          <BodyCompositionWidget
-            logs={data.bodyCompositionLogs || []}
-            latest={data.latestBodyComposition}
-            previous={data.previousBodyComposition}
-            onOpenModal={() => setIsSmartFitModalOpen(true)}
-            onRefresh={onRefresh}
-          />
-        </div>
-      )}
-
-      {activeHealthTab === "recovery" && (
-        <div className="space-y-6 animate-in fade-in duration-200">
-          <MuscleRecoveryWidget recentWorkouts={data.recentHevyWorkouts} />
-        </div>
-      )}
-
-      {activeHealthTab === "hevy" && (
-        <div className="space-y-6 animate-in fade-in duration-200">
-          <MuscleRecoveryWidget recentWorkouts={data.recentHevyWorkouts} />
-          <HevyWidget
-            recentWorkouts={data.recentHevyWorkouts}
-            stats={data.hevyStats}
-            onRefresh={onRefresh}
-          />
-        </div>
-      )}
-
-      {activeHealthTab === "overview" && (
-        <div className="space-y-6 animate-in fade-in duration-200">
-          {/* Hormonal Circadian Engine Highlight in Overview */}
-          <HormonalCircadianWidget
-            onOpenHevy={() => setActiveHealthTab("hevy")}
+            onOpenHevy={() => {
+              setActiveHealthTab("training");
+              setTrainingSubTab("hevy");
+            }}
             onOpenPantry={() => setActiveHealthTab("nutrition")}
           />
 
-          {/* 1. Header Metrics Row */}
+          {/* Header Quick Metrics Row */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {/* Workout Streak */}
             <div className="rounded-xl border border-[#2A2723] bg-[#181715] p-4 shadow-sm">
@@ -310,7 +226,7 @@ export function HealthView({ data, onRefresh }: HealthViewProps) {
             {/* Sleep Average */}
             <div className="rounded-xl border border-[#2A2723] bg-[#181715] p-4 shadow-sm">
               <div className="flex items-center justify-between text-xs text-[#8E867B] font-mono">
-                <span>Sueño & Recuperación</span>
+                <span>Sueño & Descanso</span>
                 <Moon className="h-4 w-4 text-[#DDD6C9]" />
               </div>
               <div className="mt-2 text-2xl font-bold font-mono text-[#F5F2EB]">
@@ -344,98 +260,85 @@ export function HealthView({ data, onRefresh }: HealthViewProps) {
             </div>
           </div>
 
-          {/* 1.2 Nutrition Glance Summary Card */}
-          {data.nutritionData && (
-            <div className="rounded-xl border border-[#2A2723] bg-[#181715] p-4.5 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-              <div className="flex items-center gap-3.5">
-                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[#1C2219] text-[#7EA35A] border border-[#7EA35A]/30">
-                  <Salad className="h-5 w-5" />
+          {/* Quick Glance Cards (Nutrición & Gym jump points) */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Nutrition Glance Card */}
+            {data.nutritionData && (
+              <div className="rounded-xl border border-[#2A2723] bg-[#181715] p-4.5 shadow-sm flex flex-col justify-between gap-3">
+                <div className="flex items-start gap-3">
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[#1C2219] text-[#7EA35A] border border-[#7EA35A]/30">
+                    <Salad className="h-4.5 w-4.5" />
+                  </div>
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <h3 className="font-serif text-sm font-bold text-[#F5F2EB] tracking-tight">
+                        Nutrición: {data.nutritionData.todayLog.calculatedMacros.kcal} kcal
+                      </h3>
+                      <span className="rounded bg-[#1C2219] border border-[#7EA35A]/30 px-1.5 py-0.5 text-[10px] font-mono text-[#7EA35A] font-bold">
+                        P: {data.nutritionData.todayLog.calculatedMacros.proteinGrams}g | C: {data.nutritionData.todayLog.calculatedMacros.carbsGrams}g | G: {data.nutritionData.todayLog.calculatedMacros.fatGrams}g
+                      </span>
+                    </div>
+                    <p className="text-xs text-[#8E867B] mt-1 line-clamp-1">
+                      {data.nutritionData.scheduledMealsToday.length > 0
+                        ? `Próxima comida: ${data.nutritionData.scheduledMealsToday[0].recipe?.title || data.nutritionData.scheduledMealsToday[0].customTitle || "Programada"}`
+                        : "Plan Mariana Mont activo • Registra tus porciones del día"}
+                    </p>
+                  </div>
                 </div>
-                <div>
+
+                <div className="flex justify-end pt-1">
+                  <button
+                    type="button"
+                    onClick={() => setActiveHealthTab("nutrition")}
+                    className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#7EA35A] hover:text-[#9DD16E] transition-colors cursor-pointer"
+                  >
+                    <span>Ir a Nutrición & Plan</span>
+                    <ArrowRight className="h-3.5 w-3.5" />
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Workout Glance Card */}
+            <div className="rounded-xl border border-[#2A2723] bg-[#181715] p-4.5 shadow-sm flex flex-col justify-between gap-3">
+              <div className="flex items-start gap-3">
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[#221D16] text-[#D99B43] border border-[#D99B43]/30">
+                  <Dumbbell className="h-4.5 w-4.5" />
+                </div>
+                <div className="min-w-0">
                   <div className="flex items-center gap-2">
                     <h3 className="font-serif text-sm font-bold text-[#F5F2EB] tracking-tight">
-                      Nutrición Hoy: {data.nutritionData.todayLog.calculatedMacros.kcal} kcal
+                      Entrenamiento & Hevy
                     </h3>
-                    <span className="rounded bg-[#1C2219] border border-[#7EA35A]/30 px-1.5 py-0.5 text-[10px] font-mono text-[#7EA35A] font-bold">
-                      P: {data.nutritionData.todayLog.calculatedMacros.proteinGrams}g | C: {data.nutritionData.todayLog.calculatedMacros.carbsGrams}g | G: {data.nutritionData.todayLog.calculatedMacros.fatGrams}g
+                    <span className="rounded bg-[#221D16] border border-[#D99B43]/30 px-1.5 py-0.5 text-[10px] font-mono font-bold text-[#D99B43]">
+                      {data.weeklyWorkoutsCount} sesiones esta semana
                     </span>
                   </div>
-                  <p className="text-xs text-[#8E867B] mt-0.5">
-                    {data.nutritionData.scheduledMealsToday.length > 0
-                      ? `Próxima comida: ${data.nutritionData.scheduledMealsToday[0].recipe?.title || data.nutritionData.scheduledMealsToday[0].customTitle || "Programada"}`
-                      : "Toca para registrar porciones de fruta, cereales, legumbres y ensalada diaria"}
+                  <p className="text-xs text-[#8E867B] mt-1 line-clamp-1">
+                    {data.recentHevyWorkouts && data.recentHevyWorkouts.length > 0
+                      ? `Última sesión: ${data.recentHevyWorkouts[0].title} (${toDateStr(data.recentHevyWorkouts[0].startTime)})`
+                      : "Sincronizado automáticamente con Hevy Tracker"}
                   </p>
                 </div>
               </div>
 
-              <button
-                type="button"
-                onClick={() => setActiveHealthTab("nutrition")}
-                className="flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-[#7EA35A] font-bold text-xs text-[#121110] hover:bg-[#8FBA66] transition-all shadow-xs shrink-0 self-start sm:self-center cursor-pointer"
-              >
-                <span>Abrir Nutrición</span>
-                <span>→</span>
-              </button>
-            </div>
-          )}
-
-          {/* 1.5. Hevy Workout Tracker Widget */}
-          <HevyWidget
-            recentWorkouts={data.recentHevyWorkouts}
-            stats={data.hevyStats}
-            onRefresh={onRefresh}
-          />
-
-          {/* 2. Workout Logger Card */}
-          <div className="rounded-xl border border-[#2A2723] bg-[#181715] p-5 shadow-sm">
-            <div className="flex items-center justify-between pb-3 border-b border-[#2A2723]">
-              <div className="flex items-center gap-2.5">
-                <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#221D16] text-[#D99B43] border border-[#D99B43]/30">
-                  <Dumbbell className="h-4 w-4" />
-                </div>
-                <div>
-                  <h3 className="font-serif text-sm font-bold text-[#F5F2EB] tracking-tight">
-                    Check-in de Entrenamiento de Hoy
-                  </h3>
-                  <p className="text-xs text-[#8E867B]">
-                    1 clic para registrar tu sesión y mantener la racha activa
-                  </p>
-                </div>
+              <div className="flex justify-end pt-1">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setActiveHealthTab("training");
+                    setTrainingSubTab("hevy");
+                  }}
+                  className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#D99B43] hover:text-[#E8AF59] transition-colors cursor-pointer"
+                >
+                  <span>Abrir Gym & Hevy</span>
+                  <ArrowRight className="h-3.5 w-3.5" />
+                </button>
               </div>
-
-              {data.todayHealth.workoutType && (
-                <span className="rounded border border-[#7EA35A]/40 bg-[#1C2219] px-2.5 py-1 text-xs font-mono font-bold text-[#7EA35A] flex items-center gap-1">
-                  <CheckCircle2 className="h-3.5 w-3.5" />
-                  <span>Registrado: {data.todayHealth.workoutType.toUpperCase()}</span>
-                </span>
-              )}
-            </div>
-
-            <div className="mt-4 grid grid-cols-2 sm:grid-cols-5 gap-2.5">
-              {WORKOUT_TYPES.map((w) => {
-                const isSelected = data.todayHealth.workoutType === w.id;
-
-                return (
-                  <button
-                    key={w.id}
-                    type="button"
-                    onClick={() => handleWorkoutCheckin(w.id)}
-                    disabled={isPending}
-                    className={`flex flex-col items-center justify-center gap-1.5 p-3.5 rounded-lg border text-xs font-bold transition-all cursor-pointer ${
-                      isSelected
-                        ? "bg-[#1C2219] border-[#7EA35A]/40 text-[#7EA35A] shadow-xs"
-                        : "bg-[#121110] border-[#2A2723] text-[#DDD6C9] hover:border-[#38332D] hover:bg-[#22201D]"
-                    }`}
-                  >
-                    <span className="text-xl">{w.icon}</span>
-                    <span>{w.label.split(" ")[0]}</span>
-                  </button>
-                );
-              })}
             </div>
           </div>
 
-          {/* 3. Side by Side: Water Gauge & Supplements */}
+          {/* Daily Interactive Logs Grid: Water & Supplements */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
             {/* Hydration Tracker */}
             <div className="rounded-xl border border-[#2A2723] bg-[#181715] p-5 shadow-sm">
@@ -539,11 +442,10 @@ export function HealthView({ data, onRefresh }: HealthViewProps) {
                       type="button"
                       onClick={() => handleToggleSupplement(supp.id)}
                       disabled={isPending}
-                      className={`flex items-center justify-between p-3 rounded-lg border transition-all text-xs font-semibold cursor-pointer ${
-                        supp.taken
+                      className={`flex items-center justify-between p-3 rounded-lg border transition-all text-xs font-semibold cursor-pointer ${supp.taken
                           ? "border-[#7EA35A]/40 bg-[#1C2219] text-[#7EA35A]"
                           : "border-[#2A2723] bg-[#121110] text-[#DDD6C9] hover:border-[#38332D]"
-                      }`}
+                        }`}
                     >
                       <div className="flex flex-col items-start text-left">
                         <span>{supp.name}</span>
@@ -554,11 +456,10 @@ export function HealthView({ data, onRefresh }: HealthViewProps) {
                         )}
                       </div>
                       <div
-                        className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-md border ml-2 ${
-                          supp.taken
+                        className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-md border ml-2 ${supp.taken
                             ? "bg-[#7EA35A] border-[#7EA35A] text-[#121110]"
                             : "border-[#2A2723] bg-[#181715]"
-                        }`}
+                          }`}
                       >
                         {supp.taken && <Check className="h-3.5 w-3.5 stroke-3" />}
                       </div>
@@ -569,7 +470,7 @@ export function HealthView({ data, onRefresh }: HealthViewProps) {
             </div>
           </div>
 
-          {/* 4. Sleep & Recovery Editor */}
+          {/* Sleep & Recovery Editor */}
           <div className="rounded-xl border border-[#2A2723] bg-[#181715] p-5 shadow-sm">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-3 border-b border-[#2A2723]">
               <div className="flex items-center gap-2.5">
@@ -627,11 +528,10 @@ export function HealthView({ data, onRefresh }: HealthViewProps) {
                       key={q}
                       type="button"
                       onClick={() => setSleepQuality(q)}
-                      className={`flex-1 py-2 rounded-md border text-xs font-bold transition-all cursor-pointer ${
-                        sleepQuality === q
+                      className={`flex-1 py-2 rounded-md border text-xs font-bold transition-all cursor-pointer ${sleepQuality === q
                           ? "bg-[#221D16] border-[#D99B43]/40 text-[#D99B43]"
                           : "bg-[#121110] border-[#2A2723] text-[#8E867B] hover:text-[#DDD6C9]"
-                      }`}
+                        }`}
                     >
                       {q} ⭐
                     </button>
@@ -640,17 +540,152 @@ export function HealthView({ data, onRefresh }: HealthViewProps) {
               </div>
             </div>
           </div>
-
-          {/* 5. Body Composition & Smart Fit Evolution */}
-          <BodyCompositionWidget
-            logs={data.bodyCompositionLogs || []}
-            latest={data.latestBodyComposition}
-            previous={data.previousBodyComposition}
-            onOpenModal={() => setIsSmartFitModalOpen(true)}
-            onRefresh={onRefresh}
-          />
         </div>
       )}
+
+      {/* ========================================================================= */}
+      {/* 2. PILAR: ENTRENAMIENTO (HEVY + RECUPERACIÓN MUSCULAR)                     */}
+      {/* ========================================================================= */}
+      {activeHealthTab === "training" && (
+        <div className="space-y-6 animate-in fade-in duration-200">
+          {/* Sub-Navigation: Hevy Tracker vs Recuperación Muscular */}
+          <div className="flex items-center justify-between gap-3 border-b border-[#2A2723] pb-3">
+            <div className="flex items-center gap-1.5 p-1 bg-[#181715] rounded-lg border border-[#2A2723]">
+              <button
+                type="button"
+                onClick={() => setTrainingSubTab("hevy")}
+                className={`flex items-center gap-2 px-3.5 py-1.5 rounded-md text-xs font-semibold transition-all cursor-pointer ${trainingSubTab === "hevy"
+                    ? "bg-[#D99B43] text-[#121110] font-bold shadow-xs"
+                    : "text-[#8E867B] hover:text-[#DDD6C9] hover:bg-[#22201D]"
+                  }`}
+              >
+                <Dumbbell className="h-3.5 w-3.5" />
+                <span>Hevy Sync & Métricas</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setTrainingSubTab("recovery")}
+                className={`flex items-center gap-2 px-3.5 py-1.5 rounded-md text-xs font-semibold transition-all cursor-pointer ${trainingSubTab === "recovery"
+                    ? "bg-[#D99B43] text-[#121110] font-bold shadow-xs"
+                    : "text-[#8E867B] hover:text-[#DDD6C9] hover:bg-[#22201D]"
+                  }`}
+              >
+                <Activity className="h-3.5 w-3.5" />
+                <span>Mapa de Recuperación Muscular</span>
+              </button>
+            </div>
+
+            <div className="hidden sm:flex items-center gap-2 text-xs font-mono text-[#8E867B]">
+              <Flame className="h-3.5 w-3.5 text-[#D99B43]" />
+              <span>Racha: <strong className="text-[#F5F2EB]">{data.workoutStreak} días</strong></span>
+            </div>
+          </div>
+
+          {/* SUB-VIEW 1: HEVY TRACKER */}
+          {trainingSubTab === "hevy" && (
+            <HevyWidget
+              recentWorkouts={data.recentHevyWorkouts}
+              stats={data.hevyStats}
+              onRefresh={onRefresh}
+            />
+          )}
+
+          {/* SUB-VIEW 2: RECUPERACIÓN MUSCULAR */}
+          {trainingSubTab === "recovery" && (
+            <MuscleRecoveryWidget recentWorkouts={data.recentHevyWorkouts} />
+          )}
+        </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* 3. PILAR: NUTRICIÓN & MARIANA MONT                                        */}
+      {/* ========================================================================= */}
+      {activeHealthTab === "nutrition" && data.nutritionData && (
+        <NutritionView
+          data={data.nutritionData}
+          onOpenManageSupplements={() => setIsManageSupplementsOpen(true)}
+          onRefresh={onRefresh}
+        />
+      )}
+
+      {/* ========================================================================= */}
+      {/* 4. PILAR: BIOMETRÍA & LABS (BIOMARCADORES + INBODY COMPOSICIÓN)          */}
+      {/* ========================================================================= */}
+      {activeHealthTab === "biometrics" && (
+        <div className="space-y-6 animate-in fade-in duration-200">
+          {/* Sub-Navigation: Biomarcadores Clínicos vs Composición Corporal */}
+          <div className="flex items-center justify-between gap-3 border-b border-[#2A2723] pb-3">
+            <div className="flex items-center gap-1.5 p-1 bg-[#181715] rounded-lg border border-[#2A2723]">
+              <button
+                type="button"
+                onClick={() => setBiometricsSubTab("biomarkers")}
+                className={`flex items-center gap-2 px-3.5 py-1.5 rounded-md text-xs font-semibold transition-all cursor-pointer ${biometricsSubTab === "biomarkers"
+                    ? "bg-[#4EAB9E] text-[#121110] font-bold shadow-xs"
+                    : "text-[#8E867B] hover:text-[#DDD6C9] hover:bg-[#22201D]"
+                  }`}
+              >
+                <FlaskConical className="h-3.5 w-3.5" />
+                <span>Estudios & Biomarcadores Clínicos</span>
+                {data.biomarkersData && (
+                  <span
+                    className={`ml-1 rounded px-1.5 py-0.2 text-[9px] font-mono font-bold ${biometricsSubTab === "biomarkers"
+                        ? "bg-[#121110] text-[#4EAB9E]"
+                        : "bg-[#162121] text-[#4EAB9E] border border-[#4EAB9E]/30"
+                      }`}
+                  >
+                    {data.biomarkersData.totalBiomarkersTracked}
+                  </span>
+                )}
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setBiometricsSubTab("composition")}
+                className={`flex items-center gap-2 px-3.5 py-1.5 rounded-md text-xs font-semibold transition-all cursor-pointer ${biometricsSubTab === "composition"
+                    ? "bg-[#4EAB9E] text-[#121110] font-bold shadow-xs"
+                    : "text-[#8E867B] hover:text-[#DDD6C9] hover:bg-[#22201D]"
+                  }`}
+              >
+                <Scale className="h-3.5 w-3.5" />
+                <span>Composición Corporal (InBody / SmartFit)</span>
+              </button>
+            </div>
+
+            {data.latestBodyComposition && (
+              <div className="hidden sm:flex items-center gap-3 text-xs font-mono text-[#8E867B]">
+                <span>Peso: <strong className="text-[#F5F2EB]">{data.latestBodyComposition.weightKg} kg</strong></span>
+                {data.latestBodyComposition.bodyFatPercentage !== undefined && (
+                  <span>Grasa: <strong className="text-[#4EAB9E]">{data.latestBodyComposition.bodyFatPercentage}%</strong></span>
+                )}
+              </div>
+            )}
+          </div>
+
+          {/* SUB-VIEW 1: BIOMARCADORES DE SANGRE */}
+          {biometricsSubTab === "biomarkers" && (
+            <BiomarkersView
+              data={data.biomarkersData}
+              onRefresh={onRefresh}
+            />
+          )}
+
+          {/* SUB-VIEW 2: COMPOSICIÓN CORPORAL */}
+          {biometricsSubTab === "composition" && (
+            <BodyCompositionWidget
+              logs={data.bodyCompositionLogs || []}
+              latest={data.latestBodyComposition}
+              previous={data.previousBodyComposition}
+              onOpenModal={() => setIsSmartFitModalOpen(true)}
+              onRefresh={onRefresh}
+            />
+          )}
+        </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* MODALS & OVERLAYS                                                         */}
+      {/* ========================================================================= */}
 
       {/* Samsung Health Import Modal */}
       {isImportModalOpen && (

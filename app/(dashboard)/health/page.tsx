@@ -1,19 +1,20 @@
-import { fetchHealthDashboardDataAction } from "@/app/actions/health";
-import { HealthView } from "@/app/components/health/HealthView";
-import { HealthSkeleton } from "@/app/components/skeletons/RouteSkeletons";
+import { fetchDailyHealthDataAction } from "@/app/actions/health";
+import { DailyHealthView } from "@/app/components/health/DailyHealthView";
+import { DailyHealthSkeleton } from "@/app/components/skeletons/RouteSkeletons";
 import { Suspense } from "react";
 
 export const dynamic = "force-dynamic";
 
 export default function HealthPage() {
   return (
-    <Suspense fallback={<HealthSkeleton />}>
-      <AsyncHealthContent />
+    <Suspense fallback={<DailyHealthSkeleton />}>
+      <AsyncDailyHealthContent />
     </Suspense>
   );
 }
 
-async function AsyncHealthContent() {
-  const healthData = await fetchHealthDashboardDataAction();
-  return <HealthView data={healthData} />;
+async function AsyncDailyHealthContent() {
+  const dailyData = await fetchDailyHealthDataAction();
+  return <DailyHealthView data={dailyData} />;
 }
+
