@@ -44,7 +44,7 @@ interface BrioCommandCenterProps {
   healthData: HealthDashboardData;
   projectsData: ProjectsDashboardData;
   vaultData: VaultDashboardData;
-  todayRitual?: RitualLog | null;
+  todayRitual: RitualLog | null;
 }
 
 export function BrioCommandCenter(props: BrioCommandCenterProps) {
