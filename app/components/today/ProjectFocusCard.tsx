@@ -4,8 +4,7 @@ import {
   deleteContextualNoteAction,
   saveContextualNoteAction,
 } from "@/app/actions/notes";
-import { updateProjectDetailsAction } from "@/app/actions/projects";
-import { createSingleTaskAction, toggleTaskAction } from "@/app/actions/tasks";
+import { toggleTaskAction } from "@/app/actions/tasks";
 import { soundFx } from "@/lib/soundFx";
 import {
   ContextualNote,
@@ -14,21 +13,22 @@ import {
   NoteCategory,
   ProjectItem,
 } from "@/lib/types";
-import {
-  extractAndClassifyLinks,
-  partitionLinksForDb
-} from "@/lib/urlClassifier";
+import { extractAndClassifyLinks } from "@/lib/urlClassifier";
 import {
   Check,
+  ChevronDown,
+  ChevronUp,
   ExternalLink,
   FileText,
   FolderGit2,
   Globe,
   Layers,
   ListTodo,
+  Minimize2,
   Plus,
   Tag,
-  Trash2
+  Trash2,
+  Zap,
 } from "lucide-react";
 import { useMemo, useState, useTransition } from "react";
 import { TaskDetailDrawer } from "./TaskDetailDrawer";
@@ -39,6 +39,10 @@ interface ProjectFocusCardProps {
   tags?: HabiticaTag[];
   contextualNotes: ContextualNote[];
   onRefreshData?: () => void;
+  isFocusMode?: boolean;
+  onToggleFocusMode?: () => void;
+  isCollapsed?: boolean;
+  onToggleCollapse?: () => void;
 }
 
 const CATEGORY_META: Record<
@@ -58,6 +62,10 @@ export function ProjectFocusCard({
   tags = [],
   contextualNotes,
   onRefreshData,
+  isFocusMode = false,
+  onToggleFocusMode,
+  isCollapsed = false,
+  onToggleCollapse,
 }: ProjectFocusCardProps) {
   const [isPending, startTransition] = useTransition();
 
@@ -132,7 +140,7 @@ export function ProjectFocusCard({
     useState<HabiticaTask | null>(null);
 
   // Quick Task Creation
-  const [newTaskText, setNewTaskText] = useState("");
+
 
   // Contextual Note Creation Form State
   const [isCreatingNote, setIsCreatingNote] = useState(false);
@@ -195,20 +203,7 @@ export function ProjectFocusCard({
     });
   };
 
-  const handleQuickAddTask = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newTaskText.trim()) return;
-    soundFx.taskComplete();
 
-    const tagSuffix = activeTag ? ` #${activeTag.name}` : "";
-    const formattedText = `${newTaskText.trim()}${tagSuffix}`;
-    setNewTaskText("");
-
-    startTransition(async () => {
-      await createSingleTaskAction(formattedText);
-      if (onRefreshData) onRefreshData();
-    });
-  };
 
   const handleSaveNote = (e: React.FormEvent) => {
     e.preventDefault();
@@ -240,64 +235,76 @@ export function ProjectFocusCard({
     });
   };
 
-  // Edit Project Dialog State
-  const [isEditingProject, setIsEditingProject] = useState(false);
-  const [projectEditTitle, setProjectEditTitle] = useState("");
-  const [projectEditDescription, setProjectEditDescription] = useState("");
-  const [projectEditTechStack, setProjectEditTechStack] = useState("");
-  const [projectEditUrls, setProjectEditUrls] = useState<string[]>([""]);
-
-  const handleOpenEditProject = () => {
-    setProjectEditTitle(activeProject.title);
-    setProjectEditDescription(activeProject.description || "");
-    setProjectEditTechStack(activeProject.techStack?.join(", ") || "");
-    const classified = extractAndClassifyLinks(activeProject.repoUrl, activeProject.liveUrl);
-    setProjectEditUrls(classified.length > 0 ? classified.map((l) => l.url) : [""]);
-    setIsEditingProject(true);
-  };
-
-  const handleSaveProjectEdit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!projectEditTitle.trim()) return;
-    soundFx.taskComplete();
-
-    const techArray = projectEditTechStack
-      .split(",")
-      .map((s) => s.trim())
-      .filter(Boolean);
-
-    const validUrls = projectEditUrls.map((u) => u.trim()).filter(Boolean);
-    const { repoUrl, liveUrl } = partitionLinksForDb(validUrls);
-
-    startTransition(async () => {
-      await updateProjectDetailsAction({
-        id: activeProject.id,
-        title: projectEditTitle.trim(),
-        description: projectEditDescription.trim() || undefined,
-        status: activeProject.status,
-        techStack: techArray,
-        repoUrl,
-        liveUrl,
-        progress: activeProject.progress,
-      });
-
-      setIsEditingProject(false);
-      if (onRefreshData) onRefreshData();
-    });
-  };
-
   const pendingTasksCount = projectTasks.filter((t) => !t.completed).length;
 
+  // Render Mini / Collapsed Card if requested
+  if (isCollapsed) {
+    return (
+      <div className="rounded-2xl border border-[#2A2723] bg-[#181715] p-4 sm:p-5 shadow-xs flex items-center justify-between gap-3 font-sans transition-all">
+        <div className="flex items-center gap-3 min-w-0">
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[#221D16] text-[#D99B43] border border-[#D99B43]/30">
+            <FolderGit2 className="h-4 w-4" />
+          </div>
+          <div className="truncate">
+            <div className="flex items-center gap-2">
+              <h3 className="font-serif text-sm sm:text-base font-bold text-[#F5F2EB] truncate">
+                {activeProject.title}
+              </h3>
+              {activeTag && (
+                <span className="font-mono text-[10px] text-[#4EAB9E] bg-[#141C1A] px-2 py-0.5 rounded border border-[#4EAB9E]/30 hidden sm:inline">
+                  #{activeTag.name}
+                </span>
+              )}
+            </div>
+            <p className="text-xs text-[#8E867B] font-mono">
+              {pendingTasksCount} tareas pendientes • {projectNotes.length} notas
+            </p>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-2 shrink-0">
+          {onToggleFocusMode && (
+            <button
+              type="button"
+              onClick={onToggleFocusMode}
+              className={`p-2 rounded-lg border transition-all cursor-pointer ${isFocusMode
+                ? "bg-[#D99B43] text-[#121110] border-[#D99B43]"
+                : "bg-[#121110] border-[#2A2723] text-[#8E867B] hover:text-[#D99B43]"
+                }`}
+              title="Modo Focus"
+            >
+              <Zap className="h-4 w-4" />
+            </button>
+          )}
+          {onToggleCollapse && (
+            <button
+              type="button"
+              onClick={onToggleCollapse}
+              className="px-3 py-1.5 rounded-lg bg-[#121110] hover:bg-[#1C1A17] border border-[#2A2723] text-[#DDD6C9] hover:text-[#F5F2EB] font-mono text-xs font-semibold cursor-pointer flex items-center gap-1.5 transition-all"
+            >
+              <span>Expandir</span>
+              <ChevronDown className="h-3.5 w-3.5" />
+            </button>
+          )}
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="rounded-2xl border border-[#2A2723] bg-[#181715] p-5 sm:p-7 shadow-sm space-y-6 font-sans relative">
+    <div
+      className={`rounded-2xl border transition-all duration-300 bg-[#181715] p-5 sm:p-7 shadow-sm space-y-6 font-sans relative ${isFocusMode
+        ? "border-[#D99B43]/50 ring-1 ring-[#D99B43]/20 shadow-lg"
+        : "border-[#2A2723]"
+        }`}
+    >
       {/* ========================================================================= */}
       {/* 1. SPACIOUS 3-TIER PROJECT HEADER                                         */}
       {/* ========================================================================= */}
-      <div className="space-y-4 pb-4 border-b border-[#2A2723]">
+      <div className="space-y-4">
         {/* Row 1: Badges & Switchers */}
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-2 flex-wrap">
-
             {/* Habitica Tag Dropdown Selector */}
             {tags.length > 0 ? (
               <div className="flex items-center gap-1 font-mono text-[10px] text-[#4EAB9E] bg-[#141C1A] px-2.5 py-1 rounded-md border border-[#4EAB9E]/30">
@@ -324,9 +331,17 @@ export function ProjectFocusCard({
                 </span>
               )
             )}
+
+            {/* Focus Mode Active Indicator */}
+            {isFocusMode && (
+              <span className="font-mono text-[10px] font-bold text-[#D99B43] bg-[#221D16] px-2.5 py-1 rounded-md border border-[#D99B43]/40 flex items-center gap-1 animate-pulse">
+                <Zap className="h-3 w-3 fill-current" />
+                <span>Deep Work Focus (100% Ancho)</span>
+              </span>
+            )}
           </div>
 
-          {/* Project Switcher Select & Edit Button */}
+          {/* Project Switcher Select & Focus / Collapse Action Controls */}
           <div className="flex items-center gap-2">
             {projects.length > 1 && (
               <div className="flex items-center gap-1.5 font-mono text-xs text-[#8E867B] bg-[#121110] px-3 py-1.5 rounded-lg border border-[#2A2723]">
@@ -346,6 +361,47 @@ export function ProjectFocusCard({
                   ))}
                 </select>
               </div>
+            )}
+
+            {/* Zen Focus Toggle Button */}
+            {onToggleFocusMode && (
+              <button
+                type="button"
+                onClick={onToggleFocusMode}
+                className={`px-2.5 py-1.5 rounded-lg text-xs font-mono font-semibold transition-all cursor-pointer flex items-center gap-1.5 border shadow-2xs ${isFocusMode
+                  ? "bg-[#D99B43] text-[#121110] border-[#D99B43] hover:bg-[#E8AF59]"
+                  : "bg-[#121110] text-[#8E867B] hover:text-[#DDD6C9] border-[#2A2723] hover:border-[#D99B43]/50"
+                  }`}
+                title={
+                  isFocusMode
+                    ? "Salir de Modo Focus (restaurar vista normal)"
+                    : "Modo Enfoque Zen (maximizar proyecto y ocultar distracciones)"
+                }
+              >
+                {isFocusMode ? (
+                  <>
+                    <Minimize2 className="h-3.5 w-3.5" />
+                    <span className="hidden sm:inline">Restaurar</span>
+                  </>
+                ) : (
+                  <>
+                    <Zap className="h-3.5 w-3.5 text-[#D99B43]" />
+                    <span className="hidden sm:inline">Modo Focus</span>
+                  </>
+                )}
+              </button>
+            )}
+
+            {/* Collapse / Minimize Card Button */}
+            {onToggleCollapse && (
+              <button
+                type="button"
+                onClick={onToggleCollapse}
+                className="p-1.5 rounded-lg text-[#8E867B] hover:text-[#DDD6C9] bg-[#121110] hover:bg-[#1C1A17] border border-[#2A2723] transition-colors cursor-pointer"
+                title="Minimizar proyecto a barra compacta"
+              >
+                <ChevronUp className="h-4 w-4" />
+              </button>
             )}
           </div>
         </div>
@@ -408,7 +464,7 @@ export function ProjectFocusCard({
               }`}
           >
             <Layers className="h-4 w-4" />
-            <span>Recursos & Stack</span>
+            <span>Recursos</span>
           </button>
         </div>
       </div>
@@ -420,24 +476,6 @@ export function ProjectFocusCard({
       {/* TAB 1: TAREAS DEL PROYECTO */}
       {activeTab === "tasks" && (
         <div className="space-y-4">
-          {/* Quick Add Task Input */}
-          <form onSubmit={handleQuickAddTask} className="flex gap-2">
-            <input
-              type="text"
-              value={newTaskText}
-              onChange={(e) => setNewTaskText(e.target.value)}
-              placeholder={`+ Añadir tarea a ${activeProject.title} ${activeTag ? `(#${activeTag.name})` : ""}...`}
-              className="flex-1 rounded-xl border border-[#2A2723] bg-[#121110] px-4 py-2.5 text-xs sm:text-sm text-[#F5F2EB] placeholder:text-[#8E867B] focus:border-[#D99B43] focus:outline-none font-sans"
-            />
-            <button
-              type="submit"
-              disabled={!newTaskText.trim() || isPending}
-              className="px-4 sm:px-5 py-2.5 rounded-xl bg-[#D99B43] hover:bg-[#E8AF59] disabled:opacity-50 text-[#121110] font-bold text-xs sm:text-sm font-mono transition-all cursor-pointer shrink-0 shadow-xs"
-            >
-              + Agregar
-            </button>
-          </form>
-
           {/* Filtered Tasks List */}
           <div className="space-y-2 max-h-105 overflow-y-auto pr-1">
             {projectTasks.length > 0 ? (
@@ -700,70 +738,39 @@ export function ProjectFocusCard({
       {/* TAB 3: RECURSOS Y ENLACES */}
       {activeTab === "resources" && (
         <div className="rounded-xl border border-[#2A2723] bg-[#121110] p-5 space-y-4">
-          <div>
-            <h4 className="font-serif text-sm font-bold text-[#F5F2EB] mb-2.5">
-              Enlaces Directos & Repositorios
-            </h4>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-              {(() => {
-                const classifiedLinks = extractAndClassifyLinks(
-                  activeProject.repoUrl,
-                  activeProject.liveUrl
-                );
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+            {(() => {
+              const classifiedLinks = extractAndClassifyLinks(
+                activeProject.repoUrl,
+                activeProject.liveUrl
+              );
 
-                if (classifiedLinks.length === 0) {
-                  return (
-                    <div className="col-span-full p-4 rounded-xl border border-dashed border-[#2A2723] bg-[#181715] text-center text-xs font-mono text-[#8E867B]">
-                      Sin enlaces ni repositorios vinculados. ¡Agrégalos con el botón &quot;Editar&quot;!
-                    </div>
-                  );
-                }
-
-                return classifiedLinks.map((link, idx) => (
-                  <a
-                    key={idx}
-                    href={link.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className={`flex items-center justify-between p-3.5 rounded-xl border transition-all hover:scale-101 ${link.badgeStyle}`}
-                  >
-                    <div className="flex items-center gap-2.5 min-w-0">
-                      {link.category === "git" ? (
-                        <FolderGit2 className="h-4 w-4 shrink-0 text-[#DDD6C9]" />
-                      ) : (
-                        <Globe className="h-4 w-4 shrink-0 text-[#4EAB9E]" />
-                      )}
-                      <div className="truncate">
-                        <div className="text-xs font-bold font-mono">{link.label}</div>
-                        <div className="text-[10px] text-[#8E867B] font-mono truncate opacity-80">
-                          {link.url}
-                        </div>
+              return classifiedLinks.map((link, idx) => (
+                <a
+                  key={idx}
+                  href={link.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={`flex items-center justify-between p-3.5 rounded-xl border transition-all hover:scale-101 ${link.badgeStyle}`}
+                >
+                  <div className="flex items-center gap-2.5 min-w-0">
+                    {link.category === "git" ? (
+                      <FolderGit2 className="h-4 w-4 shrink-0 text-[#DDD6C9]" />
+                    ) : (
+                      <Globe className="h-4 w-4 shrink-0 text-[#4EAB9E]" />
+                    )}
+                    <div className="truncate">
+                      <div className="text-xs font-bold font-mono">{link.label}</div>
+                      <div className="text-[10px] text-[#8E867B] font-mono truncate opacity-80">
+                        {link.url}
                       </div>
                     </div>
-                    <ExternalLink className="h-3.5 w-3.5 shrink-0 opacity-60 ml-2" />
-                  </a>
-                ));
-              })()}
-            </div>
+                  </div>
+                  <ExternalLink className="h-3.5 w-3.5 shrink-0 opacity-60 ml-2" />
+                </a>
+              ));
+            })()}
           </div>
-
-          {activeProject.techStack && activeProject.techStack.length > 0 && (
-            <div className="pt-3 border-t border-[#2A2723]">
-              <span className="text-[11px] font-mono text-[#8E867B] block mb-2">
-                Stack Tecnológico:
-              </span>
-              <div className="flex items-center gap-2 flex-wrap">
-                {activeProject.techStack.map((tech) => (
-                  <span
-                    key={tech}
-                    className="font-mono text-xs text-[#DDD6C9] bg-[#181715] px-2.5 py-1 rounded-md border border-[#2A2723]"
-                  >
-                    {tech}
-                  </span>
-                ))}
-              </div>
-            </div>
-          )}
         </div>
       )}
 
