@@ -245,11 +245,10 @@ export function EveningReviewModal({
                       type="button"
                       onClick={handleToggleInn}
                       disabled={isPending}
-                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-mono font-semibold transition-all cursor-pointer ${
-                        isResting
+                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-mono font-semibold transition-all cursor-pointer ${isResting
                           ? "bg-[#3D3425] text-[#E8AF59] border border-[#D99B43]/40 shadow-xs"
                           : "bg-[#181715] text-[#8E867B] hover:text-[#DDD6C9] border border-[#2A2723]"
-                      }`}
+                        }`}
                     >
                       <Bed className="h-3.5 w-3.5" />
                       <span>{isResting ? "Descansando" : "Descanso"}</span>
@@ -284,9 +283,8 @@ export function EveningReviewModal({
                                     className="p-1 rounded text-[#8E867B] hover:text-[#F5F2EB] hover:bg-[#22201D] transition-colors cursor-pointer"
                                   >
                                     <ChevronDown
-                                      className={`h-3.5 w-3.5 transition-transform ${
-                                        isExpanded ? "" : "-rotate-90"
-                                      }`}
+                                      className={`h-3.5 w-3.5 transition-transform ${isExpanded ? "" : "-rotate-90"
+                                        }`}
                                     />
                                   </button>
                                 )}
@@ -328,19 +326,17 @@ export function EveningReviewModal({
                                           handleToggleSubtask(daily.id, item.id, Boolean(item.completed));
                                         }
                                       }}
-                                      className={`flex items-center justify-between p-1.5 rounded-lg border text-xs cursor-pointer select-none transition-all ${
-                                        isChecked
+                                      className={`flex items-center justify-between p-1.5 rounded-lg border text-xs cursor-pointer select-none transition-all ${isChecked
                                           ? "bg-[#141813] border-[#7EA35A]/30 text-[#8E867B]"
                                           : "bg-[#121110] border-[#2A2723] hover:border-[#38332D] text-[#DDD6C9]"
-                                      }`}
+                                        }`}
                                     >
                                       <div className="flex items-center gap-2 min-w-0">
                                         <div
-                                          className={`flex h-4 w-4 shrink-0 items-center justify-center rounded border transition-colors ${
-                                            isChecked
+                                          className={`flex h-4 w-4 shrink-0 items-center justify-center rounded border transition-colors ${isChecked
                                               ? "bg-[#7EA35A] border-[#7EA35A] text-[#121110]"
                                               : "border-[#38332D] bg-[#181715]"
-                                          }`}
+                                            }`}
                                         >
                                           {isChecked && <Check className="h-2.5 w-2.5 stroke-3" />}
                                         </div>
@@ -479,7 +475,7 @@ export function EveningReviewModal({
               <div className="mt-5 space-y-4 animate-in fade-in duration-200">
                 {/* 3-Point Rest Checklist */}
                 <div className="rounded-xl border border-[#2A2723] bg-[#121110] p-4 sm:p-5 space-y-3">
-                  <h4 className="text-xs font-bold text-[#F5F2EB] font-serif uppercase tracking-wider text-[#8E867B]">
+                  <h4 className="text-xs font-bold text-[#F5F2EB] font-serif uppercase tracking-wider">
                     Protocolo de Desconexión & Descanso
                   </h4>
 
@@ -487,18 +483,16 @@ export function EveningReviewModal({
                     {/* Item 1: Rutina de noche lista */}
                     <div
                       onClick={handleToggleNightRoutine}
-                      className={`flex items-center gap-3 p-3 rounded-xl border transition-all cursor-pointer select-none ${
-                        nightRoutineDone
+                      className={`flex items-center gap-3 p-3 rounded-xl border transition-all cursor-pointer select-none ${nightRoutineDone
                           ? "bg-[#141813] border-[#7EA35A]/40 text-[#F5F2EB]"
                           : "bg-[#181715] border-[#2A2723] hover:border-[#38332D] text-[#8E867B]"
-                      }`}
+                        }`}
                     >
                       <div
-                        className={`flex h-5 w-5 shrink-0 items-center justify-center rounded border transition-colors ${
-                          nightRoutineDone
+                        className={`flex h-5 w-5 shrink-0 items-center justify-center rounded border transition-colors ${nightRoutineDone
                             ? "bg-[#7EA35A] border-[#7EA35A] text-[#121110] font-bold"
                             : "border-[#38332D] bg-[#121110]"
-                        }`}
+                          }`}
                       >
                         {nightRoutineDone && <Check className="h-3.5 w-3.5 stroke-3" />}
                       </div>
@@ -520,18 +514,16 @@ export function EveningReviewModal({
                         setScreensOff(!screensOff);
                         soundFx.click();
                       }}
-                      className={`flex items-center gap-3 p-3 rounded-xl border transition-all cursor-pointer select-none ${
-                        screensOff
+                      className={`flex items-center gap-3 p-3 rounded-xl border transition-all cursor-pointer select-none ${screensOff
                           ? "bg-[#141813] border-[#7EA35A]/40 text-[#F5F2EB]"
                           : "bg-[#181715] border-[#2A2723] hover:border-[#38332D] text-[#8E867B]"
-                      }`}
+                        }`}
                     >
                       <div
-                        className={`flex h-5 w-5 shrink-0 items-center justify-center rounded border transition-colors ${
-                          screensOff
+                        className={`flex h-5 w-5 shrink-0 items-center justify-center rounded border transition-colors ${screensOff
                             ? "bg-[#7EA35A] border-[#7EA35A] text-[#121110] font-bold"
                             : "border-[#38332D] bg-[#121110]"
-                        }`}
+                          }`}
                       >
                         {screensOff && <Check className="h-3.5 w-3.5 stroke-3" />}
                       </div>
@@ -546,18 +538,16 @@ export function EveningReviewModal({
                         setRoomPrepared(!roomPrepared);
                         soundFx.click();
                       }}
-                      className={`flex items-center gap-3 p-3 rounded-xl border transition-all cursor-pointer select-none ${
-                        roomPrepared
+                      className={`flex items-center gap-3 p-3 rounded-xl border transition-all cursor-pointer select-none ${roomPrepared
                           ? "bg-[#141813] border-[#7EA35A]/40 text-[#F5F2EB]"
                           : "bg-[#181715] border-[#2A2723] hover:border-[#38332D] text-[#8E867B]"
-                      }`}
+                        }`}
                     >
                       <div
-                        className={`flex h-5 w-5 shrink-0 items-center justify-center rounded border transition-colors ${
-                          roomPrepared
+                        className={`flex h-5 w-5 shrink-0 items-center justify-center rounded border transition-colors ${roomPrepared
                             ? "bg-[#7EA35A] border-[#7EA35A] text-[#121110] font-bold"
                             : "border-[#38332D] bg-[#121110]"
-                        }`}
+                          }`}
                       >
                         {roomPrepared && <Check className="h-3.5 w-3.5 stroke-3" />}
                       </div>
@@ -582,11 +572,10 @@ export function EveningReviewModal({
                           setEnergyLevel(lvl.value);
                           soundFx.click();
                         }}
-                        className={`p-2 rounded-xl border transition-all cursor-pointer text-center flex flex-col items-center gap-1 ${
-                          energyLevel === lvl.value
+                        className={`p-2 rounded-xl border transition-all cursor-pointer text-center flex flex-col items-center gap-1 ${energyLevel === lvl.value
                             ? `${lvl.color} font-bold shadow-xs`
                             : "bg-[#181715] border-[#2A2723] text-[#8E867B] hover:text-[#DDD6C9]"
-                        }`}
+                          }`}
                       >
                         <span className="text-base">{lvl.emoji}</span>
                         <span className="text-[10px] leading-tight">{lvl.label}</span>
