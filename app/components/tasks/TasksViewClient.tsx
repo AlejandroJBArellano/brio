@@ -1,23 +1,19 @@
 "use client";
 
-import { toggleTaskAction } from "@/app/actions/tasks";
 import { useCommandCenter } from "@/app/components/context/CommandCenterContext";
-import { DailyFocusRibbon } from "@/app/components/DailyFocusRibbon";
 import { TaskInspectorPane } from "@/app/components/TaskInspectorPane";
 import { TaskStream } from "@/app/components/TaskStream";
 import { HabiticaTag, HabiticaTask, RitualLog } from "@/lib/types";
-import { useTransition } from "react";
 
 interface TasksViewClientProps {
   tasks: HabiticaTask[];
   tags: HabiticaTag[];
-  todayRitual: RitualLog | null;
+  todayRitual?: RitualLog | null;
 }
 
 export function TasksViewClient({
   tasks,
   tags,
-  todayRitual,
 }: TasksViewClientProps) {
   const {
     activeTaskTab,
@@ -26,36 +22,14 @@ export function TasksViewClient({
     setActiveTagFilter,
     selectedTask,
     setSelectedTask,
-    mustWinTaskIds,
-    setMustWinTaskIds: _setMustWinTaskIds,
-    openModal,
   } = useCommandCenter();
-
-  const [, startTransition] = useTransition();
 
   const currentSelectedTask = selectedTask
     ? tasks.find((t) => t.id === selectedTask.id) || selectedTask
     : null;
 
-  const currentMustWins =
-    mustWinTaskIds.length > 0 ? mustWinTaskIds : todayRitual?.mustWinTasks || [];
-
-  const handleToggleMustWin = (taskId: string) => {
-    startTransition(async () => {
-      await toggleTaskAction(taskId, "up");
-    });
-  };
-
   return (
     <div className="flex flex-col gap-5">
-      {/* Daily Must-Win Focus Ribbon */}
-      <DailyFocusRibbon
-        mustWinTaskIds={currentMustWins}
-        tasks={tasks}
-        onToggleTask={handleToggleMustWin}
-        onOpenMorningRitual={() => openModal("morningRitual")}
-      />
-
       {/* Split-Pane Workspace (Task Stream Left + Linear Inspector Right) */}
       <div className="flex flex-col lg:flex-row gap-5 items-start">
         <div

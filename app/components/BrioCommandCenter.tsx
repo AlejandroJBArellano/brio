@@ -1,6 +1,5 @@
 "use client";
 
-import { toggleTaskAction } from "@/app/actions/tasks";
 import {
   CommandCenterProvider,
   useCommandCenter,
@@ -19,9 +18,8 @@ import {
   VaultDashboardData,
 } from "@/lib/types";
 import { Plus } from "lucide-react";
-import { useEffect, useTransition } from "react";
+import { useEffect } from "react";
 import { AnalyticsView } from "./analytics/AnalyticsView";
-import { DailyFocusRibbon } from "./DailyFocusRibbon";
 import { DayScheduleView } from "./DayScheduleView";
 import { FinanceView } from "./finance/FinanceView";
 import { HeaderStatsRibbon } from "./HeaderStatsRibbon";
@@ -43,15 +41,15 @@ interface BrioCommandCenterProps {
   analyticsData: AnalyticsDashboardData;
   calendarSchedule: CalendarDaySchedule;
   isCalendarConfigured: boolean;
-  todayRitual: RitualLog | null;
   healthData: HealthDashboardData;
   projectsData: ProjectsDashboardData;
   vaultData: VaultDashboardData;
+  todayRitual?: RitualLog | null;
 }
 
 export function BrioCommandCenter(props: BrioCommandCenterProps) {
   return (
-    <CommandCenterProvider initialMustWins={props.todayRitual?.mustWinTasks || []}>
+    <CommandCenterProvider>
       <BrioCommandCenterContent {...props} />
     </CommandCenterProvider>
   );
@@ -66,10 +64,10 @@ function BrioCommandCenterContent({
   analyticsData,
   calendarSchedule,
   isCalendarConfigured,
-  todayRitual,
   healthData,
   projectsData,
   vaultData,
+  todayRitual,
 }: BrioCommandCenterProps) {
   const {
     activeMainTab,
@@ -80,12 +78,9 @@ function BrioCommandCenterContent({
     setActiveTagFilter,
     selectedTask,
     setSelectedTask,
-    mustWinTaskIds,
     openModal,
     refreshData,
   } = useCommandCenter();
-
-  const [, startTransition] = useTransition();
 
   const currentSelectedTask = selectedTask
     ? tasks.find((t) => t.id === selectedTask.id) || selectedTask
@@ -147,12 +142,6 @@ function BrioCommandCenterContent({
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [setActiveMainTab, openModal]);
 
-  const handleToggleMustWin = (taskId: string) => {
-    startTransition(async () => {
-      await toggleTaskAction(taskId, "up");
-    });
-  };
-
   const handleOpenBottomSheetWithTab = (
     tab: "expense" | "task" | "water" | "nutrition" = "expense"
   ) => {
@@ -201,14 +190,6 @@ function BrioCommandCenterContent({
 
       {activeMainTab === "tasks" && (
         <div className="flex flex-col gap-5">
-          {/* Daily Must-Win Focus Ribbon */}
-          <DailyFocusRibbon
-            mustWinTaskIds={mustWinTaskIds}
-            tasks={tasks}
-            onToggleTask={handleToggleMustWin}
-            onOpenMorningRitual={() => openModal("morningRitual")}
-          />
-
           {/* Split-Pane Workspace (Task Stream Left + Linear Inspector Right) */}
           <div className="flex flex-col lg:flex-row gap-5 items-start">
             <div

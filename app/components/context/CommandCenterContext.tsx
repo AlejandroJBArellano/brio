@@ -12,6 +12,7 @@ import {
 } from "react";
 
 export type DashboardMainTab =
+  | "today"
   | "quick"
   | "tasks"
   | "finance"
@@ -82,7 +83,7 @@ export function CommandCenterProvider({
   initialMustWins = [],
 }: CommandCenterProviderProps) {
   const router = useRouter();
-  const [activeMainTab, setActiveMainTab] = useState<DashboardMainTab>("tasks");
+  const [activeMainTab, setActiveMainTab] = useState<DashboardMainTab>("today");
   const [activeTaskTab, setActiveTaskTab] = useState<TaskStreamTab>("all");
   const [activeTagFilter, setActiveTagFilter] = useState<string | null>(null);
   const [selectedTask, setSelectedTask] = useState<HabiticaTask | null>(null);
@@ -105,7 +106,13 @@ export function CommandCenterProvider({
   }, []);
 
   const refreshData = useCallback(() => {
-    startTransition(() => {
+    startTransition(async () => {
+      try {
+        const { syncHabiticaDataAction } = await import("@/app/actions/tasks");
+        await syncHabiticaDataAction();
+      } catch {
+        // Continue with router refresh even if network sync action fails
+      }
       router.refresh();
     });
   }, [router]);
