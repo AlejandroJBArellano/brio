@@ -13,6 +13,7 @@ import {
   ContextualNote,
   DailyHealthData,
   FinanceDashboardData,
+  FoodGroupKey,
   HabiticaTag,
   HabiticaTask,
   HabiticaUser,
@@ -24,17 +25,34 @@ import {
   ArrowRight,
   Check,
   CheckCircle2,
+  ChefHat,
   ChevronDown,
   Droplet,
   Moon,
   Pill,
   Plus,
-  Sun,
-  Wallet
+  Salad,
+  Sun
 } from "lucide-react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useMemo, useOptimistic, useState, useTransition } from "react";
 import { ProjectFocusCard } from "./ProjectFocusCard";
+
+const ALL_FOOD_GROUPS: {
+  key: FoodGroupKey;
+  icon: string;
+  label: string;
+  defaultTarget: number;
+}[] = [
+  { key: "vegetables", icon: "🥦", label: "Verduras", defaultTarget: 4.5 },
+  { key: "legumes", icon: "🫘", label: "Legumbres", defaultTarget: 3 },
+  { key: "cereals", icon: "🌾", label: "Cereales", defaultTarget: 5 },
+  { key: "fats_seeds", icon: "🥑", label: "Semillas", defaultTarget: 3.5 },
+  { key: "fruits", icon: "🍎", label: "Frutas", defaultTarget: 3.5 },
+  { key: "leafy_greens", icon: "🥬", label: "Hojas", defaultTarget: 2 },
+  { key: "tubers", icon: "🍠", label: "Tubérculos", defaultTarget: 1 },
+];
 
 interface TodayViewClientProps {
   user: HabiticaUser;
@@ -126,6 +144,27 @@ export function TodayViewClient({
     Math.round((optimisticWater / waterTarget) * 100)
   );
   const isWaterComplete = optimisticWater >= waterTarget;
+
+  // Nutrition Data & Portions
+  const nutritionSummary = healthData.nutritionSummary;
+  const portions = nutritionSummary?.portions || {};
+  const portionGoals = nutritionSummary?.portionGoals || {
+    vegetables: 4.5,
+    legumes: 3,
+    cereals: 5,
+    fats_seeds: 3.5,
+    fruits: 3.5,
+  };
+  const totalPortionsConsumed =
+    nutritionSummary?.totalPortionsConsumed ??
+    Object.values(portions).reduce((sum, v) => sum + (Number(v) || 0), 0);
+  const totalPortionsTarget =
+    nutritionSummary?.totalPortionsTarget ??
+    Object.values(portionGoals).reduce((sum, v) => sum + (Number(v) || 0), 0);
+  const portionPercent = Math.min(
+    100,
+    Math.round((totalPortionsConsumed / Math.max(1, totalPortionsTarget)) * 100)
+  );
 
   // Finance Data (Ant Expenses)
   const antSpent = financeData.totalAntExpensesToday || 0;
@@ -262,17 +301,8 @@ export function TodayViewClient({
       <div className="rounded-xl border border-[#2A2723] bg-[#181715] p-4 sm:p-5 shadow-xs">
         <div className="flex items-center justify-between gap-3">
           <div>
-            <div className="flex items-center gap-2 mb-0.5">
-              <span className="font-mono text-xs uppercase tracking-wider text-[#8E867B]">
-                {todayFormatted}
-              </span>
-              <span className="h-1 w-1 rounded-full bg-[#38332D]" />
-              <span className="font-mono text-xs text-[#D99B43]">
-                Semana {Math.ceil(new Date().getDate() / 7)}
-              </span>
-            </div>
             <h1 className="font-serif text-lg sm:text-2xl font-bold tracking-tight text-[#F5F2EB]">
-              Comando del Día
+              {todayFormatted}
             </h1>
           </div>
 
@@ -300,8 +330,8 @@ export function TodayViewClient({
               type="button"
               onClick={() => openModal("morningRitual")}
               className={`p-1.5 sm:px-3 sm:py-1.5 rounded-lg text-xs font-semibold border transition-all cursor-pointer flex items-center gap-1.5 ${hasMorningRitual
-                  ? "border-[#7EA35A]/40 bg-[#1C2219] text-[#7EA35A]"
-                  : "border-[#2A2723] bg-[#121110] text-[#8E867B] hover:text-[#DDD6C9]"
+                ? "border-[#7EA35A]/40 bg-[#1C2219] text-[#7EA35A]"
+                : "border-[#2A2723] bg-[#121110] text-[#8E867B] hover:text-[#DDD6C9]"
                 }`}
               title="Ritual Matutino de Despegue"
             >
@@ -314,8 +344,8 @@ export function TodayViewClient({
               type="button"
               onClick={() => openModal("eveningReview")}
               className={`p-1.5 sm:px-3 sm:py-1.5 rounded-lg text-xs font-semibold border transition-all cursor-pointer flex items-center gap-1.5 ${hasEveningReview
-                  ? "border-[#7EA35A]/40 bg-[#1C2219] text-[#7EA35A]"
-                  : "border-[#2A2723] bg-[#121110] text-[#8E867B] hover:text-[#DDD6C9]"
+                ? "border-[#7EA35A]/40 bg-[#1C2219] text-[#7EA35A]"
+                : "border-[#2A2723] bg-[#121110] text-[#8E867B] hover:text-[#DDD6C9]"
                 }`}
               title="Cierre Nocturno"
             >
@@ -425,8 +455,8 @@ export function TodayViewClient({
                         setIsSuppDetailsOpen(false);
                       }}
                       className={`px-2 py-1 rounded-md text-center font-semibold transition-all cursor-pointer ${activeSuppTiming === timing
-                          ? "bg-[#221D16] text-[#D99B43] border border-[#D99B43]/30 shadow-2xs"
-                          : "text-[#8E867B] hover:text-[#DDD6C9]"
+                        ? "bg-[#221D16] text-[#D99B43] border border-[#D99B43]/30 shadow-2xs"
+                        : "text-[#8E867B] hover:text-[#DDD6C9]"
                         }`}
                     >
                       {timing}
@@ -440,9 +470,6 @@ export function TodayViewClient({
             {filteredSupplements.length > 0 ? (
               <div className="space-y-3">
                 <div className="flex items-center justify-between text-xs font-mono">
-                  <span className="text-[#8E867B]">
-                    Turno {activeSuppTiming}:
-                  </span>
                   <span
                     className={
                       allTakenInActiveTiming
@@ -461,8 +488,8 @@ export function TodayViewClient({
                   disabled={isPending}
                   onClick={handleBatchTakeSupplements}
                   className={`w-full py-2.5 px-3 rounded-lg font-bold text-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-xs font-sans ${allTakenInActiveTiming
-                      ? "bg-[#1C2219] text-[#7EA35A] border border-[#7EA35A]/40"
-                      : "bg-[#7EA35A] hover:bg-[#8FB866] text-[#121110]"
+                    ? "bg-[#1C2219] text-[#7EA35A] border border-[#7EA35A]/40"
+                    : "bg-[#7EA35A] hover:bg-[#8FB866] text-[#121110]"
                     }`}
                 >
                   <CheckCircle2 className="h-4 w-4" />
@@ -498,15 +525,15 @@ export function TodayViewClient({
                           key={supp.id}
                           onClick={() => handleToggleSupplement(supp.id)}
                           className={`flex items-center justify-between p-2.5 rounded-lg border transition-all cursor-pointer select-none ${supp.taken
-                              ? "bg-[#141813] border-[#7EA35A]/30 text-[#8E867B]"
-                              : "bg-[#121110] border-[#2A2723] hover:border-[#38332D] text-[#F5F2EB]"
+                            ? "bg-[#141813] border-[#7EA35A]/30 text-[#8E867B]"
+                            : "bg-[#121110] border-[#2A2723] hover:border-[#38332D] text-[#F5F2EB]"
                             }`}
                         >
                           <div className="flex items-center gap-2.5 min-w-0">
                             <div
                               className={`flex h-4 w-4 shrink-0 items-center justify-center rounded border transition-colors ${supp.taken
-                                  ? "bg-[#7EA35A] border-[#7EA35A] text-[#121110] font-bold"
-                                  : "border-[#38332D] bg-[#181715]"
+                                ? "bg-[#7EA35A] border-[#7EA35A] text-[#121110] font-bold"
+                                : "border-[#38332D] bg-[#181715]"
                                 }`}
                             >
                               {supp.taken && (
@@ -515,8 +542,8 @@ export function TodayViewClient({
                             </div>
                             <span
                               className={`text-xs truncate ${supp.taken
-                                  ? "line-through text-[#8E867B]"
-                                  : "text-[#F5F2EB]"
+                                ? "line-through text-[#8E867B]"
+                                : "text-[#F5F2EB]"
                                 }`}
                             >
                               {supp.name}
@@ -562,7 +589,7 @@ export function TodayViewClient({
                   className="py-2 px-3 rounded-lg border border-[#2A2723] bg-[#121110] hover:bg-[#1C2219] hover:border-[#4EAB9E]/40 text-[#DDD6C9] hover:text-[#4EAB9E] text-xs font-mono font-semibold transition-all flex items-center justify-center gap-1.5 cursor-pointer"
                 >
                   <Plus className="h-3 w-3" />
-                  <span>+250 ml (Vaso)</span>
+                  <span>+250 ml</span>
                 </button>
 
                 <button
@@ -572,7 +599,7 @@ export function TodayViewClient({
                   className="py-2 px-3 rounded-lg border border-[#2A2723] bg-[#121110] hover:bg-[#1C2219] hover:border-[#4EAB9E]/40 text-[#DDD6C9] hover:text-[#4EAB9E] text-xs font-mono font-semibold transition-all flex items-center justify-center gap-1.5 cursor-pointer"
                 >
                   <Plus className="h-3 w-3" />
-                  <span>+500 ml (Botella)</span>
+                  <span>+500 ml</span>
                 </button>
               </div>
 
@@ -592,61 +619,94 @@ export function TodayViewClient({
             </div>
           </div>
 
-          {/* Micro-Barra de Gastos Hormiga */}
-          <div className="rounded-xl border border-[#2A2723] bg-[#181715] p-4 sm:p-5 shadow-sm space-y-3">
-            <div className="flex items-center justify-between gap-3">
-              <div className="flex items-center gap-2.5 min-w-0">
-                <div
-                  className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border ${isAntExceeded
-                      ? "bg-[#221716] text-[#E05D52] border-[#E05D52]/30"
-                      : "bg-[#221D16] text-[#D99B43] border-[#D99B43]/30"
-                    }`}
-                >
-                  <Wallet className="h-4 w-4" />
-                </div>
-                <div className="min-w-0">
-                  <div className="flex items-center gap-2">
-                    <span className="font-serif text-xs sm:text-sm font-bold text-[#F5F2EB]">
-                      Gastos Hormiga
-                    </span>
-                    <span
-                      className={`font-mono text-[10px] font-bold px-1.5 py-0.2 rounded border ${isAntExceeded
-                          ? "bg-[#221716] text-[#E05D52] border-[#E05D52]/30"
-                          : "bg-[#141813] text-[#7EA35A] border-[#7EA35A]/30"
-                        }`}
+          {/* Micro-Resumen de Nutrición & Porciones (Plan Mariana Mont) */}
+          <div className="rounded-xl border border-[#2A2723] bg-[#181715] p-5 sm:p-6 shadow-sm space-y-4">
+            <div className="flex items-center justify-between pb-3 border-b border-[#2A2723]">
+              <div className="flex items-center gap-2">
+                <Salad className="h-4 w-4 text-[#7EA35A]" />
+                <span className="font-serif text-sm sm:text-base font-bold text-[#F5F2EB]">
+                  Porciones del Día
+                </span>
+              </div>
+              <span className="font-mono text-xs font-bold text-[#7EA35A]">
+                {totalPortionsConsumed} / {totalPortionsTarget} ({portionPercent}%)
+              </span>
+            </div>
+
+            <div className="space-y-3">
+              {/* Micro-pills por todos los 7 grupos alimenticios + card de balance */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5 font-mono">
+                {ALL_FOOD_GROUPS.map((group) => {
+                  const current = portions[group.key] ?? 0;
+                  const target = portionGoals[group.key] ?? group.defaultTarget;
+                  const isMet = current >= target && target > 0;
+
+                  return (
+                    <div
+                      key={group.key}
+                      className={`p-2 rounded-lg border transition-all ${
+                        isMet
+                          ? "bg-[#141813] border-[#7EA35A]/40 text-[#7EA35A]"
+                          : "bg-[#121110] border-[#2A2723] text-[#DDD6C9]"
+                      }`}
                     >
-                      {isAntExceeded
-                        ? `+$${(antSpent - antLimit).toFixed(0)} exc.`
-                        : `$${antRemaining.toFixed(0)} disp.`}
-                    </span>
+                      <div className="flex items-center justify-between gap-1 text-[10px] font-mono">
+                        <span className="truncate text-[#8E867B] flex items-center gap-1">
+                          <span>{group.icon}</span>
+                          <span className="truncate">{group.label}</span>
+                        </span>
+                        {isMet && <Check className="h-2.5 w-2.5 stroke-3 text-[#7EA35A]" />}
+                      </div>
+                      <div className="font-bold text-xs mt-1">
+                        <span className={isMet ? "text-[#7EA35A]" : "text-[#F5F2EB]"}>
+                          {current}
+                        </span>
+                        <span className="text-[10px] font-normal text-[#8E867B]">
+                          /{target}
+                        </span>
+                      </div>
+                    </div>
+                  );
+                })}
+
+                {/* 8th Slot: Balance del Plan / Kcal */}
+                <div className="p-2 rounded-lg bg-[#121110] border border-[#2A2723] flex flex-col justify-between">
+                  <div className="flex items-center justify-between text-[10px] font-mono text-[#8E867B]">
+                    <span>🔥 Energía</span>
+                    <span className="text-[#D99B43] font-bold">Kcal</span>
                   </div>
-                  <p className="font-mono text-[11px] text-[#8E867B] truncate">
-                    Gastado: ${antSpent.toFixed(0)} / ${antLimit.toFixed(0)} meta
-                  </p>
+                  <div className="font-mono text-xs font-bold text-[#F5F2EB] mt-1 truncate">
+                    {nutritionSummary?.kcal ? `${nutritionSummary.kcal} kcal` : "0 kcal"}
+                  </div>
                 </div>
               </div>
 
-              <button
-                type="button"
-                onClick={() => openModal("finance")}
-                className="px-3 py-1.5 rounded-lg bg-[#221D16] hover:bg-[#2F271D] text-[#D99B43] border border-[#D99B43]/30 text-xs font-mono font-bold transition-all cursor-pointer shrink-0 flex items-center gap-1"
-              >
-                <Plus className="h-3 w-3" />
-                <span>Gasto</span>
-              </button>
-            </div>
+              {/* Barra de progreso de porciones */}
+              <div className="h-1.5 w-full rounded-full bg-[#121110] overflow-hidden">
+                <div
+                  className="h-full bg-[#7EA35A] transition-all duration-300 rounded-full"
+                  style={{ width: `${portionPercent}%` }}
+                />
+              </div>
 
-            {/* Minimal Progress Line */}
-            <div className="h-1 w-full rounded-full bg-[#121110] mt-3 overflow-hidden">
-              <div
-                className={`h-full transition-all duration-300 ${isAntExceeded
-                    ? "bg-[#E05D52]"
-                    : antPercent >= 80
-                      ? "bg-[#D99B43]"
-                      : "bg-[#7EA35A]"
-                  }`}
-                style={{ width: `${antPercent}%` }}
-              />
+              {/* Próxima comida o Kcal y botón de ¿Qué cocino hoy? */}
+              <div className="pt-1 flex items-center justify-between gap-3">
+                <div className="min-w-0">
+                  <p className="text-[11px] font-mono text-[#8E867B] truncate">
+                    {nutritionSummary?.nextMealTitle
+                      ? `Próxima: ${nutritionSummary.nextMealTitle}`
+                      : `${nutritionSummary?.kcal ? `${nutritionSummary.kcal} kcal hoy` : "Plan Mariana Mont"}`}
+                  </p>
+                </div>
+
+                <Link
+                  href="/health/nutrition"
+                  className="px-3 py-1.5 rounded-lg bg-[#1C2219] hover:bg-[#252E21] border border-[#7EA35A]/40 text-[#7EA35A] text-xs font-mono font-bold transition-all flex items-center gap-1.5 shrink-0 cursor-pointer shadow-2xs hover:border-[#7EA35A]/70"
+                >
+                  <ChefHat className="h-3.5 w-3.5 text-[#7EA35A]" />
+                  <span>¿Qué cocino hoy? ↗</span>
+                </Link>
+              </div>
             </div>
           </div>
         </div>

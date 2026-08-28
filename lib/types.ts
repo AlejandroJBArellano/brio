@@ -556,6 +556,19 @@ export interface MuscleRecoverySummary {
 }
 
 
+export interface NutritionSummary {
+  kcal: number;
+  proteinGrams: number;
+  carbsGrams: number;
+  fatGrams: number;
+  nextMealTitle?: string;
+  portions?: Partial<Record<FoodGroupKey, number>>;
+  portionGoals?: Partial<Record<FoodGroupKey, number>>;
+  totalPortionsConsumed?: number;
+  totalPortionsTarget?: number;
+  groupsMetCount?: number;
+}
+
 export interface DailyHealthData {
   todayHealth: HealthLog;
   waterPercent: number;
@@ -564,13 +577,7 @@ export interface DailyHealthData {
   averageSleepHours: number;
   recentLogs: HealthLog[];
   supplementsCatalog: UserSupplement[];
-  nutritionSummary?: {
-    kcal: number;
-    proteinGrams: number;
-    carbsGrams: number;
-    fatGrams: number;
-    nextMealTitle?: string;
-  };
+  nutritionSummary?: NutritionSummary;
   lastWorkoutSummary?: {
     title: string;
     date: string;
@@ -605,6 +612,7 @@ export interface HealthDashboardData {
   recentHevyWorkouts?: HevyWorkout[];
   hevyStats?: HevyStats;
   nutritionData?: NutritionDashboardData;
+  nutritionSummary?: NutritionSummary;
   biomarkersData?: BiomarkersDashboardData;
 }
 

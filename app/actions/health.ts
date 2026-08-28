@@ -11,12 +11,14 @@ import {
   BodyCompositionLog,
   BodyCompositionSegmental,
   DailyHealthData,
+  FoodGroupKey,
   HealthDashboardData,
   HealthLog,
   HevyExercise,
   HevyStats,
   HevyWorkout,
   LabTestReport,
+  NutritionSummary,
   SupplementItem,
   TrainingHealthData,
   UserSupplement,
@@ -413,8 +415,25 @@ export async function fetchDailyHealthDataAction(): Promise<DailyHealthData> {
 
   const waterPercent = Math.min(100, Math.round((todayHealth.waterMl / 3000) * 100));
 
-  let nutritionSummary = undefined;
+  let nutritionSummary: NutritionSummary | undefined = undefined;
   if (nutritionData && nutritionData.todayLog) {
+    const portions = nutritionData.todayLog.portions || {};
+    const portionGoals = nutritionData.settings?.dailyPortionGoals || {};
+
+    const totalPortionsConsumed = Object.values(portions).reduce(
+      (sum: number, v: unknown) => sum + (Number(v) || 0),
+      0
+    );
+    const totalPortionsTarget = Object.values(portionGoals).reduce(
+      (sum: number, v: unknown) => sum + (Number(v) || 0),
+      0
+    );
+
+    const groupsMetCount = Object.entries(portionGoals).filter(([key, target]) => {
+      const consumed = portions[key as FoodGroupKey] || 0;
+      return consumed >= Number(target) && Number(target) > 0;
+    }).length;
+
     nutritionSummary = {
       kcal: nutritionData.todayLog.calculatedMacros.kcal,
       proteinGrams: nutritionData.todayLog.calculatedMacros.proteinGrams,
@@ -426,6 +445,11 @@ export async function fetchDailyHealthDataAction(): Promise<DailyHealthData> {
             nutritionData.scheduledMealsToday[0].customTitle ||
             "Programada")
           : undefined,
+      portions,
+      portionGoals,
+      totalPortionsConsumed: Number(totalPortionsConsumed.toFixed(1)),
+      totalPortionsTarget: Number(totalPortionsTarget.toFixed(1)),
+      groupsMetCount,
     };
   }
 
