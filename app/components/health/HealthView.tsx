@@ -24,6 +24,7 @@ import {
   UploadCloud,
   Salad,
   X,
+  Zap,
 } from "lucide-react";
 import { useState, useTransition } from "react";
 import { BiomarkersView } from "./biomarkers/BiomarkersView";
@@ -205,6 +206,12 @@ export function HealthView({ data, onRefresh }: HealthViewProps) {
               </span>
             )}
           </button>
+        </div>
+
+        {/* Habitica RPG Gamification Status Badge */}
+        <div className="hidden lg:flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#221D16] border border-[#D99B43]/30 text-xs font-mono text-[#D99B43]">
+          <Zap className="size-3.5 fill-[#D99B43]" />
+          <span>Habitica RPG Vinculado</span>
         </div>
       </div>
 

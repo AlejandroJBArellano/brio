@@ -103,6 +103,37 @@ export async function saveHormonalScheduleConfigAction(
   }
 }
 
+const HORMONAL_ITEM_TITLES: Record<keyof HormonalDailyChecklist, { title: string; notes: string }> = {
+  sleep10hLogged: {
+    title: "[Brio] 10h Sueño Profundo & Síntesis Hormonal",
+    notes: "21:30 - 07:30: Síntesis de Testosterona y Hormona de Crecimiento.",
+  },
+  morningSunlight: {
+    title: "[Brio] Carga de Luz Solar & Hidratación Matutina",
+    notes: "07:30 - 08:30: 10-15m sol directo + 500ml agua con electrolitos.",
+  },
+  morningDeepWorkDone: {
+    title: "[Brio] Ventana Dorada de Deep Work Matutino",
+    notes: "08:30 - 12:00: Tareas Must-Win de alta concentración en pico de dopamina.",
+  },
+  gymSessionCompleted: {
+    title: "[Brio] Entrenamiento de Fuerza en Gym",
+    notes: "12:00 - 14:00: Sobrecarga progresiva y pico neuromuscular.",
+  },
+  postGymNutrition: {
+    title: "[Brio] Almuerzo Anabólico Post-Gym",
+    notes: "14:00 - 15:00: Comida limpia, densa en proteína/grasas sin somnolencia.",
+  },
+  hardStop7pmRespected: {
+    title: "[Brio] Hard Stop 7PM & Desconexión Laboral",
+    notes: "19:00: Cierre absoluto del trabajo y desconexión mental.",
+  },
+  nightDimLightMagnesium: {
+    title: "[Brio] Dim Light & Magnesio / Zinc",
+    notes: "20:00 - 21:30: Luz cálida tenue y relajación del sistema nervioso.",
+  },
+};
+
 /**
  * Server Action: Toggles an item in today's hormonal checklist.
  */
@@ -129,8 +160,13 @@ export async function toggleHormonalChecklistItemAction(
     `;
 
     if (updatedChecklist[key]) {
+      const meta = HORMONAL_ITEM_TITLES[key] || {
+        title: `[Brio] Hábito Circadiano: ${key}`,
+        notes: `Hábito circadiano cumplido: ${key}`,
+      };
       await awardHabiticaEvent("CIRCADIAN_HABIT_COMPLETED", {
-        customNotes: `Hábito circadiano cumplido: ${key}`,
+        customTitle: meta.title,
+        customNotes: meta.notes,
       });
     }
 

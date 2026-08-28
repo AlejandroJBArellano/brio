@@ -496,6 +496,7 @@ export async function logWorkoutAction(
 
     // Award Habitica XP for workout
     await awardHabiticaEvent("WORKOUT_COMPLETED", {
+      customTitle: `[Brio] Entrenamiento: ${workoutType}`,
       customNotes: `Entrenamiento: ${workoutType}${workoutNotes ? ` • ${workoutNotes}` : ""}`,
     });
 
@@ -527,7 +528,8 @@ export async function addWaterAction(
 
     // Award Habitica XP for hydration
     await awardHabiticaEvent("HYDRATION_LOGGED", {
-      customNotes: `Ingesta de agua: +${amountMl}ml`,
+      customTitle: `[Brio] Hidratación (+${amountMl}ml)`,
+      customNotes: `Ingesta de agua: +${amountMl}ml registrados en Brio.`,
     });
 
     revalidatePath("/");
@@ -759,7 +761,13 @@ export async function toggleSupplementAction(
 
     // Award Habitica XP safely without blocking
     try {
-      await awardHabiticaEvent("SUPPLEMENTS_COMPLETED");
+      const toggledItem = updatedSupplements.find((s) => s.id === supplementId);
+      if (toggledItem && toggledItem.taken) {
+        await awardHabiticaEvent("SUPPLEMENTS_COMPLETED", {
+          customTitle: `[Brio] Suplemento: ${toggledItem.name}`,
+          customNotes: `Suplemento diario tomado: ${toggledItem.name}${toggledItem.dosage ? ` (${toggledItem.dosage})` : ""}.`,
+        });
+      }
     } catch (gamifyErr) {
       console.warn("[Habitica Gamify Non-blocking Warning]:", gamifyErr);
     }
@@ -843,9 +851,12 @@ export async function batchToggleSupplementsByTimingAction(
           updated_at = NOW();
     `;
 
-    if (completed) {
+    if (completed && modifiedCount > 0) {
       try {
-        await awardHabiticaEvent("SUPPLEMENTS_COMPLETED");
+        await awardHabiticaEvent("SUPPLEMENTS_COMPLETED", {
+          customTitle: `[Brio] Suplementación: ${timing}`,
+          customNotes: `Tanda de suplementación completada (${timing}): ${modifiedCount} suplementos tomados.`,
+        });
       } catch (gamifyErr) {
         console.warn("[Habitica Gamify Non-blocking Warning]:", gamifyErr);
       }
@@ -887,12 +898,11 @@ export async function logSleepAction(
           updated_at = NOW();
     `;
 
-    // Award Habitica XP if optimal sleep
-    if (sleepHours >= 7 || sleepQuality >= 4) {
-      await awardHabiticaEvent("SLEEP_LOGGED", {
-        customNotes: `Descanso: ${sleepHours}h (Calidad ${sleepQuality}/5)`,
-      });
-    }
+    // Award Habitica XP for sleep log
+    await awardHabiticaEvent("SLEEP_LOGGED", {
+      customTitle: `[Brio] Descanso & Sueño (${sleepHours}h)`,
+      customNotes: `Registro de sueño y recuperación: ${sleepHours}h (Calidad ${sleepQuality}/5).`,
+    });
 
     revalidatePath("/");
     return { success: true };
@@ -1008,6 +1018,7 @@ export async function createBodyCompositionLogAction(input: {
 
     // Award Habitica XP for body composition tracking
     await awardHabiticaEvent("BODY_COMPOSITION_LOGGED", {
+      customTitle: "[Brio] InBody / Composición Corporal",
       customNotes: `Peso: ${input.weightKg} kg${input.bodyFatPercentage ? ` • Grasa: ${input.bodyFatPercentage}%` : ""}${input.skeletalMuscleKg ? ` • Músculo: ${input.skeletalMuscleKg} kg` : ""}`,
     });
 
@@ -1092,6 +1103,13 @@ export async function syncHevyWorkoutsAction(options?: {
       }
 
       if (p >= result.pageCount) break;
+    }
+
+    if (totalSynced > 0) {
+      await awardHabiticaEvent("WORKOUT_COMPLETED", {
+        customTitle: `[Brio] Hevy: ${totalSynced} Entrenamientos Sincronizados`,
+        customNotes: `Sincronización de Hevy: ${totalSynced} sesiones y ${Math.round(totalVolume)} kg de volumen total levantados.`,
+      });
     }
 
     revalidatePath("/");
