@@ -66,8 +66,32 @@ export async function saveMorningRitualAction(payload: {
       VALUES (${todayStr}, ${tasksJson}::jsonb, ${payload.energyLevel}, ${payload.dayIntention || null})
       ON CONFLICT (date) DO UPDATE
       SET energy_level = ${payload.energyLevel},
-          day_intention = ${payload.dayIntention || null};
+          day_intention = COALESCE(${payload.dayIntention || null}, ritual_logs.day_intention),
+          must_win_tasks = COALESCE(${tasksJson}::jsonb, ritual_logs.must_win_tasks);
     `;
+
+    // Also persist sleep hours and sleep quality into health_logs
+    if (payload.sleepHours || payload.sleepQuality) {
+      let numericSleepHours = 7.5;
+      if (payload.sleepHours === "< 6h") numericSleepHours = 5.5;
+      else if (payload.sleepHours === "6h - 7h") numericSleepHours = 6.5;
+      else if (payload.sleepHours === "7h - 8h") numericSleepHours = 7.5;
+      else if (payload.sleepHours === "> 8h") numericSleepHours = 8.5;
+
+      let numericQuality = 3;
+      if (payload.sleepQuality === "heavy") numericQuality = 2;
+      else if (payload.sleepQuality === "normal") numericQuality = 3;
+      else if (payload.sleepQuality === "restful") numericQuality = 5;
+
+      await sql`
+        INSERT INTO health_logs (date, sleep_hours, sleep_quality, updated_at)
+        VALUES (${todayStr}, ${numericSleepHours}, ${numericQuality}, NOW())
+        ON CONFLICT (date) DO UPDATE
+        SET sleep_hours = ${numericSleepHours},
+            sleep_quality = ${numericQuality},
+            updated_at = NOW();
+      `;
+    }
 
     // Activity tracking
     await sql`
@@ -85,7 +109,10 @@ export async function saveMorningRitualAction(payload: {
       customNotes: notesParts.join(" • "),
     });
 
-    revalidatePath("/");
+    revalidatePath("/", "layout");
+    revalidatePath("/today");
+    revalidatePath("/tasks");
+    revalidatePath("/health");
     return { success: true };
   } catch (error) {
     console.error("[Save Morning Ritual Error]:", error);

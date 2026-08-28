@@ -1,7 +1,7 @@
 "use client";
 
 import { saveMorningRitualAction } from "@/app/actions/rituals";
-import { toggleChecklistItemAction } from "@/app/actions/tasks";
+import { toggleChecklistItemAction, toggleTaskAction } from "@/app/actions/tasks";
 import { soundFx } from "@/lib/soundFx";
 import { HabiticaTask, HabiticaUser } from "@/lib/types";
 import {
@@ -12,6 +12,7 @@ import {
   Sun,
   X,
 } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useMemo, useOptimistic, useState, useTransition } from "react";
 
 interface MorningRitualModalProps {
@@ -39,10 +40,9 @@ const ENERGY_LEVELS = [
 ];
 
 const DEFAULT_SELF_CARE_ITEMS = [
-  { id: "water", text: "Tomar primer vaso de agua (500 ml)", icon: "💧" },
-  { id: "smoothie", text: "Preparar y tomar licuado tranquilo", icon: "🥤" },
-  { id: "hygiene", text: "Cepillarme los dientes y tender la cama", icon: "🛏️" },
-  { id: "supplements", text: "Tomar suplementos matutinos", icon: "💊" },
+  { id: "teeth", text: "Cepillarme los dientes", icon: "🪥" },
+  { id: "breakfast", text: "Desayuno", icon: "🍳" },
+  { id: "water", text: "Tomar agua", icon: "💧" },
 ];
 
 export function MorningRitualModal({
@@ -52,6 +52,7 @@ export function MorningRitualModal({
   tasks,
   onSuccess,
 }: MorningRitualModalProps) {
+  const router = useRouter();
   const [isPending, startTransition] = useTransition();
 
   // Bloque 1: Bio-Check de Sueño y Energía
@@ -65,18 +66,44 @@ export function MorningRitualModal({
     [tasks]
   );
 
-  // Auto-detect a Morning Daily or fallback
+  // Auto-detect a Morning Daily prioritizing the real user daily with checklist (e.g. Rutina matutina)
   const autoMorningDaily = useMemo(() => {
-    return (
-      dailyTasks.find((t) =>
-        /matutina|mañana|morning|despertar|rutina/i.test(t.text)
-      ) ||
-      dailyTasks[0] ||
-      null
+    // 1. Explicitly look for a routine daily with checklist items (not [Brio])
+    const routineWithChecklist = dailyTasks.find(
+      (t) =>
+        t.checklist &&
+        t.checklist.length > 0 &&
+        !t.text.startsWith("[Brio]") &&
+        /matutin|mañana|morning|rutina/i.test(t.text)
     );
+    if (routineWithChecklist) return routineWithChecklist;
+
+    // 2. Look for "Rutina matutina" / "Matutina"
+    const namedRoutine = dailyTasks.find(
+      (t) =>
+        !t.text.startsWith("[Brio]") &&
+        /rutina matutina|matutina|rutina de la mañana/i.test(t.text)
+    );
+    if (namedRoutine) return namedRoutine;
+
+    // 3. Any non-[Brio] daily with checklist
+    const nonBrioChecklist = dailyTasks.find(
+      (t) => !t.text.startsWith("[Brio]") && t.checklist && t.checklist.length > 0
+    );
+    if (nonBrioChecklist) return nonBrioChecklist;
+
+    // 4. Any morning daily without [Brio] prefix
+    const morningMatch = dailyTasks.find(
+      (t) =>
+        !t.text.startsWith("[Brio]") &&
+        /matutina|mañana|morning|despertar/i.test(t.text)
+    );
+    if (morningMatch) return morningMatch;
+
+    return dailyTasks[0] || null;
   }, [dailyTasks]);
 
-  const [selectedDailyId, _setSelectedDailyId] = useState<string | null>(
+  const [selectedDailyId, setSelectedDailyId] = useState<string | null>(
     autoMorningDaily?.id || null
   );
 
@@ -126,6 +153,12 @@ export function MorningRitualModal({
   const handleFinish = () => {
     soundFx.taskComplete();
     startTransition(async () => {
+      // 1. Complete/score the active Daily on Habitica if not yet done
+      if (activeDaily && (activeDaily.isDue || activeDaily.completed === false)) {
+        await toggleTaskAction(activeDaily.id, "up");
+      }
+
+      // 2. Save the Morning Ritual state
       await saveMorningRitualAction({
         energyLevel,
         sleepHours,
@@ -133,6 +166,7 @@ export function MorningRitualModal({
       });
 
       if (onSuccess) onSuccess();
+      router.refresh();
       onClose();
     });
   };
@@ -274,9 +308,27 @@ export function MorningRitualModal({
 
             {/* Daily Selector / Badge */}
             {activeDaily && (
-              <span className="font-mono text-[10px] text-[#4EAB9E] bg-[#141C1A] px-2 py-0.5 rounded border border-[#4EAB9E]/30 truncate max-w-40">
-                ⚡ Habitica: {activeDaily.text}
-              </span>
+              <div className="flex items-center gap-1.5">
+                {dailyTasks.filter((t) => !t.text.startsWith("[Brio]")).length > 1 ? (
+                  <select
+                    value={selectedDailyId || activeDaily.id}
+                    onChange={(e) => setSelectedDailyId(e.target.value)}
+                    className="font-mono text-[10px] text-[#4EAB9E] bg-[#141C1A] px-2 py-0.5 rounded border border-[#4EAB9E]/30 cursor-pointer max-w-48 truncate focus:outline-none"
+                  >
+                    {dailyTasks
+                      .filter((t) => !t.text.startsWith("[Brio]"))
+                      .map((d) => (
+                        <option key={d.id} value={d.id} className="bg-[#181715] text-[#F5F2EB]">
+                          ⚡ {d.text} {d.checklist?.length ? `(${d.checklist.filter((c) => c.completed).length}/${d.checklist.length})` : ""}
+                        </option>
+                      ))}
+                  </select>
+                ) : (
+                  <span className="font-mono text-[10px] text-[#4EAB9E] bg-[#141C1A] px-2 py-0.5 rounded border border-[#4EAB9E]/30 truncate max-w-48">
+                    ⚡ Habitica: {activeDaily.text}
+                  </span>
+                )}
+              </div>
             )}
           </div>
 
