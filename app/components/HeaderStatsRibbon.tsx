@@ -125,7 +125,7 @@ export function HeaderStatsRibbon({ user }: HeaderStatsRibbonProps) {
   }, [router]);
 
   const isTabActive = (route: string) => {
-    if (route === "/tasks") return pathname === "/tasks" || pathname === "/";
+    if (route === "/today") return pathname === "/today" || pathname === "/";
     return pathname.startsWith(route);
   };
 
@@ -156,21 +156,24 @@ export function HeaderStatsRibbon({ user }: HeaderStatsRibbonProps) {
               <Link
                 key={item.href}
                 href={item.href}
-                className={`group flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs transition-all font-sans shrink-0 cursor-pointer ${active
+                className={`group flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs transition-all font-sans shrink-0 cursor-pointer ${
+                  active
                     ? "border border-[#3D3425] bg-[#221D16] text-[#D99B43] font-bold shadow-xs"
                     : "border border-transparent text-[#8E867B] hover:text-[#DDD6C9] hover:bg-[#1D1B18]"
-                  }`}
+                }`}
               >
                 <Icon
-                  className={`size-3.5 transition-colors ${active ? "text-[#D99B43]" : "text-[#8E867B] group-hover:text-[#DDD6C9]"
-                    }`}
+                  className={`size-3.5 transition-colors ${
+                    active ? "text-[#D99B43]" : "text-[#8E867B] group-hover:text-[#DDD6C9]"
+                  }`}
                 />
                 <span>{item.label}</span>
                 <kbd
-                  className={`hidden lg:inline-block rounded px-1 py-0.2 font-mono text-[9px] transition-colors ${active
+                  className={`hidden lg:inline-block rounded px-1 py-0.2 font-mono text-[9px] transition-colors ${
+                    active
                       ? "bg-[#2E2419] text-[#D99B43] border border-[#4A3B25]"
                       : "bg-[#141312] text-[#736B60] border border-[#22201D]"
-                    }`}
+                  }`}
                 >
                   {item.shortcut}
                 </kbd>
@@ -218,7 +221,7 @@ export function HeaderStatsRibbon({ user }: HeaderStatsRibbonProps) {
           </button>
 
           {isActionsOpen && (
-            <div className="absolute right-0 mt-2 w-56 rounded-xl border border-[#2A2723] bg-[#181715] p-1.5 shadow-2xl z-50 animate-in fade-in zoom-in-95 duration-100 font-sans text-xs">
+            <div className="absolute right-0 mt-2 w-60 rounded-xl border border-[#2A2723] bg-[#181715] p-1.5 shadow-2xl z-50 animate-in fade-in zoom-in-95 duration-100 font-sans text-xs">
               <button
                 type="button"
                 onClick={() => {
@@ -279,6 +282,33 @@ export function HeaderStatsRibbon({ user }: HeaderStatsRibbonProps) {
                 <kbd className="font-mono text-[10px] text-[#8E867B] bg-[#121110] px-1 rounded border border-[#2A2723]">⌘J</kbd>
               </button>
 
+              {/* Habitica Inn / Sleep Button in Actions Menu */}
+              <button
+                type="button"
+                onClick={() => {
+                  setIsActionsOpen(false);
+                  handleToggleRest();
+                }}
+                disabled={isPending}
+                className={`w-full flex items-center justify-between p-2 rounded-lg transition-colors cursor-pointer ${
+                  isResting
+                    ? "bg-[#D99B43]/15 text-[#E8AF59] hover:bg-[#D99B43]/25"
+                    : "text-[#DDD6C9] hover:bg-[#22201D] hover:text-[#F5F2EB]"
+                }`}
+              >
+                <div className="flex items-center gap-2 min-w-0">
+                  <Bed className={`size-3.5 shrink-0 ${isResting ? "text-[#E8AF59]" : "text-[#D99B43]"}`} />
+                  <span className="truncate">{isResting ? "Descansando" : "Descanso"}</span>
+                </div>
+                <span className={`font-mono text-[9px] px-1.5 py-0.5 rounded border shrink-0 ${
+                  isResting
+                    ? "border-[#D99B43]/40 bg-[#221D16] text-[#E8AF59] font-bold"
+                    : "border-[#2A2723] bg-[#121110] text-[#8E867B]"
+                }`}>
+                  {isResting ? "DESCANSANDO" : "ACTIVO"}
+                </span>
+              </button>
+
               <div className="my-1 h-px bg-[#2A2723]" />
 
               <button
@@ -299,7 +329,7 @@ export function HeaderStatsRibbon({ user }: HeaderStatsRibbonProps) {
           )}
         </div>
 
-        {/* Profile Popover (Sleek Avatar Pill with Level, Posada & Sign Out) */}
+        {/* Profile Popover (Sleek Avatar Pill with Level, Rest & Sign Out) */}
         <div className="relative" ref={profileRef}>
           <button
             type="button"
@@ -316,7 +346,7 @@ export function HeaderStatsRibbon({ user }: HeaderStatsRibbonProps) {
               Lvl {stats.lvl}
             </span>
             {isResting && (
-              <span className="flex size-1.5 rounded-full bg-[#D99B43] animate-pulse" title="En Posada" />
+              <span className="flex size-1.5 rounded-full bg-[#D99B43] animate-pulse" title="Descansando" />
             )}
             <ChevronDown className={`size-3 text-[#8E867B] transition-transform ${isProfileOpen ? "rotate-180" : ""}`} />
           </button>
@@ -338,7 +368,7 @@ export function HeaderStatsRibbon({ user }: HeaderStatsRibbonProps) {
                 </div>
               </div>
 
-              {/* Posada / Rest toggle */}
+              {/* Rest toggle */}
               <div>
                 <button
                   type="button"
@@ -351,10 +381,10 @@ export function HeaderStatsRibbon({ user }: HeaderStatsRibbonProps) {
                 >
                   <div className="flex items-center gap-2">
                     <Bed className="size-4" />
-                    <span>Posada (Pausar Daño)</span>
+                    <span>Descanso</span>
                   </div>
                   <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-black/40">
-                    {isResting ? "ACTIVO" : "DESCANSO"}
+                    {isResting ? "DESCANSANDO" : "ACTIVO"}
                   </span>
                 </button>
               </div>

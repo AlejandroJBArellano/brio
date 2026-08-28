@@ -252,12 +252,12 @@ function CommandPaletteContent({
       },
       {
         id: "action-rest",
-        title: isResting ? "Despertar de la Posada" : "Descansar en la Posada (Inn)",
+        title: isResting ? "Desactivar descanso" : "Activar descanso",
         subtitle: isResting
           ? "Reanudar daño de dailies"
-          : "Pausar daño de dailies no completadas",
+          : "Pausar daño de dailies pendientes",
         icon: Bed,
-        badge: isResting ? "En Posada" : "Activo",
+        badge: isResting ? "Descansando" : "Activo",
         run: () => {
           startTransition(async () => {
             await toggleSleepAction();
