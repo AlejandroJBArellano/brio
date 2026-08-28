@@ -12,11 +12,13 @@ import {
   VaultItemCategory,
 } from "@/lib/types";
 import { matchTasksToProject } from "@/lib/projectMatcher";
+import { extractAndClassifyLinks } from "@/lib/urlClassifier";
 import {
   BookOpen,
   ChevronRight,
   Code2,
   ExternalLink,
+  Globe,
   GraduationCap,
   ListTodo,
   Music,
@@ -298,14 +300,15 @@ export function VaultView({ data, onRefresh, onOpenScratchpad }: VaultViewProps)
               data.projects.map((proj) => {
                 const statusMeta = STATUS_LABELS[proj.status] || STATUS_LABELS.idea;
                 const metrics = matchTasksToProject(proj, data.tasks || []);
+                const classifiedLinks = extractAndClassifyLinks(proj.repoUrl, proj.liveUrl);
 
                 return (
                   <div
                     key={proj.id}
                     onClick={() => setSelectedProject(proj)}
-                    className="group rounded-xl border border-[#2A2723] bg-[#181715] hover:border-[#38332D] hover:bg-[#1D1B18] p-5 shadow-sm transition-all flex flex-col justify-between cursor-pointer space-y-4"
+                    className="group rounded-xl border border-[#2A2723] bg-[#181715] hover:border-[#38332D] hover:bg-[#1D1B18] p-3.5 sm:p-4 shadow-sm transition-all flex flex-col justify-between cursor-pointer space-y-2.5"
                   >
-                    <div className="space-y-3">
+                    <div className="space-y-2">
                       {/* Status and Action delete */}
                       <div
                         className="flex items-center justify-between font-mono"
@@ -316,7 +319,7 @@ export function VaultView({ data, onRefresh, onOpenScratchpad }: VaultViewProps)
                           onChange={(e) =>
                             handleUpdateProjectStatus(proj.id, e.target.value as ProjectStatus)
                           }
-                          className={`text-[11px] font-bold px-2.5 py-1 rounded-lg border ${statusMeta.color} bg-[#121110] focus:outline-none cursor-pointer`}
+                          className={`text-[10px] font-bold px-2 py-0.5 rounded border ${statusMeta.color} bg-[#121110] focus:outline-none cursor-pointer`}
                         >
                           <option value="permanent">♾️ Permanente</option>
                           <option value="in_progress">⚡ En Desarrollo</option>
@@ -329,6 +332,7 @@ export function VaultView({ data, onRefresh, onOpenScratchpad }: VaultViewProps)
                           type="button"
                           onClick={() => handleDeleteProject(proj.id)}
                           className="opacity-0 group-hover:opacity-100 p-1 text-[#8E867B] hover:text-[#E05D52] transition-all cursor-pointer"
+                          title="Eliminar proyecto"
                         >
                           <Trash2 className="h-3.5 w-3.5" />
                         </button>
@@ -336,30 +340,33 @@ export function VaultView({ data, onRefresh, onOpenScratchpad }: VaultViewProps)
 
                       {/* Title & Description */}
                       <div>
-                        <h4 className="font-serif text-base font-bold text-[#F5F2EB] tracking-tight group-hover:text-white transition-colors">
+                        <h4
+                          className="font-serif text-sm font-bold text-[#F5F2EB] tracking-tight group-hover:text-white transition-colors truncate"
+                          title={proj.title}
+                        >
                           {proj.title}
                         </h4>
                         {proj.description && (
-                          <p className="text-xs text-[#8E867B] mt-1 line-clamp-2">
+                          <p className="text-[11px] text-[#8E867B] mt-0.5 line-clamp-1 font-sans">
                             {proj.description}
                           </p>
                         )}
                       </div>
 
                       {/* Live Habitica Task Progress Bar */}
-                      <div className="space-y-1.5 pt-1">
-                        <div className="flex items-center justify-between text-[11px] font-mono">
-                          <span className="text-[#8E867B] flex items-center gap-1.5">
-                            <ListTodo className="size-3 text-[#D99B43]" />
+                      <div className="space-y-1">
+                        <div className="flex items-center justify-between text-[10px] font-mono">
+                          <span className="text-[#8E867B] flex items-center gap-1">
+                            <ListTodo className="size-2.5 text-[#D99B43]" />
                             <span>
-                              {metrics.completedCount}/{metrics.totalCount} tareas listas
+                              {metrics.completedCount}/{metrics.totalCount} listas
                             </span>
                           </span>
                           <span className="font-bold text-[#DDD6C9]">
                             {metrics.progressPercent}%
                           </span>
                         </div>
-                        <div className="relative h-1.5 w-full overflow-hidden rounded-full bg-[#121110] border border-[#2A2723]">
+                        <div className="relative h-1 w-full overflow-hidden rounded-full bg-[#121110] border border-[#2A2723]">
                           <div
                             className="h-full rounded-full bg-linear-to-r from-[#D99B43] to-[#4EAB9E] transition-all duration-500"
                             style={{ width: `${metrics.progressPercent}%` }}
@@ -367,55 +374,55 @@ export function VaultView({ data, onRefresh, onOpenScratchpad }: VaultViewProps)
                         </div>
                       </div>
 
-                      {/* Tech Stack Badges */}
+                      {/* Tech Stack Badges (Compact) */}
                       {proj.techStack && proj.techStack.length > 0 && (
-                        <div className="flex flex-wrap gap-1.5 pt-1">
-                          {proj.techStack.map((tech) => (
+                        <div className="flex flex-wrap items-center gap-1 pt-0.5">
+                          {proj.techStack.slice(0, 3).map((tech) => (
                             <span
                               key={tech}
-                              className="px-2 py-0.5 rounded-md bg-[#121110] border border-[#2A2723] text-[10px] font-mono text-[#DDD6C9]"
+                              className="px-1.5 py-0.2 rounded bg-[#121110] border border-[#2A2723] text-[9px] font-mono text-[#DDD6C9] truncate max-w-28"
                             >
                               {tech}
                             </span>
                           ))}
+                          {proj.techStack.length > 3 && (
+                            <span className="px-1 py-0.2 rounded bg-[#121110] border border-[#2A2723] text-[9px] font-mono text-[#8E867B]">
+                              +{proj.techStack.length - 3}
+                            </span>
+                          )}
                         </div>
                       )}
                     </div>
 
                     {/* Links & Open Dossier Button */}
                     <div
-                      className="pt-3 border-t border-[#2A2723] flex items-center justify-between text-xs font-mono"
+                      className="pt-2 border-t border-[#2A2723] flex items-center justify-between text-xs font-mono"
                       onClick={(e) => e.stopPropagation()}
                     >
-                      <div className="flex items-center gap-3">
-                        {proj.repoUrl && (
+                      <div className="flex items-center gap-2 overflow-hidden mr-2">
+                        {classifiedLinks.slice(0, 2).map((link, idx) => (
                           <a
-                            href={proj.repoUrl}
+                            key={idx}
+                            href={link.url}
                             target="_blank"
                             rel="noreferrer"
-                            className="text-[#8E867B] hover:text-[#F5F2EB] flex items-center gap-1"
+                            className="text-[#8E867B] hover:text-[#F5F2EB] flex items-center gap-1 truncate max-w-28 text-[10px] transition-colors"
+                            title={link.url}
                           >
-                            <Code2 className="h-3.5 w-3.5" />
-                            <span>Repo</span>
+                            {link.category === "git" ? (
+                              <Code2 className="size-3 shrink-0" />
+                            ) : (
+                              <Globe className="size-3 shrink-0 text-[#4EAB9E]" />
+                            )}
+                            <span className="truncate">{link.label}</span>
                           </a>
-                        )}
-                        {proj.liveUrl && (
-                          <a
-                            href={proj.liveUrl}
-                            target="_blank"
-                            rel="noreferrer"
-                            className="text-[#4EAB9E] hover:underline flex items-center gap-1 font-semibold"
-                          >
-                            <ExternalLink className="h-3.5 w-3.5" />
-                            <span>Live</span>
-                          </a>
-                        )}
+                        ))}
                       </div>
 
                       <button
                         type="button"
                         onClick={() => setSelectedProject(proj)}
-                        className="inline-flex items-center gap-1 text-[11px] font-semibold text-[#D99B43] hover:text-[#E8AF59] transition-colors cursor-pointer"
+                        className="inline-flex items-center gap-1 text-[10px] font-semibold text-[#D99B43] hover:text-[#E8AF59] transition-colors cursor-pointer shrink-0 ml-auto"
                       >
                         <span>Dossier</span>
                         <ChevronRight className="size-3 stroke-[2.5]" />
