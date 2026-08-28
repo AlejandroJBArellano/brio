@@ -45,14 +45,14 @@ const ALL_FOOD_GROUPS: {
   label: string;
   defaultTarget: number;
 }[] = [
-  { key: "vegetables", icon: "🥦", label: "Verduras", defaultTarget: 4.5 },
-  { key: "legumes", icon: "🫘", label: "Legumbres", defaultTarget: 3 },
-  { key: "cereals", icon: "🌾", label: "Cereales", defaultTarget: 5 },
-  { key: "fats_seeds", icon: "🥑", label: "Semillas", defaultTarget: 3.5 },
-  { key: "fruits", icon: "🍎", label: "Frutas", defaultTarget: 3.5 },
-  { key: "leafy_greens", icon: "🥬", label: "Hojas", defaultTarget: 2 },
-  { key: "tubers", icon: "🍠", label: "Tubérculos", defaultTarget: 1 },
-];
+    { key: "vegetables", icon: "🥦", label: "Verduras", defaultTarget: 4.5 },
+    { key: "legumes", icon: "🫘", label: "Legumbres", defaultTarget: 3 },
+    { key: "cereals", icon: "🌾", label: "Cereales", defaultTarget: 5 },
+    { key: "fats_seeds", icon: "🥑", label: "Semillas", defaultTarget: 3.5 },
+    { key: "fruits", icon: "🍎", label: "Frutas", defaultTarget: 3.5 },
+    { key: "leafy_greens", icon: "🥬", label: "Hojas", defaultTarget: 2 },
+    { key: "tubers", icon: "🍠", label: "Tubérculos", defaultTarget: 1 },
+  ];
 
 interface TodayViewClientProps {
   user: HabiticaUser;
@@ -308,23 +308,6 @@ export function TodayViewClient({
 
           {/* Circadian Badge & Quick Ritual Openers */}
           <div className="flex items-center gap-1.5 sm:gap-2">
-            <div
-              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border text-xs font-mono font-medium"
-              style={{
-                backgroundColor: `${hormonalStatus.currentPhase.color}12`,
-                borderColor: `${hormonalStatus.currentPhase.color}35`,
-                color: hormonalStatus.currentPhase.color,
-              }}
-              title={`${hormonalStatus.currentPhase.name}: ${hormonalStatus.remainingFormatted} restantes`}
-            >
-              <span>{hormonalStatus.currentPhase.icon}</span>
-              <span className="font-bold">
-                {hormonalStatus.currentPhase.shortName}
-              </span>
-              <span className="text-[10px] opacity-75 hidden sm:inline">
-                ({hormonalStatus.remainingFormatted})
-              </span>
-            </div>
 
             <button
               type="button"
@@ -566,8 +549,8 @@ export function TodayViewClient({
           </div>
 
           {/* Hidratación Inteligente */}
-          <div className="rounded-xl border border-[#2A2723] bg-[#181715] p-5 sm:p-6 shadow-sm space-y-4">
-            <div className="flex items-center justify-between pb-3 border-b border-[#2A2723]">
+          <div className="rounded-xl border border-[#2A2723] bg-[#181715] p-5 shadow-sm space-y-3">
+            <div className="flex items-center justify-between pb-3">
               <div className="flex items-center gap-2">
                 <Droplet className="h-4 w-4 text-[#4EAB9E]" />
                 <span className="font-serif text-sm sm:text-base font-bold text-[#F5F2EB]">
@@ -602,20 +585,6 @@ export function TodayViewClient({
                   <span>+500 ml</span>
                 </button>
               </div>
-
-              {/* Minimal Progress Bar */}
-              <div className="h-1.5 w-full rounded-full bg-[#121110] overflow-hidden">
-                <div
-                  className="h-full bg-[#4EAB9E] transition-all duration-300 rounded-full"
-                  style={{ width: `${waterPercent}%` }}
-                />
-              </div>
-
-              {isWaterComplete && (
-                <p className="text-[11px] text-[#7EA35A] font-mono text-center font-semibold">
-                  ✓ Meta de hidratación óptima alcanzada hoy.
-                </p>
-              )}
             </div>
           </div>
 
@@ -644,11 +613,10 @@ export function TodayViewClient({
                   return (
                     <div
                       key={group.key}
-                      className={`p-2 rounded-lg border transition-all ${
-                        isMet
-                          ? "bg-[#141813] border-[#7EA35A]/40 text-[#7EA35A]"
-                          : "bg-[#121110] border-[#2A2723] text-[#DDD6C9]"
-                      }`}
+                      className={`p-2 rounded-lg border transition-all ${isMet
+                        ? "bg-[#141813] border-[#7EA35A]/40 text-[#7EA35A]"
+                        : "bg-[#121110] border-[#2A2723] text-[#DDD6C9]"
+                        }`}
                     >
                       <div className="flex items-center justify-between gap-1 text-[10px] font-mono">
                         <span className="truncate text-[#8E867B] flex items-center gap-1">
