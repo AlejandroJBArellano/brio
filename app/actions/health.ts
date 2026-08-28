@@ -7,8 +7,10 @@ import {
   BiomarkerLog,
   BiomarkerStatus,
   BiomarkersDashboardData,
+  BiometricsHealthData,
   BodyCompositionLog,
   BodyCompositionSegmental,
+  DailyHealthData,
   HealthDashboardData,
   HealthLog,
   HevyExercise,
@@ -16,6 +18,7 @@ import {
   HevyWorkout,
   LabTestReport,
   SupplementItem,
+  TrainingHealthData,
   UserSupplement,
   WorkoutType,
 } from "@/lib/types";
@@ -303,6 +306,244 @@ async function getBiomarkersDashboardData(sql: SqlClient): Promise<BiomarkersDas
     console.error("[getBiomarkersDashboardData Error]:", error);
     return emptyDashboardData;
   }
+}
+
+/**
+ * Server Action: Fetches daily health data (today's health log, supplements, water, sleep, streaks, and quick glances).
+ * Fast, lightweight query optimized for the Daily tab and Today dashboard.
+ */
+export async function fetchDailyHealthDataAction(): Promise<DailyHealthData> {
+  const sql = getDb();
+  const todayStr = getTodayDateStr();
+
+  const [
+    catalog,
+    todayRows,
+    recentRows,
+    latestHevyRow,
+    nutritionData,
+  ] = await Promise.all([
+    getSupplementsCatalog(sql),
+    sql`SELECT * FROM health_logs WHERE date = ${todayStr} LIMIT 1;`,
+    sql`SELECT * FROM health_logs ORDER BY date DESC LIMIT 14;`,
+    sql`SELECT title, start_time, date FROM hevy_workouts ORDER BY date DESC, start_time DESC LIMIT 1;`,
+    fetchNutritionDashboardDataAction(todayStr).catch(() => null),
+  ]);
+
+  // Process today's health record
+  let todayHealth: HealthLog;
+  if (todayRows.length > 0) {
+    const row = todayRows[0] as unknown as HealthLogDbRow;
+    const existingSupplements: SupplementItem[] = Array.isArray(row.supplements) ? row.supplements : [];
+
+    const syncedSupplements: SupplementItem[] = catalog.map((catItem) => {
+      const match = existingSupplements.find((s) => s.id === catItem.id);
+      return {
+        id: catItem.id,
+        name: catItem.dosage ? `${catItem.name} (${catItem.dosage})` : catItem.name,
+        dosage: catItem.dosage,
+        timing: catItem.timing,
+        taken: match ? Boolean(match.taken) : false,
+      };
+    });
+
+    todayHealth = {
+      date: todayStr,
+      workoutType: row.workout_type || undefined,
+      workoutNotes: row.workout_notes || undefined,
+      waterMl: Number(row.water_ml) || 0,
+      supplements: syncedSupplements,
+      sleepHours: Number(row.sleep_hours) || 7.5,
+      sleepQuality: Number(row.sleep_quality) || 4,
+      stepsCount: Number(row.steps_count) || 0,
+    };
+  } else {
+    const initialSupplements: SupplementItem[] = catalog.map((catItem) => ({
+      id: catItem.id,
+      name: catItem.dosage ? `${catItem.name} (${catItem.dosage})` : catItem.name,
+      dosage: catItem.dosage,
+      timing: catItem.timing,
+      taken: false,
+    }));
+
+    todayHealth = {
+      date: todayStr,
+      waterMl: 0,
+      supplements: initialSupplements,
+      sleepHours: 7.5,
+      sleepQuality: 4,
+      stepsCount: 0,
+    };
+  }
+
+  // Process recent 14 days logs
+  const recentLogs: HealthLog[] = (recentRows as unknown as HealthLogDbRow[]).map((r) => ({
+    date: toDateStr(r.date),
+    workoutType: r.workout_type || undefined,
+    workoutNotes: r.workout_notes || undefined,
+    waterMl: Number(r.water_ml) || 0,
+    supplements: Array.isArray(r.supplements) ? r.supplements : [],
+    sleepHours: Number(r.sleep_hours) || 7.5,
+    sleepQuality: Number(r.sleep_quality) || 4,
+    stepsCount: Number(r.steps_count) || 0,
+  }));
+
+  const weeklyWorkoutsCount = recentLogs
+    .slice(0, 7)
+    .filter((l) => l.workoutType && l.workoutType !== "rest").length;
+
+  let workoutStreak = 0;
+  for (const log of recentLogs) {
+    if (log.workoutType && log.workoutType !== "rest") {
+      workoutStreak += 1;
+    } else {
+      break;
+    }
+  }
+
+  const averageSleepHours =
+    recentLogs.length > 0
+      ? Number(
+          (
+            recentLogs.reduce((sum, l) => sum + l.sleepHours, 0) /
+            recentLogs.length
+          ).toFixed(1)
+        )
+      : 7.5;
+
+  const waterPercent = Math.min(100, Math.round((todayHealth.waterMl / 3000) * 100));
+
+  let nutritionSummary = undefined;
+  if (nutritionData && nutritionData.todayLog) {
+    nutritionSummary = {
+      kcal: nutritionData.todayLog.calculatedMacros.kcal,
+      proteinGrams: nutritionData.todayLog.calculatedMacros.proteinGrams,
+      carbsGrams: nutritionData.todayLog.calculatedMacros.carbsGrams,
+      fatGrams: nutritionData.todayLog.calculatedMacros.fatGrams,
+      nextMealTitle:
+        nutritionData.scheduledMealsToday.length > 0
+          ? (nutritionData.scheduledMealsToday[0].recipe?.title ||
+            nutritionData.scheduledMealsToday[0].customTitle ||
+            "Programada")
+          : undefined,
+    };
+  }
+
+  let lastWorkoutSummary = undefined;
+  if (latestHevyRow.length > 0) {
+    const r = latestHevyRow[0] as unknown as { title: string; date: Date | string };
+    lastWorkoutSummary = {
+      title: r.title || "Entrenamiento",
+      date: toDateStr(r.date),
+    };
+  }
+
+  return {
+    todayHealth,
+    waterPercent,
+    weeklyWorkoutsCount,
+    workoutStreak,
+    averageSleepHours,
+    recentLogs,
+    supplementsCatalog: catalog,
+    nutritionSummary,
+    lastWorkoutSummary,
+  };
+}
+
+/**
+ * Server Action: Fetches dedicated training & workouts data (Hevy history, stats, streaks).
+ */
+export async function fetchTrainingHealthDataAction(): Promise<TrainingHealthData> {
+  const sql = getDb();
+
+  const [
+    recentRows,
+    hevyRows,
+    statsRows,
+  ] = await Promise.all([
+    sql`SELECT * FROM health_logs ORDER BY date DESC LIMIT 14;`,
+    sql`SELECT * FROM hevy_workouts ORDER BY date DESC, start_time DESC LIMIT 20;`,
+    sql`SELECT COUNT(*)::int as count, COALESCE(SUM(total_volume_kg), 0)::float as volume, MAX(created_at) as last_sync FROM hevy_workouts;`,
+  ]);
+
+  const recentLogs: HealthLog[] = (recentRows as unknown as HealthLogDbRow[]).map((r) => ({
+    date: toDateStr(r.date),
+    workoutType: r.workout_type || undefined,
+    workoutNotes: r.workout_notes || undefined,
+    waterMl: Number(r.water_ml) || 0,
+    supplements: Array.isArray(r.supplements) ? r.supplements : [],
+    sleepHours: Number(r.sleep_hours) || 7.5,
+    sleepQuality: Number(r.sleep_quality) || 4,
+    stepsCount: Number(r.steps_count) || 0,
+  }));
+
+  const weeklyWorkoutsCount = recentLogs
+    .slice(0, 7)
+    .filter((l) => l.workoutType && l.workoutType !== "rest").length;
+
+  let workoutStreak = 0;
+  for (const log of recentLogs) {
+    if (log.workoutType && log.workoutType !== "rest") {
+      workoutStreak += 1;
+    } else {
+      break;
+    }
+  }
+
+  const recentHevyWorkouts: HevyWorkout[] = (hevyRows as unknown as HevyDbRow[]).map((r) => ({
+    id: r.id,
+    title: r.title,
+    description: r.description || undefined,
+    startTime: r.start_time instanceof Date ? r.start_time.toISOString() : (r.start_time?.toString() || new Date().toISOString()),
+    endTime: r.end_time instanceof Date ? r.end_time.toISOString() : (r.end_time?.toString() || new Date().toISOString()),
+    date: toDateStr(r.date),
+    durationSeconds: Number(r.duration_seconds) || 0,
+    totalVolumeKg: Number(r.total_volume_kg) || 0,
+    exercisesCount: Number(r.exercises_count) || 0,
+    setsCount: Number(r.sets_count) || 0,
+    exercises: Array.isArray(r.exercises) ? (r.exercises as HevyExercise[]) : [],
+    createdAt: r.created_at?.toString(),
+    updatedAt: r.hevy_updated_at?.toString(),
+  }));
+
+  const hevyStats: HevyStats = {
+    totalWorkouts: Number(statsRows[0]?.count || 0),
+    totalVolumeKg: Number(statsRows[0]?.volume || 0),
+    lastSyncedAt: statsRows[0]?.last_sync?.toString(),
+  };
+
+  return {
+    recentHevyWorkouts,
+    hevyStats,
+    workoutStreak,
+    weeklyWorkoutsCount,
+  };
+}
+
+/**
+ * Server Action: Fetches dedicated biometrics data (clinical lab biomarkers & InBody scans).
+ */
+export async function fetchBiometricsHealthDataAction(): Promise<BiometricsHealthData> {
+  const sql = getDb();
+
+  const [
+    bodyCompositionLogs,
+    biomarkersData,
+  ] = await Promise.all([
+    getBodyCompositionLogs(sql),
+    getBiomarkersDashboardData(sql),
+  ]);
+
+  const latestBodyComposition = bodyCompositionLogs.length > 0 ? bodyCompositionLogs[0] : undefined;
+  const previousBodyComposition = bodyCompositionLogs.length > 1 ? bodyCompositionLogs[1] : undefined;
+
+  return {
+    biomarkersData,
+    bodyCompositionLogs,
+    latestBodyComposition,
+    previousBodyComposition,
+  };
 }
 
 /**

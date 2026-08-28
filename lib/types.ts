@@ -556,6 +556,41 @@ export interface MuscleRecoverySummary {
 }
 
 
+export interface DailyHealthData {
+  todayHealth: HealthLog;
+  waterPercent: number;
+  weeklyWorkoutsCount: number;
+  workoutStreak: number;
+  averageSleepHours: number;
+  recentLogs: HealthLog[];
+  supplementsCatalog: UserSupplement[];
+  nutritionSummary?: {
+    kcal: number;
+    proteinGrams: number;
+    carbsGrams: number;
+    fatGrams: number;
+    nextMealTitle?: string;
+  };
+  lastWorkoutSummary?: {
+    title: string;
+    date: string;
+  };
+}
+
+export interface TrainingHealthData {
+  recentHevyWorkouts: HevyWorkout[];
+  hevyStats: HevyStats;
+  workoutStreak: number;
+  weeklyWorkoutsCount: number;
+}
+
+export interface BiometricsHealthData {
+  biomarkersData: BiomarkersDashboardData;
+  bodyCompositionLogs: BodyCompositionLog[];
+  latestBodyComposition?: BodyCompositionLog;
+  previousBodyComposition?: BodyCompositionLog;
+}
+
 export interface HealthDashboardData {
   todayHealth: HealthLog;
   waterPercent: number;
