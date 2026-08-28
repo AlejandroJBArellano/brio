@@ -11,6 +11,7 @@ import { getHormonalStatus } from "@/lib/hormonal";
 import { soundFx } from "@/lib/soundFx";
 import {
   ContextualNote,
+  DailyHealthData,
   FinanceDashboardData,
   HabiticaTag,
   HabiticaTask,
@@ -40,7 +41,7 @@ interface TodayViewClientProps {
   user: HabiticaUser;
   tasks: HabiticaTask[];
   tags?: HabiticaTag[];
-  healthData: HealthDashboardData;
+  healthData: DailyHealthData | HealthDashboardData;
   financeData: FinanceDashboardData;
   todayRitual: RitualLog | null;
   projects?: ProjectItem[];

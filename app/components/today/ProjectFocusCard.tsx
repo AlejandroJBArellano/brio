@@ -21,7 +21,6 @@ import {
 } from "@/lib/urlClassifier";
 import {
   Check,
-  Code2,
   Edit2,
   ExternalLink,
   FileText,

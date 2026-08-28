@@ -14,16 +14,13 @@ import { extractAndClassifyLinks } from "@/lib/urlClassifier";
 import {
   ChevronRight,
   Code2,
-  ExternalLink,
   FolderGit2,
   Globe,
   ListTodo,
   Plus,
   Search,
-  Sparkles,
   Trash2,
   X,
-  Zap,
 } from "lucide-react";
 import { useMemo, useState, useTransition } from "react";
 

@@ -1,5 +1,5 @@
 import { fetchFinanceDashboardDataAction } from "@/app/actions/finance";
-import { fetchHealthDashboardDataAction } from "@/app/actions/health";
+import { fetchDailyHealthDataAction } from "@/app/actions/health";
 import { fetchContextualNotesAction } from "@/app/actions/notes";
 import { fetchProjectsDashboardDataAction } from "@/app/actions/projects";
 import { fetchTodayRitualAction } from "@/app/actions/rituals";
@@ -28,7 +28,7 @@ async function AsyncTodayContent() {
     contextualNotes,
   ] = await Promise.all([
     fetchDashboardDataAction(),
-    fetchHealthDashboardDataAction(),
+    fetchDailyHealthDataAction(),
     fetchFinanceDashboardDataAction(),
     fetchTodayRitualAction(),
     fetchProjectsDashboardDataAction().catch(() => ({
