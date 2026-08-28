@@ -62,7 +62,9 @@ export function matchTasksToProject(
   const { prefixes, canonicalPrefix } = getProjectKeywords(project);
 
   const matchedTasks = tasks.filter((t) => {
-    // Only match To-Dos or Dailies relevant to projects
+    // Strictly match ONLY To-Dos (exclude habits and dailies)
+    if (t.type !== "todo") return false;
+
     const { prefix, cleanTitle: _cleanTitle } = parseTaskPrefix(t.text);
     const prefixLower = prefix?.toLowerCase() || "";
     const fullTextLower = t.text.toLowerCase();
@@ -78,9 +80,7 @@ export function matchTasksToProject(
   });
 
   const totalCount = matchedTasks.length;
-  const completedCount = matchedTasks.filter(
-    (t) => t.completed || (t.type === "daily" && (!t.isDue || t.completed))
-  ).length;
+  const completedCount = matchedTasks.filter((t) => t.completed).length;
   const pendingCount = totalCount - completedCount;
 
   const progressPercent =

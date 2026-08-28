@@ -532,7 +532,7 @@ export function ProjectDossierDrawer({
                   <div className="flex items-center gap-2">
                     <ListTodo className="size-4 text-[#4EAB9E]" />
                     <h3 className="font-serif text-xs font-bold uppercase tracking-wider text-[#F5F2EB]">
-                      Tareas del Proyecto en Habitica ({metrics.totalCount})
+                      To-Dos del Proyecto en Habitica ({metrics.totalCount})
                     </h3>
                   </div>
 
@@ -610,17 +610,6 @@ export function ProjectDossierDrawer({
                           </div>
 
                           <div className="flex items-center gap-2 shrink-0 ml-2">
-                            <span
-                              className={`text-[9px] font-mono font-semibold px-1.5 py-0.5 rounded border uppercase ${
-                                task.type === "daily"
-                                  ? "border-[#3D3425] bg-[#221D16] text-[#D99B43]"
-                                  : task.type === "habit"
-                                  ? "border-[#7EA35A]/30 bg-[#1C2219] text-[#7EA35A]"
-                                  : "border-[#4EAB9E]/30 bg-[#162121] text-[#4EAB9E]"
-                              }`}
-                            >
-                              {task.type === "daily" ? "Daily" : task.type === "habit" ? "Hábito" : "To-Do"}
-                            </span>
                             {priority && (
                               <span
                                 className={`text-[10px] font-mono px-1.5 py-0.5 rounded border ${priority.badge}`}
