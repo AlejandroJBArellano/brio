@@ -23,6 +23,12 @@ export const getCachedHabiticaTags = cache(async (): Promise<HabiticaTag[]> => {
 
 export const getCachedHabiticaDashboardData = cache(async () => {
   const isConfigured = isHabiticaConfigured();
+  if (isConfigured) {
+    await habiticaClient.checkAndRunCronIfNeeded().catch((err) => {
+      console.warn("[DAL Habitica Cron Check]:", err);
+    });
+  }
+
   const [user, tasks, tags] = await Promise.all([
     getCachedHabiticaUser(),
     getCachedHabiticaTasks(),

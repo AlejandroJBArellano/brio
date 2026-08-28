@@ -507,7 +507,70 @@ export class HabiticaClient {
       method: "POST",
     });
 
+    apiCache.clear();
     return { success: true, resting: res };
+  }
+
+  /**
+   * Executes Habitica Cron manually to rollover to a new day,
+   * reset completed dailies, apply pending damage/buffs, and advance streaks.
+   */
+  public async runCron(): Promise<{ success: boolean; data?: unknown }> {
+    if (!isHabiticaConfigured() && !this.customUserId) {
+      return { success: true };
+    }
+
+    try {
+      const res = await this.request<unknown>("/cron", {
+        method: "POST",
+      });
+      // Clear cache so all subsequent task queries get the freshly reset state
+      apiCache.clear();
+      // Clean up any legacy duplicate Brio tasks
+      await this.cleanupObsoleteBrioTasks();
+      return { success: true, data: res };
+    } catch (error) {
+      console.warn("[Habitica Cron Execution Warning]:", error);
+      return { success: false };
+    }
+  }
+
+  /**
+   * Automatically deletes legacy/duplicate synthetic tasks created by previous versions of Brio
+   */
+  public async cleanupObsoleteBrioTasks(): Promise<void> {
+    if (!isHabiticaConfigured() && !this.customUserId) return;
+    try {
+      const dailies = await this.getUserTasks("dailys");
+      const obsolete = dailies.filter(
+        (t) =>
+          t.text.includes("[Brio] Morning Kickoff") ||
+          (t.text.includes("[Brio]") && t.text.includes("Must-Win"))
+      );
+      for (const task of obsolete) {
+        await this.deleteTask(task.id);
+        console.log(`[Cleanup] Deleted obsolete task "${task.text}" (${task.id})`);
+      }
+      if (obsolete.length > 0) {
+        apiCache.clear();
+      }
+    } catch (err) {
+      console.warn("[Cleanup Obsolete Tasks Warning]:", err);
+    }
+  }
+
+  /**
+   * Periodically checks and runs cron on page loads/SSR (throttled to once per minute).
+   */
+  private static lastCronCheckTime = 0;
+  public async checkAndRunCronIfNeeded(): Promise<boolean> {
+    const now = Date.now();
+    if (now - HabiticaClient.lastCronCheckTime < 60000) {
+      return false;
+    }
+    HabiticaClient.lastCronCheckTime = now;
+    const outcome = await this.runCron();
+    return outcome.success;
   }
 
   /**

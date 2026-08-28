@@ -13,17 +13,21 @@ interface EventTemplate {
 
 const EVENT_TEMPLATES: Record<HabiticaEventType, EventTemplate> = {
   MORNING_KICKOFF: {
-    type: "daily",
-    text: "[Brio] Morning Kickoff (3 Must-Wins)",
-    notes: "Planificar el día, registrar nivel de energía y definir intención.",
+    type: "habit",
+    text: "[Brio] Ritual Matutino",
+    notes: "Despegue matutino, registro de energía y autocuidado completado.",
     priority: 1.5,
+    up: true,
+    down: false,
     tags: ["brio", "rituals"],
   },
   EVENING_REVIEW: {
-    type: "daily",
-    text: "[Brio] Evening Review (Cierre del Día)",
-    notes: "Reflexión nocturna, auditoría de gastos y revisión de objetivos.",
+    type: "habit",
+    text: "[Brio] Cierre Nocturno",
+    notes: "Reflexión nocturna, auditoría de gastos y desconexión.",
     priority: 1.5,
+    up: true,
+    down: false,
     tags: ["brio", "rituals"],
   },
   WORKOUT_COMPLETED: {
