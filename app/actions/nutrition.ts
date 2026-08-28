@@ -320,6 +320,27 @@ export async function fetchNutritionDashboardDataAction(
   }
 }
 
+const FOOD_GROUP_NAMES: Record<FoodGroupKey, string> = {
+  fruits: "Fruta",
+  vegetables: "Verdura",
+  cereals: "Cereal",
+  tubers: "Tubérculo",
+  legumes: "Legumbre / Tofu",
+  fats_seeds: "Semillas / Grasa",
+  leafy_greens: "Hojas Verdes",
+};
+
+const MARIANA_MONT_HABIT_NAMES: Record<keyof NutritionHabitLog, string> = {
+  dailySalad: "Ensalada Diaria Mariana Mont",
+  noUltraProcessed: "Cero Ultraprocesados & Comida Limpia",
+  b12Weekly: "Suplemento Vitamina B12 (Mariana Mont)",
+  hydrationGoal: "Meta de Hidratación 2.5L",
+  spirulina: "Suplemento Espirulina",
+  omega3Dha: "Suplemento Omega-3 DHA",
+  magnesium: "Suplemento Citrato de Magnesio",
+  vitC: "Suplemento Vitamina C",
+};
+
 /**
  * Logs or updates portion counts and habit checks for a specific date.
  */
@@ -368,6 +389,15 @@ export async function logDailyPortionsAction(
         notes = COALESCE(EXCLUDED.notes, nutrition_daily_logs.notes),
         updated_at = NOW();
     `;
+
+    // Award Habitica for logging nutrition portions
+    const totalPortions = Object.values(portions).reduce((acc, v) => acc + (Number(v) || 0), 0);
+    if (totalPortions > 0) {
+      await awardHabiticaEvent("NUTRITION_HABIT", {
+        customTitle: "[Brio] Plan Mariana Mont: Porciones Registradas",
+        customNotes: `Registro de ${totalPortions} porciones de comida limpia del plan Mariana Mont.`,
+      });
+    }
 
     revalidatePath("/");
     return { success: true };
@@ -425,6 +455,15 @@ export async function quickAdjustPortionAction(
         updated_at = NOW();
     `;
 
+    // If incrementing a portion, award Habitica
+    if (delta > 0) {
+      const groupLabel = FOOD_GROUP_NAMES[group] || group;
+      await awardHabiticaEvent("NUTRITION_HABIT", {
+        customTitle: `[Brio] Nutrición Mariana Mont: +${delta} ${groupLabel}`,
+        customNotes: `Porción saludable registrada en el plan de Mariana Mont (${groupLabel}).`,
+      });
+    }
+
     revalidatePath("/");
     return { success: true, newVal };
   } catch (error) {
@@ -479,8 +518,10 @@ export async function toggleNutritionHabitAction(
     `;
 
     if (habits[habitKey]) {
+      const habitLabel = MARIANA_MONT_HABIT_NAMES[habitKey] || habitKey;
       await awardHabiticaEvent("NUTRITION_HABIT", {
-        customNotes: `Hábito nutricional cumplido: ${habitKey}`,
+        customTitle: `[Brio] ${habitLabel}`,
+        customNotes: `Hábito cumplido del plan Mariana Mont: ${habitLabel}`,
       });
     }
 
@@ -619,8 +660,10 @@ export async function toggleScheduledMealCompletedAction(
     }
 
     if (newCompleted) {
+      const mealTitle = meal.custom_title || `Comida (${meal.meal_slot})`;
       await awardHabiticaEvent("SCHEDULED_MEAL_COMPLETED", {
-        customNotes: `Comida completada: ${meal.custom_title || meal.meal_slot}`,
+        customTitle: `[Brio] Mariana Mont: ${mealTitle}`,
+        customNotes: `Receta o comida completada del plan clínico de Mariana Mont (${meal.meal_slot}).`,
       });
     }
 

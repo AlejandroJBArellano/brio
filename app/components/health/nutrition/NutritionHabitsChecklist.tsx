@@ -12,6 +12,7 @@ import {
   Settings2,
   ShieldCheck,
   Sparkles,
+  Zap,
 } from "lucide-react";
 import { useTransition } from "react";
 
@@ -84,11 +85,17 @@ export function NutritionHabitsChecklist({
             <Salad className="h-4 w-4" />
           </div>
           <div>
-            <h3 className="font-serif text-sm font-bold text-[#F5F2EB] tracking-tight">
-              Indicaciones & Suplementación Diaria
-            </h3>
+            <div className="flex items-center gap-2">
+              <h3 className="font-serif text-sm font-bold text-[#F5F2EB] tracking-tight">
+                Indicaciones & Suplementación Diaria
+              </h3>
+              <span className="hidden sm:inline-flex items-center gap-1 rounded bg-[#221D16] border border-[#D99B43]/30 px-1.5 py-0.2 text-[9px] font-mono text-[#D99B43]">
+                <Zap className="size-2.5" />
+                Habitica RPG
+              </span>
+            </div>
             <p className="text-xs text-[#8E867B] font-mono">
-              Reglas clínicas de alimentación y suplementación sincronizada
+              Reglas clínicas de Mariana Mont sincronizadas con tu personaje (+EXP/Oro)
             </p>
           </div>
         </div>
