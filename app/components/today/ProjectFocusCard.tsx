@@ -5,6 +5,7 @@ import {
   saveContextualNoteAction,
 } from "@/app/actions/notes";
 import { toggleTaskAction } from "@/app/actions/tasks";
+import { getProjectKeywords } from "@/lib/projectMatcher";
 import { soundFx } from "@/lib/soundFx";
 import {
   ContextualNote,
@@ -14,6 +15,7 @@ import {
   ProjectItem,
 } from "@/lib/types";
 import { extractAndClassifyLinks } from "@/lib/urlClassifier";
+import { parseTaskPrefix } from "@/lib/utils";
 import {
   Check,
   ChevronDown,
@@ -163,19 +165,20 @@ export function ProjectFocusCard({
       );
     }
 
-    // 3. Strategy B: Filter by primary project keyword in task text or notes (e.g. "unpo")
-    const projectWords = activeProject.title
-      .toLowerCase()
-      .split(/[\s—\-_()]+/)
-      .filter((w) => w.length >= 3);
-
-    const primaryKeyword = projectWords[0] || "";
-    if (!primaryKeyword) return [];
-
+    // 3. Strategy B: Filter by project canonical prefixes and keywords
+    const { prefixes } = getProjectKeywords(activeProject);
     return todoTasks.filter((t) => {
-      const text = (t.text || "").toLowerCase();
-      const notes = (t.notes || "").toLowerCase();
-      return text.includes(primaryKeyword) || notes.includes(primaryKeyword);
+      const { prefix } = parseTaskPrefix(t.text || "");
+      const prefixLower = prefix?.toLowerCase() || "";
+      const textLower = (t.text || "").toLowerCase();
+      const notesLower = (t.notes || "").toLowerCase();
+
+      for (const p of prefixes) {
+        if (prefixLower.includes(p)) return true;
+        if (textLower.includes(`[${p}]`) || textLower.includes(p)) return true;
+        if (notesLower.includes(`[${p}]`)) return true;
+      }
+      return false;
     });
   }, [tasks, activeTag, activeProject]);
 
@@ -330,14 +333,6 @@ export function ProjectFocusCard({
                   #{activeTag.name}
                 </span>
               )
-            )}
-
-            {/* Focus Mode Active Indicator */}
-            {isFocusMode && (
-              <span className="font-mono text-[10px] font-bold text-[#D99B43] bg-[#221D16] px-2.5 py-1 rounded-md border border-[#D99B43]/40 flex items-center gap-1 animate-pulse">
-                <Zap className="h-3 w-3 fill-current" />
-                <span>Deep Work Focus (100% Ancho)</span>
-              </span>
             )}
           </div>
 

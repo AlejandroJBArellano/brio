@@ -19,6 +19,9 @@ export function getProjectKeywords(project: ProjectItem): {
 } {
   const titleLower = project.title.toLowerCase();
 
+  if (titleLower.includes("afore") || titleLower.includes("orfandad")) {
+    return { prefixes: ["afore", "retiro afore", "orfandad"], canonicalPrefix: "[Afore]" };
+  }
   if (titleLower.includes("unpo")) {
     return { prefixes: ["unpo"], canonicalPrefix: "[UNPO]" };
   }
