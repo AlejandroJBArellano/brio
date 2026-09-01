@@ -257,14 +257,22 @@ function BrioCommandCenterContent({
         />
       )}
 
-      {/* Floating Action Button (+) for Instant Mobile/Tablet Capture */}
+      {/* Floating Action Button for Instant Mobile/Desktop Capture */}
       <button
         type="button"
         onClick={() => handleOpenBottomSheetWithTab("expense")}
-        aria-label="Captura Rápida Móvil"
-        className="fixed bottom-6 right-6 z-40 flex size-13 items-center justify-center rounded-full bg-[#D99B43] hover:bg-[#E8AF59] text-[#121110] shadow-xl shadow-black/60 hover:scale-105 active:scale-95 transition-all border border-[#E8AF59]/40 bottom-safe"
+        aria-label="Captura Rápida"
+        className="fixed bottom-6 right-6 z-40 inline-flex items-center gap-2.5 p-3 sm:px-4 sm:py-2.5 rounded-full bg-[#181715]/90 backdrop-blur-md border border-[#D99B43]/30 text-[#F5F2EB] shadow-xl shadow-black/80 hover:border-[#D99B43] hover:bg-[#221D16] hover:shadow-[#D99B43]/15 transition-all duration-200 cursor-pointer group bottom-safe active:scale-95"
       >
-        <Plus className="size-6 stroke-3" />
+        <div className="flex size-6 shrink-0 items-center justify-center rounded-full bg-[#D99B43] text-[#121110] transition-transform duration-300 group-hover:rotate-90 group-hover:bg-[#E8AF59] shadow-xs">
+          <Plus className="size-3.5 stroke-[2.5]" />
+        </div>
+        <span className="hidden sm:inline font-sans text-xs font-semibold text-[#DDD6C9] group-hover:text-[#F5F2EB] transition-colors">
+          Captura
+        </span>
+        <kbd className="hidden sm:inline-block px-1.5 py-0.5 text-[10px] font-mono font-medium bg-[#121110] border border-[#2A2723] rounded text-[#8E867B] group-hover:text-[#D99B43] transition-colors">
+          ⌘B
+        </kbd>
       </button>
 
       {/* Dynamic Modal Manager (next/dynamic lazy loading for all modals) */}
