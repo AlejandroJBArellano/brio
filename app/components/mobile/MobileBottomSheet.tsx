@@ -1,8 +1,21 @@
-import { createTransactionAction } from "@/app/actions/finance";
-import { logWaterAction } from "@/app/actions/health";
+import { createTransactionAction, fetchFinanceCatalogAction } from "@/app/actions/finance";
+import {
+  fetchSupplementsCatalogAction,
+  logWaterAction,
+  toggleSupplementAction,
+} from "@/app/actions/health";
 import { quickAdjustPortionAction, toggleNutritionHabitAction } from "@/app/actions/nutrition";
 import { createSingleTaskAction } from "@/app/actions/tasks";
-import { FinanceAccount, FinanceCategory, FoodGroupKey } from "@/lib/types";
+import {
+  DEFAULT_FINANCE_ACCOUNTS,
+  DEFAULT_FINANCE_CATEGORIES,
+  DEFAULT_USER_SUPPLEMENTS,
+  FinanceAccount,
+  FinanceCategory,
+  FoodGroupKey,
+  UserSupplement,
+} from "@/lib/types";
+import { FinanceIcon } from "@/app/components/finance/FinanceIcon";
 import { getTodayDateStr } from "@/lib/dateUtils";
 import {
   Check,
@@ -15,7 +28,7 @@ import {
   Zap,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useState, useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
 
 type SheetTab = "expense" | "task" | "water" | "nutrition";
 
@@ -26,6 +39,22 @@ interface MobileBottomSheetProps {
   dailyAntRemaining?: number;
   categories?: FinanceCategory[];
   accounts?: FinanceAccount[];
+}
+
+function getSupplementEmoji(name: string, id: string): string {
+  const lower = (name + " " + id).toLowerCase();
+  if (lower.includes("ensalada") || lower.includes("salad")) return "🥗";
+  if (lower.includes("procesado") || lower.includes("clean") || lower.includes("chatarra")) return "🚫";
+  if (lower.includes("creatina") || lower.includes("creatine")) return "⚡";
+  if (lower.includes("omega") || lower.includes("pescado") || lower.includes("fish")) return "🐟";
+  if (lower.includes("b12") || lower.includes("vitamina b")) return "💊";
+  if (lower.includes("magnesio") || lower.includes("zinc") || lower.includes("calcio")) return "🧪";
+  if (lower.includes("proteina") || lower.includes("shake") || lower.includes("whey")) return "🥤";
+  if (lower.includes("multivitamin") || lower.includes("vitamina") || lower.includes("vitamin")) return "💊";
+  if (lower.includes("cafe") || lower.includes("te") || lower.includes("matcha")) return "🍵";
+  if (lower.includes("ayuno") || lower.includes("fasting")) return "⏱️";
+  if (lower.includes("agua") || lower.includes("water") || lower.includes("hidrata")) return "💧";
+  return "✨";
 }
 
 export function MobileBottomSheet({
@@ -41,26 +70,55 @@ export function MobileBottomSheet({
   const [isPending, startTransition] = useTransition();
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
+  const [dbCategories, setDbCategories] = useState<FinanceCategory[]>(categories);
+  const [dbAccounts, setDbAccounts] = useState<FinanceAccount[]>(accounts);
+  const [dbSupplements, setDbSupplements] = useState<UserSupplement[]>(DEFAULT_USER_SUPPLEMENTS);
+
+  // Sync props or fetch real catalog from Neon DB if empty
+  useEffect(() => {
+    if (categories.length > 0) {
+      setDbCategories(categories);
+    }
+    if (accounts.length > 0) {
+      setDbAccounts(accounts);
+    }
+
+    if (isOpen) {
+      if (categories.length === 0 || accounts.length === 0) {
+        fetchFinanceCatalogAction()
+          .then((catalog) => {
+            if (catalog.categories && catalog.categories.length > 0) {
+              setDbCategories(catalog.categories);
+            }
+            if (catalog.accounts && catalog.accounts.length > 0) {
+              setDbAccounts(catalog.accounts);
+            }
+          })
+          .catch((err) => {
+            console.error("[MobileBottomSheet] Failed to load finance catalog:", err);
+          });
+      }
+
+      fetchSupplementsCatalogAction()
+        .then((supps) => {
+          if (supps && supps.length > 0) {
+            setDbSupplements(supps);
+          }
+        })
+        .catch((err) => {
+          console.error("[MobileBottomSheet] Failed to load supplements catalog:", err);
+        });
+    }
+  }, [isOpen, categories, accounts]);
+
   const effectiveCategories =
-    categories.length > 0
-      ? categories
-      : [
-          { id: "comida", name: "Comida", icon: "🍔", isAntDefault: false },
-          { id: "antojo", name: "Antojo", icon: "☕", isAntDefault: true },
-          { id: "transporte", name: "Transporte", icon: "🚗", isAntDefault: false },
-          { id: "servicios", name: "Servicios", icon: "🏠", isAntDefault: false },
-          { id: "salud", name: "Salud", icon: "💊", isAntDefault: false },
-          { id: "compras", name: "Compras", icon: "🛍️", isAntDefault: false },
-        ];
+    dbCategories.length > 0 ? dbCategories : DEFAULT_FINANCE_CATEGORIES;
 
   const effectiveAccounts =
-    accounts.length > 0
-      ? accounts
-      : [
-          { id: "nu", name: "Nu" },
-          { id: "bbva", name: "BBVA" },
-          { id: "efectivo", name: "Efectivo" },
-        ];
+    dbAccounts.length > 0 ? dbAccounts : DEFAULT_FINANCE_ACCOUNTS;
+
+  const effectiveSupplements =
+    dbSupplements.length > 0 ? dbSupplements : DEFAULT_USER_SUPPLEMENTS;
 
   // Expense form state
   const [amount, setAmount] = useState<string>("");
@@ -68,6 +126,23 @@ export function MobileBottomSheet({
   const [category, setCategory] = useState<string>(effectiveCategories[0]?.id || "comida");
   const [account, setAccount] = useState<string>(effectiveAccounts[0]?.id || "nu");
   const [isAntExpense, setIsAntExpense] = useState<boolean>(true);
+
+  // Sync selected category and account when dynamic catalog loads
+  useEffect(() => {
+    if (effectiveCategories.length > 0 && !effectiveCategories.some((c) => c.id === category)) {
+      const firstCat = effectiveCategories[0];
+      setCategory(firstCat.id);
+      if (firstCat.isAntDefault || firstCat.id === "antojo") {
+        setIsAntExpense(true);
+      }
+    }
+  }, [effectiveCategories, category]);
+
+  useEffect(() => {
+    if (effectiveAccounts.length > 0 && !effectiveAccounts.some((a) => a.id === account)) {
+      setAccount(effectiveAccounts[0].id);
+    }
+  }, [effectiveAccounts, account]);
 
   // Task form state
   const [taskText, setTaskText] = useState<string>("");
@@ -164,12 +239,20 @@ export function MobileBottomSheet({
     });
   };
 
-  const handleQuickHabit = (habitKey: "dailySalad" | "noUltraProcessed" | "b12Weekly", name: string) => {
+  const handleQuickSupplementOrHabit = (item: UserSupplement) => {
     const todayStr = getTodayDateStr();
     startTransition(async () => {
-      const res = await toggleNutritionHabitAction(todayStr, habitKey);
+      if (item.id === "salad" || item.id === "dailySalad") {
+        await toggleNutritionHabitAction(todayStr, "dailySalad");
+      } else if (item.id === "clean_eating" || item.id === "noUltraProcessed") {
+        await toggleNutritionHabitAction(todayStr, "noUltraProcessed");
+      } else if (item.id === "b12" || item.id === "b12Weekly") {
+        await toggleNutritionHabitAction(todayStr, "b12Weekly");
+      }
+
+      const res = await toggleSupplementAction(item.id);
       if (res.success) {
-        setSuccessMessage(`${name} actualizado ✨`);
+        setSuccessMessage(`✓ ${item.name} registrado ✨`);
         setTimeout(() => {
           setSuccessMessage(null);
           onClose();
@@ -312,8 +395,8 @@ export function MobileBottomSheet({
                 <label className="text-[11px] font-semibold text-[#8E867B] uppercase tracking-wider block mb-1.5 font-mono">
                   Categoría
                 </label>
-                <div className="flex flex-wrap gap-1.5">
-                  {effectiveCategories.slice(0, 8).map((c) => (
+                <div className="flex flex-wrap gap-1.5 max-h-36 overflow-y-auto pr-0.5">
+                  {effectiveCategories.map((c) => (
                     <button
                       key={c.id}
                       type="button"
@@ -323,13 +406,13 @@ export function MobileBottomSheet({
                           setIsAntExpense(true);
                         }
                       }}
-                      className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-all flex items-center gap-1 cursor-pointer font-sans ${
+                      className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-all flex items-center gap-1.5 cursor-pointer font-sans ${
                         category === c.id
                           ? "bg-[#221716] text-[#E05D52] border border-[#E05D52]/40"
                           : "bg-[#121110] text-[#8E867B] border border-[#2A2723] hover:text-[#DDD6C9]"
                       }`}
                     >
-                      <span>{c.icon || "🏷️"}</span>
+                      <FinanceIcon icon={c.icon || "tag"} className="h-3.5 w-3.5 shrink-0" />
                       <span>#{c.id}</span>
                     </button>
                   ))}
@@ -344,13 +427,16 @@ export function MobileBottomSheet({
                       key={acc.id}
                       type="button"
                       onClick={() => setAccount(acc.id)}
-                      className={`px-2.5 py-1 rounded-lg text-xs font-mono uppercase transition-all flex items-center gap-1 cursor-pointer ${
+                      className={`px-2.5 py-1 rounded-lg text-xs font-mono uppercase transition-all flex items-center gap-1.5 cursor-pointer ${
                         account === acc.id
                           ? "bg-[#221D16] text-[#D99B43] border border-[#D99B43]/40"
                           : "bg-[#121110] text-[#8E867B] border border-[#2A2723]"
                       }`}
                     >
-                      <span>{acc.icon || "💳"}</span>
+                      <FinanceIcon
+                        icon={acc.icon || (acc.type === "cash" ? "banknote" : "credit-card")}
+                        className="h-3.5 w-3.5 shrink-0"
+                      />
                       <span>@{acc.id}</span>
                     </button>
                   ))}
@@ -444,14 +530,15 @@ export function MobileBottomSheet({
                 <span className="text-xs font-semibold text-[#DDD6C9] block mb-2 font-serif">
                   1-Tap: Sumar Porción (+1)
                 </span>
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                   {[
                     { key: "fruits" as const, name: "Fruta", icon: "🍎", color: "border-[#E05D52]/30 bg-[#221716] text-[#E05D52]" },
                     { key: "vegetables" as const, name: "Verdura", icon: "🥦", color: "border-[#7EA35A]/30 bg-[#1C2219] text-[#7EA35A]" },
                     { key: "cereals" as const, name: "Cereal", icon: "🌾", color: "border-[#D99B43]/30 bg-[#221D16] text-[#D99B43]" },
                     { key: "legumes" as const, name: "Legumbre/Tofu", icon: "🫘", color: "border-[#4EAB9E]/30 bg-[#162121] text-[#4EAB9E]" },
                     { key: "fats_seeds" as const, name: "Semillas/Grasa", icon: "🥑", color: "border-[#7EA35A]/30 bg-[#1C2219] text-[#7EA35A]" },
-                    { key: "leafy_greens" as const, name: "Hojas", icon: "🥬", color: "border-[#4EAB9E]/30 bg-[#162121] text-[#4EAB9E]" },
+                    { key: "leafy_greens" as const, name: "Hojas", icon: "🥬", color: "border-[#7EA35A]/30 bg-[#1C2219] text-[#7EA35A]" },
+                    { key: "tubers" as const, name: "Tubérculo", icon: "🍠", color: "border-[#D99B43]/30 bg-[#221D16] text-[#D99B43]" },
                   ].map((item) => (
                     <button
                       key={item.key}
@@ -468,34 +555,41 @@ export function MobileBottomSheet({
               </div>
 
               <div className="pt-2 border-t border-[#2A2723]">
-                <span className="text-xs font-semibold text-[#DDD6C9] block mb-2 font-serif">
-                  Hábitos Clave de Mariana Mont:
-                </span>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-                  <button
-                    type="button"
-                    onClick={() => handleQuickHabit("dailySalad", "Ensalada Diaria")}
-                    disabled={isPending}
-                    className="py-2.5 px-2 rounded-lg bg-[#121110] border border-[#7EA35A]/30 text-[11px] font-semibold text-[#7EA35A] hover:bg-[#1C2219] transition-all text-center cursor-pointer"
-                  >
-                    🥗 Ensalada Diaria
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => handleQuickHabit("noUltraProcessed", "Cero Procesados")}
-                    disabled={isPending}
-                    className="py-2.5 px-2 rounded-lg bg-[#121110] border border-[#D99B43]/30 text-[11px] font-semibold text-[#D99B43] hover:bg-[#221D16] transition-all text-center cursor-pointer"
-                  >
-                    🚫 Cero Procesados
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => handleQuickHabit("b12Weekly", "Vitamina B12")}
-                    disabled={isPending}
-                    className="py-2.5 px-2 rounded-lg bg-[#121110] border border-[#4EAB9E]/30 text-[11px] font-semibold text-[#4EAB9E] hover:bg-[#162121] transition-all text-center cursor-pointer"
-                  >
-                    💊 Vitamina B12
-                  </button>
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-xs font-semibold text-[#DDD6C9] font-serif">
+                    Hábitos & Suplementos Diarios ({effectiveSupplements.length}):
+                  </span>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-48 overflow-y-auto pr-0.5">
+                  {effectiveSupplements.map((item) => {
+                    const emoji = getSupplementEmoji(item.name, item.id);
+                    return (
+                      <button
+                        key={item.id}
+                        type="button"
+                        onClick={() => handleQuickSupplementOrHabit(item)}
+                        disabled={isPending}
+                        className="flex items-center justify-between p-2.5 rounded-lg bg-[#121110] border border-[#2A2723] hover:border-[#D99B43]/40 text-xs font-semibold text-[#DDD6C9] hover:text-[#F5F2EB] hover:bg-[#181715] transition-all text-left cursor-pointer active:scale-95 group"
+                      >
+                        <div className="flex items-center gap-2.5 truncate min-w-0 pr-2">
+                          <span className="text-base shrink-0">{emoji}</span>
+                          <div className="truncate">
+                            <div className="text-xs font-bold truncate text-[#F5F2EB] group-hover:text-[#D99B43] transition-colors">
+                              {item.name}
+                            </div>
+                            {item.dosage && (
+                              <div className="text-[10px] text-[#8E867B] font-mono truncate">
+                                {item.dosage} {item.timing ? `• ${item.timing}` : ""}
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                        <span className="shrink-0 text-[10px] font-mono font-bold text-[#D99B43] bg-[#221D16] border border-[#D99B43]/30 px-2 py-0.5 rounded-md">
+                          +1
+                        </span>
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
             </div>

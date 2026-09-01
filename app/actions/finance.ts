@@ -202,6 +202,17 @@ export async function getFinanceCatalog(sql: SqlClient): Promise<{
   }
 }
 
+/**
+ * Server Action: Fetches active finance categories and accounts from the database catalog.
+ */
+export async function fetchFinanceCatalogAction(): Promise<{
+  categories: FinanceCategory[];
+  accounts: FinanceAccount[];
+}> {
+  const sql = getDb();
+  return getFinanceCatalog(sql);
+}
+
 function mapCommitmentRow(r: CommitmentDbRow): FinanceCommitment {
   const totalAmount = r.total_amount ? Number(r.total_amount) : undefined;
   const installmentAmount = r.installment_amount ? Number(r.installment_amount) : undefined;

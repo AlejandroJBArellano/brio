@@ -5,6 +5,7 @@ import {
   createFinanceCategoryAction,
   deleteFinanceAccountAction,
   deleteFinanceCategoryAction,
+  fetchFinanceCatalogAction,
   updateFinanceAccountAction,
   updateFinanceCategoryAction,
 } from "@/app/actions/finance";
@@ -13,7 +14,12 @@ import {
   LUCIDE_ACCOUNT_ICONS,
   LUCIDE_CATEGORY_ICONS,
 } from "@/app/components/finance/FinanceIcon";
-import { FinanceAccount, FinanceCategory } from "@/lib/types";
+import {
+  DEFAULT_FINANCE_ACCOUNTS,
+  DEFAULT_FINANCE_CATEGORIES,
+  FinanceAccount,
+  FinanceCategory,
+} from "@/lib/types";
 import {
   AlertCircle,
   Check,
@@ -28,13 +34,13 @@ import {
   Trash2,
   X,
 } from "lucide-react";
-import { useState, useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
 
 interface ManageFinanceCatalogModalProps {
   isOpen: boolean;
   onClose: () => void;
-  categories: FinanceCategory[];
-  accounts: FinanceAccount[];
+  categories?: FinanceCategory[];
+  accounts?: FinanceAccount[];
   onSuccess?: () => void;
 }
 
@@ -56,6 +62,37 @@ export function ManageFinanceCatalogModal({
   const [activeTab, setActiveTab] = useState<"accounts" | "categories">("accounts");
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
+
+  const [dbCategories, setDbCategories] = useState<FinanceCategory[]>(categories);
+  const [dbAccounts, setDbAccounts] = useState<FinanceAccount[]>(accounts);
+
+  const reloadCatalog = async () => {
+    try {
+      const catalog = await fetchFinanceCatalogAction();
+      if (catalog.categories && catalog.categories.length > 0) {
+        setDbCategories(catalog.categories);
+      }
+      if (catalog.accounts && catalog.accounts.length > 0) {
+        setDbAccounts(catalog.accounts);
+      }
+    } catch (err) {
+      console.error("[ManageFinanceCatalogModal] Failed to reload catalog:", err);
+    }
+  };
+
+  useEffect(() => {
+    if (categories.length > 0) setDbCategories(categories);
+    if (accounts.length > 0) setDbAccounts(accounts);
+
+    if (isOpen && (categories.length === 0 || accounts.length === 0)) {
+      reloadCatalog();
+    }
+  }, [isOpen, categories, accounts]);
+
+  const effectiveCategories =
+    dbCategories.length > 0 ? dbCategories : DEFAULT_FINANCE_CATEGORIES;
+  const effectiveAccounts =
+    dbAccounts.length > 0 ? dbAccounts : DEFAULT_FINANCE_ACCOUNTS;
 
   // Form states for Accounts
   const [editingAccountId, setEditingAccountId] = useState<string | null>(null);
@@ -145,6 +182,7 @@ export function ManageFinanceCatalogModal({
       }
 
       resetAccountForm();
+      await reloadCatalog();
       if (onSuccess) onSuccess();
     });
   };
@@ -158,6 +196,7 @@ export function ManageFinanceCatalogModal({
         return;
       }
       if (editingAccountId === id) resetAccountForm();
+      await reloadCatalog();
       if (onSuccess) onSuccess();
     });
   };
@@ -197,6 +236,7 @@ export function ManageFinanceCatalogModal({
       }
 
       resetCategoryForm();
+      await reloadCatalog();
       if (onSuccess) onSuccess();
     });
   };
@@ -210,6 +250,7 @@ export function ManageFinanceCatalogModal({
         return;
       }
       if (editingCategoryId === id) resetCategoryForm();
+      await reloadCatalog();
       if (onSuccess) onSuccess();
     });
   };
@@ -260,7 +301,7 @@ export function ManageFinanceCatalogModal({
             }`}
           >
             <CreditCard className="h-4 w-4" />
-            <span>Tarjetas & Cuentas ({accounts.length})</span>
+            <span>Tarjetas & Cuentas ({effectiveAccounts.length})</span>
           </button>
 
           <button
@@ -276,7 +317,7 @@ export function ManageFinanceCatalogModal({
             }`}
           >
             <Tag className="h-4 w-4" />
-            <span>Categorías ({categories.length})</span>
+            <span>Categorías ({effectiveCategories.length})</span>
           </button>
         </div>
 
@@ -434,11 +475,11 @@ export function ManageFinanceCatalogModal({
               {/* List of current accounts */}
               <div className="space-y-2 font-mono">
                 <div className="flex items-center justify-between text-xs text-[#8E867B] px-1">
-                  <span>Cuentas y Tarjetas Activas ({accounts.length})</span>
+                  <span>Cuentas y Tarjetas Activas ({effectiveAccounts.length})</span>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                  {accounts.map((acc) => (
+                  {effectiveAccounts.map((acc) => (
                     <div
                       key={acc.id}
                       className="flex items-center justify-between p-3 rounded-lg border border-[#2A2723] bg-[#121110] hover:border-[#38332D] transition-all group"
@@ -644,11 +685,11 @@ export function ManageFinanceCatalogModal({
               {/* List of current categories */}
               <div className="space-y-2 font-mono">
                 <div className="flex items-center justify-between text-xs text-[#8E867B] px-1">
-                  <span>Categorías Activas ({categories.length})</span>
+                  <span>Categorías Activas ({effectiveCategories.length})</span>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                  {categories.map((cat) => (
+                  {effectiveCategories.map((cat) => (
                     <div
                       key={cat.id}
                       className="flex items-center justify-between p-3 rounded-lg border border-[#2A2723] bg-[#121110] hover:border-[#38332D] transition-all group"

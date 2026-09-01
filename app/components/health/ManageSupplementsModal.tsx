@@ -3,9 +3,10 @@
 import {
   createSupplementAction,
   deleteSupplementAction,
+  fetchSupplementsCatalogAction,
   updateSupplementAction,
 } from "@/app/actions/health";
-import { UserSupplement } from "@/lib/types";
+import { DEFAULT_USER_SUPPLEMENTS, UserSupplement } from "@/lib/types";
 import {
   AlertCircle,
   Check,
@@ -17,16 +18,19 @@ import {
   Trash2,
   X,
 } from "lucide-react";
-import { useState, useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
 
 interface ManageSupplementsModalProps {
   isOpen: boolean;
   onClose: () => void;
-  supplements: UserSupplement[];
+  supplements?: UserSupplement[];
   onSuccess?: () => void;
 }
 
 const COMMON_PRESETS = [
+  { name: "Ensalada Diaria", dosage: "Con semillas", timing: "Comida" },
+  { name: "Cero Ultraprocesados", dosage: "Sin fritos", timing: "Todo el día" },
+  { name: "Vitamina B12", dosage: "2000mcg", timing: "Mañana" },
   { name: "Creatina", dosage: "5g", timing: "Post-entreno" },
   { name: "Citrato de Magnesio", dosage: "400mg", timing: "Noche" },
   { name: "Omega 3", dosage: "2 cápsulas", timing: "Con comida" },
@@ -44,14 +48,17 @@ const TIMING_OPTIONS = [
   { id: "Pre-entreno", label: "Pre-entreno ⚡" },
   { id: "Post-entreno", label: "Post-entreno 🏋️" },
   { id: "Con comida", label: "Con comida 🍽️" },
+  { id: "Comida", label: "Comida 🥗" },
+  { id: "Todo el día", label: "Todo el día 🛡️" },
 ];
 
 export function ManageSupplementsModal({
   isOpen,
   onClose,
-  supplements,
+  supplements = [],
   onSuccess,
 }: ManageSupplementsModalProps) {
+  const [dbSupplements, setDbSupplements] = useState<UserSupplement[]>(supplements);
   const [name, setName] = useState("");
   const [dosage, setDosage] = useState("");
   const [timing, setTiming] = useState("Mañana");
@@ -59,6 +66,25 @@ export function ManageSupplementsModal({
   const [error, setError] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
+
+  const reloadSupplements = async () => {
+    try {
+      const items = await fetchSupplementsCatalogAction();
+      if (items && items.length > 0) setDbSupplements(items);
+    } catch (err) {
+      console.error("[ManageSupplementsModal] Failed to reload catalog:", err);
+    }
+  };
+
+  useEffect(() => {
+    if (supplements.length > 0) setDbSupplements(supplements);
+    if (isOpen && supplements.length === 0) {
+      reloadSupplements();
+    }
+  }, [isOpen, supplements]);
+
+  const effectiveSupplements =
+    dbSupplements.length > 0 ? dbSupplements : DEFAULT_USER_SUPPLEMENTS;
 
   if (!isOpen) return null;
 
@@ -96,6 +122,7 @@ export function ManageSupplementsModal({
 
         if (res.success) {
           handleCancelEdit();
+          await reloadSupplements();
           if (onSuccess) onSuccess();
         } else {
           setError(res.error || "No se pudo actualizar el suplemento.");
@@ -111,6 +138,7 @@ export function ManageSupplementsModal({
           setName("");
           setDosage("");
           setTiming("Mañana");
+          await reloadSupplements();
           if (onSuccess) onSuccess();
         } else {
           setError(res.error || "No se pudo agregar el suplemento.");
@@ -125,6 +153,7 @@ export function ManageSupplementsModal({
       if (res.success) {
         setDeletingId(null);
         if (editingId === id) handleCancelEdit();
+        await reloadSupplements();
         if (onSuccess) onSuccess();
       } else {
         setError(res.error || "No se pudo eliminar el suplemento.");
@@ -134,7 +163,7 @@ export function ManageSupplementsModal({
 
   const handleAddPreset = (preset: { name: string; dosage: string; timing: string }) => {
     // Check if already exists
-    const exists = supplements.some(
+    const exists = effectiveSupplements.some(
       (s) => s.name.toLowerCase() === preset.name.toLowerCase()
     );
     if (exists) {
@@ -146,6 +175,7 @@ export function ManageSupplementsModal({
       const res = await createSupplementAction(preset);
       if (res.success) {
         setError(null);
+        await reloadSupplements();
         if (onSuccess) onSuccess();
       } else {
         setError(res.error || "No se pudo agregar el preset.");
@@ -302,7 +332,7 @@ export function ManageSupplementsModal({
               </div>
               <div className="flex flex-wrap gap-2 font-mono">
                 {COMMON_PRESETS.map((preset) => {
-                  const alreadyAdded = supplements.some(
+                  const alreadyAdded = effectiveSupplements.some(
                     (s) => s.name.toLowerCase() === preset.name.toLowerCase()
                   );
                   return (
@@ -337,23 +367,23 @@ export function ManageSupplementsModal({
           <div>
             <div className="flex items-center justify-between mb-3 font-mono">
               <h4 className="text-xs font-bold text-[#F5F2EB] tracking-tight flex items-center gap-2">
-                <span>Tus Suplementos Activos</span>
+                <span>Tus Suplementos & Hábitos Activos</span>
                 <span className="rounded-full bg-[#221D16] px-2 py-0.5 text-[10px] font-bold text-[#D99B43] border border-[#D99B43]/30">
-                  {supplements.length}
+                  {effectiveSupplements.length}
                 </span>
               </h4>
             </div>
 
-            {supplements.length === 0 ? (
+            {effectiveSupplements.length === 0 ? (
               <div className="p-8 text-center rounded-lg border border-dashed border-[#2A2723] bg-[#121110]">
                 <Pill className="h-8 w-8 text-[#8E867B] mx-auto mb-2" />
                 <p className="text-xs text-[#8E867B]">
-                  Aún no tienes suplementos configurados. Agrega uno arriba o usa los presets rápidos.
+                  Aún no tienes suplementos o hábitos configurados. Agrega uno arriba o usa los presets rápidos.
                 </p>
               </div>
             ) : (
               <div className="space-y-2 font-mono">
-                {supplements.map((supp) => (
+                {effectiveSupplements.map((supp) => (
                   <div
                     key={supp.id}
                     className={`flex items-center justify-between p-3 rounded-lg border transition-all ${

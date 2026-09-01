@@ -432,6 +432,16 @@ export interface UserSupplement {
   createdAt?: string;
 }
 
+export const DEFAULT_USER_SUPPLEMENTS: UserSupplement[] = [
+  { id: "salad", name: "Ensalada Diaria", dosage: "Con semillas", timing: "Comida/Cena", orderIndex: 0, isActive: true },
+  { id: "clean_eating", name: "Cero Ultraprocesados", dosage: "Sin fritos", timing: "Todo el día", orderIndex: 1, isActive: true },
+  { id: "b12", name: "Vitamina B12", dosage: "2000mcg", timing: "Semanal / Mañana", orderIndex: 2, isActive: true },
+  { id: "creatine", name: "Creatina", dosage: "5g", timing: "Post-entreno", orderIndex: 3, isActive: true },
+  { id: "multivitamin", name: "Multivitamínico", dosage: "1 cápsula", timing: "Mañana", orderIndex: 4, isActive: true },
+  { id: "omega3", name: "Omega 3", dosage: "2 cápsulas", timing: "Con comida", orderIndex: 5, isActive: true },
+  { id: "protein", name: "Proteína / Shake", dosage: "30g", timing: "Post-entreno", orderIndex: 6, isActive: true },
+];
+
 export interface HealthLog {
   date: string;
   workoutType?: WorkoutType;

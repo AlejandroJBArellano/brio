@@ -2,6 +2,7 @@
 
 import {
   createTransactionAction,
+  fetchFinanceCatalogAction,
   updateTransactionAction,
 } from "@/app/actions/finance";
 import { getTodayDateStr } from "@/lib/dateUtils";
@@ -27,7 +28,7 @@ import {
   Wallet,
   X,
 } from "lucide-react";
-import { useState, useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
 
 interface TransactionModalProps {
   isOpen: boolean;
@@ -78,10 +79,34 @@ function TransactionModalContent({
   onOpenManageCatalog,
 }: Omit<TransactionModalProps, "isOpen">) {
   const isEditing = Boolean(transactionToEdit);
+
+  const [dbCategories, setDbCategories] = useState<FinanceCategory[]>(categories);
+  const [dbAccounts, setDbAccounts] = useState<FinanceAccount[]>(accounts);
+
+  useEffect(() => {
+    if (categories.length > 0) setDbCategories(categories);
+    if (accounts.length > 0) setDbAccounts(accounts);
+
+    if (categories.length === 0 || accounts.length === 0) {
+      fetchFinanceCatalogAction()
+        .then((catalog) => {
+          if (catalog.categories && catalog.categories.length > 0) {
+            setDbCategories(catalog.categories);
+          }
+          if (catalog.accounts && catalog.accounts.length > 0) {
+            setDbAccounts(catalog.accounts);
+          }
+        })
+        .catch((err) => {
+          console.error("[TransactionModal] Failed to load finance catalog:", err);
+        });
+    }
+  }, [categories, accounts]);
+
   const effectiveCategories =
-    categories.length > 0 ? categories : DEFAULT_FINANCE_CATEGORIES;
+    dbCategories.length > 0 ? dbCategories : DEFAULT_FINANCE_CATEGORIES;
   const effectiveAccounts =
-    accounts.length > 0 ? accounts : DEFAULT_FINANCE_ACCOUNTS;
+    dbAccounts.length > 0 ? dbAccounts : DEFAULT_FINANCE_ACCOUNTS;
 
   const [type, setType] = useState<TransactionType>(
     transactionToEdit?.type || "expense"
@@ -99,6 +124,18 @@ function TransactionModalContent({
   const [isAntExpense, setIsAntExpense] = useState(
     Boolean(transactionToEdit?.isAntExpense)
   );
+
+  useEffect(() => {
+    if (!transactionToEdit && effectiveCategories.length > 0 && !effectiveCategories.some((c) => c.id === category)) {
+      setCategory(effectiveCategories[0].id);
+    }
+  }, [effectiveCategories, category, transactionToEdit]);
+
+  useEffect(() => {
+    if (!transactionToEdit && effectiveAccounts.length > 0 && !effectiveAccounts.some((a) => a.id === account)) {
+      setAccount(effectiveAccounts[0].id);
+    }
+  }, [effectiveAccounts, account, transactionToEdit]);
   const [notes, setNotes] = useState("");
   const [date, setDate] = useState(
     transactionToEdit?.date || getTodayDateStr()

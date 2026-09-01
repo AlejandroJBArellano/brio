@@ -11,6 +11,7 @@ import {
   BodyCompositionLog,
   BodyCompositionSegmental,
   DailyHealthData,
+  DEFAULT_USER_SUPPLEMENTS,
   FoodGroupKey,
   HealthDashboardData,
   HealthLog,
@@ -51,6 +52,7 @@ interface BiomarkerDbRow {
   date: Date | string;
   category: string;
   name: string;
+  canonical_name: string;
   code?: string;
   value_numeric?: number | string | null;
   value_text?: string | null;
@@ -61,14 +63,15 @@ interface BiomarkerDbRow {
   status: string;
   notes?: string | null;
   order_index?: number | string;
+  interpretation?: string;
   created_at?: Date | string;
 }
 
 interface UserSupplementDbRow {
   id: string;
   name: string;
-  dosage?: string;
-  timing?: string;
+  dosage?: string | null;
+  timing?: string | null;
   order_index?: number | string;
   is_active?: boolean;
   created_at?: Date | string;
@@ -117,36 +120,73 @@ interface HevyDbRow {
   hevy_updated_at?: Date | string;
 }
 
-const DEFAULT_USER_SUPPLEMENTS: UserSupplement[] = [
-  { id: "creatine", name: "Creatina", dosage: "5g", timing: "Post-entreno", orderIndex: 0, isActive: true },
-  { id: "multivitamin", name: "Multivitamínico", dosage: "1 cápsula", timing: "Mañana", orderIndex: 1, isActive: true },
-  { id: "omega3", name: "Omega 3", dosage: "2 cápsulas", timing: "Con comida", orderIndex: 2, isActive: true },
-  { id: "protein", name: "Proteína / Shake", dosage: "30g", timing: "Post-entreno", orderIndex: 3, isActive: true },
-];
+interface WorkoutDbRow {
+  id: string;
+  date: Date | string;
+  type: string;
+  notes?: string;
+  exercises?: unknown;
+  created_at?: Date | string;
+  hevy_updated_at?: Date | string;
+}
 
 type SqlClient = { (strings: TemplateStringsArray, ...values: unknown[]): Promise<unknown[]> };
 
 /**
- * Helper: Fetches the master supplements catalog from database.
+ * Helper: Fetches the master supplements and habits catalog from database.
  */
 async function getSupplementsCatalog(sql: SqlClient): Promise<UserSupplement[]> {
-  const rows = await sql`
-    SELECT * FROM user_supplements WHERE is_active = true ORDER BY order_index ASC, created_at ASC;
-  `;
+  try {
+    await sql`
+      CREATE TABLE IF NOT EXISTS user_supplements (
+        id TEXT PRIMARY KEY,
+        name TEXT NOT NULL,
+        dosage TEXT,
+        timing TEXT,
+        order_index INTEGER DEFAULT 0,
+        is_active BOOLEAN DEFAULT true,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+      );
+    `;
 
-  if (rows.length > 0) {
-    return (rows as unknown as UserSupplementDbRow[]).map((r) => ({
-      id: r.id,
-      name: r.name,
-      dosage: r.dosage || undefined,
-      timing: r.timing || undefined,
-      orderIndex: Number(r.order_index) || 0,
-      isActive: r.is_active ?? true,
-      createdAt: r.created_at?.toString(),
-    }));
+    const rows = await sql`
+      SELECT * FROM user_supplements WHERE is_active = true ORDER BY order_index ASC, created_at ASC;
+    `;
+
+    if (rows.length > 0) {
+      return (rows as unknown as UserSupplementDbRow[]).map((r) => ({
+        id: r.id,
+        name: r.name,
+        dosage: r.dosage || undefined,
+        timing: r.timing || undefined,
+        orderIndex: Number(r.order_index) || 0,
+        isActive: r.is_active ?? true,
+        createdAt: r.created_at?.toString(),
+      }));
+    }
+
+    // Seed defaults if empty
+    for (const item of DEFAULT_USER_SUPPLEMENTS) {
+      await sql`
+        INSERT INTO user_supplements (id, name, dosage, timing, order_index, is_active)
+        VALUES (${item.id}, ${item.name}, ${item.dosage || null}, ${item.timing || null}, ${item.orderIndex || 0}, true)
+        ON CONFLICT (id) DO NOTHING;
+      `;
+    }
+
+    return DEFAULT_USER_SUPPLEMENTS;
+  } catch (error) {
+    console.error("[Get Supplements Catalog Error]:", error);
+    return DEFAULT_USER_SUPPLEMENTS;
   }
+}
 
-  return DEFAULT_USER_SUPPLEMENTS;
+/**
+ * Server Action: Fetches active supplements and habits catalog.
+ */
+export async function fetchSupplementsCatalogAction(): Promise<UserSupplement[]> {
+  const sql = getDb();
+  return getSupplementsCatalog(sql);
 }
 
 /**
