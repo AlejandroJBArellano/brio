@@ -9,6 +9,7 @@ import {
   Flame,
   Plus,
   Scale,
+  Target,
   Trash2,
   TrendingDown,
   TrendingUp,
@@ -127,6 +128,99 @@ export function BodyCompositionWidget({
             <Plus className="h-4 w-4 stroke-[2.5]" />
             <span>+ Nueva Medición</span>
           </button>
+        </div>
+      </div>
+
+      {/* 1.5 Active Cutting Goal / Target Card */}
+      <div className="relative overflow-hidden rounded-xl border border-[#D99B43]/30 bg-linear-to-br from-[#1C1A17] via-[#161513] to-[#121110] p-4 sm:p-5 shadow-md">
+        <div className="absolute top-0 right-0 h-32 w-32 bg-[#D99B43]/5 rounded-full blur-2xl pointer-events-none" />
+        
+        {/* Header & Badges */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 mb-3.5">
+          <div className="flex items-center gap-2.5">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#2A2318] text-[#D99B43] border border-[#D99B43]/40 shadow-xs">
+              <Target className="h-4 w-4" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <h4 className="font-serif text-sm font-bold text-[#F5F2EB] tracking-tight">
+                  Meta Activa: Fase de Definición Gradual
+                </h4>
+                <span className="rounded-full bg-[#D99B43]/15 px-2 py-0.5 text-[9px] font-mono font-bold text-[#D99B43] border border-[#D99B43]/30">
+                  18 Semanas (~0.38 kg/sem)
+                </span>
+              </div>
+              <p className="text-[11px] text-[#8E867B] font-mono">
+                Reducción de grasa corporal preservando 33.7 kg de masa muscular esquelética
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2 text-xs font-mono">
+            <span className="rounded-lg bg-[#121110] px-3 py-1 text-[#DDD6C9] border border-[#2A2723]">
+              Meta: <strong className="text-[#4EAB9E]">71.0 kg</strong> (~14% Grasa)
+            </span>
+          </div>
+        </div>
+
+        {/* Progress Bar */}
+        {(() => {
+          const startWeight = 78.6;
+          const targetWeight = 71.0;
+          const currentWeight = current.weightKg || startWeight;
+          const totalToLose = startWeight - targetWeight;
+          const lostSoFar = Math.max(0, startWeight - currentWeight);
+          const progressPercent = Math.min(100, Math.max(0, Math.round((lostSoFar / totalToLose) * 100)));
+          const remainingKg = Math.max(0, currentWeight - targetWeight).toFixed(1);
+
+          return (
+            <div className="space-y-2 mb-3.5 bg-[#121110]/90 p-3 rounded-lg border border-[#2A2723]">
+              <div className="flex items-center justify-between text-xs font-mono">
+                <span className="text-[#8E867B] flex items-center gap-1.5">
+                  <span className="text-[#DDD6C9] font-bold">{startWeight} kg</span>
+                  <span className="text-[10px] text-[#6A6359]">(24.6% BF)</span>
+                  <span>➔</span>
+                  <strong className="text-[#D99B43]">{currentWeight} kg</strong>
+                  <span className="text-[10px] text-[#6A6359]">(Actual)</span>
+                </span>
+                <span className="text-[#4EAB9E] font-bold">
+                  {progressPercent}% completado ({remainingKg} kg restantes)
+                </span>
+              </div>
+
+              {/* Visual Track */}
+              <div className="relative h-2 w-full overflow-hidden rounded-full bg-[#22201D]">
+                <div
+                  className="h-full rounded-full bg-linear-to-r from-[#D99B43] to-[#4EAB9E] transition-all duration-500"
+                  style={{ width: `${Math.max(5, progressPercent)}%` }}
+                />
+              </div>
+            </div>
+          );
+        })()}
+
+        {/* Quick Protocol Targets Grid */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 font-mono text-xs">
+          <div className="rounded-lg bg-[#121110] p-2.5 border border-[#2A2723]/80">
+            <span className="text-[10px] text-[#8E867B] block font-sans">🔥 Déficit Calórico</span>
+            <span className="font-bold text-[#F5F2EB] text-xs">~2,050 kcal/d</span>
+            <span className="text-[9px] text-[#7EA35A] block">-400 kcal vs TDEE</span>
+          </div>
+          <div className="rounded-lg bg-[#121110] p-2.5 border border-[#2A2723]/80">
+            <span className="text-[10px] text-[#8E867B] block font-sans">🥩 Proteína Diaria</span>
+            <span className="font-bold text-[#F5F2EB] text-xs">160 g / día</span>
+            <span className="text-[9px] text-[#8E867B] block">2.1g/kg masa magra</span>
+          </div>
+          <div className="rounded-lg bg-[#121110] p-2.5 border border-[#2A2723]/80">
+            <span className="text-[10px] text-[#8E867B] block font-sans">💧 Hidratación Meta</span>
+            <span className="font-bold text-[#F5F2EB] text-xs">3,000 ml / día</span>
+            <span className="text-[9px] text-[#4EAB9E] block">40L Agua corporal</span>
+          </div>
+          <div className="rounded-lg bg-[#121110] p-2.5 border border-[#2A2723]/80">
+            <span className="text-[10px] text-[#8E867B] block font-sans">👟 Actividad NEAT</span>
+            <span className="font-bold text-[#F5F2EB] text-xs">+10,000 pasos</span>
+            <span className="text-[9px] text-[#D99B43] block">Gym Fuerza Hevy</span>
+          </div>
         </div>
       </div>
 

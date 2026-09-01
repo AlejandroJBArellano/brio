@@ -12,7 +12,6 @@ import {
   ArrowRight,
   Check,
   Droplet,
-  Dumbbell,
   Flame,
   Moon,
   Pill,
@@ -20,7 +19,7 @@ import {
   Salad,
   Settings2,
   UploadCloud,
-  X,
+  X
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -193,40 +192,6 @@ export function DailyHealthView({ data, onRefresh }: DailyHealthViewProps) {
             </Link>
           </div>
         </div>
-
-        {/* Workout Glance Card */}
-        <div className="rounded-xl border border-[#2A2723] bg-[#181715] p-4.5 shadow-xs flex flex-col justify-between gap-3">
-          <div className="flex items-start gap-3">
-            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[#221D16] text-[#D99B43] border border-[#D99B43]/30">
-              <Dumbbell className="h-4.5 w-4.5" />
-            </div>
-            <div className="min-w-0">
-              <div className="flex items-center gap-2">
-                <h3 className="font-serif text-sm font-bold text-[#F5F2EB] tracking-tight">
-                  Entrenamiento & Hevy
-                </h3>
-                <span className="rounded bg-[#221D16] border border-[#D99B43]/30 px-1.5 py-0.5 text-[10px] font-mono font-bold text-[#D99B43]">
-                  {data.weeklyWorkoutsCount} sesiones esta semana
-                </span>
-              </div>
-              <p className="text-xs text-[#8E867B] mt-1 line-clamp-1">
-                {data.lastWorkoutSummary
-                  ? `Última sesión: ${data.lastWorkoutSummary.title} (${data.lastWorkoutSummary.date})`
-                  : "Sincronizado automáticamente con Hevy Tracker"}
-              </p>
-            </div>
-          </div>
-
-          <div className="flex justify-end pt-1">
-            <Link
-              href="/health/training"
-              className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#D99B43] hover:text-[#E8AF59] transition-colors cursor-pointer"
-            >
-              <span>Abrir Gym & Hevy</span>
-              <ArrowRight className="h-3.5 w-3.5" />
-            </Link>
-          </div>
-        </div>
       </div>
 
       {/* 4. Daily Interactive Logs Grid: Water & Supplements */}
@@ -333,11 +298,10 @@ export function DailyHealthView({ data, onRefresh }: DailyHealthViewProps) {
                   type="button"
                   onClick={() => handleToggleSupplement(supp.id)}
                   disabled={isPending}
-                  className={`flex items-center justify-between p-3 rounded-lg border transition-all text-xs font-semibold cursor-pointer ${
-                    supp.taken
+                  className={`flex items-center justify-between p-3 rounded-lg border transition-all text-xs font-semibold cursor-pointer ${supp.taken
                       ? "border-[#7EA35A]/40 bg-[#1C2219] text-[#7EA35A]"
                       : "border-[#2A2723] bg-[#121110] text-[#DDD6C9] hover:border-[#38332D]"
-                  }`}
+                    }`}
                 >
                   <div className="flex flex-col items-start text-left">
                     <span>{supp.name}</span>
@@ -348,11 +312,10 @@ export function DailyHealthView({ data, onRefresh }: DailyHealthViewProps) {
                     )}
                   </div>
                   <div
-                    className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-md border ml-2 ${
-                      supp.taken
+                    className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-md border ml-2 ${supp.taken
                         ? "bg-[#7EA35A] border-[#7EA35A] text-[#121110]"
                         : "border-[#2A2723] bg-[#181715]"
-                    }`}
+                      }`}
                   >
                     {supp.taken && <Check className="h-3.5 w-3.5 stroke-3" />}
                   </div>
@@ -421,11 +384,10 @@ export function DailyHealthView({ data, onRefresh }: DailyHealthViewProps) {
                   key={q}
                   type="button"
                   onClick={() => setSleepQuality(q)}
-                  className={`flex-1 py-2 rounded-md border text-xs font-bold transition-all cursor-pointer ${
-                    sleepQuality === q
+                  className={`flex-1 py-2 rounded-md border text-xs font-bold transition-all cursor-pointer ${sleepQuality === q
                       ? "bg-[#221D16] border-[#D99B43]/40 text-[#D99B43]"
                       : "bg-[#121110] border-[#2A2723] text-[#8E867B] hover:text-[#DDD6C9]"
-                  }`}
+                    }`}
                 >
                   {q} ⭐
                 </button>
