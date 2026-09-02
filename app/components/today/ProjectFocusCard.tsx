@@ -318,7 +318,7 @@ export function ProjectFocusCard({
                   className="bg-transparent border-none text-[#4EAB9E] font-bold focus:outline-none cursor-pointer pr-1"
                 >
                   <option value="none" className="bg-[#181715] text-[#8E867B]">
-                    🔍 Filtrar por nombre del proyecto (sin tag)
+                    Ver por proyecto
                   </option>
                   {tags.map((t) => (
                     <option key={t.id} value={t.id} className="bg-[#181715] text-[#4EAB9E]">
