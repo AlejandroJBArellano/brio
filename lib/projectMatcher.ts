@@ -29,7 +29,7 @@ export function getProjectKeywords(project: ProjectItem): {
     return { prefixes: ["pbj", "montgomery"], canonicalPrefix: "[PBJ]" };
   }
   if (titleLower.includes("0 => 100") || titleLower.includes("0 -> 100") || titleLower.includes("marca personal")) {
-    return { prefixes: ["0 -> 100", "0 => 100", "0->100", "marca personal"], canonicalPrefix: "[0 -> 100]" };
+    return { prefixes: ["marca personal", "0 -> 100", "0 => 100", "0->100"], canonicalPrefix: "[Marca Personal]" };
   }
   if (titleLower.includes("hybridge")) {
     return { prefixes: ["hybridge", "hybridge: oss", "hybridge oss"], canonicalPrefix: "[Hybridge]" };
