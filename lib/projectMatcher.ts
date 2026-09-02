@@ -32,7 +32,18 @@ export function getProjectKeywords(project: ProjectItem): {
     return { prefixes: ["marca personal", "0 -> 100", "0 => 100", "0->100"], canonicalPrefix: "[Marca Personal]" };
   }
   if (titleLower.includes("hybridge")) {
-    return { prefixes: ["hybridge", "hybridge: oss", "hybridge oss"], canonicalPrefix: "[Hybridge]" };
+    return {
+      prefixes: [
+        "hybridge",
+        "hybridge: oss",
+        "hybridge oss",
+        "análisis y procesamiento de datos",
+        "ciberseguridad y hackeo ético",
+        "el tablero de ajedrez (seguridad)",
+        "sa módulo 4",
+      ],
+      canonicalPrefix: "[Hybridge]",
+    };
   }
   if (titleLower.includes("kittn")) {
     return { prefixes: ["kittn os", "kittn"], canonicalPrefix: "[Kittn OS]" };
