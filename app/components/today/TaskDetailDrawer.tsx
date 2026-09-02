@@ -16,9 +16,9 @@ import {
   Image as ImageIcon,
   ListTodo,
   Loader2,
+  Pencil,
   Plus,
   Trash2,
-  UploadCloud,
   X,
 } from "lucide-react";
 import { useRef, useState, useTransition } from "react";
@@ -44,10 +44,19 @@ export function TaskDetailDrawer({
   const [isAddingNote, setIsAddingNote] = useState(false);
   const [noteTitle, setNoteTitle] = useState("");
   const [noteContent, setNoteContent] = useState("");
+
+  // Editing Note State
+  const [editingNoteId, setEditingNoteId] = useState<string | null>(null);
+  const [editNoteTitle, setEditNoteTitle] = useState("");
+  const [editNoteContent, setEditNoteContent] = useState("");
+
   const [isUploadingImage, setIsUploadingImage] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
+  const [isEditDragging, setIsEditDragging] = useState(false);
+
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const editFileInputRef = useRef<HTMLInputElement | null>(null);
 
   if (!isOpen || !task) return null;
 
@@ -71,7 +80,7 @@ export function TaskDetailDrawer({
     });
   };
 
-  const handleUploadFile = async (file: File) => {
+  const handleUploadFile = async (file: File, isEdit: boolean = false) => {
     if (!file.type.startsWith("image/")) {
       setUploadError("Solo se permiten archivos de imagen (PNG, JPG, WEBP).");
       return;
@@ -90,7 +99,11 @@ export function TaskDetailDrawer({
         soundFx.click();
         const altText = file.name.replace(/\.[^/.]+$/, "") || "Captura adjunta";
         const markdownImage = `\n![${altText}](${res.url})\n`;
-        setNoteContent((prev) => (prev ? `${prev.trimEnd()}\n${markdownImage}` : markdownImage));
+        if (isEdit) {
+          setEditNoteContent((prev) => (prev ? `${prev.trimEnd()}\n${markdownImage}` : markdownImage));
+        } else {
+          setNoteContent((prev) => (prev ? `${prev.trimEnd()}\n${markdownImage}` : markdownImage));
+        }
       } else {
         setUploadError(res.error || "Error al subir la imagen");
       }
@@ -102,7 +115,7 @@ export function TaskDetailDrawer({
     }
   };
 
-  // Clipboard Paste handler (⌘V direct screenshot paste)
+  // Clipboard Paste handler for new note
   const handlePaste = async (e: React.ClipboardEvent<HTMLTextAreaElement>) => {
     const items = e.clipboardData?.items;
     if (!items) return;
@@ -113,29 +126,28 @@ export function TaskDetailDrawer({
         const file = item.getAsFile();
         if (file) {
           e.preventDefault();
-          await handleUploadFile(file);
+          await handleUploadFile(file, false);
           return;
         }
       }
     }
   };
 
-  // File picker handler
-  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (files && files.length > 0) {
-      await handleUploadFile(files[0]);
-    }
-    if (fileInputRef.current) fileInputRef.current.value = "";
-  };
+  // Clipboard Paste handler for editing note
+  const handleEditPaste = async (e: React.ClipboardEvent<HTMLTextAreaElement>) => {
+    const items = e.clipboardData?.items;
+    if (!items) return;
 
-  // Drag and drop handlers
-  const handleDrop = async (e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    setIsDragging(false);
-    const files = e.dataTransfer.files;
-    if (files && files.length > 0) {
-      await handleUploadFile(files[0]);
+    for (let i = 0; i < items.length; i++) {
+      const item = items[i];
+      if (item.type.startsWith("image/")) {
+        const file = item.getAsFile();
+        if (file) {
+          e.preventDefault();
+          await handleUploadFile(file, true);
+          return;
+        }
+      }
     }
   };
 
@@ -159,10 +171,49 @@ export function TaskDetailDrawer({
     });
   };
 
+  const handleStartEdit = (note: ContextualNote) => {
+    setEditingNoteId(note.id);
+    setEditNoteTitle(note.title);
+    setEditNoteContent(note.content);
+    setIsAddingNote(false);
+    setUploadError(null);
+  };
+
+  const handleCancelEdit = () => {
+    setEditingNoteId(null);
+    setEditNoteTitle("");
+    setEditNoteContent("");
+    setUploadError(null);
+  };
+
+  const handleSaveEdit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editNoteTitle.trim() || !editNoteContent.trim() || !editingNoteId) return;
+    soundFx.taskComplete();
+
+    startTransition(async () => {
+      await saveContextualNoteAction({
+        id: editingNoteId,
+        projectId,
+        taskId: task.id,
+        title: editNoteTitle.trim(),
+        content: editNoteContent.trim(),
+        category: "technical",
+      });
+      setEditingNoteId(null);
+      setEditNoteTitle("");
+      setEditNoteContent("");
+      if (onRefreshData) onRefreshData();
+    });
+  };
+
   const handleDeleteTaskNote = (noteId: string) => {
     soundFx.click();
     startTransition(async () => {
       await deleteContextualNoteAction(noteId);
+      if (editingNoteId === noteId) {
+        setEditingNoteId(null);
+      }
       if (onRefreshData) onRefreshData();
     });
   };
@@ -284,7 +335,10 @@ export function TaskDetailDrawer({
 
               <button
                 type="button"
-                onClick={() => setIsAddingNote(!isAddingNote)}
+                onClick={() => {
+                  setIsAddingNote(!isAddingNote);
+                  if (editingNoteId) setEditingNoteId(null);
+                }}
                 className="text-[11px] font-mono text-[#4EAB9E] hover:underline cursor-pointer flex items-center gap-1"
               >
                 <Plus className="h-3 w-3" />
@@ -314,7 +368,12 @@ export function TaskDetailDrawer({
                     setIsDragging(true);
                   }}
                   onDragLeave={() => setIsDragging(false)}
-                  onDrop={handleDrop}
+                  onDrop={async (e) => {
+                    e.preventDefault();
+                    setIsDragging(false);
+                    const files = e.dataTransfer.files;
+                    if (files && files.length > 0) await handleUploadFile(files[0], false);
+                  }}
                   className={`relative rounded-lg border transition-all ${
                     isDragging
                       ? "border-[#4EAB9E] bg-[#141C1A]"
@@ -337,7 +396,11 @@ export function TaskDetailDrawer({
                         ref={fileInputRef}
                         type="file"
                         accept="image/*"
-                        onChange={handleFileChange}
+                        onChange={async (e) => {
+                          const files = e.target.files;
+                          if (files && files.length > 0) await handleUploadFile(files[0], false);
+                          if (fileInputRef.current) fileInputRef.current.value = "";
+                        }}
                         className="hidden"
                       />
                       <button
@@ -374,7 +437,7 @@ export function TaskDetailDrawer({
                   </p>
                 )}
 
-                {/* Real-time Preview of Markdown note content */}
+                {/* Real-time Preview */}
                 {noteContent && (
                   <div className="p-2.5 rounded-lg bg-[#121110] border border-[#2A2723] space-y-1">
                     <span className="font-mono text-[9px] text-[#8E867B] uppercase tracking-wider block">
@@ -408,39 +471,190 @@ export function TaskDetailDrawer({
               </form>
             )}
 
-            {/* List of Linked Notes with Rich Renderer */}
+            {/* List of Linked Notes */}
             {linkedNotes.length > 0 ? (
-              <div className="space-y-2.5 max-h-75 overflow-y-auto pr-1">
-                {linkedNotes.map((note) => (
-                  <div
-                    key={note.id}
-                    className="p-3.5 rounded-xl border border-[#2A2723] bg-[#181715] space-y-2 group hover:border-[#4EAB9E]/30 transition-colors"
-                  >
-                    <div className="flex items-center justify-between gap-2">
-                      <div className="flex items-center gap-2 min-w-0">
-                        <span className="font-serif text-xs sm:text-sm font-bold text-[#F5F2EB] truncate">
-                          {note.title}
-                        </span>
-                        <span className="font-mono text-[9px] text-[#4EAB9E] bg-[#141C1A] px-1.5 py-0.5 rounded border border-[#4EAB9E]/30 shrink-0">
-                          {note.category}
-                        </span>
+              <div className="space-y-2.5 max-h-96 overflow-y-auto pr-1">
+                {linkedNotes.map((note) => {
+                  const isEditing = editingNoteId === note.id;
+
+                  // Inline Edit Form for this specific note
+                  if (isEditing) {
+                    return (
+                      <form
+                        key={note.id}
+                        onSubmit={handleSaveEdit}
+                        className="space-y-3 p-3.5 rounded-xl bg-[#181715] border border-[#D99B43]/50 shadow-md animate-in zoom-in-95 duration-150"
+                      >
+                        <div className="flex items-center justify-between gap-2">
+                          <span className="font-mono text-[10px] text-[#D99B43] font-bold uppercase tracking-wider">
+                            ✏️ Editando Nota
+                          </span>
+                          <button
+                            type="button"
+                            onClick={handleCancelEdit}
+                            className="p-1 rounded text-[#8E867B] hover:text-[#DDD6C9] cursor-pointer"
+                          >
+                            <X className="h-3.5 w-3.5" />
+                          </button>
+                        </div>
+
+                        <input
+                          type="text"
+                          value={editNoteTitle}
+                          onChange={(e) => setEditNoteTitle(e.target.value)}
+                          placeholder="Título de la nota..."
+                          className="w-full rounded-lg border border-[#2A2723] bg-[#121110] px-3 py-2 text-xs text-[#F5F2EB] placeholder:text-[#8E867B] focus:border-[#D99B43] focus:outline-none font-bold"
+                          autoFocus
+                        />
+
+                        {/* Dropzone & Textarea for Edit */}
+                        <div
+                          onDragOver={(e) => {
+                            e.preventDefault();
+                            setIsEditDragging(true);
+                          }}
+                          onDragLeave={() => setIsEditDragging(false)}
+                          onDrop={async (e) => {
+                            e.preventDefault();
+                            setIsEditDragging(false);
+                            const files = e.dataTransfer.files;
+                            if (files && files.length > 0) await handleUploadFile(files[0], true);
+                          }}
+                          className={`relative rounded-lg border transition-all ${
+                            isEditDragging
+                              ? "border-[#D99B43] bg-[#221D16]"
+                              : "border-[#2A2723] bg-[#121110]"
+                          }`}
+                        >
+                          <textarea
+                            rows={5}
+                            value={editNoteContent}
+                            onPaste={handleEditPaste}
+                            onChange={(e) => setEditNoteContent(e.target.value)}
+                            placeholder="Contenido de la nota (puedes pegar capturas con ⌘V)..."
+                            className="w-full bg-transparent p-3 text-xs text-[#F5F2EB] placeholder:text-[#8E867B] focus:outline-none resize-none font-sans leading-relaxed"
+                          />
+
+                          {/* Action Bar for Edit */}
+                          <div className="flex items-center justify-between px-3 py-2 border-t border-[#2A2723]/60 bg-[#141312]/60 rounded-b-lg">
+                            <div className="flex items-center gap-2">
+                              <input
+                                ref={editFileInputRef}
+                                type="file"
+                                accept="image/*"
+                                onChange={async (e) => {
+                                  const files = e.target.files;
+                                  if (files && files.length > 0) await handleUploadFile(files[0], true);
+                                  if (editFileInputRef.current) editFileInputRef.current.value = "";
+                                }}
+                                className="hidden"
+                              />
+                              <button
+                                type="button"
+                                onClick={() => editFileInputRef.current?.click()}
+                                disabled={isUploadingImage}
+                                className="px-2.5 py-1 rounded-md text-[11px] font-mono text-[#8E867B] hover:text-[#DDD6C9] bg-[#181715] hover:bg-[#22201D] border border-[#2A2723] transition-colors cursor-pointer flex items-center gap-1.5"
+                                title="Adjuntar otra imagen"
+                              >
+                                {isUploadingImage ? (
+                                  <Loader2 className="h-3.5 w-3.5 animate-spin text-[#D99B43]" />
+                                ) : (
+                                  <ImageIcon className="h-3.5 w-3.5 text-[#D99B43]" />
+                                )}
+                                <span>{isUploadingImage ? "Subiendo..." : "Adjuntar imagen"}</span>
+                              </button>
+
+                              <span className="text-[10px] font-mono text-[#8E867B] hidden sm:inline">
+                                o pega captura con <kbd className="px-1 py-0.5 rounded bg-[#22201D] text-[#DDD6C9]">⌘V</kbd>
+                              </span>
+                            </div>
+
+                            {isEditDragging && (
+                              <span className="text-[10px] font-mono text-[#D99B43] animate-pulse">
+                                Suelta la imagen aquí
+                              </span>
+                            )}
+                          </div>
+                        </div>
+
+                        {uploadError && (
+                          <p className="text-[11px] font-mono text-[#E05D52]">
+                            ⚠️ {uploadError}
+                          </p>
+                        )}
+
+                        {/* Live Preview for Edit */}
+                        {editNoteContent && (
+                          <div className="p-2.5 rounded-lg bg-[#121110] border border-[#2A2723] space-y-1">
+                            <span className="font-mono text-[9px] text-[#8E867B] uppercase tracking-wider block">
+                              Vista previa:
+                            </span>
+                            <NoteContentRenderer content={editNoteContent} maxTextLines={3} />
+                          </div>
+                        )}
+
+                        <div className="flex items-center justify-end gap-2 pt-1">
+                          <button
+                            type="button"
+                            onClick={handleCancelEdit}
+                            className="px-3 py-1.5 rounded-lg border border-[#2A2723] text-xs font-mono text-[#8E867B] hover:text-[#DDD6C9] cursor-pointer"
+                          >
+                            Cancelar
+                          </button>
+                          <button
+                            type="submit"
+                            disabled={!editNoteTitle.trim() || !editNoteContent.trim() || isPending || isUploadingImage}
+                            className="px-4 py-1.5 rounded-lg bg-[#D99B43] hover:bg-[#E8AF59] text-[#121110] font-bold text-xs font-mono cursor-pointer transition-all disabled:opacity-50"
+                          >
+                            Guardar Cambios
+                          </button>
+                        </div>
+                      </form>
+                    );
+                  }
+
+                  // Default Display Card
+                  return (
+                    <div
+                      key={note.id}
+                      className="p-3.5 rounded-xl border border-[#2A2723] bg-[#181715] space-y-2 group hover:border-[#4EAB9E]/30 transition-colors"
+                    >
+                      <div className="flex items-center justify-between gap-2">
+                        <div className="flex items-center gap-2 min-w-0">
+                          <span className="font-serif text-xs sm:text-sm font-bold text-[#F5F2EB] truncate">
+                            {note.title}
+                          </span>
+                          <span className="font-mono text-[9px] text-[#4EAB9E] bg-[#141C1A] px-1.5 py-0.5 rounded border border-[#4EAB9E]/30 shrink-0">
+                            {note.category}
+                          </span>
+                        </div>
+
+                        {/* Action buttons: Edit & Delete */}
+                        <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <button
+                            type="button"
+                            onClick={() => handleStartEdit(note)}
+                            className="p-1 rounded text-[#8E867B] hover:text-[#D99B43] hover:bg-[#22201D] transition-colors cursor-pointer"
+                            title="Editar nota"
+                          >
+                            <Pencil className="h-3.5 w-3.5" />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleDeleteTaskNote(note.id)}
+                            className="p-1 rounded text-[#8E867B] hover:text-[#E05D52] hover:bg-[#22201D] transition-colors cursor-pointer"
+                            title="Eliminar nota"
+                          >
+                            <Trash2 className="h-3.5 w-3.5" />
+                          </button>
+                        </div>
                       </div>
 
-                      {/* Delete note button */}
-                      <button
-                        type="button"
-                        onClick={() => handleDeleteTaskNote(note.id)}
-                        className="p-1 rounded text-[#8E867B] hover:text-[#E05D52] hover:bg-[#22201D] opacity-0 group-hover:opacity-100 transition-all cursor-pointer"
-                        title="Eliminar nota"
-                      >
-                        <Trash2 className="h-3.5 w-3.5" />
-                      </button>
+                      {/* Rich Content Renderer */}
+                      <NoteContentRenderer content={note.content} />
                     </div>
-
-                    {/* Rich Content Renderer: Text + Zoomable Image Thumbnails */}
-                    <NoteContentRenderer content={note.content} />
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             ) : (
               !isAddingNote && (
