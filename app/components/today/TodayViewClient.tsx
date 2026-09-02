@@ -428,7 +428,9 @@ export function TodayViewClient({
     todayRitual?.dayIntention ||
     (todayRitual?.mustWinTasks && todayRitual.mustWinTasks.length > 0)
   );
-  const hasEveningReview = Boolean(todayRitual?.reflection);
+  const hasEveningReview = Boolean(
+    todayRitual?.expensesLogged || todayRitual?.reflection
+  );
 
   const isMorningWindow = currentHour < 13;
   const isEveningWindow = currentHour >= 19;

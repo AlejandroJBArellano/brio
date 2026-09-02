@@ -190,7 +190,6 @@ export function ModalManager({
           onClose={closeModal}
           user={user}
           tasks={tasks}
-          mustWinTaskIds={mustWinTaskIds}
           totalAntSpentToday={financeData?.totalAntExpensesToday || 0}
           dailyAntLimit={financeData?.currentBudget?.dailyAntLimit || 150}
           onSuccess={refreshData}

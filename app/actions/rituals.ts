@@ -162,16 +162,15 @@ export async function saveEveningReviewAction(payload: {
     const todayStr = getTodayDateStr();
 
     await sql`
-      INSERT INTO ritual_logs (date, reflection, expenses_logged, energy_level)
-      VALUES (${todayStr}, ${payload.reflection || null}, ${Boolean(payload.expensesLogged)}, ${payload.energyLevel || null})
+      INSERT INTO ritual_logs (date, reflection, expenses_logged)
+      VALUES (${todayStr}, ${payload.reflection || null}, ${Boolean(payload.expensesLogged)})
       ON CONFLICT (date) DO UPDATE
       SET reflection = COALESCE(${payload.reflection || null}, ritual_logs.reflection),
-          expenses_logged = ${Boolean(payload.expensesLogged)},
-          energy_level = COALESCE(${payload.energyLevel || null}, ritual_logs.energy_level);
+          expenses_logged = ${Boolean(payload.expensesLogged)};
     `;
 
     let tasksCreated = 0;
-    // If tomorrow notes provided, parse & dispatch to Habitica if any tasks formatted
+    // Only parse and create tasks if explicit tomorrow notes are provided
     if (payload.tomorrowNotes && payload.tomorrowNotes.trim()) {
       const parsed = parseBatchInput(payload.tomorrowNotes.trim());
       if (parsed.payloads.length > 0) {
