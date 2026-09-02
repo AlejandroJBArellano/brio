@@ -33,6 +33,7 @@ import {
   Zap,
 } from "lucide-react";
 import { useMemo, useState, useTransition } from "react";
+import { NoteContentRenderer } from "@/app/components/notes/NoteContentRenderer";
 import { TaskDetailDrawer } from "./TaskDetailDrawer";
 
 interface ProjectFocusCardProps {
@@ -744,9 +745,7 @@ export function ProjectFocusCard({
                         </span>
                       )}
 
-                      <p className="text-xs text-[#8E867B] whitespace-pre-wrap line-clamp-4 leading-relaxed font-sans">
-                        {note.content}
-                      </p>
+                      <NoteContentRenderer content={note.content} maxTextLines={4} />
                     </div>
 
                     <span className="font-mono text-[9px] text-[#8E867B] opacity-60">

@@ -1,18 +1,27 @@
 "use client";
 
-import { saveContextualNoteAction } from "@/app/actions/notes";
+import {
+  deleteContextualNoteAction,
+  saveContextualNoteAction,
+  uploadNoteImageAction,
+} from "@/app/actions/notes";
 import { toggleChecklistItemAction, toggleTaskAction } from "@/app/actions/tasks";
+import { NoteContentRenderer } from "@/app/components/notes/NoteContentRenderer";
 import { soundFx } from "@/lib/soundFx";
 import { ContextualNote, HabiticaTask } from "@/lib/types";
 import {
   Check,
   CheckCircle2,
   FileText,
+  Image as ImageIcon,
   ListTodo,
+  Loader2,
   Plus,
+  Trash2,
+  UploadCloud,
   X,
 } from "lucide-react";
-import { useState, useTransition } from "react";
+import { useRef, useState, useTransition } from "react";
 
 interface TaskDetailDrawerProps {
   task: HabiticaTask | null;
@@ -35,6 +44,10 @@ export function TaskDetailDrawer({
   const [isAddingNote, setIsAddingNote] = useState(false);
   const [noteTitle, setNoteTitle] = useState("");
   const [noteContent, setNoteContent] = useState("");
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   if (!isOpen || !task) return null;
 
@@ -58,6 +71,74 @@ export function TaskDetailDrawer({
     });
   };
 
+  const handleUploadFile = async (file: File) => {
+    if (!file.type.startsWith("image/")) {
+      setUploadError("Solo se permiten archivos de imagen (PNG, JPG, WEBP).");
+      return;
+    }
+
+    setIsUploadingImage(true);
+    setUploadError(null);
+
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const res = await uploadNoteImageAction(formData);
+
+      if (res.success && res.url) {
+        soundFx.click();
+        const altText = file.name.replace(/\.[^/.]+$/, "") || "Captura adjunta";
+        const markdownImage = `\n![${altText}](${res.url})\n`;
+        setNoteContent((prev) => (prev ? `${prev.trimEnd()}\n${markdownImage}` : markdownImage));
+      } else {
+        setUploadError(res.error || "Error al subir la imagen");
+      }
+    } catch (err) {
+      console.error("[Upload error]:", err);
+      setUploadError("Error de conexión al subir la imagen.");
+    } finally {
+      setIsUploadingImage(false);
+    }
+  };
+
+  // Clipboard Paste handler (⌘V direct screenshot paste)
+  const handlePaste = async (e: React.ClipboardEvent<HTMLTextAreaElement>) => {
+    const items = e.clipboardData?.items;
+    if (!items) return;
+
+    for (let i = 0; i < items.length; i++) {
+      const item = items[i];
+      if (item.type.startsWith("image/")) {
+        const file = item.getAsFile();
+        if (file) {
+          e.preventDefault();
+          await handleUploadFile(file);
+          return;
+        }
+      }
+    }
+  };
+
+  // File picker handler
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (files && files.length > 0) {
+      await handleUploadFile(files[0]);
+    }
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  };
+
+  // Drag and drop handlers
+  const handleDrop = async (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    setIsDragging(false);
+    const files = e.dataTransfer.files;
+    if (files && files.length > 0) {
+      await handleUploadFile(files[0]);
+    }
+  };
+
   const handleCreateTaskNote = (e: React.FormEvent) => {
     e.preventDefault();
     if (!noteTitle.trim() || !noteContent.trim()) return;
@@ -78,13 +159,21 @@ export function TaskDetailDrawer({
     });
   };
 
+  const handleDeleteTaskNote = (noteId: string) => {
+    soundFx.click();
+    startTransition(async () => {
+      await deleteContextualNoteAction(noteId);
+      if (onRefreshData) onRefreshData();
+    });
+  };
+
   return (
     <div className="fixed inset-0 z-50 flex justify-end bg-black/75 backdrop-blur-xs animate-in fade-in duration-200 font-sans">
       {/* Click backdrop to close */}
       <div className="absolute inset-0" onClick={onClose} />
 
       <div
-        className="relative w-full sm:w-[50vw] xl:w-[48vw] min-w-85 max-w-225 h-full bg-[#181715] border-l border-[#2A2723] p-6 sm:p-8 shadow-2xl flex flex-col justify-between overflow-y-auto animate-in slide-in-from-right duration-250 space-y-6 z-10"
+        className="relative w-full sm:w-[52vw] xl:w-[48vw] min-w-85 max-w-225 h-full bg-[#181715] border-l border-[#2A2723] p-6 sm:p-8 shadow-2xl flex flex-col justify-between overflow-y-auto animate-in slide-in-from-right duration-250 space-y-6 z-10"
         role="dialog"
       >
         {/* Header */}
@@ -113,8 +202,9 @@ export function TaskDetailDrawer({
           {/* Title */}
           <div>
             <h3
-              className={`font-serif text-lg sm:text-xl font-bold text-[#F5F2EB] ${task.completed ? "line-through text-[#8E867B]" : ""
-                }`}
+              className={`font-serif text-lg sm:text-xl font-bold text-[#F5F2EB] ${
+                task.completed ? "line-through text-[#8E867B]" : ""
+              }`}
             >
               {task.text}
             </h3>
@@ -139,7 +229,11 @@ export function TaskDetailDrawer({
               <div className="flex items-center justify-between pb-2 border-b border-[#2A2723]">
                 <div className="flex items-center gap-1.5 text-xs font-serif font-bold text-[#F5F2EB]">
                   <ListTodo className="h-4 w-4 text-[#D99B43]" />
-                  <span>Subtareas / Checklist ({task.checklist.filter((c) => c.completed).length}/{task.checklist.length})</span>
+                  <span>
+                    Subtareas / Checklist (
+                    {task.checklist.filter((c) => c.completed).length}/
+                    {task.checklist.length})
+                  </span>
                 </div>
               </div>
 
@@ -148,25 +242,28 @@ export function TaskDetailDrawer({
                   <div
                     key={item.id}
                     onClick={() => item.id && handleToggleChecklist(item.id)}
-                    className={`flex items-center justify-between p-2.5 rounded-lg border transition-all cursor-pointer select-none ${item.completed
-                      ? "bg-[#141813] border-[#7EA35A]/30 text-[#8E867B]"
-                      : "bg-[#181715] border-[#2A2723] hover:border-[#38332D] text-[#F5F2EB]"
-                      }`}
+                    className={`flex items-center justify-between p-2.5 rounded-lg border transition-all cursor-pointer select-none ${
+                      item.completed
+                        ? "bg-[#141813] border-[#7EA35A]/30 text-[#8E867B]"
+                        : "bg-[#181715] border-[#2A2723] hover:border-[#38332D] text-[#F5F2EB]"
+                    }`}
                   >
                     <div className="flex items-center gap-2.5 min-w-0">
                       <div
-                        className={`flex h-4.5 w-4.5 shrink-0 items-center justify-center rounded border transition-colors ${item.completed
-                          ? "bg-[#7EA35A] border-[#7EA35A] text-[#121110] font-bold"
-                          : "border-[#38332D] bg-[#121110]"
-                          }`}
+                        className={`flex h-4.5 w-4.5 shrink-0 items-center justify-center rounded border transition-colors ${
+                          item.completed
+                            ? "bg-[#7EA35A] border-[#7EA35A] text-[#121110] font-bold"
+                            : "border-[#38332D] bg-[#121110]"
+                        }`}
                       >
                         {item.completed && <Check className="h-3 w-3 stroke-3" />}
                       </div>
                       <span
-                        className={`text-xs ${item.completed
-                          ? "line-through text-[#8E867B]"
-                          : "text-[#F5F2EB]"
-                          }`}
+                        className={`text-xs ${
+                          item.completed
+                            ? "line-through text-[#8E867B]"
+                            : "text-[#F5F2EB]"
+                        }`}
                       >
                         {item.text}
                       </span>
@@ -195,64 +292,166 @@ export function TaskDetailDrawer({
               </button>
             </div>
 
-            {/* Inline Note Creation Form */}
+            {/* Inline Note Creation Form with Paste & Upload */}
             {isAddingNote && (
               <form
                 onSubmit={handleCreateTaskNote}
-                className="space-y-2.5 p-3 rounded-xl bg-[#181715] border border-[#4EAB9E]/30 animate-in fade-in duration-150"
+                className="space-y-3 p-3.5 rounded-xl bg-[#181715] border border-[#4EAB9E]/30 animate-in fade-in duration-150"
               >
                 <input
                   type="text"
-                  placeholder="Título de la nota (ej. Endpoint bug, Criterio)..."
+                  placeholder="Título de la nota (ej. Gráfica de ilusión de velocidad)..."
                   value={noteTitle}
                   onChange={(e) => setNoteTitle(e.target.value)}
-                  className="w-full rounded-lg border border-[#2A2723] bg-[#121110] px-3 py-1.5 text-xs text-[#F5F2EB] placeholder:text-[#8E867B] focus:border-[#4EAB9E] focus:outline-none"
+                  className="w-full rounded-lg border border-[#2A2723] bg-[#121110] px-3 py-2 text-xs text-[#F5F2EB] placeholder:text-[#8E867B] focus:border-[#4EAB9E] focus:outline-none"
                   autoFocus
                 />
-                <textarea
-                  rows={3}
-                  placeholder="Escribe detalles técnicos, decisiones o apuntes..."
-                  value={noteContent}
-                  onChange={(e) => setNoteContent(e.target.value)}
-                  className="w-full rounded-lg border border-[#2A2723] bg-[#121110] px-3 py-1.5 text-xs text-[#F5F2EB] placeholder:text-[#8E867B] focus:border-[#4EAB9E] focus:outline-none resize-none font-sans"
-                />
-                <button
-                  type="submit"
-                  disabled={!noteTitle.trim() || !noteContent.trim() || isPending}
-                  className="w-full py-2 rounded-lg bg-[#4EAB9E] hover:bg-[#5BBDAF] text-[#121110] font-bold text-xs font-mono cursor-pointer transition-all disabled:opacity-50"
+
+                {/* Dropzone & Textarea */}
+                <div
+                  onDragOver={(e) => {
+                    e.preventDefault();
+                    setIsDragging(true);
+                  }}
+                  onDragLeave={() => setIsDragging(false)}
+                  onDrop={handleDrop}
+                  className={`relative rounded-lg border transition-all ${
+                    isDragging
+                      ? "border-[#4EAB9E] bg-[#141C1A]"
+                      : "border-[#2A2723] bg-[#121110]"
+                  }`}
                 >
-                  Guardar Nota en esta Tarea
-                </button>
+                  <textarea
+                    rows={4}
+                    placeholder="Escribe detalles o pega capturas de pantalla directamente aquí (⌘V)..."
+                    value={noteContent}
+                    onPaste={handlePaste}
+                    onChange={(e) => setNoteContent(e.target.value)}
+                    className="w-full bg-transparent p-3 text-xs text-[#F5F2EB] placeholder:text-[#8E867B] focus:outline-none resize-none font-sans"
+                  />
+
+                  {/* Actions Bar inside composer */}
+                  <div className="flex items-center justify-between px-3 py-2 border-t border-[#2A2723]/60 bg-[#141312]/60 rounded-b-lg">
+                    <div className="flex items-center gap-2">
+                      <input
+                        ref={fileInputRef}
+                        type="file"
+                        accept="image/*"
+                        onChange={handleFileChange}
+                        className="hidden"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => fileInputRef.current?.click()}
+                        disabled={isUploadingImage}
+                        className="px-2.5 py-1 rounded-md text-[11px] font-mono text-[#8E867B] hover:text-[#DDD6C9] bg-[#181715] hover:bg-[#22201D] border border-[#2A2723] transition-colors cursor-pointer flex items-center gap-1.5"
+                        title="Subir archivo de imagen"
+                      >
+                        {isUploadingImage ? (
+                          <Loader2 className="h-3.5 w-3.5 animate-spin text-[#4EAB9E]" />
+                        ) : (
+                          <ImageIcon className="h-3.5 w-3.5 text-[#4EAB9E]" />
+                        )}
+                        <span>{isUploadingImage ? "Subiendo..." : "Adjuntar imagen"}</span>
+                      </button>
+
+                      <span className="text-[10px] font-mono text-[#8E867B] hidden sm:inline">
+                        o pega captura con <kbd className="px-1 py-0.5 rounded bg-[#22201D] text-[#DDD6C9]">⌘V</kbd>
+                      </span>
+                    </div>
+
+                    {isDragging && (
+                      <span className="text-[10px] font-mono text-[#4EAB9E] animate-pulse">
+                        Suelta la imagen para adjuntar
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                {uploadError && (
+                  <p className="text-[11px] font-mono text-[#E05D52]">
+                    ⚠️ {uploadError}
+                  </p>
+                )}
+
+                {/* Real-time Preview of Markdown note content */}
+                {noteContent && (
+                  <div className="p-2.5 rounded-lg bg-[#121110] border border-[#2A2723] space-y-1">
+                    <span className="font-mono text-[9px] text-[#8E867B] uppercase tracking-wider block">
+                      Vista previa:
+                    </span>
+                    <NoteContentRenderer content={noteContent} maxTextLines={2} />
+                  </div>
+                )}
+
+                <div className="flex items-center justify-end gap-2 pt-1">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsAddingNote(false);
+                      setNoteTitle("");
+                      setNoteContent("");
+                      setUploadError(null);
+                    }}
+                    className="px-3.5 py-2 rounded-lg border border-[#2A2723] text-xs font-mono text-[#8E867B] hover:text-[#DDD6C9] cursor-pointer"
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={!noteTitle.trim() || !noteContent.trim() || isPending || isUploadingImage}
+                    className="px-5 py-2 rounded-lg bg-[#4EAB9E] hover:bg-[#5BBDAF] text-[#121110] font-bold text-xs font-mono cursor-pointer transition-all disabled:opacity-50"
+                  >
+                    Guardar Nota
+                  </button>
+                </div>
               </form>
             )}
 
-            {/* List of Linked Notes */}
+            {/* List of Linked Notes with Rich Renderer */}
             {linkedNotes.length > 0 ? (
-              <div className="space-y-2 max-h-48 overflow-y-auto pr-1">
+              <div className="space-y-2.5 max-h-75 overflow-y-auto pr-1">
                 {linkedNotes.map((note) => (
                   <div
                     key={note.id}
-                    className="p-3 rounded-lg border border-[#2A2723] bg-[#181715] space-y-1"
+                    className="p-3.5 rounded-xl border border-[#2A2723] bg-[#181715] space-y-2 group hover:border-[#4EAB9E]/30 transition-colors"
                   >
-                    <div className="flex items-center justify-between">
-                      <span className="font-serif text-xs font-bold text-[#F5F2EB] truncate">
-                        {note.title}
-                      </span>
-                      <span className="font-mono text-[9px] text-[#4EAB9E] bg-[#141C1A] px-1.5 py-0.5 rounded border border-[#4EAB9E]/30">
-                        {note.category}
-                      </span>
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="flex items-center gap-2 min-w-0">
+                        <span className="font-serif text-xs sm:text-sm font-bold text-[#F5F2EB] truncate">
+                          {note.title}
+                        </span>
+                        <span className="font-mono text-[9px] text-[#4EAB9E] bg-[#141C1A] px-1.5 py-0.5 rounded border border-[#4EAB9E]/30 shrink-0">
+                          {note.category}
+                        </span>
+                      </div>
+
+                      {/* Delete note button */}
+                      <button
+                        type="button"
+                        onClick={() => handleDeleteTaskNote(note.id)}
+                        className="p-1 rounded text-[#8E867B] hover:text-[#E05D52] hover:bg-[#22201D] opacity-0 group-hover:opacity-100 transition-all cursor-pointer"
+                        title="Eliminar nota"
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </button>
                     </div>
-                    <p className="text-[11px] text-[#8E867B] line-clamp-3 leading-relaxed whitespace-pre-wrap">
-                      {note.content}
-                    </p>
+
+                    {/* Rich Content Renderer: Text + Zoomable Image Thumbnails */}
+                    <NoteContentRenderer content={note.content} />
                   </div>
                 ))}
               </div>
             ) : (
               !isAddingNote && (
-                <p className="text-[11px] text-[#8E867B] font-mono italic">
-                  Sin notas.
-                </p>
+                <div className="rounded-xl border border-dashed border-[#2A2723] p-5 text-center space-y-1">
+                  <p className="text-xs text-[#8E867B] font-mono">
+                    No hay notas en esta tarea.
+                  </p>
+                  <p className="text-[10px] text-[#8E867B]/70 font-mono">
+                    Haz clic en &quot;+ Nueva Nota&quot; para registrar ideas o pegar capturas (⌘V).
+                  </p>
+                </div>
               )
             )}
           </div>
@@ -264,17 +463,14 @@ export function TaskDetailDrawer({
             type="button"
             disabled={task.completed || isPending}
             onClick={handleCompleteTask}
-            className={`w-full py-3 px-4 rounded-xl font-bold text-xs sm:text-sm font-sans transition-all flex items-center justify-center gap-2 cursor-pointer shadow-sm ${task.completed
-              ? "bg-[#1C2219] text-[#7EA35A] border border-[#7EA35A]/40 opacity-75 cursor-not-allowed"
-              : "bg-[#7EA35A] hover:bg-[#8FB866] text-[#121110] active:scale-[0.99]"
-              }`}
+            className={`w-full py-3 px-4 rounded-xl font-bold text-xs sm:text-sm font-sans transition-all flex items-center justify-center gap-2 cursor-pointer shadow-sm ${
+              task.completed
+                ? "bg-[#1C2219] text-[#7EA35A] border border-[#7EA35A]/40 opacity-75 cursor-not-allowed"
+                : "bg-[#7EA35A] hover:bg-[#8FB866] text-[#121110] active:scale-[0.99]"
+            }`}
           >
             <CheckCircle2 className="h-4 w-4" />
-            <span>
-              {task.completed
-                ? "Completada"
-                : "Completar"}
-            </span>
+            <span>{task.completed ? "Completada" : "Completar"}</span>
           </button>
         </div>
       </div>

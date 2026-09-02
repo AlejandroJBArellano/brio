@@ -1,6 +1,7 @@
 "use server";
 
 import { getDb } from "@/lib/db";
+import { generateS3FileKey, uploadBufferToS3 } from "@/lib/s3";
 import { ContextualNote, NoteCategory } from "@/lib/types";
 import { revalidatePath } from "next/cache";
 
@@ -176,5 +177,49 @@ export async function deleteContextualNoteAction(
   } catch (error) {
     console.error("[Delete Contextual Note Error]:", error);
     return { success: false, error: "Failed to delete note" };
+  }
+}
+
+/**
+ * Server Action: Uploads an image for contextual task notes and returns a persistent streaming URL.
+ */
+export async function uploadNoteImageAction(
+  formData: FormData
+): Promise<{ success: boolean; url?: string; key?: string; fileName?: string; error?: string }> {
+  try {
+    const file = formData.get("file") as File | null;
+    if (!file || file.size === 0) {
+      return { success: false, error: "No se seleccionó ningún archivo." };
+    }
+
+    if (file.size > 20 * 1024 * 1024) {
+      return { success: false, error: "La imagen excede el límite de 20MB." };
+    }
+
+    const buffer = Buffer.from(await file.arrayBuffer());
+    const key = generateS3FileKey("notes", file.name || "captura.png");
+    const contentType = file.type || "image/png";
+
+    await uploadBufferToS3({
+      buffer,
+      key,
+      contentType,
+    });
+
+    // We use the streaming endpoint /api/vault/file?key=... which is permanent and does not expire
+    const persistentUrl = `/api/vault/file?key=${encodeURIComponent(key)}`;
+
+    return {
+      success: true,
+      url: persistentUrl,
+      key,
+      fileName: file.name || "imagen.png",
+    };
+  } catch (error) {
+    console.error("[Upload Note Image Error]:", error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Error al subir la imagen.",
+    };
   }
 }
