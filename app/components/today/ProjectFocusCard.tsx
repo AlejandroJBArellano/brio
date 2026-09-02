@@ -71,25 +71,69 @@ export function ProjectFocusCard({
 }: ProjectFocusCardProps) {
   const [isPending, startTransition] = useTransition();
 
+  // Proyectos activos para la vista de Hoy (in_progress y permanent)
+  const activeProjects = useMemo(() => {
+    const activeOnly = projects.filter(
+      (p) => p.status === "in_progress" || p.status === "permanent"
+    );
+    const list = activeOnly.length > 0 ? activeOnly : projects;
+
+    const todoTasks = tasks.filter((t) => t.type === "todo");
+
+    return list
+      .map((p) => {
+        const { prefixes } = getProjectKeywords(p);
+        const pendingCount = todoTasks.filter((t) => {
+          const { prefix } = parseTaskPrefix(t.text || "");
+          const prefixLower = prefix?.toLowerCase() || "";
+          const textLower = (t.text || "").toLowerCase();
+          const notesLower = (t.notes || "").toLowerCase();
+          for (const pre of prefixes) {
+            if (prefixLower.includes(pre)) return true;
+            if (textLower.includes(`[${pre}]`) || textLower.includes(pre)) return true;
+            if (notesLower.includes(`[${pre}]`)) return true;
+          }
+          return false;
+        }).filter((t) => !t.completed).length;
+
+        return {
+          ...p,
+          pendingTasksCount: pendingCount,
+        };
+      })
+      .sort((a, b) => {
+        // Proyectos con tareas pendientes primero
+        if (b.pendingTasksCount !== a.pendingTasksCount) {
+          return b.pendingTasksCount - a.pendingTasksCount;
+        }
+        if (a.status === "in_progress" && b.status !== "in_progress") return -1;
+        if (b.status === "in_progress" && a.status !== "in_progress") return 1;
+        return 0;
+      });
+  }, [projects, tasks]);
+
   // Active Project Selection
   const [selectedProjectId, setSelectedProjectId] = useState<string>(() => {
+    if (activeProjects.length > 0) return activeProjects[0].id;
     return projects.length > 0 ? projects[0].id : "default_project";
   });
 
   const activeProject = useMemo(() => {
     return (
+      activeProjects.find((p) => p.id === selectedProjectId) ||
       projects.find((p) => p.id === selectedProjectId) ||
+      activeProjects[0] ||
       projects[0] || {
         id: "default_project",
-        title: "Brio MVP & Core Architecture",
-        description: "Zero-latency Personal Command Center with RPG gamification and bio-control.",
+        title: "Brio OS",
+        description: "",
         status: "in_progress",
         techStack: ["Next.js 15", "PostgreSQL", "Tailwind", "Habitica"],
         repoUrl: "https://github.com/alejandro/brio",
-        progress: 65,
+        progress: 0,
       }
     );
-  }, [projects, selectedProjectId]);
+  }, [activeProjects, projects, selectedProjectId]);
 
   // Find Best Matching Habitica Tag or allow manual tag selection
   const autoDetectedTag = useMemo(() => {
@@ -338,20 +382,20 @@ export function ProjectFocusCard({
 
           {/* Project Switcher Select & Focus / Collapse Action Controls */}
           <div className="flex items-center gap-2">
-            {projects.length > 1 && (
+            {activeProjects.length > 1 && (
               <div className="flex items-center gap-1.5 font-mono text-xs text-[#8E867B] bg-[#121110] px-3 py-1.5 rounded-lg border border-[#2A2723]">
-                <span className="text-[10px] uppercase">Cambiar:</span>
+                <span className="text-[10px] uppercase">Proyecto:</span>
                 <select
                   value={activeProject.id}
                   onChange={(e) => {
                     setSelectedProjectId(e.target.value);
                     setSelectedTagId(null); // reset tag override to auto
                   }}
-                  className="bg-transparent border-none text-[#F5F2EB] font-bold focus:outline-none cursor-pointer max-w-44 truncate"
+                  className="bg-transparent border-none text-[#F5F2EB] font-bold focus:outline-none cursor-pointer max-w-48 truncate"
                 >
-                  {projects.map((p) => (
+                  {activeProjects.map((p) => (
                     <option key={p.id} value={p.id} className="bg-[#181715] text-[#F5F2EB]">
-                      {p.title}
+                      {p.title} {p.pendingTasksCount > 0 ? `(${p.pendingTasksCount})` : ""}
                     </option>
                   ))}
                 </select>
@@ -367,11 +411,7 @@ export function ProjectFocusCard({
                   ? "bg-[#D99B43] text-[#121110] border-[#D99B43] hover:bg-[#E8AF59]"
                   : "bg-[#121110] text-[#8E867B] hover:text-[#DDD6C9] border-[#2A2723] hover:border-[#D99B43]/50"
                   }`}
-                title={
-                  isFocusMode
-                    ? "Salir de Modo Focus (restaurar vista normal)"
-                    : "Modo Enfoque Zen (maximizar proyecto y ocultar distracciones)"
-                }
+                title={isFocusMode ? "Restaurar vista" : "Modo Focus"}
               >
                 {isFocusMode ? (
                   <>
@@ -393,7 +433,7 @@ export function ProjectFocusCard({
                 type="button"
                 onClick={onToggleCollapse}
                 className="p-1.5 rounded-lg text-[#8E867B] hover:text-[#DDD6C9] bg-[#121110] hover:bg-[#1C1A17] border border-[#2A2723] transition-colors cursor-pointer"
-                title="Minimizar proyecto a barra compacta"
+                title="Minimizar"
               >
                 <ChevronUp className="h-4 w-4" />
               </button>
@@ -530,16 +570,15 @@ export function ProjectFocusCard({
                 </div>
               ))
             ) : (
-              /* Beautiful Precise Empty State */
               <div className="rounded-xl border border-dashed border-[#2A2723] bg-[#121110] p-8 text-center space-y-2">
                 <ListTodo className="h-8 w-8 text-[#8E867B] mx-auto opacity-70" />
                 <h4 className="font-serif text-sm sm:text-base font-bold text-[#F5F2EB]">
-                  Sin tareas asignadas a {activeProject.title}
+                  Sin tareas pendientes
                 </h4>
                 <p className="text-xs text-[#8E867B] font-mono max-w-md mx-auto">
                   {activeTag
-                    ? `No hay tareas con la etiqueta #${activeTag.name}. Escribe una tarea arriba para crearla automáticamente.`
-                    : "No hay tareas con el nombre de este proyecto. Vincula una etiqueta arriba o escribe una nueva tarea."}
+                    ? `No hay tareas con la etiqueta #${activeTag.name}.`
+                    : `No hay tareas asignadas a ${activeProject.title}.`}
                 </p>
               </div>
             )}
@@ -723,7 +762,7 @@ export function ProjectFocusCard({
               })
             ) : (
               <div className="col-span-full rounded-xl border border-dashed border-[#2A2723] p-8 text-center text-xs text-[#8E867B] font-mono">
-                No hay notas en este proyecto. ¡Crea una con el botón &quot;+ Nueva Nota&quot;!
+                No hay notas en este proyecto.
               </div>
             )}
           </div>
