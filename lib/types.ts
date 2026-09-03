@@ -641,6 +641,8 @@ export interface ProjectItem {
   repoUrl?: string;
   liveUrl?: string;
   progress: number;
+  taskPrefixes?: string[];
+  canonicalPrefix?: string;
   createdAt?: string;
 }
 

@@ -11,58 +11,38 @@ export interface ProjectTaskMetrics {
 }
 
 /**
- * Maps a project title or ID to its standard bracket prefixes and search keywords.
+ * Maps a project to its standard bracket prefixes and search keywords dynamically from database fields,
+ * with a clean fallback to the main title segment.
  */
 export function getProjectKeywords(project: ProjectItem): {
   prefixes: string[];
   canonicalPrefix: string;
 } {
-  const titleLower = project.title.toLowerCase();
-
-  if (titleLower.includes("afore") || titleLower.includes("orfandad")) {
-    return { prefixes: ["afore", "retiro afore", "orfandad"], canonicalPrefix: "[Afore]" };
-  }
-  if (titleLower.includes("unpo")) {
-    return { prefixes: ["unpo"], canonicalPrefix: "[UNPO]" };
-  }
-  if (titleLower.includes("pbj") || titleLower.includes("montgomery")) {
-    return { prefixes: ["pbj", "montgomery"], canonicalPrefix: "[PBJ]" };
-  }
-  if (titleLower.includes("0 => 100") || titleLower.includes("0 -> 100") || titleLower.includes("marca personal")) {
-    return { prefixes: ["marca personal", "0 -> 100", "0 => 100", "0->100"], canonicalPrefix: "[Marca Personal]" };
-  }
-  if (titleLower.includes("hybridge")) {
-    return {
-      prefixes: [
-        "hybridge",
-        "hybridge: oss",
-        "hybridge oss",
-        "análisis y procesamiento de datos",
-        "ciberseguridad y hackeo ético",
-        "el tablero de ajedrez (seguridad)",
-        "sa módulo 4",
-      ],
-      canonicalPrefix: "[Hybridge]",
-    };
-  }
-  if (titleLower.includes("kittn")) {
-    return { prefixes: ["kittn os", "kittn"], canonicalPrefix: "[Kittn OS]" };
-  }
-  if (titleLower.includes("adaquest")) {
-    return { prefixes: ["adaquest"], canonicalPrefix: "[AdaQuest]" };
-  }
-  if (titleLower.includes("strata")) {
-    return { prefixes: ["strata"], canonicalPrefix: "[Strata]" };
-  }
-  if (titleLower.includes("brio")) {
-    return { prefixes: ["brio"], canonicalPrefix: "[Brio]" };
-  }
-
-  // Fallback: use the first word or main title segment
   const cleanTitle = project.title.split(/[—\-:]/)[0].trim();
+  const titleLower = cleanTitle.toLowerCase();
+
+  // Extract custom prefixes configured by the user on the project
+  const userPrefixes = Array.isArray(project.taskPrefixes)
+    ? project.taskPrefixes.map((p) => p.trim().toLowerCase()).filter(Boolean)
+    : [];
+
+  // Include user-defined prefixes and clean title (deduplicated)
+  const prefixes = userPrefixes.length > 0
+    ? Array.from(new Set([...userPrefixes, titleLower]))
+    : [titleLower];
+
+  // Canonical bracket prefix (e.g. "[Hybridge]", "[Brio]")
+  let canonicalPrefix = project.canonicalPrefix?.trim();
+  if (canonicalPrefix) {
+    if (!canonicalPrefix.startsWith("[")) canonicalPrefix = `[${canonicalPrefix}`;
+    if (!canonicalPrefix.endsWith("]")) canonicalPrefix = `${canonicalPrefix}]`;
+  } else {
+    canonicalPrefix = `[${cleanTitle}]`;
+  }
+
   return {
-    prefixes: [cleanTitle.toLowerCase()],
-    canonicalPrefix: `[${cleanTitle}]`,
+    prefixes,
+    canonicalPrefix,
   };
 }
 
