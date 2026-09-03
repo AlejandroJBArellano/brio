@@ -47,7 +47,7 @@ export function EveningReviewModal({
   onSuccess,
   onOpenNewTransaction,
 }: EveningReviewModalProps) {
-  const [step, setStep] = useState<1 | 2 | 3>(1);
+  const [step, setStep] = useState<1 | 2>(1);
   const [isPending, startTransition] = useTransition();
 
   // Step 1: Dailies optimistic completed state & subtasks checklist optimistic state
@@ -177,13 +177,12 @@ export function EveningReviewModal({
                       Cierre Nocturno & Desconexión
                     </h2>
                     <span className="rounded-md bg-[#221D16] text-[#D99B43] border border-[#D99B43]/30 font-mono text-[10px] px-2 py-0.5 font-bold">
-                      Bloque {step} de 3
+                      Bloque {step} de 2
                     </span>
                   </div>
                   <p className="text-xs text-[#8E867B] font-mono mt-0.5">
                     {step === 1 && "Auditoría operativa de dailies y gastos del día"}
-                    {step === 2 && "Vaciado mental para no pensar en trabajo"}
-                    {step === 3 && "Nivel de cansancio y cierre de jornada"}
+                    {step === 2 && "Vaciado mental, nivel de cansancio y cierre"}
                   </p>
                 </div>
               </div>
@@ -422,41 +421,6 @@ export function EveningReviewModal({
                   />
                 </div>
 
-                {/* Navigation */}
-                <div className="flex justify-between items-center pt-3 border-t border-[#2A2723]">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      soundFx.click();
-                      setStep(1);
-                    }}
-                    className="inline-flex items-center gap-1.5 text-xs font-mono text-[#8E867B] hover:text-[#DDD6C9] cursor-pointer"
-                  >
-                    <ArrowLeft className="h-4 w-4" />
-                    <span>Atrás</span>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => {
-                      soundFx.click();
-                      setStep(3);
-                    }}
-                    className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#4EAB9E] font-bold font-mono text-xs text-[#121110] hover:bg-[#5BBDAF] transition-all cursor-pointer shadow-xs"
-                  >
-                    <span>Cierre de Noche</span>
-                    <ArrowRight className="h-4 w-4" />
-                  </button>
-                </div>
-              </div>
-            )}
-
-            {/* ========================================================================= */}
-            {/* BLOQUE 3: CIERRE & NIVEL DE CANSANCIO                                     */}
-            {/* ========================================================================= */}
-            {step === 3 && (
-              <div className="mt-5 space-y-4 animate-in fade-in duration-200">
-
                 {/* Fatigue / Energy Selector */}
                 <div className="rounded-xl border border-[#2A2723] bg-[#121110] p-4 space-y-2.5">
                   <span className="text-xs font-bold text-[#F5F2EB] font-serif block">
@@ -484,13 +448,13 @@ export function EveningReviewModal({
                   </div>
                 </div>
 
-                {/* Final Actions */}
+                {/* Navigation & Final Shutdown Action */}
                 <div className="flex justify-between items-center pt-3 border-t border-[#2A2723]">
                   <button
                     type="button"
                     onClick={() => {
                       soundFx.click();
-                      setStep(2);
+                      setStep(1);
                     }}
                     className="inline-flex items-center gap-1.5 text-xs font-mono text-[#8E867B] hover:text-[#DDD6C9] cursor-pointer"
                   >
