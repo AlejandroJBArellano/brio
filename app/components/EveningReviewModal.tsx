@@ -10,7 +10,7 @@ import {
   Bed,
   Check,
   ChevronDown,
-  Coffee,
+  ChevronUp,
   Heart,
   Moon,
   Sparkles,
@@ -42,10 +42,10 @@ export function EveningReviewModal({
   onClose,
   user,
   tasks,
-  totalAntSpentToday,
-  dailyAntLimit,
+  totalAntSpentToday: _totalAntSpentToday,
+  dailyAntLimit: _dailyAntLimit,
   onSuccess,
-  onOpenNewTransaction,
+  onOpenNewTransaction: _onOpenNewTransaction,
 }: EveningReviewModalProps) {
   const [step, setStep] = useState<1 | 2>(1);
   const [isPending, startTransition] = useTransition();
@@ -181,7 +181,7 @@ export function EveningReviewModal({
                     </span>
                   </div>
                   <p className="text-xs text-[#8E867B] font-mono mt-0.5">
-                    {step === 1 && "Auditoría operativa de dailies y gastos del día"}
+                    {step === 1 && "Auditoría operativa de dailies pendientes"}
                     {step === 2 && "Vaciado mental, nivel de cansancio y cierre"}
                   </p>
                 </div>
@@ -341,43 +341,7 @@ export function EveningReviewModal({
                   )}
                 </div>
 
-                {/* Financial Check-in Card */}
-                <div className="rounded-xl border border-[#3D3425]/40 bg-[#121110] p-4 space-y-3">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2.5">
-                      <Coffee className="h-4.5 w-4.5 text-[#D99B43]" />
-                      <div>
-                        <h4 className="text-xs font-bold text-[#F5F2EB] font-serif">
-                          Gastos Hormiga & Antojos de Hoy
-                        </h4>
-                        <p className="text-[11px] text-[#8E867B] font-mono">
-                          {totalAntSpentToday <= dailyAntLimit
-                            ? `✅ Dentro de tu límite diario de $${dailyAntLimit.toFixed(0)} MXN.`
-                            : `⚠️ Excediste tu presupuesto diario por $${(totalAntSpentToday - dailyAntLimit).toFixed(2)} MXN.`}
-                        </p>
-                      </div>
-                    </div>
 
-                    <span className="font-mono text-xs font-bold text-[#D99B43] bg-[#221D16] px-2.5 py-1 rounded-md border border-[#D99B43]/30">
-                      ${totalAntSpentToday.toFixed(2)} / ${dailyAntLimit.toFixed(2)} MXN
-                    </span>
-                  </div>
-
-                  {onOpenNewTransaction && (
-                    <div className="flex justify-end pt-2 border-t border-[#2A2723]">
-                      <button
-                        type="button"
-                        onClick={() => {
-                          onClose();
-                          onOpenNewTransaction();
-                        }}
-                        className="px-3 py-1.5 rounded-lg border border-[#D99B43]/40 bg-[#221D16] text-xs font-mono font-semibold text-[#D99B43] hover:bg-[#3D3425] transition-colors cursor-pointer"
-                      >
-                        + Registrar un Gasto
-                      </button>
-                    </div>
-                  )}
-                </div>
 
                 {/* Navigation Button */}
                 <div className="flex justify-end pt-3 border-t border-[#2A2723]">
