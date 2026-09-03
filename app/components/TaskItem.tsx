@@ -93,11 +93,10 @@ export function TaskItem({
   return (
     <div
       onClick={onSelect}
-      className={`group relative flex items-center justify-between px-3.5 py-2.5 sm:px-4 sm:py-3 transition-all cursor-pointer select-none border-b border-[#22201D] last:border-b-0 ${
-        isSelected
-          ? "bg-[#22201D] border-l-2 border-l-[#D99B43] pl-[13px] sm:pl-[15px]"
+      className={`group relative flex items-center justify-between px-3.5 py-2.5 sm:px-4 sm:py-3 transition-all cursor-pointer select-none border-b border-[#22201D] last:border-b-0 ${isSelected
+          ? "bg-[#22201D] border-l-2 border-l-[#D99B43] pl-3.25 sm:pl-3.75"
           : "bg-[#181715] hover:bg-[#1D1B18] border-l-2 border-l-transparent"
-      } ${isPending ? "opacity-60 pointer-events-none" : optimisticState.completed ? "opacity-45" : "opacity-100"}`}
+        } ${isPending ? "opacity-60 pointer-events-none" : optimisticState.completed ? "opacity-45" : "opacity-100"}`}
     >
       {/* Columna Principal: Check / Acciones + Título + Badges */}
       <div className="flex items-center gap-3 min-w-0 flex-1">
@@ -112,13 +111,12 @@ export function TaskItem({
                 ? "Marcar como pendiente"
                 : "Marcar como completada"
             }
-            className={`flex size-5 shrink-0 items-center justify-center rounded border transition-all cursor-pointer ${
-              isPending
+            className={`flex size-5 shrink-0 items-center justify-center rounded border transition-all cursor-pointer ${isPending
                 ? "border-[#D99B43]/70 bg-[#1D1B18] cursor-wait"
                 : optimisticState.completed
-                ? "border-[#7EA35A] bg-[#7EA35A] text-[#121110] shadow-xs"
-                : "border-[#3D3831] bg-[#121110] hover:border-[#D99B43]/70 hover:bg-[#D99B43]/10"
-            }`}
+                  ? "border-[#7EA35A] bg-[#7EA35A] text-[#121110] shadow-xs"
+                  : "border-[#3D3831] bg-[#121110] hover:border-[#D99B43]/70 hover:bg-[#D99B43]/10"
+              }`}
           >
             {isPending ? (
               <Loader2 className="size-3.5 animate-spin text-[#D99B43]" />
@@ -159,13 +157,12 @@ export function TaskItem({
         {/* Badge de Tipo si está habilitado */}
         {showTypeBadge && (
           <span
-            className={`hidden sm:inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-[10px] font-mono font-semibold uppercase tracking-wider shrink-0 border ${
-              task.type === "daily"
+            className={`hidden sm:inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-[10px] font-mono font-semibold uppercase tracking-wider shrink-0 border ${task.type === "daily"
                 ? "border-[#3D3425] bg-[#221D16] text-[#E8AF59]"
                 : task.type === "habit"
-                ? "border-[#1D2619] bg-[#182014] text-[#7EA35A]"
-                : "border-[#1E2825] bg-[#141F1D] text-[#4EAB9E]"
-            }`}
+                  ? "border-[#1D2619] bg-[#182014] text-[#7EA35A]"
+                  : "border-[#1E2825] bg-[#141F1D] text-[#4EAB9E]"
+              }`}
           >
             {task.type === "daily" && <Calendar className="size-2.5" />}
             {task.type === "habit" && <Zap className="size-2.5" />}
@@ -185,11 +182,10 @@ export function TaskItem({
             )}
 
             <span
-              className={`text-xs sm:text-sm font-medium leading-snug tracking-tight text-[#F5F2EB] truncate ${
-                optimisticState.completed
+              className={`text-xs sm:text-sm font-medium leading-snug tracking-tight text-[#F5F2EB] truncate ${optimisticState.completed
                   ? "line-through text-[#8E867B]"
                   : "group-hover:text-white"
-              }`}
+                }`}
             >
               {cleanTitle}
             </span>
@@ -295,11 +291,10 @@ export function TaskItem({
 
         {/* Flecha de Selección / Inspector */}
         <ChevronRight
-          className={`size-3.5 transition-transform duration-200 ${
-            isSelected
+          className={`size-3.5 transition-transform duration-200 ${isSelected
               ? "text-[#D99B43] translate-x-0.5"
               : "text-[#5C564E] group-hover:text-[#DDD6C9]"
-          }`}
+            }`}
         />
       </div>
     </div>

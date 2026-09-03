@@ -10,11 +10,10 @@ import {
   Bed,
   Check,
   ChevronDown,
-  ChevronUp,
   Heart,
   Moon,
   Sparkles,
-  X,
+  X
 } from "lucide-react";
 import { useMemo, useState, useTransition } from "react";
 
@@ -176,14 +175,7 @@ export function EveningReviewModal({
                     <h2 className="font-serif text-base sm:text-lg font-bold text-[#F5F2EB] tracking-tight">
                       Cierre Nocturno & Desconexión
                     </h2>
-                    <span className="rounded-md bg-[#221D16] text-[#D99B43] border border-[#D99B43]/30 font-mono text-[10px] px-2 py-0.5 font-bold">
-                      Bloque {step} de 2
-                    </span>
                   </div>
-                  <p className="text-xs text-[#8E867B] font-mono mt-0.5">
-                    {step === 1 && "Auditoría operativa de dailies pendientes"}
-                    {step === 2 && "Vaciado mental, nivel de cansancio y cierre"}
-                  </p>
                 </div>
               </div>
 
@@ -212,8 +204,8 @@ export function EveningReviewModal({
                         </h4>
                         <p className="text-[11px] text-[#8E867B] font-mono">
                           {pendingDailies.length > 0
-                            ? `⚠️ Tienes ${pendingDailies.length} daily(s) pendientes que te causarán daño a medianoche.`
-                            : "🎉 ¡Tus dailies principales están completas! Cero daño a medianoche."}
+                            ? `Tienes ${pendingDailies.length} daily(s) pendientes,`
+                            : "Dailies completas"}
                         </p>
                       </div>
                     </div>
@@ -223,11 +215,10 @@ export function EveningReviewModal({
                       type="button"
                       onClick={handleToggleInn}
                       disabled={isPending}
-                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-mono font-semibold transition-all cursor-pointer ${
-                        isResting
-                          ? "bg-[#3D3425] text-[#E8AF59] border border-[#D99B43]/40 shadow-xs"
-                          : "bg-[#181715] text-[#8E867B] hover:text-[#DDD6C9] border border-[#2A2723]"
-                      }`}
+                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-mono font-semibold transition-all cursor-pointer ${isResting
+                        ? "bg-[#3D3425] text-[#E8AF59] border border-[#D99B43]/40 shadow-xs"
+                        : "bg-[#181715] text-[#8E867B] hover:text-[#DDD6C9] border border-[#2A2723]"
+                        }`}
                     >
                       <Bed className="h-3.5 w-3.5" />
                       <span>{isResting ? "Descansando" : "Descanso"}</span>
@@ -262,9 +253,8 @@ export function EveningReviewModal({
                                     className="p-1 rounded text-[#8E867B] hover:text-[#F5F2EB] hover:bg-[#22201D] transition-colors cursor-pointer"
                                   >
                                     <ChevronDown
-                                      className={`h-3.5 w-3.5 transition-transform ${
-                                        isExpanded ? "" : "-rotate-90"
-                                      }`}
+                                      className={`h-3.5 w-3.5 transition-transform ${isExpanded ? "" : "-rotate-90"
+                                        }`}
                                     />
                                   </button>
                                 )}
@@ -306,19 +296,17 @@ export function EveningReviewModal({
                                           handleToggleSubtask(daily.id, item.id, Boolean(item.completed));
                                         }
                                       }}
-                                      className={`flex items-center justify-between p-1.5 rounded-lg border text-xs cursor-pointer select-none transition-all ${
-                                        isChecked
-                                          ? "bg-[#141813] border-[#7EA35A]/30 text-[#8E867B]"
-                                          : "bg-[#121110] border-[#2A2723] hover:border-[#38332D] text-[#DDD6C9]"
-                                      }`}
+                                      className={`flex items-center justify-between p-1.5 rounded-lg border text-xs cursor-pointer select-none transition-all ${isChecked
+                                        ? "bg-[#141813] border-[#7EA35A]/30 text-[#8E867B]"
+                                        : "bg-[#121110] border-[#2A2723] hover:border-[#38332D] text-[#DDD6C9]"
+                                        }`}
                                     >
                                       <div className="flex items-center gap-2 min-w-0">
                                         <div
-                                          className={`flex h-4 w-4 shrink-0 items-center justify-center rounded border transition-colors ${
-                                            isChecked
-                                              ? "bg-[#7EA35A] border-[#7EA35A] text-[#121110]"
-                                              : "border-[#38332D] bg-[#181715]"
-                                          }`}
+                                          className={`flex h-4 w-4 shrink-0 items-center justify-center rounded border transition-colors ${isChecked
+                                            ? "bg-[#7EA35A] border-[#7EA35A] text-[#121110]"
+                                            : "border-[#38332D] bg-[#181715]"
+                                            }`}
                                         >
                                           {isChecked && <Check className="h-2.5 w-2.5 stroke-3" />}
                                         </div>
@@ -368,11 +356,8 @@ export function EveningReviewModal({
                 <div className="rounded-xl border border-[#2A2723] bg-[#121110] p-4 sm:p-5 space-y-3">
                   <div className="space-y-1">
                     <h3 className="font-serif text-sm font-bold text-[#F5F2EB]">
-                      Bloc de Notas Libre / Brain Dump
+                      Brain Dump
                     </h3>
-                    <p className="text-xs text-[#8E867B] font-mono leading-relaxed">
-                      Vuelca cualquier idea, pendiente laboral o apunte para sacar el trabajo de tu mente y descansar sin estrés.
-                    </p>
                   </div>
 
                   <textarea
@@ -399,11 +384,10 @@ export function EveningReviewModal({
                           setEnergyLevel(lvl.value);
                           soundFx.click();
                         }}
-                        className={`p-2 rounded-xl border transition-all cursor-pointer text-center flex flex-col items-center gap-1 ${
-                          energyLevel === lvl.value
-                            ? `${lvl.color} font-bold shadow-xs`
-                            : "bg-[#181715] border-[#2A2723] text-[#8E867B] hover:text-[#DDD6C9]"
-                        }`}
+                        className={`p-2 rounded-xl border transition-all cursor-pointer text-center flex flex-col items-center gap-1 ${energyLevel === lvl.value
+                          ? `${lvl.color} font-bold shadow-xs`
+                          : "bg-[#181715] border-[#2A2723] text-[#8E867B] hover:text-[#DDD6C9]"
+                          }`}
                       >
                         <span className="text-base">{lvl.emoji}</span>
                         <span className="text-[10px] leading-tight">{lvl.label}</span>
@@ -433,7 +417,7 @@ export function EveningReviewModal({
                     className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-[#7EA35A] hover:bg-[#8FB866] font-bold font-mono text-xs sm:text-sm text-[#121110] transition-all cursor-pointer shadow-sm disabled:opacity-50"
                   >
                     <Moon className="h-4 w-4" />
-                    <span>{isPending ? "Cerrando..." : "Apagado y Cierre (+XP)"}</span>
+                    <span>{isPending ? "Cerrando..." : "Listo"}</span>
                   </button>
                 </div>
               </div>
