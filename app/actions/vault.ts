@@ -51,6 +51,8 @@ interface ProjectDbRow {
   repo_url?: string;
   live_url?: string;
   progress?: number | string;
+  task_prefixes?: string[];
+  canonical_prefix?: string;
   created_at?: Date | string;
 }
 
@@ -117,6 +119,8 @@ export async function fetchVaultDashboardDataAction(): Promise<VaultDashboardDat
     repoUrl: r.repo_url || undefined,
     liveUrl: r.live_url || undefined,
     progress: Number(r.progress) || 0,
+    taskPrefixes: Array.isArray(r.task_prefixes) ? r.task_prefixes : [],
+    canonicalPrefix: r.canonical_prefix || undefined,
     createdAt: r.created_at?.toString(),
   }));
 

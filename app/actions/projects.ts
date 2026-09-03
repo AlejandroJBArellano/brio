@@ -24,6 +24,8 @@ interface ProjectDbRow {
   repo_url?: string;
   live_url?: string;
   progress?: number | string;
+  task_prefixes?: string[];
+  canonical_prefix?: string;
   created_at?: Date | string;
 }
 
@@ -70,6 +72,8 @@ export async function fetchProjectsPageDataAction(): Promise<ProjectsPageData> {
     repoUrl: p.repo_url || undefined,
     liveUrl: p.live_url || undefined,
     progress: Number(p.progress) || 0,
+    taskPrefixes: Array.isArray(p.task_prefixes) ? p.task_prefixes : [],
+    canonicalPrefix: p.canonical_prefix || undefined,
     createdAt: p.created_at?.toString(),
   }));
 
@@ -101,6 +105,8 @@ export async function fetchProjectsDashboardDataAction(): Promise<ProjectsDashbo
     repoUrl: p.repo_url || undefined,
     liveUrl: p.live_url || undefined,
     progress: Number(p.progress) || 0,
+    taskPrefixes: Array.isArray(p.task_prefixes) ? p.task_prefixes : [],
+    canonicalPrefix: p.canonical_prefix || undefined,
     createdAt: p.created_at?.toString(),
   }));
 
@@ -139,14 +145,30 @@ export async function createProjectAction(payload: {
   repoUrl?: string;
   liveUrl?: string;
   progress?: number;
+  taskPrefixes?: string[];
+  canonicalPrefix?: string;
 }): Promise<{ success: boolean; error?: string }> {
   try {
     const sql = getDb();
     const id = `prj-${Date.now()}`;
+    const techStackJson = JSON.stringify(payload.techStack || []);
+    const prefixesJson = JSON.stringify(payload.taskPrefixes || []);
 
     await sql`
-      INSERT INTO projects (id, title, description, status, tech_stack, repo_url, live_url, progress)
-      VALUES (${id}, ${payload.title}, ${payload.description || null}, ${payload.status || "idea"}, ${JSON.stringify(payload.techStack || [])}::jsonb, ${payload.repoUrl || null}, ${payload.liveUrl || null}, ${payload.progress || 0});
+      INSERT INTO projects (
+        id, title, description, status, tech_stack, repo_url, live_url, progress, task_prefixes, canonical_prefix
+      ) VALUES (
+        ${id}, 
+        ${payload.title}, 
+        ${payload.description || null}, 
+        ${payload.status || "idea"}, 
+        ${techStackJson}::jsonb, 
+        ${payload.repoUrl || null}, 
+        ${payload.liveUrl || null}, 
+        ${payload.progress || 0},
+        ${prefixesJson}::jsonb,
+        ${payload.canonicalPrefix || null}
+      );
     `;
 
     revalidatePath("/");
@@ -223,10 +245,13 @@ export async function updateProjectDetailsAction(payload: {
   repoUrl?: string;
   liveUrl?: string;
   progress?: number;
+  taskPrefixes?: string[];
+  canonicalPrefix?: string;
 }): Promise<{ success: boolean; error?: string }> {
   try {
     const sql = getDb();
     const techStackJson = JSON.stringify(payload.techStack || []);
+    const prefixesJson = JSON.stringify(payload.taskPrefixes || []);
 
     await sql`
       UPDATE projects
@@ -237,6 +262,8 @@ export async function updateProjectDetailsAction(payload: {
           repo_url = ${payload.repoUrl || null},
           live_url = ${payload.liveUrl || null},
           progress = ${payload.progress ?? 0},
+          task_prefixes = ${prefixesJson}::jsonb,
+          canonical_prefix = ${payload.canonicalPrefix || null},
           updated_at = NOW()
       WHERE id = ${payload.id};
     `;
