@@ -92,6 +92,10 @@ export function ProjectDossierDrawer({
     return classified.length > 0 ? classified.map((l) => l.url) : [""];
   });
   const [editProgress, setEditProgress] = useState(() => project?.progress || 0);
+  const [editCanonicalPrefix, setEditCanonicalPrefix] = useState(() => project?.canonicalPrefix || "");
+  const [editTaskPrefixes, setEditTaskPrefixes] = useState(() =>
+    Array.isArray(project?.taskPrefixes) ? project.taskPrefixes.join(", ") : ""
+  );
   const [isConfirmingDelete, setIsConfirmingDelete] = useState(false);
 
   const handleOpenEdit = () => {
@@ -103,6 +107,8 @@ export function ProjectDossierDrawer({
       const classified = extractAndClassifyLinks(project.repoUrl, project.liveUrl);
       setEditUrls(classified.length > 0 ? classified.map((l) => l.url) : [""]);
       setEditProgress(project.progress || 0);
+      setEditCanonicalPrefix(project.canonicalPrefix || "");
+      setEditTaskPrefixes(Array.isArray(project.taskPrefixes) ? project.taskPrefixes.join(", ") : "");
       setIsConfirmingDelete(false);
     }
     setIsEditing(true);
@@ -175,6 +181,10 @@ export function ProjectDossierDrawer({
 
     const validUrls = editUrls.map((u) => u.trim()).filter(Boolean);
     const { repoUrl, liveUrl } = partitionLinksForDb(validUrls);
+    const prefixesArray = editTaskPrefixes
+      .split(",")
+      .map((s) => s.trim())
+      .filter(Boolean);
 
     startTransition(async () => {
       await updateProjectDetailsAction({
@@ -186,6 +196,8 @@ export function ProjectDossierDrawer({
         repoUrl,
         liveUrl,
         progress: editProgress,
+        canonicalPrefix: editCanonicalPrefix.trim() || undefined,
+        taskPrefixes: prefixesArray,
       });
 
       soundFx.taskComplete();
@@ -213,10 +225,24 @@ export function ProjectDossierDrawer({
         {/* Header */}
         <div className="p-5 border-b border-[#2A2723] bg-[#141311] space-y-3">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-wrap">
               <span className="rounded bg-[#221D16] border border-[#3D3425] px-2 py-0.5 font-mono text-[10px] text-[#D99B43] font-semibold">
                 {metrics.canonicalPrefix}
               </span>
+              {project.taskPrefixes && project.taskPrefixes.length > 0 && (
+                <div className="hidden sm:flex items-center gap-1">
+                  {project.taskPrefixes.slice(0, 3).map((p, i) => (
+                    <span key={i} className="rounded bg-[#181715] border border-[#2A2723] px-1.5 py-0.5 font-mono text-[9px] text-[#8E867B]">
+                      {p}
+                    </span>
+                  ))}
+                  {project.taskPrefixes.length > 3 && (
+                    <span className="font-mono text-[9px] text-[#635C53]">
+                      +{project.taskPrefixes.length - 3}
+                    </span>
+                  )}
+                </div>
+              )}
               <select
                 value={project.status}
                 onChange={(e) => handleUpdateStatus(e.target.value as ProjectStatus)}
@@ -389,6 +415,34 @@ export function ProjectDossierDrawer({
                     placeholder="Next.js 15, PostgreSQL, Tailwind, AWS..."
                     className="w-full rounded-lg border border-[#2A2723] bg-[#121110] p-2.5 text-xs text-[#F5F2EB] focus:outline-none focus:border-[#D99B43] font-mono"
                   />
+                </div>
+
+                {/* Habitica Prefix & Matcher Config */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 p-3 rounded-lg border border-[#2A2723] bg-[#100F0E]">
+                  <div className="space-y-1">
+                    <label className="block text-[11px] font-mono text-[#8E867B]">
+                      Prefijo Canónico:
+                    </label>
+                    <input
+                      type="text"
+                      value={editCanonicalPrefix}
+                      onChange={(e) => setEditCanonicalPrefix(e.target.value)}
+                      placeholder="[Hybridge], [Brio]..."
+                      className="w-full rounded-lg border border-[#2A2723] bg-[#121110] p-2 text-xs text-[#F5F2EB] focus:outline-none focus:border-[#D99B43] font-mono"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="block text-[11px] font-mono text-[#8E867B]">
+                      Prefijos Habitica (comas):
+                    </label>
+                    <input
+                      type="text"
+                      value={editTaskPrefixes}
+                      onChange={(e) => setEditTaskPrefixes(e.target.value)}
+                      placeholder="hybridge, hackeo ético, sa módulo 4..."
+                      className="w-full rounded-lg border border-[#2A2723] bg-[#121110] p-2 text-xs text-[#F5F2EB] focus:outline-none focus:border-[#D99B43] font-mono"
+                    />
+                  </div>
                 </div>
 
                 {/* Dynamic Smart Links Section */}

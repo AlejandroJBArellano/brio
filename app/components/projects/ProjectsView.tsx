@@ -69,6 +69,8 @@ export function ProjectsView({ data, onRefresh }: ProjectsViewProps) {
   const [newDescription, setNewDescription] = useState("");
   const [newStatus, setNewStatus] = useState<ProjectStatus>("in_progress");
   const [newTechStack, setNewTechStack] = useState("");
+  const [newCanonicalPrefix, setNewCanonicalPrefix] = useState("");
+  const [newTaskPrefixes, setNewTaskPrefixes] = useState("");
   const [newUrls, setNewUrls] = useState<string[]>([""]);
 
   const counts = useMemo(() => {
@@ -126,6 +128,10 @@ export function ProjectsView({ data, onRefresh }: ProjectsViewProps) {
     const validUrls = newUrls.map((u) => u.trim()).filter(Boolean);
     const gitLinks = validUrls.filter((u) => u.includes("git") || u.includes("github"));
     const liveLinks = validUrls.filter((u) => !u.includes("git") && !u.includes("github"));
+    const prefixesArray = newTaskPrefixes
+      .split(",")
+      .map((s) => s.trim())
+      .filter(Boolean);
 
     startTransition(async () => {
       await createProjectAction({
@@ -135,6 +141,8 @@ export function ProjectsView({ data, onRefresh }: ProjectsViewProps) {
         techStack: techArray,
         repoUrl: gitLinks.length > 0 ? gitLinks.join(", ") : undefined,
         liveUrl: liveLinks.length > 0 ? liveLinks.join(", ") : undefined,
+        canonicalPrefix: newCanonicalPrefix.trim() || undefined,
+        taskPrefixes: prefixesArray,
       });
 
       soundFx.taskComplete();
@@ -142,6 +150,8 @@ export function ProjectsView({ data, onRefresh }: ProjectsViewProps) {
       setNewTitle("");
       setNewDescription("");
       setNewTechStack("");
+      setNewCanonicalPrefix("");
+      setNewTaskPrefixes("");
       setNewUrls([""]);
       if (onRefresh) onRefresh();
     });
@@ -293,19 +303,24 @@ export function ProjectsView({ data, onRefresh }: ProjectsViewProps) {
                     className="flex items-center justify-between font-mono"
                     onClick={(e) => e.stopPropagation()}
                   >
-                    <select
-                      value={proj.status}
-                      onChange={(e) =>
-                        handleUpdateStatus(proj.id, e.target.value as ProjectStatus)
-                      }
-                      className={`text-[10px] font-bold px-2 py-0.5 rounded border ${statusMeta.color} bg-[#121110] focus:outline-none cursor-pointer`}
-                    >
-                      <option value="permanent">♾️ Permanente</option>
-                      <option value="in_progress">⚡ En Desarrollo</option>
-                      <option value="launched">🚀 Lanzado</option>
-                      <option value="idea">💡 Idea</option>
-                      <option value="paused">⏸️ Pausado</option>
-                    </select>
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                      <select
+                        value={proj.status}
+                        onChange={(e) =>
+                          handleUpdateStatus(proj.id, e.target.value as ProjectStatus)
+                        }
+                        className={`text-[10px] font-bold px-2 py-0.5 rounded border ${statusMeta.color} bg-[#121110] focus:outline-none cursor-pointer`}
+                      >
+                        <option value="permanent">♾️ Permanente</option>
+                        <option value="in_progress">⚡ En Desarrollo</option>
+                        <option value="launched">🚀 Lanzado</option>
+                        <option value="idea">💡 Idea</option>
+                        <option value="paused">⏸️ Pausado</option>
+                      </select>
+                      <span className="rounded bg-[#221D16] border border-[#3D3425] px-1.5 py-0.5 font-mono text-[9px] text-[#D99B43] font-semibold">
+                        {metrics.canonicalPrefix}
+                      </span>
+                    </div>
 
                     <button
                       type="button"
@@ -489,6 +504,34 @@ export function ProjectsView({ data, onRefresh }: ProjectsViewProps) {
                   placeholder="Next.js 15, PostgreSQL, Tailwind, AWS..."
                   className="w-full rounded-lg border border-[#2A2723] bg-[#121110] p-2 text-xs text-[#F5F2EB] focus:outline-none focus:border-[#D99B43] font-mono"
                 />
+              </div>
+
+              {/* Dynamic Prefixes for Habitica matcher */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 p-3 rounded-lg border border-[#2A2723] bg-[#100F0E]">
+                <div className="space-y-1">
+                  <label className="block text-[11px] font-mono text-[#8E867B]">
+                    Prefijo Canónico:
+                  </label>
+                  <input
+                    type="text"
+                    value={newCanonicalPrefix}
+                    onChange={(e) => setNewCanonicalPrefix(e.target.value)}
+                    placeholder="ej. [Hybridge], [Brio]..."
+                    className="w-full rounded-lg border border-[#2A2723] bg-[#121110] p-2 text-xs text-[#F5F2EB] focus:outline-none focus:border-[#D99B43] font-mono"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="block text-[11px] font-mono text-[#8E867B]">
+                    Prefijos Habitica (comas):
+                  </label>
+                  <input
+                    type="text"
+                    value={newTaskPrefixes}
+                    onChange={(e) => setNewTaskPrefixes(e.target.value)}
+                    placeholder="ej. hybridge, hackeo, módulo 4..."
+                    className="w-full rounded-lg border border-[#2A2723] bg-[#121110] p-2 text-xs text-[#F5F2EB] focus:outline-none focus:border-[#D99B43] font-mono"
+                  />
+                </div>
               </div>
 
               {/* Dynamic URLs */}
