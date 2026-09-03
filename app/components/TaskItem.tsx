@@ -15,6 +15,7 @@ import {
   ChevronRight,
   Flame,
   ListTodo,
+  Loader2,
   Minus,
   Plus,
   Tag,
@@ -96,7 +97,7 @@ export function TaskItem({
         isSelected
           ? "bg-[#22201D] border-l-2 border-l-[#D99B43] pl-[13px] sm:pl-[15px]"
           : "bg-[#181715] hover:bg-[#1D1B18] border-l-2 border-l-transparent"
-      } ${optimisticState.completed ? "opacity-45" : "opacity-100"}`}
+      } ${isPending ? "opacity-60 pointer-events-none" : optimisticState.completed ? "opacity-45" : "opacity-100"}`}
     >
       {/* Columna Principal: Check / Acciones + Título + Badges */}
       <div className="flex items-center gap-3 min-w-0 flex-1">
@@ -104,6 +105,7 @@ export function TaskItem({
         {(task.type === "todo" || task.type === "daily") && (
           <button
             type="button"
+            disabled={isPending}
             onClick={(e) => handleScore(e, "up")}
             aria-label={
               optimisticState.completed
@@ -111,12 +113,18 @@ export function TaskItem({
                 : "Marcar como completada"
             }
             className={`flex size-5 shrink-0 items-center justify-center rounded border transition-all cursor-pointer ${
-              optimisticState.completed
+              isPending
+                ? "border-[#D99B43]/70 bg-[#1D1B18] cursor-wait"
+                : optimisticState.completed
                 ? "border-[#7EA35A] bg-[#7EA35A] text-[#121110] shadow-xs"
                 : "border-[#3D3831] bg-[#121110] hover:border-[#D99B43]/70 hover:bg-[#D99B43]/10"
             }`}
           >
-            {optimisticState.completed && <Check className="size-3.5 stroke-[2.5]" />}
+            {isPending ? (
+              <Loader2 className="size-3.5 animate-spin text-[#D99B43]" />
+            ) : optimisticState.completed ? (
+              <Check className="size-3.5 stroke-[2.5]" />
+            ) : null}
           </button>
         )}
 

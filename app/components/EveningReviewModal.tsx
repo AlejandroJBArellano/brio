@@ -80,24 +80,6 @@ export function EveningReviewModal({
   // Step 2: Freeform Brain Dump / Reflection
   const [brainDump, setBrainDump] = useState("");
 
-  // Step 3: 3-Point Rest Checklist
-  const nightDailyTask = useMemo(() => {
-    return tasks.find(
-      (t) =>
-        t.type === "daily" &&
-        !t.text.trim().startsWith("[") &&
-        (t.text.toLowerCase().includes("rutina nocturna") ||
-          t.text.toLowerCase().includes("noche") ||
-          t.text.toLowerCase().includes("dormir"))
-    );
-  }, [tasks]);
-
-  const [nightRoutineDone, setNightRoutineDone] = useState<boolean>(() => {
-    return nightDailyTask ? !nightDailyTask.isDue : false;
-  });
-  const [screensOff, setScreensOff] = useState(false);
-  const [roomPrepared, setRoomPrepared] = useState(false);
-
   // Step 3: Fatigue / Energy Level (1 to 5)
   const [energyLevel, setEnergyLevel] = useState<number>(2);
 
@@ -134,18 +116,6 @@ export function EveningReviewModal({
     });
   };
 
-  const handleToggleNightRoutine = () => {
-    const nextVal = !nightRoutineDone;
-    setNightRoutineDone(nextVal);
-    soundFx.taskComplete();
-
-    // If there's an associated Habitica daily, toggle it in sync
-    if (nightDailyTask) {
-      startTransition(async () => {
-        await toggleTaskAction(nightDailyTask.id, nextVal ? "up" : "down");
-      });
-    }
-  };
 
   const handleFinishShutdown = () => {
     soundFx.taskComplete();
@@ -213,7 +183,7 @@ export function EveningReviewModal({
                   <p className="text-xs text-[#8E867B] font-mono mt-0.5">
                     {step === 1 && "Auditoría operativa de dailies y gastos del día"}
                     {step === 2 && "Vaciado mental para no pensar en trabajo"}
-                    {step === 3 && "Protocolo de descanso y preparación para dormir"}
+                    {step === 3 && "Nivel de cansancio y cierre de jornada"}
                   </p>
                 </div>
               </div>
@@ -474,7 +444,7 @@ export function EveningReviewModal({
                     }}
                     className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#4EAB9E] font-bold font-mono text-xs text-[#121110] hover:bg-[#5BBDAF] transition-all cursor-pointer shadow-xs"
                   >
-                    <span>Protocolo de Sueño</span>
+                    <span>Cierre de Noche</span>
                     <ArrowRight className="h-4 w-4" />
                   </button>
                 </div>
@@ -482,100 +452,10 @@ export function EveningReviewModal({
             )}
 
             {/* ========================================================================= */}
-            {/* BLOQUE 3: DESCONEXIÓN & PROTOCOLO DE SUEÑO                                */}
+            {/* BLOQUE 3: CIERRE & NIVEL DE CANSANCIO                                     */}
             {/* ========================================================================= */}
             {step === 3 && (
               <div className="mt-5 space-y-4 animate-in fade-in duration-200">
-                {/* 3-Point Rest Checklist */}
-                <div className="rounded-xl border border-[#2A2723] bg-[#121110] p-4 sm:p-5 space-y-3">
-                  <h4 className="text-xs font-bold text-[#F5F2EB] font-serif uppercase tracking-wider">
-                    Protocolo de Desconexión & Descanso
-                  </h4>
-
-                  <div className="space-y-2">
-                    {/* Item 1: Rutina de noche lista */}
-                    <div
-                      onClick={handleToggleNightRoutine}
-                      className={`flex items-center gap-3 p-3 rounded-xl border transition-all cursor-pointer select-none ${
-                        nightRoutineDone
-                          ? "bg-[#141813] border-[#7EA35A]/40 text-[#F5F2EB]"
-                          : "bg-[#181715] border-[#2A2723] hover:border-[#38332D] text-[#8E867B]"
-                      }`}
-                    >
-                      <div
-                        className={`flex h-5 w-5 shrink-0 items-center justify-center rounded border transition-colors ${
-                          nightRoutineDone
-                            ? "bg-[#7EA35A] border-[#7EA35A] text-[#121110] font-bold"
-                            : "border-[#38332D] bg-[#121110]"
-                        }`}
-                      >
-                        {nightRoutineDone && <Check className="h-3.5 w-3.5 stroke-3" />}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <span className="text-xs font-semibold block">
-                          Rutina de noche lista
-                        </span>
-                        {nightDailyTask && (
-                          <span className="text-[10px] text-[#8E867B] font-mono">
-                            Sincroniza con daily de Habitica
-                          </span>
-                        )}
-                      </div>
-                    </div>
-
-                    {/* Item 2: Pantallas y notificaciones en silencio */}
-                    <div
-                      onClick={() => {
-                        setScreensOff(!screensOff);
-                        soundFx.click();
-                      }}
-                      className={`flex items-center gap-3 p-3 rounded-xl border transition-all cursor-pointer select-none ${
-                        screensOff
-                          ? "bg-[#141813] border-[#7EA35A]/40 text-[#F5F2EB]"
-                          : "bg-[#181715] border-[#2A2723] hover:border-[#38332D] text-[#8E867B]"
-                      }`}
-                    >
-                      <div
-                        className={`flex h-5 w-5 shrink-0 items-center justify-center rounded border transition-colors ${
-                          screensOff
-                            ? "bg-[#7EA35A] border-[#7EA35A] text-[#121110] font-bold"
-                            : "border-[#38332D] bg-[#121110]"
-                        }`}
-                      >
-                        {screensOff && <Check className="h-3.5 w-3.5 stroke-3" />}
-                      </div>
-                      <span className="text-xs font-semibold">
-                        Pantallas apagadas / modo silencio
-                      </span>
-                    </div>
-
-                    {/* Item 3: Ambiente fresco y oscuro */}
-                    <div
-                      onClick={() => {
-                        setRoomPrepared(!roomPrepared);
-                        soundFx.click();
-                      }}
-                      className={`flex items-center gap-3 p-3 rounded-xl border transition-all cursor-pointer select-none ${
-                        roomPrepared
-                          ? "bg-[#141813] border-[#7EA35A]/40 text-[#F5F2EB]"
-                          : "bg-[#181715] border-[#2A2723] hover:border-[#38332D] text-[#8E867B]"
-                      }`}
-                    >
-                      <div
-                        className={`flex h-5 w-5 shrink-0 items-center justify-center rounded border transition-colors ${
-                          roomPrepared
-                            ? "bg-[#7EA35A] border-[#7EA35A] text-[#121110] font-bold"
-                            : "border-[#38332D] bg-[#121110]"
-                        }`}
-                      >
-                        {roomPrepared && <Check className="h-3.5 w-3.5 stroke-3" />}
-                      </div>
-                      <span className="text-xs font-semibold">
-                        Ambiente fresco y oscuro preparado
-                      </span>
-                    </div>
-                  </div>
-                </div>
 
                 {/* Fatigue / Energy Selector */}
                 <div className="rounded-xl border border-[#2A2723] bg-[#121110] p-4 space-y-2.5">

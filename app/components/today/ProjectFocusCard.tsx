@@ -26,6 +26,7 @@ import {
   Globe,
   Layers,
   ListTodo,
+  Loader2,
   Minimize2,
   Plus,
   Tag,
@@ -242,12 +243,21 @@ export function ProjectFocusCard({
     return projectNotes.filter((n) => n.category === noteCategoryFilter);
   }, [projectNotes, noteCategoryFilter]);
 
+  // Loading state for completing a task
+  const [loadingTaskId, setLoadingTaskId] = useState<string | null>(null);
+
   // Handlers
   const handleToggleTask = (task: HabiticaTask) => {
+    if (loadingTaskId === task.id) return;
     soundFx.taskComplete();
+    setLoadingTaskId(task.id);
     startTransition(async () => {
-      await toggleTaskAction(task.id, "up");
-      if (onRefreshData) onRefreshData();
+      try {
+        await toggleTaskAction(task.id, "up");
+        if (onRefreshData) onRefreshData();
+      } finally {
+        setLoadingTaskId(null);
+      }
     });
   };
 
@@ -518,7 +528,9 @@ export function ProjectFocusCard({
               projectTasks.map((task) => (
                 <div
                   key={task.id}
-                  className={`flex items-center justify-between p-3.5 sm:p-4 rounded-xl border transition-all cursor-pointer group select-none ${task.completed
+                  className={`flex items-center justify-between p-3.5 sm:p-4 rounded-xl border transition-all cursor-pointer group select-none ${
+                    loadingTaskId === task.id ? "opacity-60 pointer-events-none" : ""
+                  } ${task.completed
                     ? "bg-[#141813] border-[#7EA35A]/30 text-[#8E867B]"
                     : "bg-[#121110] border-[#2A2723] hover:border-[#D99B43]/50 text-[#F5F2EB]"
                     }`}
@@ -528,12 +540,19 @@ export function ProjectFocusCard({
                     className="flex items-center gap-3.5 flex-1 min-w-0 pr-3"
                   >
                     <div
-                      className={`flex h-5 w-5 shrink-0 items-center justify-center rounded border transition-colors ${task.completed
-                        ? "bg-[#7EA35A] border-[#7EA35A] text-[#121110] font-bold"
-                        : "border-[#38332D] bg-[#181715] group-hover:border-[#D99B43]"
+                      className={`flex h-5 w-5 shrink-0 items-center justify-center rounded border transition-colors ${
+                        loadingTaskId === task.id
+                          ? "border-[#D99B43]/70 bg-[#1D1B18]"
+                          : task.completed
+                          ? "bg-[#7EA35A] border-[#7EA35A] text-[#121110] font-bold"
+                          : "border-[#38332D] bg-[#181715] group-hover:border-[#D99B43]"
                         }`}
                     >
-                      {task.completed && <Check className="h-3.5 w-3.5 stroke-3" />}
+                      {loadingTaskId === task.id ? (
+                        <Loader2 className="h-3.5 w-3.5 animate-spin text-[#D99B43]" />
+                      ) : task.completed ? (
+                        <Check className="h-3.5 w-3.5 stroke-3" />
+                      ) : null}
                     </div>
 
                     <div className="min-w-0 space-y-0.5">
