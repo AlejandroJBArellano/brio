@@ -9,7 +9,7 @@
 import readline from "node:readline";
 import path from "node:path";
 
-const BRIO_API_URL = (process.env.BRIO_API_URL || "http://localhost:3000").replace(/\/+$/, "");
+const BRIO_API_URL = (process.env.BRIO_API_URL || "https://brio-sand.vercel.app").replace(/\/+$/, "");
 const BRIO_AGENT_TOKEN = process.env.BRIO_AGENT_TOKEN || "";
 
 /**
