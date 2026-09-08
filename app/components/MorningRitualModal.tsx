@@ -214,7 +214,7 @@ export function MorningRitualModal({
           <div className="flex items-center gap-2">
             <Moon className="h-4 w-4 text-[#D99B43]" />
             <h3 className="font-serif text-xs sm:text-sm font-bold text-[#F5F2EB]">
-              1. ¿Cómo dormiste y cómo está tu energía hoy?
+              1. Calidad de sueño
             </h3>
           </div>
 
@@ -229,11 +229,10 @@ export function MorningRitualModal({
                   key={opt}
                   type="button"
                   onClick={() => setSleepHours(opt)}
-                  className={`py-1.5 rounded-lg border text-center font-semibold transition-all cursor-pointer ${
-                    sleepHours === opt
-                      ? "bg-[#221D16] text-[#D99B43] border-[#D99B43]/50 shadow-xs"
-                      : "bg-[#181715] text-[#8E867B] border-[#2A2723] hover:text-[#DDD6C9]"
-                  }`}
+                  className={`py-1.5 rounded-lg border text-center font-semibold transition-all cursor-pointer ${sleepHours === opt
+                    ? "bg-[#221D16] text-[#D99B43] border-[#D99B43]/50 shadow-xs"
+                    : "bg-[#181715] text-[#8E867B] border-[#2A2723] hover:text-[#DDD6C9]"
+                    }`}
                 >
                   {opt}
                 </button>
@@ -252,11 +251,10 @@ export function MorningRitualModal({
                   key={opt.id}
                   type="button"
                   onClick={() => setSleepQuality(opt.id)}
-                  className={`p-2 rounded-lg border text-center transition-all cursor-pointer flex flex-col items-center gap-1 ${
-                    sleepQuality === opt.id
-                      ? "bg-[#141813] text-[#7EA35A] border-[#7EA35A]/50 shadow-xs font-semibold"
-                      : "bg-[#181715] text-[#8E867B] border-[#2A2723] hover:text-[#DDD6C9]"
-                  }`}
+                  className={`p-2 rounded-lg border text-center transition-all cursor-pointer flex flex-col items-center gap-1 ${sleepQuality === opt.id
+                    ? "bg-[#141813] text-[#7EA35A] border-[#7EA35A]/50 shadow-xs font-semibold"
+                    : "bg-[#181715] text-[#8E867B] border-[#2A2723] hover:text-[#DDD6C9]"
+                    }`}
                 >
                   <span className="text-base">{opt.icon}</span>
                   <span className="text-[10px] leading-tight font-sans">
@@ -278,11 +276,10 @@ export function MorningRitualModal({
                   key={lvl.level}
                   type="button"
                   onClick={() => setEnergyLevel(lvl.level)}
-                  className={`p-2 rounded-lg border text-center transition-all cursor-pointer flex flex-col items-center gap-0.5 ${
-                    energyLevel === lvl.level
-                      ? "bg-[#221D16] text-[#D99B43] border-[#D99B43]/50 shadow-xs font-bold"
-                      : "bg-[#181715] text-[#8E867B] border-[#2A2723] hover:text-[#DDD6C9]"
-                  }`}
+                  className={`p-2 rounded-lg border text-center transition-all cursor-pointer flex flex-col items-center gap-0.5 ${energyLevel === lvl.level
+                    ? "bg-[#221D16] text-[#D99B43] border-[#D99B43]/50 shadow-xs font-bold"
+                    : "bg-[#181715] text-[#8E867B] border-[#2A2723] hover:text-[#DDD6C9]"
+                    }`}
                 >
                   <span className="text-lg">{lvl.icon}</span>
                   <span className="text-[9px] font-mono leading-tight">
@@ -302,7 +299,7 @@ export function MorningRitualModal({
             <div className="flex items-center gap-2">
               <Droplet className="h-4 w-4 text-[#4EAB9E]" />
               <h3 className="font-serif text-xs sm:text-sm font-bold text-[#F5F2EB]">
-                2. Rutina Física de Autocuidado
+                2. Rutina Matutina
               </h3>
             </div>
 
@@ -339,30 +336,27 @@ export function MorningRitualModal({
                 <div
                   key={item.id}
                   onClick={() => handleToggleHabiticaChecklist(item.id)}
-                  className={`flex items-center justify-between p-2.5 rounded-lg border transition-all cursor-pointer select-none ${
-                    item.completed
-                      ? "bg-[#141813] border-[#7EA35A]/30 text-[#8E867B]"
-                      : "bg-[#181715] border-[#2A2723] hover:border-[#38332D] text-[#F5F2EB]"
-                  }`}
+                  className={`flex items-center justify-between p-2.5 rounded-lg border transition-all cursor-pointer select-none ${item.completed
+                    ? "bg-[#141813] border-[#7EA35A]/30 text-[#8E867B]"
+                    : "bg-[#181715] border-[#2A2723] hover:border-[#38332D] text-[#F5F2EB]"
+                    }`}
                 >
                   <div className="flex items-center gap-2.5 min-w-0">
                     <div
-                      className={`flex h-4.5 w-4.5 shrink-0 items-center justify-center rounded border transition-colors ${
-                        item.completed
-                          ? "bg-[#7EA35A] border-[#7EA35A] text-[#121110] font-bold"
-                          : "border-[#38332D] bg-[#121110]"
-                      }`}
+                      className={`flex h-4.5 w-4.5 shrink-0 items-center justify-center rounded border transition-colors ${item.completed
+                        ? "bg-[#7EA35A] border-[#7EA35A] text-[#121110] font-bold"
+                        : "border-[#38332D] bg-[#121110]"
+                        }`}
                     >
                       {item.completed && (
                         <Check className="h-3 w-3 stroke-3" />
                       )}
                     </div>
                     <span
-                      className={`text-xs ${
-                        item.completed
-                          ? "line-through text-[#8E867B]"
-                          : "text-[#F5F2EB]"
-                      }`}
+                      className={`text-xs ${item.completed
+                        ? "line-through text-[#8E867B]"
+                        : "text-[#F5F2EB]"
+                        }`}
                     >
                       {item.text}
                     </span>
@@ -383,29 +377,26 @@ export function MorningRitualModal({
                   <div
                     key={item.id}
                     onClick={() => handleToggleFallbackCheck(item.id)}
-                    className={`flex items-center justify-between p-2.5 rounded-lg border transition-all cursor-pointer select-none ${
-                      isChecked
-                        ? "bg-[#141813] border-[#7EA35A]/30 text-[#8E867B]"
-                        : "bg-[#181715] border-[#2A2723] hover:border-[#38332D] text-[#F5F2EB]"
-                    }`}
+                    className={`flex items-center justify-between p-2.5 rounded-lg border transition-all cursor-pointer select-none ${isChecked
+                      ? "bg-[#141813] border-[#7EA35A]/30 text-[#8E867B]"
+                      : "bg-[#181715] border-[#2A2723] hover:border-[#38332D] text-[#F5F2EB]"
+                      }`}
                   >
                     <div className="flex items-center gap-2.5 min-w-0">
                       <div
-                        className={`flex h-4.5 w-4.5 shrink-0 items-center justify-center rounded border transition-colors ${
-                          isChecked
-                            ? "bg-[#7EA35A] border-[#7EA35A] text-[#121110] font-bold"
-                            : "border-[#38332D] bg-[#121110]"
-                        }`}
+                        className={`flex h-4.5 w-4.5 shrink-0 items-center justify-center rounded border transition-colors ${isChecked
+                          ? "bg-[#7EA35A] border-[#7EA35A] text-[#121110] font-bold"
+                          : "border-[#38332D] bg-[#121110]"
+                          }`}
                       >
                         {isChecked && <Check className="h-3 w-3 stroke-3" />}
                       </div>
                       <span className="text-xs">{item.icon}</span>
                       <span
-                        className={`text-xs ${
-                          isChecked
-                            ? "line-through text-[#8E867B]"
-                            : "text-[#F5F2EB]"
-                        }`}
+                        className={`text-xs ${isChecked
+                          ? "line-through text-[#8E867B]"
+                          : "text-[#F5F2EB]"
+                          }`}
                       >
                         {item.text}
                       </span>
@@ -433,7 +424,7 @@ export function MorningRitualModal({
           >
             <Sparkles className="h-4 w-4" />
             <span>
-              {isPending ? "Despegando..." : "🌿 Despegar Mi Mañana (+30 XP)"}
+              {isPending ? "Empezando..." : "Empezar"}
             </span>
           </button>
         </div>
