@@ -193,6 +193,19 @@ const TOOLS = [
       },
     },
   },
+  {
+    name: "brio_sync_project",
+    description: "Sincroniza bajo demanda las tareas de un proyecto desde integraciones externas configuradas (ej. Notion).",
+    inputSchema: {
+      type: "object",
+      properties: {
+        project: {
+          type: "string",
+          description: "Nombre o identificador del proyecto a sincronizar (ej. 'unpo'). Se auto-detecta si se omite.",
+        },
+      },
+    },
+  },
 ];
 
 // ----------------------------------------------------------------------
@@ -282,6 +295,21 @@ async function handleToolCall(name, args) {
       const data = await callBrio(`/api/agent/tasks/${encodeURIComponent(args.taskId)}`, {
         method: "PATCH",
         body: JSON.stringify(payload),
+      });
+      return {
+        content: [
+          {
+            type: "text",
+            text: JSON.stringify(data, null, 2),
+          },
+        ],
+      };
+    }
+
+    case "brio_sync_project": {
+      const proj = resolveProjectName(args?.project);
+      const data = await callBrio(`/api/agent/projects/${encodeURIComponent(proj)}/sync`, {
+        method: "POST",
       });
       return {
         content: [

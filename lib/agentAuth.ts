@@ -13,6 +13,7 @@ interface ProjectDbRow {
   progress?: number | string;
   task_prefixes?: string[];
   canonical_prefix?: string;
+  integrations?: Record<string, any>;
   created_at?: Date | string;
 }
 
@@ -43,24 +44,16 @@ export function verifyAgentAuth(request: Request): {
   let providedToken = "";
 
   if (authHeader && authHeader.startsWith("Bearer ")) {
-    providedToken = authHeader.slice(7).trim();
+    providedToken = authHeader.substring(7).trim();
   } else if (brioTokenHeader) {
     providedToken = brioTokenHeader.trim();
   }
 
-  if (!providedToken) {
+  if (!providedToken || providedToken !== configuredToken) {
     return {
       authorized: false,
       status: 401,
-      error: "Missing authentication token. Pass 'Authorization: Bearer <token>' or 'x-brio-token'.",
-    };
-  }
-
-  if (providedToken !== configuredToken) {
-    return {
-      authorized: false,
-      status: 403,
-      error: "Invalid agent token.",
+      error: "Unauthorized: Invalid or missing Brio Agent Token.",
     };
   }
 
@@ -102,6 +95,7 @@ export async function resolveProject(
       progress: Number(p.progress) || 0,
       taskPrefixes: Array.isArray(p.task_prefixes) ? p.task_prefixes : [],
       canonicalPrefix: p.canonical_prefix || undefined,
+      integrations: p.integrations || undefined,
       createdAt: p.created_at?.toString(),
     })
   );

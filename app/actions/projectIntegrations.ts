@@ -63,10 +63,21 @@ export async function saveNotionIntegrationAction(params: SaveNotionIntegrationP
   return { success: true };
 }
 
+export interface ProjectSyncActionResult {
+  success: boolean;
+  error?: string;
+  totalFound?: number;
+  createdCount?: number;
+  skippedCount?: number;
+  createdTasks?: string[];
+}
+
 /**
  * Server Action: Synchronizes tasks on demand from Notion to Habitica for a specific project.
  */
-export async function syncProjectFromNotionAction(projectId: string) {
+export async function syncProjectFromNotionAction(
+  projectId: string
+): Promise<ProjectSyncActionResult> {
   const sql = getDb();
 
   // Ensure column exists

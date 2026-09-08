@@ -14,3 +14,5 @@ Ejemplo:
 "Recuerda hacer tu entreno / rutina el día de hoy" --> "Hoy toca entrenar"
 "Rutina del turno matutino" --> "Rutina matutina"
 "Recuerda tu comida del día de hoy" --> "Recuerda comer"
+
+También, sólo usa íconos, nada de emojis. Si ves un emoji, elimínalo

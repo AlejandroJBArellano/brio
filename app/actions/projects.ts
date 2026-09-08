@@ -26,6 +26,7 @@ interface ProjectDbRow {
   progress?: number | string;
   task_prefixes?: string[];
   canonical_prefix?: string;
+  integrations?: Record<string, any>;
   created_at?: Date | string;
 }
 
@@ -74,6 +75,7 @@ export async function fetchProjectsPageDataAction(): Promise<ProjectsPageData> {
     progress: Number(p.progress) || 0,
     taskPrefixes: Array.isArray(p.task_prefixes) ? p.task_prefixes : [],
     canonicalPrefix: p.canonical_prefix || undefined,
+    integrations: p.integrations || undefined,
     createdAt: p.created_at?.toString(),
   }));
 
@@ -107,6 +109,7 @@ export async function fetchProjectsDashboardDataAction(): Promise<ProjectsDashbo
     progress: Number(p.progress) || 0,
     taskPrefixes: Array.isArray(p.task_prefixes) ? p.task_prefixes : [],
     canonicalPrefix: p.canonical_prefix || undefined,
+    integrations: p.integrations || undefined,
     createdAt: p.created_at?.toString(),
   }));
 

@@ -268,11 +268,12 @@ export async function syncNotionTasksToHabitica(params: {
 
     const cleanId = notionTask.id.replace(/-/g, "");
     const notionUrl = `https://app.notion.com/${cleanId}`;
+    const cleanPriority = (notionTask.priority || "").replace(/[\u{1F300}-\u{1FAD6}\u{1F900}-\u{1F9FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]/gu, "").trim();
 
     const notesContent = [
       notionTag,
       `**Estado en Notion**: ${notionTask.status}`,
-      notionTask.priority ? `**Prioridad**: ${notionTask.priority}` : "",
+      cleanPriority ? `**Prioridad**: ${cleanPriority}` : "",
       notionTask.category ? `**Categoría**: ${notionTask.category}` : "",
       `[Ver tarea en Notion](${notionUrl})`,
     ]

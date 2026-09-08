@@ -29,6 +29,7 @@ import {
   Loader2,
   Minimize2,
   Plus,
+  RefreshCw,
   Tag,
   Trash2,
   Zap,
@@ -36,6 +37,7 @@ import {
 import { useMemo, useState, useTransition } from "react";
 import { NoteContentRenderer } from "@/app/components/notes/NoteContentRenderer";
 import { TaskDetailDrawer } from "./TaskDetailDrawer";
+import { syncProjectFromNotionAction } from "@/app/actions/projectIntegrations";
 
 interface ProjectFocusCardProps {
   projects: ProjectItem[];
@@ -246,6 +248,39 @@ export function ProjectFocusCard({
   // Loading state for completing a task
   const [loadingTaskId, setLoadingTaskId] = useState<string | null>(null);
 
+  // Notion On-Demand Sync State
+  const [isSyncingNotion, setIsSyncingNotion] = useState(false);
+  const [syncFeedback, setSyncFeedback] = useState<string | null>(null);
+
+  const handleSyncNotion = async () => {
+    if (isSyncingNotion) return;
+    soundFx.click();
+    setIsSyncingNotion(true);
+    setSyncFeedback(null);
+    try {
+      const res = await syncProjectFromNotionAction(activeProject.id);
+      if (res.success) {
+        soundFx.taskComplete();
+        const count = res.createdCount ?? 0;
+        const msg =
+          count > 0
+            ? `${count} tareas nuevas`
+            : `Al día (${res.skippedCount ?? 0} existentes)`;
+        setSyncFeedback(msg);
+        if (onRefreshData) onRefreshData();
+      } else {
+        soundFx.click();
+        setSyncFeedback(res.error || "Error");
+      }
+    } catch {
+      soundFx.click();
+      setSyncFeedback("Error de red");
+    } finally {
+      setIsSyncingNotion(false);
+      setTimeout(() => setSyncFeedback(null), 4000);
+    }
+  };
+
   // Handlers
   const handleToggleTask = (task: HabiticaTask) => {
     if (loadingTaskId === task.id) return;
@@ -411,6 +446,32 @@ export function ProjectFocusCard({
                   ))}
                 </select>
               </div>
+            )}
+
+            {syncFeedback && (
+              <span className="font-mono text-[11px] px-2.5 py-1 rounded-md bg-[#221D16] text-[#D99B43] border border-[#D99B43]/30">
+                {syncFeedback}
+              </span>
+            )}
+
+            {/* Notion Discreet Sync Button */}
+            {(activeProject.id === "prj-unpo" || activeProject.integrations?.notion?.enabled) && (
+              <button
+                type="button"
+                onClick={handleSyncNotion}
+                disabled={isSyncingNotion}
+                className="px-2.5 py-1.5 rounded-lg text-xs font-mono font-semibold transition-all cursor-pointer flex items-center gap-1.5 border shadow-2xs bg-[#121110] text-[#DDD6C9] hover:text-[#FFFFFF] border-[#2A2723] hover:border-[#B388FF]/50 disabled:opacity-50"
+                title="Sincronizar tareas de Notion"
+              >
+                <RefreshCw
+                  className={`h-3.5 w-3.5 ${
+                    isSyncingNotion ? "animate-spin text-[#D99B43]" : "text-[#B388FF]"
+                  }`}
+                />
+                <span className="hidden sm:inline">
+                  {isSyncingNotion ? "Sincronizando..." : "Notion"}
+                </span>
+              </button>
             )}
 
             {/* Zen Focus Toggle Button */}
