@@ -4,9 +4,12 @@ import {
   deleteContextualNoteAction,
   saveContextualNoteAction,
 } from "@/app/actions/notes";
+import { syncProjectFromNotionAction } from "@/app/actions/projectIntegrations";
 import { toggleTaskAction } from "@/app/actions/tasks";
+import { NoteContentRenderer } from "@/app/components/notes/NoteContentRenderer";
 import { getProjectKeywords } from "@/lib/projectMatcher";
 import { soundFx } from "@/lib/soundFx";
+import { parseTaskMetadata } from "@/lib/taskMetadata";
 import {
   ContextualNote,
   HabiticaTag,
@@ -38,10 +41,7 @@ import {
   Zap,
 } from "lucide-react";
 import { useMemo, useState, useTransition } from "react";
-import { NoteContentRenderer } from "@/app/components/notes/NoteContentRenderer";
 import { TaskDetailDrawer } from "./TaskDetailDrawer";
-import { syncProjectFromNotionAction } from "@/app/actions/projectIntegrations";
-import { parseTaskMetadata } from "@/lib/taskMetadata";
 
 interface ProjectFocusCardProps {
   projects: ProjectItem[];
@@ -464,6 +464,10 @@ export function ProjectFocusCard({
             )}
           </div>
 
+          <h2 className="font-serif text-xl sm:text-2xl font-bold text-[#F5F2EB] tracking-tight leading-snug">
+            {activeProject.title}
+          </h2>
+
           {/* Project Switcher Select & Focus / Collapse Action Controls */}
           <div className="flex items-center gap-2">
             {activeProjects.length > 1 && (
@@ -502,9 +506,8 @@ export function ProjectFocusCard({
                 title="Sincronizar tareas de Notion"
               >
                 <RefreshCw
-                  className={`h-3.5 w-3.5 ${
-                    isSyncingNotion ? "animate-spin text-[#D99B43]" : "text-[#B388FF]"
-                  }`}
+                  className={`h-3.5 w-3.5 ${isSyncingNotion ? "animate-spin text-[#D99B43]" : "text-[#B388FF]"
+                    }`}
                 />
                 <span className="hidden sm:inline">
                   {isSyncingNotion ? "Sincronizando..." : "Notion"}
@@ -549,13 +552,6 @@ export function ProjectFocusCard({
               </button>
             )}
           </div>
-        </div>
-
-        {/* Row 2: Big Project Title & Description */}
-        <div className="space-y-1">
-          <h2 className="font-serif text-xl sm:text-2xl font-bold text-[#F5F2EB] tracking-tight leading-snug">
-            {activeProject.title}
-          </h2>
         </div>
 
         {/* Row 3: Dedicated Full-Width Segmented Tab Navigation Bar */}
@@ -625,11 +621,10 @@ export function ProjectFocusCard({
               <button
                 type="button"
                 onClick={() => setPriorityFilter("all")}
-                className={`px-2.5 py-1 rounded-lg border transition-all cursor-pointer ${
-                  priorityFilter === "all"
-                    ? "bg-[#DDD6C9] text-[#121110] border-[#DDD6C9] font-bold"
-                    : "bg-[#121110] text-[#8E867B] border-[#2A2723] hover:text-[#DDD6C9]"
-                }`}
+                className={`px-2.5 py-1 rounded-lg border transition-all cursor-pointer ${priorityFilter === "all"
+                  ? "bg-[#DDD6C9] text-[#121110] border-[#DDD6C9] font-bold"
+                  : "bg-[#121110] text-[#8E867B] border-[#2A2723] hover:text-[#DDD6C9]"
+                  }`}
               >
                 Todas ({priorityCounts.all})
               </button>
@@ -637,11 +632,10 @@ export function ProjectFocusCard({
               <button
                 type="button"
                 onClick={() => setPriorityFilter("high")}
-                className={`px-2.5 py-1 rounded-lg border transition-all cursor-pointer flex items-center gap-1.5 ${
-                  priorityFilter === "high"
-                    ? "bg-[#251417] text-[#FF6369] border-[#E5484D] font-bold"
-                    : "bg-[#121110] text-[#8E867B] border-[#2A2723] hover:text-[#FF6369]"
-                }`}
+                className={`px-2.5 py-1 rounded-lg border transition-all cursor-pointer flex items-center gap-1.5 ${priorityFilter === "high"
+                  ? "bg-[#251417] text-[#FF6369] border-[#E5484D] font-bold"
+                  : "bg-[#121110] text-[#8E867B] border-[#2A2723] hover:text-[#FF6369]"
+                  }`}
               >
                 <span className="w-1.5 h-1.5 rounded-full bg-[#FF6369]" />
                 Alta ({priorityCounts.high})
@@ -650,11 +644,10 @@ export function ProjectFocusCard({
               <button
                 type="button"
                 onClick={() => setPriorityFilter("medium")}
-                className={`px-2.5 py-1 rounded-lg border transition-all cursor-pointer flex items-center gap-1.5 ${
-                  priorityFilter === "medium"
-                    ? "bg-[#221D16] text-[#D99B43] border-[#D99B43] font-bold"
-                    : "bg-[#121110] text-[#8E867B] border-[#2A2723] hover:text-[#D99B43]"
-                }`}
+                className={`px-2.5 py-1 rounded-lg border transition-all cursor-pointer flex items-center gap-1.5 ${priorityFilter === "medium"
+                  ? "bg-[#221D16] text-[#D99B43] border-[#D99B43] font-bold"
+                  : "bg-[#121110] text-[#8E867B] border-[#2A2723] hover:text-[#D99B43]"
+                  }`}
               >
                 <span className="w-1.5 h-1.5 rounded-full bg-[#D99B43]" />
                 Media ({priorityCounts.medium})
@@ -663,11 +656,10 @@ export function ProjectFocusCard({
               <button
                 type="button"
                 onClick={() => setPriorityFilter("low")}
-                className={`px-2.5 py-1 rounded-lg border transition-all cursor-pointer flex items-center gap-1.5 ${
-                  priorityFilter === "low"
-                    ? "bg-[#141813] text-[#7EA35A] border-[#7EA35A] font-bold"
-                    : "bg-[#121110] text-[#8E867B] border-[#2A2723] hover:text-[#7EA35A]"
-                }`}
+                className={`px-2.5 py-1 rounded-lg border transition-all cursor-pointer flex items-center gap-1.5 ${priorityFilter === "low"
+                  ? "bg-[#141813] text-[#7EA35A] border-[#7EA35A] font-bold"
+                  : "bg-[#121110] text-[#8E867B] border-[#2A2723] hover:text-[#7EA35A]"
+                  }`}
               >
                 <span className="w-1.5 h-1.5 rounded-full bg-[#7EA35A]" />
                 Baja ({priorityCounts.low})
@@ -697,13 +689,11 @@ export function ProjectFocusCard({
                   <div
                     key={task.id}
                     onClick={() => setActiveTaskForDrawer(task)}
-                    className={`group rounded-xl border p-3.5 sm:p-4 transition-all duration-150 flex flex-col gap-2.5 cursor-pointer select-none ${
-                      loadingTaskId === task.id ? "opacity-60 pointer-events-none" : ""
-                    } ${
-                      task.completed
+                    className={`group rounded-xl border p-3.5 sm:p-4 transition-all duration-150 flex flex-col gap-2.5 cursor-pointer select-none ${loadingTaskId === task.id ? "opacity-60 pointer-events-none" : ""
+                      } ${task.completed
                         ? "bg-[#141813]/60 border-[#7EA35A]/25 text-[#8E867B]"
                         : "bg-[#121110] border-[#2A2723] hover:border-[#38332D] hover:bg-[#151412] text-[#F5F2EB]"
-                    }`}
+                      }`}
                   >
                     {/* Top Row: Checkbox, Title & Quick Edit Button */}
                     <div className="flex items-start justify-between gap-3">
@@ -715,13 +705,12 @@ export function ProjectFocusCard({
                             e.stopPropagation();
                             handleToggleTask(task);
                           }}
-                          className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded border transition-colors cursor-pointer ${
-                            loadingTaskId === task.id
-                              ? "border-[#D99B43]/70 bg-[#1D1B18]"
-                              : task.completed
+                          className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded border transition-colors cursor-pointer ${loadingTaskId === task.id
+                            ? "border-[#D99B43]/70 bg-[#1D1B18]"
+                            : task.completed
                               ? "bg-[#7EA35A] border-[#7EA35A] text-[#121110]"
                               : "border-[#38332D] bg-[#181715] hover:border-[#D99B43]"
-                          }`}
+                            }`}
                         >
                           {loadingTaskId === task.id ? (
                             <Loader2 className="h-3 w-3 animate-spin text-[#D99B43]" />
@@ -733,11 +722,10 @@ export function ProjectFocusCard({
                         {/* Title */}
                         <div className="min-w-0 space-y-1">
                           <h4
-                            className={`text-xs sm:text-sm font-medium leading-snug break-words ${
-                              task.completed
-                                ? "line-through text-[#8E867B]"
-                                : "text-[#F5F2EB] group-hover:text-[#FFFFFF]"
-                            }`}
+                            className={`text-xs sm:text-sm font-medium leading-snug wrap-break-word ${task.completed
+                              ? "line-through text-[#8E867B]"
+                              : "text-[#F5F2EB] group-hover:text-[#FFFFFF]"
+                              }`}
                           >
                             {task.text}
                           </h4>
