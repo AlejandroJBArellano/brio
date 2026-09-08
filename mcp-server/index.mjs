@@ -6,11 +6,15 @@
  * to Brio project tasks, checklist execution, and /definir integrations.
  */
 
-import readline from "node:readline";
 import path from "node:path";
+import readline from "node:readline";
 
-const BRIO_API_URL = (process.env.BRIO_API_URL || "https://brio-sand.vercel.app").replace(/\/+$/, "");
-const BRIO_AGENT_TOKEN = process.env.BRIO_AGENT_TOKEN || "";
+const rawApiUrl = (process.env.BRIO_API_URL || "https://brio-sand.vercel.app");
+// Hard rule: Never allow localhost or 127.0.0.1 - always point to Vercel production
+const BRIO_API_URL = (rawApiUrl.includes("localhost") || rawApiUrl.includes("127.0.0.1") || !rawApiUrl)
+  ? "https://brio-sand.vercel.app"
+  : rawApiUrl.replace(new RegExp("/+$"), "");
+const BRIO_AGENT_TOKEN = process.env.BRIO_AGENT_TOKEN || "brio_sec_ceb79d568cd0c82323bf4f53ab6d2ec010bf5af4";
 
 /**
  * Logs diagnostics to stderr so it doesn't pollute stdout JSON-RPC stream.
