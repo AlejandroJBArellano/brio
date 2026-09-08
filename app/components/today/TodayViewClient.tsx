@@ -109,25 +109,6 @@ export function TodayViewClient({
   const { openModal } = useCommandCenter();
   const [isPending, startTransition] = useTransition();
 
-  // Live Time clock (hours and minutes)
-  const [currentTime, setCurrentTime] = useState<string>("");
-
-  useEffect(() => {
-    const updateTime = () => {
-      const d = new Date();
-      setCurrentTime(
-        d.toLocaleTimeString("es-MX", {
-          hour: "2-digit",
-          minute: "2-digit",
-          hour12: true,
-        })
-      );
-    };
-    updateTime();
-    const interval = setInterval(updateTime, 10000);
-    return () => clearInterval(interval);
-  }, []);
-
   // Preferences with lazy localStorage initialization (Mobile vs Desktop independent)
   const [prefs, setPrefs] = useState<TodayViewPreferences>(() => {
     if (typeof window === "undefined") return DEFAULT_PREFERENCES;
@@ -377,16 +358,6 @@ export function TodayViewClient({
   const pendingInActiveTiming =
     filteredSupplements.length - takenCountInActiveTiming;
 
-  // Date String in Spanish
-  const todayFormatted = useMemo(() => {
-    const d = new Date();
-    return d.toLocaleDateString("es-MX", {
-      weekday: "long",
-      day: "numeric",
-      month: "long",
-    });
-  }, []);
-
   // Handlers
   const handleToggleSupplement = (id: string) => {
     soundFx.supplementChecked();
@@ -449,22 +420,129 @@ export function TodayViewClient({
       {/* ========================================================================= */}
       {/* 1. HEADER                          */}
       {/* ========================================================================= */}
-      <div className="rounded-xl border border-[#2A2723] bg-[#181715] p-3 sm:p-4 shadow-xs space-y-2.5">
-        {/* Main Row: Date + Time + Rituals + Views Switcher */}
-        <div className="flex items-center justify-between gap-3 flex-wrap">
-          {/* Date & Time */}
-          <div className="flex items-center gap-2.5 min-w-0">
-            <h1 className="font-serif text-base sm:text-xl font-bold tracking-tight text-[#F5F2EB] flex items-center gap-2 flex-wrap">
-              <span className="capitalize">{todayFormatted}</span>
-              {currentTime && (
-                <span className="font-mono text-xs sm:text-sm font-semibold text-[#D99B43] bg-[#221D16] px-2 py-0.5 rounded-md border border-[#D99B43]/30 tracking-wider">
-                  {currentTime}
+      {/* ========================================================================= */}
+      {/* 1. HEADER / TOOLBAR                                                       */}
+      {/* ========================================================================= */}
+      <div className="rounded-xl border border-[#2A2723] bg-[#181715] p-2 sm:p-2.5 shadow-xs">
+        <div className="flex items-center justify-between gap-2.5 flex-wrap">
+          {/* Presets & Module Chips */}
+          <div className="flex items-center gap-1.5 flex-wrap">
+            {/* Presets Segmented Bar */}
+            <div className="flex items-center p-0.5 rounded-lg bg-[#121110] border border-[#2A2723]">
+              <button
+                type="button"
+                onClick={() => setPreset(prefs.isFocusMode ? "all" : "focus")}
+                className={`px-2 py-1 rounded-md font-semibold text-[11px] transition-all cursor-pointer flex items-center gap-1 ${prefs.isFocusMode
+                  ? "bg-[#221D16] text-[#D99B43] border border-[#D99B43]/30 shadow-2xs font-bold"
+                  : "text-[#8E867B] hover:text-[#DDD6C9]"
+                  }`}
+                title="Modo Focus (Deep Work 12 columnas)"
+              >
+                <Zap className="h-3 w-3" />
+                <span>Focus</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setPreset("bio")}
+                className={`px-2 py-1 rounded-md font-semibold text-[11px] transition-all cursor-pointer flex items-center gap-1 ${!prefs.visible.project &&
+                  (prefs.visible.supplements ||
+                    prefs.visible.water ||
+                    prefs.visible.nutrition)
+                  ? "bg-[#141813] text-[#7EA35A] border border-[#7EA35A]/30 shadow-2xs font-bold"
+                  : "text-[#8E867B] hover:text-[#DDD6C9]"
+                  }`}
+                title="Modo Bio / Salud"
+              >
+                <Droplet className="h-3 w-3" />
+                <span>Bio</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setPreset("all")}
+                className={`px-2 py-1 rounded-md font-semibold text-[11px] transition-all cursor-pointer flex items-center gap-1 ${prefs.visible.project &&
+                  prefs.visible.supplements &&
+                  prefs.visible.water &&
+                  prefs.visible.nutrition &&
+                  !prefs.isFocusMode
+                  ? "bg-[#141C1A] text-[#4EAB9E] border border-[#4EAB9E]/30 shadow-2xs font-bold"
+                  : "text-[#8E867B] hover:text-[#DDD6C9]"
+                  }`}
+                title="Vista Completa"
+              >
+                <LayoutGrid className="h-3 w-3" />
+                <span>Todo</span>
+              </button>
+            </div>
+
+            <div className="h-4 w-px bg-[#2A2723] mx-0.5 hidden xs:block" />
+
+            {/* Modular Chips */}
+            <button
+              type="button"
+              onClick={() => toggleWidget("project")}
+              className={`px-2 py-1 rounded-lg border text-[11px] font-semibold transition-all cursor-pointer flex items-center gap-1 ${prefs.visible.project
+                ? "bg-[#221D16] text-[#D99B43] border-[#D99B43]/40 font-bold"
+                : "bg-[#121110] text-[#8E867B] border-[#2A2723] opacity-60 hover:opacity-100"
+                }`}
+              title="Activar/Ocultar Proyecto"
+            >
+              <FolderGit2 className="h-3 w-3" />
+              <span>Proyecto</span>
+              {pendingProjectTasksCount > 0 && (
+                <span className="px-1.5 py-0.2 rounded-full text-[9px] font-bold bg-[#D99B43] text-[#121110]">
+                  {pendingProjectTasksCount}
                 </span>
               )}
-            </h1>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => toggleWidget("supplements")}
+              className={`px-2 py-1 rounded-lg border text-[11px] font-semibold transition-all cursor-pointer flex items-center gap-1 ${prefs.visible.supplements
+                ? "bg-[#1C2219] text-[#7EA35A] border-[#7EA35A]/40 font-bold"
+                : "bg-[#121110] text-[#8E867B] border-[#2A2723] opacity-60 hover:opacity-100"
+                }`}
+              title="Activar/Ocultar Suplementos"
+            >
+              <Pill className="h-3 w-3" />
+              <span>Suplementos</span>
+              <span className="text-[10px] opacity-80">
+                ({takenCountInActiveTiming}/{filteredSupplements.length})
+              </span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => toggleWidget("water")}
+              className={`px-2 py-1 rounded-lg border text-[11px] font-semibold transition-all cursor-pointer flex items-center gap-1 ${prefs.visible.water
+                ? "bg-[#141C1A] text-[#4EAB9E] border-[#4EAB9E]/40 font-bold"
+                : "bg-[#121110] text-[#8E867B] border-[#2A2723] opacity-60 hover:opacity-100"
+                }`}
+              title="Activar/Ocultar Agua"
+            >
+              <Droplet className="h-3 w-3" />
+              <span>Agua</span>
+              <span className="text-[10px] opacity-80">({waterPercent}%)</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => toggleWidget("nutrition")}
+              className={`px-2 py-1 rounded-lg border text-[11px] font-semibold transition-all cursor-pointer flex items-center gap-1 ${prefs.visible.nutrition
+                ? "bg-[#1C2219] text-[#7EA35A] border-[#7EA35A]/40 font-bold"
+                : "bg-[#121110] text-[#8E867B] border-[#2A2723] opacity-60 hover:opacity-100"
+                }`}
+              title="Activar/Ocultar Porciones"
+            >
+              <Salad className="h-3 w-3" />
+              <span>Porciones</span>
+              <span className="text-[10px] opacity-80">({portionPercent}%)</span>
+            </button>
           </div>
 
-          {/* Quick Ritual Buttons & Collapsible Controls Toggle */}
+          {/* Quick Ritual Buttons */}
           <div className="flex items-center gap-1.5 sm:gap-2">
             <button
               type="button"
@@ -493,157 +571,8 @@ export function TodayViewClient({
               <span className="hidden xs:inline">Cierre PM</span>
               {hasEveningReview && <Check className="h-3 w-3 stroke-3 ml-0.5" />}
             </button>
-
-            {/* Toggle Modular Controls Button */}
-            <button
-              type="button"
-              onClick={() => {
-                soundFx.click();
-                savePrefs({
-                  ...prefs,
-                  isControlsOpen: !prefs.isControlsOpen,
-                });
-              }}
-              className={`p-1.5 sm:px-2.5 sm:py-1 rounded-lg text-xs font-mono font-semibold border transition-all cursor-pointer flex items-center gap-1.5 ${prefs.isControlsOpen
-                ? "bg-[#221D16] text-[#D99B43] border-[#D99B43]/40"
-                : "bg-[#121110] text-[#8E867B] hover:text-[#DDD6C9] border-[#2A2723]"
-                }`}
-              title={
-                prefs.isControlsOpen
-                  ? "Ocultar panel de modos y módulos"
-                  : "Mostrar panel de modos y módulos"
-              }
-            >
-              <span className="hidden sm:inline">Vistas</span>
-              <ChevronDown
-                className={`h-3.5 w-3.5 transition-transform duration-200 ${prefs.isControlsOpen ? "rotate-180" : ""
-                  }`}
-              />
-            </button>
           </div>
         </div>
-
-        {/* Collapsible Slim Controls Bar */}
-        {prefs.isControlsOpen && (
-          <div className="pt-2 border-t border-[#2A2723] flex flex-wrap items-center justify-between gap-2 text-xs font-mono animate-in fade-in duration-150">
-            {/* Presets & Module Chips combined into a sleek unified row */}
-            <div className="flex items-center gap-1.5 flex-wrap">
-              {/* Presets Segmented Bar */}
-              <div className="flex items-center p-0.5 rounded-lg bg-[#121110] border border-[#2A2723]">
-                <button
-                  type="button"
-                  onClick={() => setPreset(prefs.isFocusMode ? "all" : "focus")}
-                  className={`px-2 py-1 rounded-md font-semibold text-[11px] transition-all cursor-pointer flex items-center gap-1 ${prefs.isFocusMode
-                    ? "bg-[#221D16] text-[#D99B43] border border-[#D99B43]/30 shadow-2xs font-bold"
-                    : "text-[#8E867B] hover:text-[#DDD6C9]"
-                    }`}
-                  title="Modo Focus (Deep Work 12 columnas)"
-                >
-                  <Zap className="h-3 w-3" />
-                  <span>Focus</span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => setPreset("bio")}
-                  className={`px-2 py-1 rounded-md font-semibold text-[11px] transition-all cursor-pointer flex items-center gap-1 ${!prefs.visible.project &&
-                    (prefs.visible.supplements ||
-                      prefs.visible.water ||
-                      prefs.visible.nutrition)
-                    ? "bg-[#141813] text-[#7EA35A] border border-[#7EA35A]/30 shadow-2xs font-bold"
-                    : "text-[#8E867B] hover:text-[#DDD6C9]"
-                    }`}
-                  title="Modo Bio / Salud"
-                >
-                  <Droplet className="h-3 w-3" />
-                  <span>Bio</span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => setPreset("all")}
-                  className={`px-2 py-1 rounded-md font-semibold text-[11px] transition-all cursor-pointer flex items-center gap-1 ${prefs.visible.project &&
-                    prefs.visible.supplements &&
-                    prefs.visible.water &&
-                    prefs.visible.nutrition &&
-                    !prefs.isFocusMode
-                    ? "bg-[#141C1A] text-[#4EAB9E] border border-[#4EAB9E]/30 shadow-2xs font-bold"
-                    : "text-[#8E867B] hover:text-[#DDD6C9]"
-                    }`}
-                  title="Vista Completa"
-                >
-                  <LayoutGrid className="h-3 w-3" />
-                  <span>Todo</span>
-                </button>
-              </div>
-
-              <div className="h-4 w-px bg-[#2A2723] mx-0.5 hidden xs:block" />
-
-              {/* Modular Chips */}
-              <button
-                type="button"
-                onClick={() => toggleWidget("project")}
-                className={`px-2 py-1 rounded-lg border text-[11px] font-semibold transition-all cursor-pointer flex items-center gap-1 ${prefs.visible.project
-                  ? "bg-[#221D16] text-[#D99B43] border-[#D99B43]/40 font-bold"
-                  : "bg-[#121110] text-[#8E867B] border-[#2A2723] opacity-60 hover:opacity-100"
-                  }`}
-                title="Activar/Ocultar Proyecto"
-              >
-                <FolderGit2 className="h-3 w-3" />
-                <span>Proyecto</span>
-                {pendingProjectTasksCount > 0 && (
-                  <span className="px-1.5 py-0.2 rounded-full text-[9px] font-bold bg-[#D99B43] text-[#121110]">
-                    {pendingProjectTasksCount}
-                  </span>
-                )}
-              </button>
-
-              <button
-                type="button"
-                onClick={() => toggleWidget("supplements")}
-                className={`px-2 py-1 rounded-lg border text-[11px] font-semibold transition-all cursor-pointer flex items-center gap-1 ${prefs.visible.supplements
-                  ? "bg-[#1C2219] text-[#7EA35A] border-[#7EA35A]/40 font-bold"
-                  : "bg-[#121110] text-[#8E867B] border-[#2A2723] opacity-60 hover:opacity-100"
-                  }`}
-                title="Activar/Ocultar Suplementos"
-              >
-                <Pill className="h-3 w-3" />
-                <span>Suplementos</span>
-                <span className="text-[10px] opacity-80">
-                  ({takenCountInActiveTiming}/{filteredSupplements.length})
-                </span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => toggleWidget("water")}
-                className={`px-2 py-1 rounded-lg border text-[11px] font-semibold transition-all cursor-pointer flex items-center gap-1 ${prefs.visible.water
-                  ? "bg-[#141C1A] text-[#4EAB9E] border-[#4EAB9E]/40 font-bold"
-                  : "bg-[#121110] text-[#8E867B] border-[#2A2723] opacity-60 hover:opacity-100"
-                  }`}
-                title="Activar/Ocultar Agua"
-              >
-                <Droplet className="h-3 w-3" />
-                <span>Agua</span>
-                <span className="text-[10px] opacity-80">({waterPercent}%)</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => toggleWidget("nutrition")}
-                className={`px-2 py-1 rounded-lg border text-[11px] font-semibold transition-all cursor-pointer flex items-center gap-1 ${prefs.visible.nutrition
-                  ? "bg-[#1C2219] text-[#7EA35A] border-[#7EA35A]/40 font-bold"
-                  : "bg-[#121110] text-[#8E867B] border-[#2A2723] opacity-60 hover:opacity-100"
-                  }`}
-                title="Activar/Ocultar Porciones"
-              >
-                <Salad className="h-3 w-3" />
-                <span>Porciones</span>
-                <span className="text-[10px] opacity-80">({portionPercent}%)</span>
-              </button>
-            </div>
-          </div>
-        )}
       </div>
 
       {/* ========================================================================= */}
