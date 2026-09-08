@@ -268,9 +268,7 @@ export function TaskDetailDrawer({
                 <FileText className="h-3.5 w-3.5" />
                 <span>Descripción / Notas de Habitica:</span>
               </div>
-              <p className="text-xs text-[#DDD6C9] whitespace-pre-wrap leading-relaxed">
-                {task.notes}
-              </p>
+              <NoteContentRenderer content={task.notes} />
             </div>
           )}
 
