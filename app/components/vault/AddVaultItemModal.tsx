@@ -26,9 +26,9 @@ interface AddVaultItemModalProps {
 const INSTRUMENTS = ["Piano", "Guitarra", "Voz", "Batería", "Bajo", "Violín", "Producción", "Otro"];
 const PLATFORMS = ["Udemy", "YouTube", "Platzi", "Coursera", "Frontend Masters", "GitHub", "Notion", "Web"];
 const DIFFICULTIES = [
-  { id: "beginner", label: "Principiante 🟢" },
-  { id: "intermediate", label: "Intermedio 🟡" },
-  { id: "advanced", label: "Avanzado 🔴" },
+  { id: "beginner", label: "Principiante" },
+  { id: "intermediate", label: "Intermedio" },
+  { id: "advanced", label: "Avanzado" },
 ];
 
 export function AddVaultItemModal({
@@ -373,7 +373,7 @@ export function AddVaultItemModal({
 
           {/* S3 File Upload Box (PDF / Archivo) */}
           <div>
-            <label className="block text-xs font-sans font-medium text-[#DDD6C9] mb-1.5 flex items-center justify-between">
+            <label className="flex items-center justify-between text-xs font-sans font-medium text-[#DDD6C9] mb-1.5">
               <span>
                 {category === "sheet_music"
                   ? "Partitura PDF (Subir a AWS S3)"

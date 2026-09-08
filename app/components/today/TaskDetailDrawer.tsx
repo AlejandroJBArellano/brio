@@ -18,7 +18,6 @@ import { soundFx } from "@/lib/soundFx";
 import { parseTaskMetadata } from "@/lib/taskMetadata";
 import { ContextualNote, HabiticaTask } from "@/lib/types";
 import {
-  AlertCircle,
   Check,
   CheckCircle2,
   ExternalLink,
@@ -31,7 +30,6 @@ import {
   Plus,
   Save,
   Trash2,
-  Undo2,
   X,
 } from "lucide-react";
 import { useEffect, useRef, useState, useTransition } from "react";

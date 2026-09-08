@@ -39,7 +39,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useMemo, useOptimistic, useState, useTransition } from "react";
+import { useMemo, useOptimistic, useState, useTransition } from "react";
 import { ProjectFocusCard } from "./ProjectFocusCard";
 
 export type WidgetKey = "project" | "supplements" | "water" | "nutrition";

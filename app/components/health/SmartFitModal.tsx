@@ -194,7 +194,7 @@ export function SmartFitModal({
           {/* Primary Row: Date & Weight */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs font-sans font-semibold text-[#DDD6C9] mb-1.5 flex items-center gap-1.5">
+              <label className="flex items-center gap-1.5 text-xs font-sans font-semibold text-[#DDD6C9] mb-1.5">
                 <Calendar className="h-3.5 w-3.5 text-[#D99B43]" />
                 <span>Fecha de medición *</span>
               </label>
@@ -208,7 +208,7 @@ export function SmartFitModal({
             </div>
 
             <div>
-              <label className="block text-xs font-sans font-semibold text-[#DDD6C9] mb-1.5 flex items-center gap-1.5">
+              <label className="flex items-center gap-1.5 text-xs font-sans font-semibold text-[#DDD6C9] mb-1.5">
                 <Scale className="h-3.5 w-3.5 text-[#7EA35A]" />
                 <span>Peso Total (kg) *</span>
               </label>

@@ -183,9 +183,9 @@ export function AddWishlistModal({
               </label>
               <div className="grid grid-cols-3 gap-1.5">
                 {[
-                  { id: "low", label: "Baja 🟢" },
-                  { id: "medium", label: "Media 🟡" },
-                  { id: "high", label: "Alta 🔴" },
+                  { id: "low", label: "Baja" },
+                  { id: "medium", label: "Media" },
+                  { id: "high", label: "Alta" },
                 ].map((pr) => (
                   <button
                     key={pr.id}
@@ -206,7 +206,7 @@ export function AddWishlistModal({
 
           {/* Cooling Period Selector */}
           <div>
-            <label className="block text-xs font-sans font-medium text-[#DDD6C9] mb-1.5 flex items-center gap-1.5">
+            <label className="flex items-center gap-1.5 text-xs font-sans font-medium text-[#DDD6C9] mb-1.5">
               <Clock className="h-3.5 w-3.5 text-[#4EAB9E]" />
               <span>Período de Enfriamiento (Anti-Impulso)</span>
             </label>

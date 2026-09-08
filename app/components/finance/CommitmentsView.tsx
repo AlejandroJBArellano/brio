@@ -183,7 +183,7 @@ export function CommitmentsView({
             placeholder="Buscar por concepto, categoría o cuenta..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-9 pr-3 py-1.5 rounded-md bg-[#121110] border border-[#2A2723] text-xs text-[#F5F2EB] placeholder-[#8E867B] focus:outline-hidden focus:border-[#D99B43] transition-all"
+            className="w-full pl-9 pr-3 py-1.5 rounded-md bg-[#121110] border border-[#2A2723] text-xs text-[#F5F2EB] placeholder:text-[#8E867B] focus:outline-hidden focus:border-[#D99B43] transition-all"
           />
         </div>
 
@@ -242,7 +242,7 @@ export function CommitmentsView({
                 : "text-[#8E867B] hover:text-[#DDD6C9] hover:bg-[#22201D]"
             }`}
           >
-            Por Vencer ⚠️
+            Por Vencer
           </button>
           <button
             type="button"

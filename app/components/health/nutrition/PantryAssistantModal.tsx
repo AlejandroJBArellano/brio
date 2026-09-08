@@ -336,7 +336,7 @@ export function PantryAssistantModal({
                   placeholder="Buscar receta o ingrediente..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-9 pr-4 py-1.5 rounded-lg bg-[#181715] border border-[#2A2723] text-xs text-[#F5F2EB] placeholder-[#8E867B] focus:outline-none focus:border-[#D99B43]"
+                  className="w-full pl-9 pr-4 py-1.5 rounded-lg bg-[#181715] border border-[#2A2723] text-xs text-[#F5F2EB] placeholder:text-[#8E867B] focus:outline-none focus:border-[#D99B43]"
                 />
               </div>
 
@@ -452,13 +452,13 @@ export function PantryAssistantModal({
 
                             {isPostGym && (
                               <span className="flex items-center gap-1 px-2 py-0.5 rounded bg-[#251A18] text-[#E05D52] border border-[#E05D52]/30 text-[10px] font-bold">
-                                🏋️ Post-Gym
+                                Post-Gym
                               </span>
                             )}
 
                             {isFast15m && (
                               <span className="flex items-center gap-1 px-2 py-0.5 rounded bg-[#1A2221] text-[#4EAB9E] border border-[#4EAB9E]/30 text-[10px] font-bold">
-                                ⚡ &lt;15 min
+                                &lt;15 min
                               </span>
                             )}
                           </div>
@@ -585,7 +585,7 @@ export function PantryAssistantModal({
                   placeholder="Nombre del ingrediente (ej. Aguacate Hass, Salmón...)"
                   value={newCustomName}
                   onChange={(e) => setNewCustomName(e.target.value)}
-                  className="flex-1 min-w-50 px-3 py-2 rounded-lg bg-[#181715] border border-[#2A2723] text-xs text-[#F5F2EB] placeholder-[#8E867B] focus:border-[#D99B43]"
+                  className="flex-1 min-w-50 px-3 py-2 rounded-lg bg-[#181715] border border-[#2A2723] text-xs text-[#F5F2EB] placeholder:text-[#8E867B] focus:border-[#D99B43]"
                 />
                 <select
                   value={newCustomCat}

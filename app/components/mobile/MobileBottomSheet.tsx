@@ -198,7 +198,7 @@ export function MobileBottomSheet({
 
       const res = await createSingleTaskAction(formattedText);
       if (res.success) {
-        setSuccessMessage("Tarea añadida a Habitica ⚡");
+        setSuccessMessage("Tarea añadida a Habitica");
         setTimeout(() => {
           setTaskText("");
           setSuccessMessage(null);
@@ -213,7 +213,7 @@ export function MobileBottomSheet({
     startTransition(async () => {
       const res = await logWaterAction(ml);
       if (res.success) {
-        setSuccessMessage(`+${ml}ml de agua registrados 💧`);
+        setSuccessMessage(`+${ml}ml de agua registrados`);
         setTimeout(() => {
           setSuccessMessage(null);
           onClose();
@@ -229,7 +229,7 @@ export function MobileBottomSheet({
     startTransition(async () => {
       const res = await quickAdjustPortionAction(todayStr, group, 1.0);
       if (res.success) {
-        setSuccessMessage(`+1 ${name} registrado 🥑`);
+        setSuccessMessage(`+1 ${name} registrado`);
         setTimeout(() => {
           setSuccessMessage(null);
           onClose();
@@ -252,7 +252,7 @@ export function MobileBottomSheet({
 
       const res = await toggleSupplementAction(item.id);
       if (res.success) {
-        setSuccessMessage(`✓ ${item.name} registrado ✨`);
+        setSuccessMessage(`${item.name} registrado`);
         setTimeout(() => {
           setSuccessMessage(null);
           onClose();
@@ -449,7 +449,7 @@ export function MobileBottomSheet({
                     onChange={(e) => setIsAntExpense(e.target.checked)}
                     className="size-4 rounded accent-[#D99B43] cursor-pointer"
                   />
-                  <span>Gasto hormiga 🐜</span>
+                  <span>Gasto hormiga</span>
                 </label>
               </div>
 
@@ -487,14 +487,14 @@ export function MobileBottomSheet({
               <div className="flex flex-wrap sm:flex-nowrap items-center gap-2">
                 {[
                   { id: "normal", label: "To-Do Normal" },
-                  { id: "urgent", label: "Alta / Must-Win ⚡" },
+                  { id: "urgent", label: "Alta / Must-Win" },
                   { id: "habit", label: "Hábito Positivo +" },
                 ].map((p) => (
                   <button
                     key={p.id}
                     type="button"
                     onClick={() => setTaskPriority(p.id as "normal" | "urgent" | "habit")}
-                    className={`flex-1 min-w-[90px] py-2 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+                    className={`flex-1 min-w-22.5 py-2 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
                       taskPriority === p.id
                         ? "bg-[#221D16] text-[#D99B43] border border-[#D99B43]/40"
                         : "bg-[#121110] text-[#8E867B] border border-[#2A2723]"
