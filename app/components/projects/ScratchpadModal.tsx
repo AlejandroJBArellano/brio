@@ -2,6 +2,7 @@
 
 import { saveScratchpadAction } from "@/app/actions/projects";
 import { submitBatchCaptureAction } from "@/app/actions/tasks";
+import { MarkdownRenderer } from "@/app/components/ui/MarkdownRenderer";
 import { Check, Edit3, X, Zap } from "lucide-react";
 import { useEffect, useState, useTransition } from "react";
 
@@ -39,6 +40,7 @@ function ScratchpadModalContent({
   onSuccess?: () => void;
 }) {
   const [content, setContent] = useState(initialContent);
+  const [showPreview, setShowPreview] = useState(false);
   const [isSaved, setIsSaved] = useState(false);
   const [isPending, startTransition] = useTransition();
   const [isInitialized, setIsInitialized] = useState(Boolean(initialContent));
@@ -122,6 +124,30 @@ function ScratchpadModalContent({
           </div>
 
           <div className="flex items-center gap-3">
+            {/* View Mode Toggle */}
+            <div className="flex items-center gap-1 rounded-lg border border-[#2A2723] bg-[#121110] p-0.5 text-[10px] font-mono">
+              <button
+                type="button"
+                onClick={() => setShowPreview(false)}
+                className={`px-2 py-1 rounded-md transition-colors cursor-pointer ${!showPreview
+                    ? "bg-[#22201D] text-[#D99B43] font-semibold"
+                    : "text-[#8E867B] hover:text-[#DDD6C9]"
+                  }`}
+              >
+                Editar
+              </button>
+              <button
+                type="button"
+                onClick={() => setShowPreview(true)}
+                className={`px-2 py-1 rounded-md transition-colors cursor-pointer ${showPreview
+                    ? "bg-[#22201D] text-[#D99B43] font-semibold"
+                    : "text-[#8E867B] hover:text-[#DDD6C9]"
+                  }`}
+              >
+                Previa
+              </button>
+            </div>
+
             <span className="text-[11px] font-mono text-[#8E867B] flex items-center gap-1">
               {isSaved ? (
                 <>
@@ -138,22 +164,34 @@ function ScratchpadModalContent({
             <button
               type="button"
               onClick={onClose}
-              className="rounded-lg p-1.5 text-[#8E867B] hover:bg-[#22201D] hover:text-[#F5F2EB] transition-colors"
+              className="rounded-lg p-1.5 text-[#8E867B] hover:bg-[#22201D] hover:text-[#F5F2EB] transition-colors cursor-pointer"
             >
               <X className="h-5 w-5" />
             </button>
           </div>
         </div>
 
-        {/* Text Area */}
+        {/* Content Area: Editor or Markdown Preview */}
         <div className="mt-4">
-          <textarea
-            rows={14}
-            value={content}
-            onChange={(e) => setContent(e.target.value)}
-            placeholder="# Mis notas del día..."
-            className="w-full rounded-lg border border-[#2A2723] bg-[#121110] p-4 font-mono text-xs leading-relaxed text-[#F5F2EB] placeholder:text-[#8E867B] focus:border-[#D99B43] focus:outline-none transition-all"
-          />
+          {showPreview ? (
+            <div className="w-full h-80 overflow-y-auto rounded-lg border border-[#2A2723] bg-[#121110] p-4">
+              {content ? (
+                <MarkdownRenderer content={content} />
+              ) : (
+                <span className="text-xs text-[#8E867B] italic font-mono">
+                  Sin notas escritas aún.
+                </span>
+              )}
+            </div>
+          ) : (
+            <textarea
+              rows={14}
+              value={content}
+              onChange={(e) => setContent(e.target.value)}
+              placeholder="# Mis notas del día..."
+              className="w-full rounded-lg border border-[#2A2723] bg-[#121110] p-4 font-mono text-xs leading-relaxed text-[#F5F2EB] placeholder:text-[#8E867B] focus:border-[#D99B43] focus:outline-none transition-all"
+            />
+          )}
         </div>
 
         {/* Quick Task Extraction Helpers */}

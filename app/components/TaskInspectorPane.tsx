@@ -8,6 +8,7 @@ import {
   toggleChecklistItemAction,
   updateTaskAction,
 } from "@/app/actions/tasks";
+import { MarkdownRenderer } from "@/app/components/ui/MarkdownRenderer";
 import { HabiticaTag, HabiticaTask } from "@/lib/types";
 import { getTaskValueColor } from "@/lib/utils";
 import {
@@ -56,6 +57,7 @@ function TaskInspectorPaneContent({
 }) {
   const [title, setTitle] = useState(task.text || "");
   const [notes, setNotes] = useState(task.notes || "");
+  const [previewNotes, setPreviewNotes] = useState(false);
   const [priority, setPriority] = useState<number>(task.priority || 1);
   const [newChecklistText, setNewChecklistText] = useState("");
   const defaultRepeat = task.repeat || {
@@ -162,13 +164,12 @@ function TaskInspectorPaneContent({
             value={task.type}
             onChange={(e) => handleConvertType(e.target.value as "daily" | "habit" | "todo")}
             disabled={isPending}
-            className={`rounded px-2 py-0.5 text-[11px] font-mono font-semibold border cursor-pointer focus:outline-none transition-all ${
-              task.type === "daily"
+            className={`rounded px-2 py-0.5 text-[11px] font-mono font-semibold border cursor-pointer focus:outline-none transition-all ${task.type === "daily"
                 ? "border-[#3D3425] bg-[#221D16] text-[#D99B43]"
                 : task.type === "habit"
-                ? "border-[#7EA35A]/30 bg-[#1C2219] text-[#7EA35A]"
-                : "border-[#4EAB9E]/30 bg-[#162121] text-[#4EAB9E]"
-            }`}
+                  ? "border-[#7EA35A]/30 bg-[#1C2219] text-[#7EA35A]"
+                  : "border-[#4EAB9E]/30 bg-[#162121] text-[#4EAB9E]"
+              }`}
             title="Cambiar tipo de tarea (Daily, Hábito, To-Do)"
           >
             <option value="daily" className="bg-[#181715] text-[#D99B43]">Daily</option>
@@ -309,11 +310,10 @@ function TaskInspectorPaneContent({
                       type="button"
                       title={title}
                       onClick={() => handleToggleDay(dayKey)}
-                      className={`py-1.5 rounded text-center text-xs font-mono font-semibold transition-all cursor-pointer border ${
-                        isDayActive
+                      className={`py-1.5 rounded text-center text-xs font-mono font-semibold transition-all cursor-pointer border ${isDayActive
                           ? "bg-[#3D3425] text-[#E8AF59] border-[#D99B43]/50 shadow-xs"
                           : "bg-[#181715] text-[#5C564E] border-[#2A2723] hover:text-[#8E867B]"
-                      }`}
+                        }`}
                     >
                       {label}
                     </button>
@@ -343,17 +343,51 @@ function TaskInspectorPaneContent({
 
         {/* Markdown Notes / Description */}
         <div>
-          <label className="block text-[11px] font-semibold uppercase tracking-wider text-[#8E867B] mb-1 font-mono">
-            Notas & Contexto (Markdown)
-          </label>
-          <textarea
-            value={notes}
-            onChange={(e) => setNotes(e.target.value)}
-            onBlur={handleSaveDetails}
-            rows={4}
-            placeholder="Añadir notas markdown, referencias o instrucciones detalladas..."
-            className="w-full rounded-lg border border-[#2A2723] bg-[#121110] p-2.5 font-mono text-xs leading-relaxed text-[#F5F2EB] placeholder:text-[#8E867B] focus:border-[#D99B43] focus:outline-none transition-all"
-          />
+          <div className="flex items-center justify-between mb-1">
+            <label className="block text-[11px] font-semibold uppercase tracking-wider text-[#8E867B] font-mono">
+              Notas & Contexto
+            </label>
+            <div className="flex items-center gap-1 text-[10px] font-mono">
+              <button
+                type="button"
+                onClick={() => setPreviewNotes(false)}
+                className={`px-1.5 py-0.5 rounded transition-colors cursor-pointer ${!previewNotes
+                    ? "bg-[#22201D] text-[#D99B43] font-semibold"
+                    : "text-[#8E867B] hover:text-[#DDD6C9]"
+                  }`}
+              >
+                Editar
+              </button>
+              <button
+                type="button"
+                onClick={() => setPreviewNotes(true)}
+                className={`px-1.5 py-0.5 rounded transition-colors cursor-pointer ${previewNotes
+                    ? "bg-[#22201D] text-[#D99B43] font-semibold"
+                    : "text-[#8E867B] hover:text-[#DDD6C9]"
+                  }`}
+              >
+                Previa
+              </button>
+            </div>
+          </div>
+          {previewNotes ? (
+            <div className="w-full min-h-24 max-h-56 overflow-y-auto rounded-lg border border-[#2A2723] bg-[#121110] p-2.5">
+              {notes ? (
+                <MarkdownRenderer content={notes} />
+              ) : (
+                <span className="text-xs text-[#8E867B] italic font-mono">Sin notas</span>
+              )}
+            </div>
+          ) : (
+            <textarea
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              onBlur={handleSaveDetails}
+              rows={4}
+              placeholder="Añadir notas markdown, referencias o instrucciones detalladas..."
+              className="w-full rounded-lg border border-[#2A2723] bg-[#121110] p-2.5 font-mono text-xs leading-relaxed text-[#F5F2EB] placeholder:text-[#8E867B] focus:border-[#D99B43] focus:outline-none transition-all"
+            />
+          )}
         </div>
 
         {/* Subtask Checklists (For Todos and Dailies) */}
@@ -386,22 +420,20 @@ function TaskInspectorPaneContent({
                       className="flex items-center gap-2 flex-1 text-left min-w-0 cursor-pointer"
                     >
                       <div
-                        className={`flex h-4 w-4 shrink-0 items-center justify-center rounded border transition-colors ${
-                          item.completed
+                        className={`flex h-4 w-4 shrink-0 items-center justify-center rounded border transition-colors ${item.completed
                             ? "border-[#7EA35A] bg-[#7EA35A] text-[#121110]"
                             : "border-[#38332D] bg-[#181715]"
-                        }`}
+                          }`}
                       >
                         {item.completed && (
                           <Check className="h-3 w-3 stroke-3" />
                         )}
                       </div>
                       <span
-                        className={`truncate ${
-                          item.completed
+                        className={`truncate ${item.completed
                             ? "text-[#8E867B] line-through"
                             : "text-[#DDD6C9]"
-                        }`}
+                          }`}
                       >
                         {item.text}
                       </span>
