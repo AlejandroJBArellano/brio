@@ -643,6 +643,7 @@ export interface ProjectItem {
   progress: number;
   taskPrefixes?: string[];
   canonicalPrefix?: string;
+  integrations?: Record<string, any>;
   createdAt?: string;
 }
 
