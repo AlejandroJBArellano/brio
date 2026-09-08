@@ -430,144 +430,82 @@ export function ProjectFocusCard({
         }`}
     >
       {/* ========================================================================= */}
-      {/* 1. SPACIOUS 3-TIER PROJECT HEADER                                         */}
+      {/* 1. COMPACT UNIFIED HEADER                                                 */}
       {/* ========================================================================= */}
-      <div className="space-y-4">
-        {/* Row 1: Badges & Switchers */}
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <div className="flex items-center gap-2 flex-wrap">
-            {/* Habitica Tag Dropdown Selector */}
-            {tags.length > 0 ? (
-              <div className="flex items-center gap-1 font-mono text-[10px] text-[#4EAB9E] bg-[#141C1A] px-2.5 py-1 rounded-md border border-[#4EAB9E]/30">
-                <Tag className="h-3 w-3" />
-                <select
-                  value={selectedTagId !== null ? selectedTagId : activeTag ? activeTag.id : "none"}
-                  onChange={(e) => setSelectedTagId(e.target.value)}
-                  className="bg-transparent border-none text-[#4EAB9E] font-bold focus:outline-none cursor-pointer pr-1"
-                >
-                  <option value="none" className="bg-[#181715] text-[#8E867B]">
-                    Ver por proyecto
+      <div className="flex flex-wrap sm:flex-nowrap items-center justify-between gap-3 pb-1">
+        {/* Left: Project Selector / Title & Habitica Tag Badge */}
+        <div className="flex items-center gap-2.5 min-w-0">
+          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[#221D16] text-[#D99B43] border border-[#D99B43]/30">
+            <FolderGit2 className="h-4 w-4" />
+          </div>
+
+          {activeProjects.length > 1 ? (
+            <div className="relative flex items-center min-w-0 group">
+              <select
+                value={activeProject.id}
+                onChange={(e) => {
+                  setSelectedProjectId(e.target.value);
+                  setSelectedTagId(null); // reset tag override to auto
+                }}
+                className="font-serif text-lg sm:text-xl font-bold text-[#F5F2EB] tracking-tight bg-transparent border-none focus:outline-none cursor-pointer hover:text-[#D99B43] transition-colors appearance-none pr-5 truncate max-w-35 sm:max-w-50"
+                title="Cambiar proyecto"
+              >
+                {activeProjects.map((p) => (
+                  <option key={p.id} value={p.id} className="bg-[#181715] text-[#F5F2EB] font-sans text-xs">
+                    {p.title} {p.pendingTasksCount > 0 ? `(${p.pendingTasksCount})` : ""}
                   </option>
-                  {tags.map((t) => (
-                    <option key={t.id} value={t.id} className="bg-[#181715] text-[#4EAB9E]">
-                      🏷️ #{t.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            ) : (
-              activeTag && (
-                <span className="font-mono text-[10px] text-[#4EAB9E] bg-[#141C1A] px-2.5 py-1 rounded-md border border-[#4EAB9E]/30">
-                  #{activeTag.name}
-                </span>
-              )
-            )}
-          </div>
+                ))}
+              </select>
+              <ChevronDown className="h-3.5 w-3.5 text-[#8E867B] group-hover:text-[#D99B43] pointer-events-none absolute right-0 transition-colors" />
+            </div>
+          ) : (
+            <h2 className="font-serif text-lg sm:text-xl font-bold text-[#F5F2EB] tracking-tight truncate max-w-37.5 sm:max-w-55">
+              {activeProject.title}
+            </h2>
+          )}
 
-          <h2 className="font-serif text-xl sm:text-2xl font-bold text-[#F5F2EB] tracking-tight leading-snug">
-            {activeProject.title}
-          </h2>
-
-          {/* Project Switcher Select & Focus / Collapse Action Controls */}
-          <div className="flex items-center gap-2">
-            {activeProjects.length > 1 && (
-              <div className="flex items-center gap-1.5 font-mono text-xs text-[#8E867B] bg-[#121110] px-3 py-1.5 rounded-lg border border-[#2A2723]">
-                <span className="text-[10px] uppercase">Proyecto:</span>
-                <select
-                  value={activeProject.id}
-                  onChange={(e) => {
-                    setSelectedProjectId(e.target.value);
-                    setSelectedTagId(null); // reset tag override to auto
-                  }}
-                  className="bg-transparent border-none text-[#F5F2EB] font-bold focus:outline-none cursor-pointer max-w-48 truncate"
-                >
-                  {activeProjects.map((p) => (
-                    <option key={p.id} value={p.id} className="bg-[#181715] text-[#F5F2EB]">
-                      {p.title} {p.pendingTasksCount > 0 ? `(${p.pendingTasksCount})` : ""}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            )}
-
-            {syncFeedback && (
-              <span className="font-mono text-[11px] px-2.5 py-1 rounded-md bg-[#221D16] text-[#D99B43] border border-[#D99B43]/30">
-                {syncFeedback}
+          {/* Habitica Tag Dropdown / Badge */}
+          {tags.length > 0 ? (
+            <div className="flex items-center gap-1 font-mono text-[10px] text-[#4EAB9E] bg-[#141C1A] px-2 py-0.5 rounded-md border border-[#4EAB9E]/30 shrink-0">
+              <Tag className="h-2.5 w-2.5 shrink-0" />
+              <select
+                value={selectedTagId !== null ? selectedTagId : activeTag ? activeTag.id : "none"}
+                onChange={(e) => setSelectedTagId(e.target.value)}
+                className="bg-transparent border-none text-[#4EAB9E] font-bold focus:outline-none cursor-pointer pr-0.5 text-[10px]"
+              >
+                <option value="none" className="bg-[#181715] text-[#8E867B]">
+                  Proyecto
+                </option>
+                {tags.map((t) => (
+                  <option key={t.id} value={t.id} className="bg-[#181715] text-[#4EAB9E]">
+                    #{t.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+          ) : (
+            activeTag && (
+              <span className="font-mono text-[10px] text-[#4EAB9E] bg-[#141C1A] px-2 py-0.5 rounded-md border border-[#4EAB9E]/30 shrink-0">
+                #{activeTag.name}
               </span>
-            )}
-
-            {/* Notion Discreet Sync Button */}
-            {(activeProject.id === "prj-unpo" || activeProject.integrations?.notion?.enabled) && (
-              <button
-                type="button"
-                onClick={handleSyncNotion}
-                disabled={isSyncingNotion}
-                className="px-2.5 py-1.5 rounded-lg text-xs font-mono font-semibold transition-all cursor-pointer flex items-center gap-1.5 border shadow-2xs bg-[#121110] text-[#DDD6C9] hover:text-[#FFFFFF] border-[#2A2723] hover:border-[#B388FF]/50 disabled:opacity-50"
-                title="Sincronizar tareas de Notion"
-              >
-                <RefreshCw
-                  className={`h-3.5 w-3.5 ${isSyncingNotion ? "animate-spin text-[#D99B43]" : "text-[#B388FF]"
-                    }`}
-                />
-                <span className="hidden sm:inline">
-                  {isSyncingNotion ? "Sincronizando..." : "Notion"}
-                </span>
-              </button>
-            )}
-
-            {/* Zen Focus Toggle Button */}
-            {onToggleFocusMode && (
-              <button
-                type="button"
-                onClick={onToggleFocusMode}
-                className={`px-2.5 py-1.5 rounded-lg text-xs font-mono font-semibold transition-all cursor-pointer flex items-center gap-1.5 border shadow-2xs ${isFocusMode
-                  ? "bg-[#D99B43] text-[#121110] border-[#D99B43] hover:bg-[#E8AF59]"
-                  : "bg-[#121110] text-[#8E867B] hover:text-[#DDD6C9] border-[#2A2723] hover:border-[#D99B43]/50"
-                  }`}
-                title={isFocusMode ? "Restaurar vista" : "Modo Focus"}
-              >
-                {isFocusMode ? (
-                  <>
-                    <Minimize2 className="h-3.5 w-3.5" />
-                    <span className="hidden sm:inline">Restaurar</span>
-                  </>
-                ) : (
-                  <>
-                    <Zap className="h-3.5 w-3.5 text-[#D99B43]" />
-                    <span className="hidden sm:inline">Modo Focus</span>
-                  </>
-                )}
-              </button>
-            )}
-
-            {/* Collapse / Minimize Card Button */}
-            {onToggleCollapse && (
-              <button
-                type="button"
-                onClick={onToggleCollapse}
-                className="p-1.5 rounded-lg text-[#8E867B] hover:text-[#DDD6C9] bg-[#121110] hover:bg-[#1C1A17] border border-[#2A2723] transition-colors cursor-pointer"
-                title="Minimizar"
-              >
-                <ChevronUp className="h-4 w-4" />
-              </button>
-            )}
-          </div>
+            )
+          )}
         </div>
 
-        {/* Row 3: Dedicated Full-Width Segmented Tab Navigation Bar */}
-        <div className="grid grid-cols-3 gap-1.5 p-1 rounded-xl bg-[#121110] border border-[#2A2723] font-mono text-xs">
+        {/* Center: Segmented Tabs (Tareas, Notas, Recursos) */}
+        <div className="flex items-center p-0.5 rounded-lg bg-[#121110] border border-[#2A2723] font-mono text-xs shrink-0 order-3 sm:order-2 w-full sm:w-auto justify-center sm:justify-start">
           <button
             type="button"
             onClick={() => setActiveTab("tasks")}
-            className={`py-2.5 px-3 rounded-lg font-semibold transition-all cursor-pointer flex items-center justify-center gap-2 ${activeTab === "tasks"
-              ? "bg-[#221D16] text-[#D99B43] border border-[#D99B43]/30 shadow-xs"
-              : "text-[#8E867B] hover:text-[#DDD6C9] hover:bg-[#181715]"
+            className={`py-1 px-2.5 rounded-md font-semibold transition-all cursor-pointer flex items-center gap-1.5 ${activeTab === "tasks"
+              ? "bg-[#221D16] text-[#D99B43] border border-[#D99B43]/30 shadow-2xs"
+              : "text-[#8E867B] hover:text-[#DDD6C9]"
               }`}
           >
-            <ListTodo className="h-4 w-4" />
-            <span>Tareas</span>
+            <ListTodo className="h-3.5 w-3.5" />
+            <span className="hidden sm:inline">Tareas</span>
             <span
-              className={`px-2 py-0.2 rounded-full text-[10px] font-bold ${activeTab === "tasks"
+              className={`px-1.5 py-0.2 rounded-full text-[10px] font-bold ${activeTab === "tasks"
                 ? "bg-[#D99B43] text-[#121110]"
                 : "bg-[#181715] text-[#8E867B]"
                 }`}
@@ -579,15 +517,15 @@ export function ProjectFocusCard({
           <button
             type="button"
             onClick={() => setActiveTab("notes")}
-            className={`py-2.5 px-3 rounded-lg font-semibold transition-all cursor-pointer flex items-center justify-center gap-2 ${activeTab === "notes"
-              ? "bg-[#141C1A] text-[#4EAB9E] border border-[#4EAB9E]/30 shadow-xs"
-              : "text-[#8E867B] hover:text-[#DDD6C9] hover:bg-[#181715]"
+            className={`py-1 px-2.5 rounded-md font-semibold transition-all cursor-pointer flex items-center gap-1.5 ${activeTab === "notes"
+              ? "bg-[#141C1A] text-[#4EAB9E] border border-[#4EAB9E]/30 shadow-2xs"
+              : "text-[#8E867B] hover:text-[#DDD6C9]"
               }`}
           >
-            <FileText className="h-4 w-4" />
-            <span>Notas</span>
+            <FileText className="h-3.5 w-3.5" />
+            <span className="hidden sm:inline">Notas</span>
             <span
-              className={`px-2 py-0.2 rounded-full text-[10px] font-bold ${activeTab === "notes"
+              className={`px-1.5 py-0.2 rounded-full text-[10px] font-bold ${activeTab === "notes"
                 ? "bg-[#4EAB9E] text-[#121110]"
                 : "bg-[#181715] text-[#8E867B]"
                 }`}
@@ -599,14 +537,79 @@ export function ProjectFocusCard({
           <button
             type="button"
             onClick={() => setActiveTab("resources")}
-            className={`py-2.5 px-3 rounded-lg font-semibold transition-all cursor-pointer flex items-center justify-center gap-2 ${activeTab === "resources"
-              ? "bg-[#1C2219] text-[#7EA35A] border border-[#7EA35A]/30 shadow-xs"
-              : "text-[#8E867B] hover:text-[#DDD6C9] hover:bg-[#181715]"
+            className={`py-1 px-2.5 rounded-md font-semibold transition-all cursor-pointer flex items-center gap-1.5 ${activeTab === "resources"
+              ? "bg-[#1C2219] text-[#7EA35A] border border-[#7EA35A]/30 shadow-2xs"
+              : "text-[#8E867B] hover:text-[#DDD6C9]"
               }`}
           >
-            <Layers className="h-4 w-4" />
-            <span>Recursos</span>
+            <Layers className="h-3.5 w-3.5" />
+            <span className="hidden sm:inline">Recursos</span>
           </button>
+        </div>
+
+        {/* Right: Actions (Notion Sync, Focus Toggle, Minimize) */}
+        <div className="flex items-center gap-1.5 shrink-0 order-2 sm:order-3">
+          {syncFeedback && (
+            <span className="font-mono text-[10px] px-2 py-0.5 rounded-md bg-[#221D16] text-[#D99B43] border border-[#D99B43]/30 truncate max-w-25 sm:max-w-none">
+              {syncFeedback}
+            </span>
+          )}
+
+          {/* Notion Discreet Sync Button */}
+          {(activeProject.id === "prj-unpo" || activeProject.integrations?.notion?.enabled) && (
+            <button
+              type="button"
+              onClick={handleSyncNotion}
+              disabled={isSyncingNotion}
+              className="p-1.5 sm:px-2 sm:py-1 rounded-lg text-xs font-mono font-semibold transition-all cursor-pointer flex items-center gap-1 border shadow-2xs bg-[#121110] text-[#DDD6C9] hover:text-[#FFFFFF] border-[#2A2723] hover:border-[#B388FF]/50 disabled:opacity-50"
+              title="Sincronizar Notion"
+            >
+              <RefreshCw
+                className={`h-3.5 w-3.5 ${isSyncingNotion ? "animate-spin text-[#D99B43]" : "text-[#B388FF]"
+                  }`}
+              />
+              <span className="hidden xl:inline text-[11px]">
+                {isSyncingNotion ? "Sincronizando..." : "Notion"}
+              </span>
+            </button>
+          )}
+
+          {/* Zen Focus Toggle Button */}
+          {onToggleFocusMode && (
+            <button
+              type="button"
+              onClick={onToggleFocusMode}
+              className={`p-1.5 sm:px-2 sm:py-1 rounded-lg text-xs font-mono font-semibold transition-all cursor-pointer flex items-center gap-1 border shadow-2xs ${isFocusMode
+                ? "bg-[#D99B43] text-[#121110] border-[#D99B43] hover:bg-[#E8AF59]"
+                : "bg-[#121110] text-[#8E867B] hover:text-[#DDD6C9] border-[#2A2723] hover:border-[#D99B43]/50"
+                }`}
+              title={isFocusMode ? "Restaurar" : "Focus"}
+            >
+              {isFocusMode ? (
+                <>
+                  <Minimize2 className="h-3.5 w-3.5" />
+                  <span className="hidden xl:inline text-[11px]">Restaurar</span>
+                </>
+              ) : (
+                <>
+                  <Zap className="h-3.5 w-3.5 text-[#D99B43]" />
+                  <span className="hidden xl:inline text-[11px]">Focus</span>
+                </>
+              )}
+            </button>
+          )}
+
+          {/* Collapse / Minimize Card Button */}
+          {onToggleCollapse && (
+            <button
+              type="button"
+              onClick={onToggleCollapse}
+              className="p-1.5 rounded-lg text-[#8E867B] hover:text-[#DDD6C9] bg-[#121110] hover:bg-[#1C1A17] border border-[#2A2723] transition-colors cursor-pointer"
+              title="Minimizar"
+            >
+              <ChevronUp className="h-4 w-4" />
+            </button>
+          )}
         </div>
       </div>
 
