@@ -169,7 +169,11 @@ export function ModalManager({
       )}
 
       {activeModal === "batch" && (
-        <BatchCaptureModal isOpen={true} onClose={closeModal} />
+        <BatchCaptureModal
+          isOpen={true}
+          onClose={closeModal}
+          projects={projectsData?.projects}
+        />
       )}
 
       {activeModal === "morningRitual" && (

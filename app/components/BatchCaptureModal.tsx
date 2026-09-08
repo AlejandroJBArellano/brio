@@ -2,10 +2,12 @@
 
 import { submitBatchCaptureAction } from "@/app/actions/tasks";
 import { parseBatchInput } from "@/lib/parser";
-import { BatchActionResult } from "@/lib/types";
+import { getProjectKeywords } from "@/lib/projectMatcher";
+import { BatchActionResult, ProjectItem } from "@/lib/types";
 import {
   AlertCircle,
   CheckCircle2,
+  FolderGit2,
   Send,
   Sparkles,
   Trash2,
@@ -16,6 +18,7 @@ import { useEffect, useMemo, useRef, useState, useTransition } from "react";
 interface BatchCaptureModalProps {
   isOpen: boolean;
   onClose: () => void;
+  projects?: ProjectItem[];
 }
 
 const SAMPLE_BATCH = `Diseñar arquitectura de Brio #ingenieria !urgente // Máximo enfoque
@@ -27,12 +30,46 @@ Publicar versión de Brio #release // Desplegar a producción`;
 export function BatchCaptureModal({
   isOpen,
   onClose,
+  projects,
 }: BatchCaptureModalProps) {
   const [rawText, setRawText] = useState("");
   const [_showCheatsheet, _setShowCheatsheet] = useState(false);
   const [lastResult, setLastResult] = useState<BatchActionResult | null>(null);
   const [isPending, startTransition] = useTransition();
+  const [fetchedProjects, setFetchedProjects] = useState<ProjectItem[]>([]);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  const effectiveProjects = projects && projects.length > 0 ? projects : fetchedProjects;
+
+  useEffect(() => {
+    if (isOpen && (!projects || projects.length === 0)) {
+      import("@/app/actions/projects")
+        .then(({ fetchProjectsDashboardDataAction }) => {
+          fetchProjectsDashboardDataAction()
+            .then((data) => {
+              if (data?.projects) setFetchedProjects(data.projects);
+            })
+            .catch(() => {});
+        })
+        .catch(() => {});
+    }
+  }, [projects, isOpen]);
+
+  const availableProjects = useMemo(() => {
+    const active = effectiveProjects.filter(
+      (p) => p.status !== "launched" && p.status !== "paused"
+    );
+    const list = active.length > 0 ? active : effectiveProjects;
+    const mapped = list.map((p) => {
+      const { canonicalPrefix } = getProjectKeywords(p);
+      return {
+        id: p.id,
+        title: p.title,
+        prefix: canonicalPrefix,
+      };
+    });
+    return Array.from(new Map(mapped.map((item) => [item.prefix, item])).values());
+  }, [effectiveProjects]);
 
   useEffect(() => {
     if (isOpen) {
@@ -82,6 +119,43 @@ export function BatchCaptureModal({
   const handleInsertSample = () => {
     setRawText(SAMPLE_BATCH);
     textareaRef.current?.focus();
+  };
+
+  const insertTextAtCursor = (textToInsert: string) => {
+    const textarea = textareaRef.current;
+    if (!textarea) {
+      setRawText((prev) => {
+        const separator = prev.length > 0 && !prev.endsWith("\n") ? "\n" : "";
+        return `${prev}${separator}${textToInsert}`;
+      });
+      return;
+    }
+
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    const prev = textarea.value;
+
+    // If cursor is at the end of a non-empty line that doesn't end in newline, prepend a newline
+    let insertion = textToInsert;
+    if (
+      start > 0 &&
+      prev[start - 1] !== "\n" &&
+      (start === prev.length || prev[start] === "\n")
+    ) {
+      insertion = `\n${textToInsert}`;
+    }
+
+    const before = prev.substring(0, start);
+    const after = prev.substring(end);
+
+    const nextValue = `${before}${insertion}${after}`;
+    setRawText(nextValue);
+
+    const newCursorPos = start + insertion.length;
+    setTimeout(() => {
+      textarea.focus();
+      textarea.setSelectionRange(newCursorPos, newCursorPos);
+    }, 10);
   };
 
   const handleSyntaxInsert = (prefix: string) => {
@@ -178,6 +252,29 @@ export function BatchCaptureModal({
             )}
           </div>
 
+          {/* Project Prefixes Bar */}
+          {availableProjects.length > 0 && (
+            <div className="flex items-center gap-1.5 overflow-x-auto text-[11px] pt-0.5">
+              <span className="text-[10px] uppercase tracking-wider text-[#8E867B] font-semibold flex items-center gap-1 shrink-0">
+                <FolderGit2 className="h-3 w-3 text-[#D99B43]" />
+                Proyectos:
+              </span>
+              <div className="flex items-center gap-1.5 overflow-x-auto pb-0.5">
+                {availableProjects.map((p) => (
+                  <button
+                    key={p.id}
+                    type="button"
+                    onClick={() => insertTextAtCursor(`${p.prefix} `)}
+                    className="rounded-md border border-[#3D3425] bg-[#221D16] px-2 py-0.5 text-[#E8AF59] hover:bg-[#2C241B] hover:border-[#D99B43]/70 transition-colors cursor-pointer shrink-0 flex items-center gap-1 text-[11px]"
+                    title={`Insertar ${p.prefix} en el cursor`}
+                  >
+                    <span className="font-semibold">{p.prefix}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
           {/* Textarea */}
           <div className="relative rounded-lg border border-[#2A2723] bg-[#121110] focus-within:border-[#D99B43] transition-all">
             <textarea
@@ -185,7 +282,7 @@ export function BatchCaptureModal({
               value={rawText}
               onChange={(e) => setRawText(e.target.value)}
               onKeyDown={handleKeyDownInTextarea}
-              placeholder={`Comprar despensa #casa\n* Lectura matutina 30m #estudio\n+ Tomar 2L de agua #salud\nDeploy hotfix !urgente // Revisar logs primero`}
+              placeholder={`[Kittn OS] Deploy hotfix !urgente // Revisar logs primero\nComprar despensa #casa\n* Lectura matutina 30m #estudio\n+ Tomar 2L de agua #salud`}
               rows={7}
               className="w-full resize-none bg-transparent p-3.5 font-mono text-sm leading-relaxed text-[#F5F2EB] placeholder:text-[#8E867B]/50 focus:outline-none"
             />
