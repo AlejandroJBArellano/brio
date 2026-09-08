@@ -434,11 +434,7 @@ export function ProjectFocusCard({
       {/* ========================================================================= */}
       <div className="flex flex-wrap sm:flex-nowrap items-center justify-between gap-3 pb-1">
         {/* Left: Project Selector / Title & Habitica Tag Badge */}
-        <div className="flex items-center gap-2.5 min-w-0">
-          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[#221D16] text-[#D99B43] border border-[#D99B43]/30">
-            <FolderGit2 className="h-4 w-4" />
-          </div>
-
+        <div className="flex items-center gap-2 min-w-0">
           {activeProjects.length > 1 ? (
             <div className="relative flex items-center min-w-0 group">
               <select
@@ -447,7 +443,7 @@ export function ProjectFocusCard({
                   setSelectedProjectId(e.target.value);
                   setSelectedTagId(null); // reset tag override to auto
                 }}
-                className="font-serif text-lg sm:text-xl font-bold text-[#F5F2EB] tracking-tight bg-transparent border-none focus:outline-none cursor-pointer hover:text-[#D99B43] transition-colors appearance-none pr-5 truncate max-w-35 sm:max-w-50"
+                className="font-serif text-lg sm:text-xl font-bold text-[#F5F2EB] tracking-tight bg-transparent border-none focus:outline-none cursor-pointer hover:text-[#D99B43] transition-colors appearance-none pr-5 truncate max-w-44 sm:max-w-64"
                 title="Cambiar proyecto"
               >
                 {activeProjects.map((p) => (
@@ -459,7 +455,7 @@ export function ProjectFocusCard({
               <ChevronDown className="h-3.5 w-3.5 text-[#8E867B] group-hover:text-[#D99B43] pointer-events-none absolute right-0 transition-colors" />
             </div>
           ) : (
-            <h2 className="font-serif text-lg sm:text-xl font-bold text-[#F5F2EB] tracking-tight truncate max-w-37.5 sm:max-w-55">
+            <h2 className="font-serif text-lg sm:text-xl font-bold text-[#F5F2EB] tracking-tight truncate max-w-44 sm:max-w-64">
               {activeProject.title}
             </h2>
           )}
