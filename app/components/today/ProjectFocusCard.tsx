@@ -19,6 +19,7 @@ import { parseTaskPrefix } from "@/lib/utils";
 import {
   Check,
   ChevronDown,
+  ChevronRight,
   ChevronUp,
   ExternalLink,
   FileText,
@@ -28,8 +29,10 @@ import {
   ListTodo,
   Loader2,
   Minimize2,
+  Pencil,
   Plus,
   RefreshCw,
+  Search,
   Tag,
   Trash2,
   Zap,
@@ -38,6 +41,7 @@ import { useMemo, useState, useTransition } from "react";
 import { NoteContentRenderer } from "@/app/components/notes/NoteContentRenderer";
 import { TaskDetailDrawer } from "./TaskDetailDrawer";
 import { syncProjectFromNotionAction } from "@/app/actions/projectIntegrations";
+import { parseTaskMetadata } from "@/lib/taskMetadata";
 
 interface ProjectFocusCardProps {
   projects: ProjectItem[];
@@ -229,6 +233,40 @@ export function ProjectFocusCard({
       return false;
     });
   }, [tasks, activeTag, activeProject]);
+
+  // Priority & Search Filters for Tasks
+  const [priorityFilter, setPriorityFilter] = useState<"all" | "high" | "medium" | "low">("all");
+  const [taskSearchQuery, setTaskSearchQuery] = useState("");
+
+  const priorityCounts = useMemo(() => {
+    let high = 0;
+    let medium = 0;
+    let low = 0;
+    projectTasks.forEach((t) => {
+      const prio = t.priority ?? 1.5;
+      if (prio >= 2) high++;
+      else if (prio <= 1) low++;
+      else medium++;
+    });
+    return { all: projectTasks.length, high, medium, low };
+  }, [projectTasks]);
+
+  const filteredProjectTasks = useMemo(() => {
+    return projectTasks.filter((t) => {
+      const prio = t.priority ?? 1.5;
+      if (priorityFilter === "high" && prio < 2) return false;
+      if (priorityFilter === "medium" && (prio < 1.1 || prio >= 2)) return false;
+      if (priorityFilter === "low" && prio > 1) return false;
+
+      if (taskSearchQuery.trim()) {
+        const q = taskSearchQuery.toLowerCase();
+        const matchTitle = t.text.toLowerCase().includes(q);
+        const matchNotes = (t.notes || "").toLowerCase().includes(q);
+        if (!matchTitle && !matchNotes) return false;
+      }
+      return true;
+    });
+  }, [projectTasks, priorityFilter, taskSearchQuery]);
 
   // Filter Contextual Notes for this Project
   const projectNotes = useMemo(() => {
@@ -578,88 +616,227 @@ export function ProjectFocusCard({
 
       {/* ========================================================================= */}
       {/* 2. TAB CONTENT                                                            */}
-      {/* ========================================================================= */}
-
-      {/* TAB 1: TAREAS DEL PROYECTO */}
+      {/* ================================================      {/* TAB 1: TAREAS DEL PROYECTO */}
       {activeTab === "tasks" && (
         <div className="space-y-4">
+          {/* Priority & Search Filter Bar */}
+          <div className="flex flex-wrap items-center justify-between gap-2 pb-2 border-b border-[#2A2723]/60">
+            <div className="flex items-center gap-1.5 flex-wrap font-mono text-xs">
+              <button
+                type="button"
+                onClick={() => setPriorityFilter("all")}
+                className={`px-2.5 py-1 rounded-lg border transition-all cursor-pointer ${
+                  priorityFilter === "all"
+                    ? "bg-[#DDD6C9] text-[#121110] border-[#DDD6C9] font-bold"
+                    : "bg-[#121110] text-[#8E867B] border-[#2A2723] hover:text-[#DDD6C9]"
+                }`}
+              >
+                Todas ({priorityCounts.all})
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setPriorityFilter("high")}
+                className={`px-2.5 py-1 rounded-lg border transition-all cursor-pointer flex items-center gap-1.5 ${
+                  priorityFilter === "high"
+                    ? "bg-[#251417] text-[#FF6369] border-[#E5484D] font-bold"
+                    : "bg-[#121110] text-[#8E867B] border-[#2A2723] hover:text-[#FF6369]"
+                }`}
+              >
+                <span className="w-1.5 h-1.5 rounded-full bg-[#FF6369]" />
+                Alta ({priorityCounts.high})
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setPriorityFilter("medium")}
+                className={`px-2.5 py-1 rounded-lg border transition-all cursor-pointer flex items-center gap-1.5 ${
+                  priorityFilter === "medium"
+                    ? "bg-[#221D16] text-[#D99B43] border-[#D99B43] font-bold"
+                    : "bg-[#121110] text-[#8E867B] border-[#2A2723] hover:text-[#D99B43]"
+                }`}
+              >
+                <span className="w-1.5 h-1.5 rounded-full bg-[#D99B43]" />
+                Media ({priorityCounts.medium})
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setPriorityFilter("low")}
+                className={`px-2.5 py-1 rounded-lg border transition-all cursor-pointer flex items-center gap-1.5 ${
+                  priorityFilter === "low"
+                    ? "bg-[#141813] text-[#7EA35A] border-[#7EA35A] font-bold"
+                    : "bg-[#121110] text-[#8E867B] border-[#2A2723] hover:text-[#7EA35A]"
+                }`}
+              >
+                <span className="w-1.5 h-1.5 rounded-full bg-[#7EA35A]" />
+                Baja ({priorityCounts.low})
+              </button>
+            </div>
+
+            {/* Quick Search */}
+            <div className="relative">
+              <Search className="h-3 w-3 text-[#8E867B] absolute left-2.5 top-1/2 -translate-y-1/2" />
+              <input
+                type="text"
+                placeholder="Buscar tareas..."
+                value={taskSearchQuery}
+                onChange={(e) => setTaskSearchQuery(e.target.value)}
+                className="w-36 sm:w-48 pl-7 pr-2.5 py-1 rounded-lg text-xs bg-[#121110] border border-[#2A2723] text-[#F5F2EB] placeholder:text-[#8E867B] focus:border-[#D99B43] focus:outline-none font-sans"
+              />
+            </div>
+          </div>
+
           {/* Filtered Tasks List */}
-          <div className="space-y-2 max-h-105 overflow-y-auto pr-1">
-            {projectTasks.length > 0 ? (
-              projectTasks.map((task) => (
-                <div
-                  key={task.id}
-                  className={`flex items-center justify-between p-3.5 sm:p-4 rounded-xl border transition-all cursor-pointer group select-none ${
-                    loadingTaskId === task.id ? "opacity-60 pointer-events-none" : ""
-                  } ${task.completed
-                    ? "bg-[#141813] border-[#7EA35A]/30 text-[#8E867B]"
-                    : "bg-[#121110] border-[#2A2723] hover:border-[#D99B43]/50 text-[#F5F2EB]"
-                    }`}
-                >
+          <div className="space-y-2.5 max-h-125 overflow-y-auto pr-1">
+            {filteredProjectTasks.length > 0 ? (
+              filteredProjectTasks.map((task) => {
+                const meta = parseTaskMetadata(task);
+
+                return (
                   <div
-                    onClick={() => handleToggleTask(task)}
-                    className="flex items-center gap-3.5 flex-1 min-w-0 pr-3"
+                    key={task.id}
+                    onClick={() => setActiveTaskForDrawer(task)}
+                    className={`group rounded-xl border p-3.5 sm:p-4 transition-all duration-150 flex flex-col gap-2.5 cursor-pointer select-none ${
+                      loadingTaskId === task.id ? "opacity-60 pointer-events-none" : ""
+                    } ${
+                      task.completed
+                        ? "bg-[#141813]/60 border-[#7EA35A]/25 text-[#8E867B]"
+                        : "bg-[#121110] border-[#2A2723] hover:border-[#38332D] hover:bg-[#151412] text-[#F5F2EB]"
+                    }`}
                   >
-                    <div
-                      className={`flex h-5 w-5 shrink-0 items-center justify-center rounded border transition-colors ${
-                        loadingTaskId === task.id
-                          ? "border-[#D99B43]/70 bg-[#1D1B18]"
-                          : task.completed
-                          ? "bg-[#7EA35A] border-[#7EA35A] text-[#121110] font-bold"
-                          : "border-[#38332D] bg-[#181715] group-hover:border-[#D99B43]"
-                        }`}
-                    >
-                      {loadingTaskId === task.id ? (
-                        <Loader2 className="h-3.5 w-3.5 animate-spin text-[#D99B43]" />
-                      ) : task.completed ? (
-                        <Check className="h-3.5 w-3.5 stroke-3" />
-                      ) : null}
+                    {/* Top Row: Checkbox, Title & Quick Edit Button */}
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="flex items-start gap-3 flex-1 min-w-0">
+                        {/* Checkbox */}
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleToggleTask(task);
+                          }}
+                          className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded border transition-colors cursor-pointer ${
+                            loadingTaskId === task.id
+                              ? "border-[#D99B43]/70 bg-[#1D1B18]"
+                              : task.completed
+                              ? "bg-[#7EA35A] border-[#7EA35A] text-[#121110]"
+                              : "border-[#38332D] bg-[#181715] hover:border-[#D99B43]"
+                          }`}
+                        >
+                          {loadingTaskId === task.id ? (
+                            <Loader2 className="h-3 w-3 animate-spin text-[#D99B43]" />
+                          ) : task.completed ? (
+                            <Check className="h-3.5 w-3.5 stroke-3" />
+                          ) : null}
+                        </button>
+
+                        {/* Title */}
+                        <div className="min-w-0 space-y-1">
+                          <h4
+                            className={`text-xs sm:text-sm font-medium leading-snug break-words ${
+                              task.completed
+                                ? "line-through text-[#8E867B]"
+                                : "text-[#F5F2EB] group-hover:text-[#FFFFFF]"
+                            }`}
+                          >
+                            {task.text}
+                          </h4>
+                        </div>
+                      </div>
+
+                      {/* Right: Quick Edit / Details Button */}
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setActiveTaskForDrawer(task);
+                        }}
+                        className="px-2.5 py-1 rounded-lg text-[#8E867B] group-hover:text-[#DDD6C9] bg-[#181715] border border-[#2A2723] group-hover:border-[#38332D] transition-colors text-xs font-mono flex items-center gap-1 shrink-0 cursor-pointer"
+                        title="Editar tarea, descripción y propiedades"
+                      >
+                        <Pencil className="h-3 w-3 text-[#D99B43]" />
+                        <span className="hidden sm:inline">Editar</span>
+                        <ChevronRight className="h-3 w-3" />
+                      </button>
                     </div>
 
-                    <div className="min-w-0 space-y-0.5">
+                    {/* Bottom Row: Rich Metadata Badges (No emojis) */}
+                    <div className="flex flex-wrap items-center gap-1.5 pl-8 text-[10px] font-mono">
+                      {/* Priority Badge */}
                       <span
-                        className={`text-xs sm:text-sm truncate block font-medium ${task.completed
-                          ? "line-through text-[#8E867B]"
-                          : "text-[#F5F2EB]"
-                          }`}
+                        className={`px-2 py-0.5 rounded-md border font-semibold flex items-center gap-1 ${meta.priorityColor.badge}`}
                       >
-                        {task.text}
+                        <span className="w-1.5 h-1.5 rounded-full bg-current opacity-80" />
+                        {meta.priorityLabel}
                       </span>
-                      {task.notes && (
-                        <span className="text-[11px] text-[#8E867B] truncate block line-clamp-1">
-                          {task.notes}
+
+                      {/* Notion Status Badge */}
+                      {meta.notionStatus && (
+                        <span className="px-2 py-0.5 rounded-md border border-[#2A2723] bg-[#181715] text-[#C2BAAD] font-semibold">
+                          {meta.notionStatus}
                         </span>
+                      )}
+
+                      {/* Notion Category Badge */}
+                      {meta.notionCategory && (
+                        <span className="px-2 py-0.5 rounded-md border border-[#4EAB9E]/30 bg-[#141C1A] text-[#4EAB9E]">
+                          {meta.notionCategory}
+                        </span>
+                      )}
+
+                      {/* Notion Hours */}
+                      {meta.notionHours && (
+                        <span className="px-2 py-0.5 rounded-md border border-[#2A2723] bg-[#181715] text-[#8E867B]">
+                          {meta.notionHours}
+                        </span>
+                      )}
+
+                      {/* Notion Ticket ID */}
+                      {meta.notionTicketId && (
+                        <span className="px-2 py-0.5 rounded-md border border-[#2A2723] bg-[#181715] text-[#8E867B]">
+                          #{meta.notionTicketId}
+                        </span>
+                      )}
+
+                      {/* Checklist Progress Pill */}
+                      {task.checklist && task.checklist.length > 0 && (
+                        <span className="px-2 py-0.5 rounded-md border border-[#D99B43]/30 bg-[#221D16] text-[#D99B43] flex items-center gap-1">
+                          <ListTodo className="h-3 w-3" />
+                          <span>
+                            {task.checklist.filter((c) => c.completed).length}/
+                            {task.checklist.length}
+                          </span>
+                        </span>
+                      )}
+
+                      {/* Direct Notion Link */}
+                      {meta.notionUrl && (
+                        <a
+                          href={meta.notionUrl}
+                          target="_blank"
+                          rel="noreferrer"
+                          onClick={(e) => e.stopPropagation()}
+                          className="px-2 py-0.5 rounded-md border border-[#2A2723] hover:border-[#B388FF]/50 bg-[#181715] text-[#DDD6C9] hover:text-[#FFFFFF] flex items-center gap-1 transition-colors"
+                          title="Abrir en Notion"
+                        >
+                          <ExternalLink className="h-3 w-3 text-[#B388FF]" />
+                          <span>Notion</span>
+                        </a>
                       )}
                     </div>
                   </div>
-
-                  {/* Open Detail Drawer Button */}
-                  <button
-                    type="button"
-                    onClick={() => setActiveTaskForDrawer(task)}
-                    className="px-2.5 py-1 rounded-lg text-[#8E867B] hover:text-[#D99B43] bg-[#181715] border border-[#2A2723] hover:border-[#D99B43]/40 transition-colors cursor-pointer text-xs font-mono flex items-center gap-1.5 shrink-0"
-                    title="Ver notas y subtareas de esta tarea"
-                  >
-                    {task.checklist && task.checklist.length > 0 && (
-                      <span className="text-[10px] text-[#D99B43] bg-[#221D16] px-1.5 py-0.2 rounded border border-[#D99B43]/30">
-                        {task.checklist.filter((c) => c.completed).length}/
-                        {task.checklist.length}
-                      </span>
-                    )}
-                    <span>Detalles ➔</span>
-                  </button>
-                </div>
-              ))
+                );
+              })
             ) : (
               <div className="rounded-xl border border-dashed border-[#2A2723] bg-[#121110] p-8 text-center space-y-2">
                 <ListTodo className="h-8 w-8 text-[#8E867B] mx-auto opacity-70" />
                 <h4 className="font-serif text-sm sm:text-base font-bold text-[#F5F2EB]">
-                  Sin tareas pendientes
+                  Sin tareas en este filtro
                 </h4>
                 <p className="text-xs text-[#8E867B] font-mono max-w-md mx-auto">
-                  {activeTag
-                    ? `No hay tareas con la etiqueta #${activeTag.name}.`
-                    : `No hay tareas asignadas a ${activeProject.title}.`}
+                  {taskSearchQuery.trim()
+                    ? `No hay tareas que coincidan con "${taskSearchQuery}".`
+                    : `No hay tareas con prioridad "${priorityFilter}".`}
                 </p>
               </div>
             )}
