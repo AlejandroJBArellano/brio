@@ -5,7 +5,11 @@ import {
   logWaterAction,
   toggleSupplementAction,
 } from "@/app/actions/health";
+import { quickAdjustPortionAction } from "@/app/actions/nutrition";
 import { useCommandCenter } from "@/app/components/context/CommandCenterContext";
+import { PortionEquivalentsModal } from "@/app/components/health/nutrition/PortionEquivalentsModal";
+import { getTodayDateStr } from "@/lib/dateUtils";
+import { calculateMacrosFromPortions } from "@/lib/nutritionPresets";
 import { soundFx } from "@/lib/soundFx";
 import {
   ContextualNote,
@@ -20,26 +24,33 @@ import {
   RitualLog,
 } from "@/lib/types";
 import {
+  Apple,
   ArrowRight,
   Check,
   CheckCircle2,
   ChefHat,
   ChevronDown,
   ChevronUp,
+  CookingPot,
   Droplet,
+  Flame,
   FolderGit2,
   LayoutGrid,
+  Leaf,
   Moon,
   Pill,
   Plus,
   RotateCcw,
   Salad,
+  Sparkles,
   Sun,
+  UtensilsCrossed,
+  Wheat,
   Zap,
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useMemo, useOptimistic, useState, useTransition } from "react";
+import { useEffect, useMemo, useOptimistic, useState, useTransition } from "react";
 import { ProjectFocusCard } from "./ProjectFocusCard";
 
 export type WidgetKey = "project" | "supplements" | "water" | "nutrition";
@@ -60,7 +71,7 @@ const DEFAULT_PREFERENCES: TodayViewPreferences = {
     nutrition: true,
   },
   collapsed: {
-    project: true,
+    project: false,
     supplements: false,
     water: false,
     nutrition: false,
@@ -71,17 +82,17 @@ const DEFAULT_PREFERENCES: TodayViewPreferences = {
 
 const ALL_FOOD_GROUPS: {
   key: FoodGroupKey;
-  icon: string;
+  icon: React.ComponentType<{ className?: string }>;
   label: string;
   defaultTarget: number;
 }[] = [
-    { key: "vegetables", icon: "🥦", label: "Verduras", defaultTarget: 4.5 },
-    { key: "legumes", icon: "🫘", label: "Legumbres", defaultTarget: 3 },
-    { key: "cereals", icon: "🌾", label: "Cereales", defaultTarget: 5 },
-    { key: "fats_seeds", icon: "🥑", label: "Semillas", defaultTarget: 3.5 },
-    { key: "fruits", icon: "🍎", label: "Frutas", defaultTarget: 3.5 },
-    { key: "leafy_greens", icon: "🥬", label: "Hojas", defaultTarget: 2 },
-    { key: "tubers", icon: "🍠", label: "Tubérculos", defaultTarget: 1 },
+    { key: "vegetables", icon: Salad, label: "Verduras", defaultTarget: 4.5 },
+    { key: "legumes", icon: CookingPot, label: "Legumbres", defaultTarget: 3 },
+    { key: "cereals", icon: Wheat, label: "Cereales", defaultTarget: 5 },
+    { key: "fats_seeds", icon: Sparkles, label: "Semillas", defaultTarget: 3.5 },
+    { key: "fruits", icon: Apple, label: "Frutas", defaultTarget: 3.5 },
+    { key: "leafy_greens", icon: Leaf, label: "Hojas", defaultTarget: 2 },
+    { key: "tubers", icon: UtensilsCrossed, label: "Tubérculos", defaultTarget: 1 },
   ];
 
 interface TodayViewClientProps {
@@ -297,25 +308,76 @@ export function TodayViewClient({
   const isWaterComplete = optimisticWater >= waterTarget;
 
   // Nutrition Data & Portions
+  const [activePortionGroup, setActivePortionGroup] = useState<FoodGroupKey | null>(null);
   const nutritionSummary = healthData.nutritionSummary;
-  const portions = nutritionSummary?.portions || {};
+  const serverPortions = nutritionSummary?.portions || {};
+
+  const [localPortions, setLocalPortions] = useState<Record<FoodGroupKey, number>>(() => ({
+    fruits: Number(serverPortions.fruits) || 0,
+    vegetables: Number(serverPortions.vegetables) || 0,
+    cereals: Number(serverPortions.cereals) || 0,
+    tubers: Number(serverPortions.tubers) || 0,
+    legumes: Number(serverPortions.legumes) || 0,
+    fats_seeds: Number(serverPortions.fats_seeds) || 0,
+    leafy_greens: Number(serverPortions.leafy_greens) || 0,
+  }));
+
+  // Sync if nutritionSummary changes from server refresh
+  useEffect(() => {
+    if (nutritionSummary?.portions) {
+      setLocalPortions({
+        fruits: Number(nutritionSummary.portions.fruits) || 0,
+        vegetables: Number(nutritionSummary.portions.vegetables) || 0,
+        cereals: Number(nutritionSummary.portions.cereals) || 0,
+        tubers: Number(nutritionSummary.portions.tubers) || 0,
+        legumes: Number(nutritionSummary.portions.legumes) || 0,
+        fats_seeds: Number(nutritionSummary.portions.fats_seeds) || 0,
+        leafy_greens: Number(nutritionSummary.portions.leafy_greens) || 0,
+      });
+    }
+  }, [nutritionSummary?.portions]);
+
   const portionGoals = nutritionSummary?.portionGoals || {
     vegetables: 4.5,
     legumes: 3,
     cereals: 5,
     fats_seeds: 3.5,
     fruits: 3.5,
+    leafy_greens: 2,
+    tubers: 1,
   };
-  const totalPortionsConsumed =
-    nutritionSummary?.totalPortionsConsumed ??
-    Object.values(portions).reduce((sum, v) => sum + (Number(v) || 0), 0);
+
+  const totalPortionsConsumed = useMemo(
+    () => Object.values(localPortions).reduce((sum, v) => sum + (Number(v) || 0), 0),
+    [localPortions]
+  );
+
   const totalPortionsTarget =
     nutritionSummary?.totalPortionsTarget ??
     Object.values(portionGoals).reduce((sum, v) => sum + (Number(v) || 0), 0);
+
   const portionPercent = Math.min(
     100,
     Math.round((totalPortionsConsumed / Math.max(1, totalPortionsTarget)) * 100)
   );
+
+  const calculatedMacros = useMemo(
+    () => calculateMacrosFromPortions(localPortions),
+    [localPortions]
+  );
+
+  const handlePortionAdjust = (group: FoodGroupKey, delta: number) => {
+    setLocalPortions((prev) => {
+      const current = prev[group] || 0;
+      const next = Math.max(0, Math.round((current + delta) * 10) / 10);
+      return { ...prev, [group]: next };
+    });
+
+    startTransition(async () => {
+      await quickAdjustPortionAction(getTodayDateStr(), group, delta);
+      router.refresh();
+    });
+  };
 
   // Filtered supplements by timing
   const filteredSupplements = useMemo(() => {
@@ -1007,7 +1069,8 @@ export function TodayViewClient({
                       {/* Micro-pills por todos los 7 grupos alimenticios + card de balance */}
                       <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5 font-mono">
                         {ALL_FOOD_GROUPS.map((group) => {
-                          const current = portions[group.key] ?? 0;
+                          const GroupIcon = group.icon;
+                          const current = localPortions[group.key] ?? 0;
                           const target =
                             portionGoals[group.key] ?? group.defaultTarget;
                           const isMet = current >= target && target > 0;
@@ -1015,14 +1078,16 @@ export function TodayViewClient({
                           return (
                             <div
                               key={group.key}
-                              className={`p-2 rounded-lg border transition-all ${isMet
-                                ? "bg-[#141813] border-[#7EA35A]/40 text-[#7EA35A]"
-                                : "bg-[#121110] border-[#2A2723] text-[#DDD6C9]"
+                              onClick={() => setActivePortionGroup(group.key)}
+                              className={`p-2 rounded-lg border transition-all cursor-pointer select-none active:scale-[0.98] ${isMet
+                                ? "bg-[#141813] border-[#7EA35A]/40 text-[#7EA35A] hover:border-[#7EA35A]/70"
+                                : "bg-[#121110] border-[#2A2723] text-[#DDD6C9] hover:border-[#D99B43]/50 hover:bg-[#181715]"
                                 }`}
+                              title={`Abrir equivalentes de ${group.label}`}
                             >
                               <div className="flex items-center justify-between gap-1 text-[10px] font-mono">
-                                <span className="truncate text-[#8E867B] flex items-center gap-1">
-                                  <span>{group.icon}</span>
+                                <span className="truncate text-[#8E867B] flex items-center gap-1.5">
+                                  <GroupIcon className="h-3 w-3 shrink-0" />
                                   <span className="truncate">{group.label}</span>
                                 </span>
                                 {isMet && (
@@ -1048,11 +1113,16 @@ export function TodayViewClient({
                         {/* 8th Slot: Balance del Plan / Kcal */}
                         <div className="p-2 rounded-lg bg-[#121110] border border-[#2A2723] flex flex-col justify-between">
                           <div className="flex items-center justify-between text-[10px] font-mono text-[#8E867B]">
-                            <span>🔥 Energía</span>
+                            <span className="flex items-center gap-1">
+                              <Flame className="h-3 w-3 text-[#D99B43]" />
+                              <span>Energía</span>
+                            </span>
                             <span className="text-[#D99B43] font-bold">Kcal</span>
                           </div>
                           <div className="font-mono text-xs font-bold text-[#F5F2EB] mt-1 truncate">
-                            {nutritionSummary?.kcal
+                            {calculatedMacros.kcal
+                              ? `${calculatedMacros.kcal} kcal`
+                              : nutritionSummary?.kcal
                               ? `${nutritionSummary.kcal} kcal`
                               : "0 kcal"}
                           </div>
@@ -1073,8 +1143,8 @@ export function TodayViewClient({
                           <p className="text-[11px] font-mono text-[#8E867B] truncate">
                             {nutritionSummary?.nextMealTitle
                               ? `Próxima: ${nutritionSummary.nextMealTitle}`
-                              : `${nutritionSummary?.kcal
-                                ? `${nutritionSummary.kcal} kcal hoy`
+                              : `${calculatedMacros.kcal || nutritionSummary?.kcal
+                                ? `${calculatedMacros.kcal || nutritionSummary?.kcal} kcal hoy`
                                 : "Plan Mariana Mont"
                               }`}
                           </p>
@@ -1096,6 +1166,22 @@ export function TodayViewClient({
           )}
         </div>
       )}
+
+      {/* Modal de Equivalentes de Porciones Mariana Mont */}
+      <PortionEquivalentsModal
+        isOpen={Boolean(activePortionGroup)}
+        onClose={() => setActivePortionGroup(null)}
+        groupKey={activePortionGroup}
+        currentPortions={activePortionGroup ? (localPortions[activePortionGroup] ?? 0) : 0}
+        targetPortions={
+          activePortionGroup
+            ? (portionGoals[activePortionGroup] ??
+              ALL_FOOD_GROUPS.find((g) => g.key === activePortionGroup)?.defaultTarget ??
+              0)
+            : 0
+        }
+        onPortionAdjust={handlePortionAdjust}
+      />
     </div>
   );
 }

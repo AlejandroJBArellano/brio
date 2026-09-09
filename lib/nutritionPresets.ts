@@ -279,6 +279,93 @@ export const MARIANA_MONT_KNOWLEDGE_BASE = {
   },
 };
 
+export interface PortionEquivalentItem {
+  id: string;
+  name: string;
+  portionDesc: string;
+  notes?: string;
+}
+
+/**
+ * Standard portion equivalencies per food group from Mariana Mont clinical plan.
+ * Used by the Portion Equivalents Modal to quickly add portions by food item.
+ */
+export const MARIANA_MONT_PORTION_EQUIVALENTS: Record<FoodGroupKey, PortionEquivalentItem[]> = {
+  cereals: [
+    { id: "cer-avena", name: "Avena en hojuelas", portionDesc: "3 cdas soperas (1/2 tz cocida)", notes: "Avena natural sin azúcar" },
+    { id: "cer-tortilla", name: "Tortilla de maíz", portionDesc: "2 piezas de comal o taqueras" },
+    { id: "cer-arroz", name: "Arroz integral", portionDesc: "1/2 taza cocido" },
+    { id: "cer-quinoa", name: "Quinoa", portionDesc: "1/2 taza cocida", notes: "Remojar 15m y enjuagar" },
+    { id: "cer-amaranto", name: "Amaranto natural", portionDesc: "1/2 taza tostado / inflado" },
+    { id: "cer-pan", name: "Pan 100% integral", portionDesc: "1 rebanada / tapa" },
+    { id: "cer-pasta", name: "Pasta 100% integral", portionDesc: "1/2 taza cocida" },
+    { id: "cer-tostadas", name: "Tostadas horneadas", portionDesc: "2 piezas horneadas sin grasa" },
+    { id: "cer-trigo-sarraceno", name: "Trigo sarraceno", portionDesc: "1/2 taza cocido" },
+    { id: "cer-elote", name: "Granos de elote", portionDesc: "1/2 taza desgranado" },
+  ],
+  fats_seeds: [
+    { id: "sem-pepitas", name: "Pepitas de calabaza", portionDesc: "2 cdas soperas (30g)" },
+    { id: "sem-girasol", name: "Semillas de girasol", portionDesc: "2 cdas soperas (30g)" },
+    { id: "sem-aguacate", name: "Aguacate", portionDesc: "1/3 pieza mediana" },
+    { id: "sem-nueces", name: "Nueces de castilla", portionDesc: "7-8 mitades (15g)" },
+    { id: "sem-almendras", name: "Almendras", portionDesc: "10-12 piezas enteras" },
+    { id: "sem-chia", name: "Semillas de chía", portionDesc: "2 cdas soperas (DHA/Omega 3)", notes: "Molidas o hidratadas" },
+    { id: "sem-linaza", name: "Semillas de linaza", portionDesc: "2 cdas soperas molidas" },
+    { id: "sem-crema-cacahuate", name: "Crema de cacahuate o almendra", portionDesc: "1 cda sopera (100% natural)" },
+    { id: "sem-ajonjoli", name: "Ajonjolí (Sésamo)", portionDesc: "2 cdas soperas (Calcio natural)" },
+    { id: "sem-pistaches", name: "Pistaches", portionDesc: "15-20 piezas sin sal" },
+    { id: "sem-aceite-oliva", name: "Aceite de oliva extra virgen", portionDesc: "1 cda sopera en crudo" },
+    { id: "sem-hemp", name: "Semillas de hemp (cáñamo)", portionDesc: "2 cdas soperas" },
+  ],
+  legumes: [
+    { id: "leg-frijol", name: "Frijoles de la olla", portionDesc: "1/2 taza cocidos", notes: "Remojo previo 8h" },
+    { id: "leg-lentejas", name: "Lentejas", portionDesc: "1/2 taza cocidas" },
+    { id: "leg-garbanzo", name: "Garbanzos", portionDesc: "1/2 taza cocidos" },
+    { id: "leg-hummus", name: "Hummus casero", portionDesc: "3 cdas soperas" },
+    { id: "leg-tofu", name: "Tofu firme o suave", portionDesc: "100g / 1/2 taza en cubos" },
+    { id: "leg-edamames", name: "Edamames de soya", portionDesc: "1/2 taza desvainados" },
+    { id: "leg-habas", name: "Habas o alubias", portionDesc: "1/2 taza cocidas" },
+    { id: "leg-chicharos", name: "Chícharos cocidos", portionDesc: "1/2 taza" },
+  ],
+  vegetables: [
+    { id: "veg-verdura-cruda", name: "Verdura cruda picada", portionDesc: "1 taza (pepino, zanahoria, chayote)" },
+    { id: "veg-verdura-vapor", name: "Verdura al vapor / salteada", portionDesc: "1/2 taza (brócoli, calabaza, coliflor)" },
+    { id: "veg-hongos", name: "Champiñones / Setas / Portobello", portionDesc: "1 taza crudos o 1/2 taza cocidos" },
+    { id: "veg-esparragos", name: "Espárragos", portionDesc: "6 piezas medianas" },
+    { id: "veg-nopal", name: "Nopal", portionDesc: "1 taza cocido o 2 piezas asadas" },
+    { id: "veg-jitomate", name: "Jitomate", portionDesc: "1 pieza grande o 2 chicos" },
+    { id: "veg-calabaza", name: "Calabacita italiana", portionDesc: "1 taza en cubos" },
+    { id: "veg-brocoli", name: "Brócoli o coliflor", portionDesc: "1 taza en floretes" },
+  ],
+  leafy_greens: [
+    { id: "leaf-espinaca", name: "Espinacas", portionDesc: "2 tazas crudas o 1 taza al vapor" },
+    { id: "leaf-acelgas", name: "Acelgas", portionDesc: "2 tazas crudas o 1 taza cocida" },
+    { id: "leaf-kale", name: "Kale / Col rizada", portionDesc: "2 tazas troceadas" },
+    { id: "leaf-lechugas", name: "Lechugas mixtas / Arúgula", portionDesc: "2 tazas frescas" },
+    { id: "leaf-germinados", name: "Germinados (alfalfa, brócoli)", portionDesc: "1 taza compacta" },
+  ],
+  fruits: [
+    { id: "fru-manzana", name: "Manzana", portionDesc: "1 pieza mediana" },
+    { id: "fru-platano", name: "Plátano", portionDesc: "1/2 pieza grande o 1 chica" },
+    { id: "fru-frutos-rojos", name: "Fresas / Frutos rojos / Moras", portionDesc: "1 taza entera" },
+    { id: "fru-papaya", name: "Papaya en cubos", portionDesc: "1 taza" },
+    { id: "fru-melon", name: "Melón", portionDesc: "1 taza en cubos (comer solo)" },
+    { id: "fru-sandia", name: "Sandía", portionDesc: "1 taza en cubos (comer sola)" },
+    { id: "fru-pera", name: "Pera", portionDesc: "1 pieza mediana" },
+    { id: "fru-naranja", name: "Naranja / Toronja", portionDesc: "1 pieza entera (no jugo)" },
+    { id: "fru-mango", name: "Mango", portionDesc: "1/2 taza en cubos" },
+    { id: "fru-pina", name: "Piña", portionDesc: "3/4 taza en cubos" },
+    { id: "fru-kiwi", name: "Kiwi", portionDesc: "2 piezas" },
+    { id: "fru-durazno", name: "Durazno / Nectarina", portionDesc: "2 piezas medianas" },
+  ],
+  tubers: [
+    { id: "tub-papa", name: "Papa cocida o al vapor", portionDesc: "1 pieza chica o 1/2 taza en cubos" },
+    { id: "tub-camote", name: "Camote amarillo o morado", portionDesc: "1/2 taza cocido en cubos" },
+    { id: "tub-betabel", name: "Betabel", portionDesc: "1/2 taza cocido en cubos" },
+    { id: "tub-yuca", name: "Yuca", portionDesc: "1/3 taza cocida" },
+  ],
+};
+
 /**
  * Complete pre-seeded recipe catalog from Mariana Mont's books:
  * - "La Luna Verde (Recetas Veganas)"
