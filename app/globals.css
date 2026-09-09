@@ -83,4 +83,13 @@ button, a, input, select, textarea {
   scrollbar-width: none;
 }
 
+/* Resizable drawer styles */
+@media (min-width: 640px) {
+  .resizable-drawer {
+    width: var(--drawer-width, 740px) !important;
+    min-width: 420px;
+    max-width: 92vw;
+  }
+}
+
 
