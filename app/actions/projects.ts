@@ -128,7 +128,7 @@ export async function fetchProjectsDashboardDataAction(): Promise<ProjectsDashbo
   const scratchpadContent =
     scratchRows.length > 0
       ? (scratchRows[0] as unknown as ScratchpadDbRow).content || ""
-      : "# 📝 Scratchpad & Brain Vault\n\n- [ ] Revisar métricas semanales\n- Idea de side project: Generador de contratos con IA\n- Nota: Configurar webhook de Google Calendar";
+      : "# Scratchpad\n\n- [ ] Revisar métricas semanales\n- Idea de side project: Generador de contratos con IA";
 
   return {
     projects,

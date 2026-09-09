@@ -11,7 +11,6 @@ export const envSchema = z.object({
     .url("HABITICA_BASE_URL must be a valid URL")
     .default("https://habitica.com/api/v3"),
   DATABASE_URL: z.string().optional(),
-  GOOGLE_CALENDAR_ICAL_URL: z.string().optional(),
   NODE_ENV: z
     .enum(["development", "test", "production"])
     .default("development"),
@@ -33,7 +32,6 @@ export function getEnv(): Env {
     HABITICA_BASE_URL:
       process.env.HABITICA_BASE_URL || "https://habitica.com/api/v3",
     DATABASE_URL: process.env.DATABASE_URL,
-    GOOGLE_CALENDAR_ICAL_URL: process.env.GOOGLE_CALENDAR_ICAL_URL,
     NODE_ENV: process.env.NODE_ENV || "development",
   });
 

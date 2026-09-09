@@ -2,35 +2,33 @@
 
 > **Minimalist, zero-latency personal command center and life operating system.**  
 > Built with Next.js (App Router), TypeScript, Tailwind CSS, Neon PostgreSQL, Better Auth, and Server Actions.  
-> Unifies **Habitica RPG Gamification**, **Brio Finanzas**, **Google Calendar**, **Deep Work Focus Engine**, **Salud & Rendimiento**, **Proyectos & Scratchpad**, y **Rituales AM/PM**.
+> Unifies **Habitica RPG Gamification**, **Brio Finanzas**, **Deep Work Focus Engine**, **Salud & Rendimiento**, **Proyectos & Scratchpad**, y **Rituales AM/PM**.
 
 ---
 
-## 🚀 Módulos Principales (Vistas `⌘1` a `⌘6`)
+## 🚀 Módulos Principales (Vistas `⌘0` a `⌘5`)
 
-- **`⌘1` ⚡ Tareas & Hábitos (Habitica + Linear Inspector)**:
+- **`⌘0` Hoy**: Resumen ejecutivo diario con hábitos, nutrición, proyectos y victorias clave.
+- **`⌘1` Tareas & Hábitos (Habitica + Linear Inspector)**:
   - Stream de tareas navegable por Vim (<kbd>j</kbd>/<kbd>k</kbd>, <kbd>Space</kbd>, <kbd>+</kbd>, <kbd>-</kbd>, <kbd>Enter</kbd>).
   - Inspector lateral de notas markdown y subtareas.
   - **Top 3 Must-Win Tasks**: Ribbon de foco del día establecido en el Ritual Matutino.
-- **`⌘2` 💰 Brio Finanzas (Neon PostgreSQL)**:
+- **`⌘2` Proyectos & Learning Vault**:
+  - **Backlog de Proyectos**: Tarjetas con estado (*Idea, En Desarrollo, Pausado, Lanzado*), tags tecnológicos y enlaces.
+  - **Tracker de Libros & Cursos**: Porcentaje de avance de lectura, notas clave e incremento rápido de páginas.
+- **`⌘3` Brio Finanzas (Neon PostgreSQL)**:
   - **Termómetro del Mes**: Presupuesto mensual vs gasto real acumulado.
   - **Detector de Gastos Hormiga**: Control de presupuesto diario para gustitos y antojos ($150 MXN) con alerta visual.
   - **Bitácora de Transacciones**: Registro de gastos e ingresos, desglose por categorías (`#comida`, `#transporte`) y cuentas (`@nu`, `@bbva`).
   - **Metas de Ahorro**: Fondo de emergencia y metas con aportes rápidos en un clic.
-- **`⌘3` 📊 Consistencia & Balance de Vida**:
-  - **Heatmap de Hábitos (90 días)**: Gráfico estilo GitHub con niveles de actividad y rachas consecutivas.
-  - **Balance de Vida por Tags**: Distribución de tu energía entre salud, trabajo, estudio y finanzas.
-- **`⌘4` 📅 Agenda (Google Calendar)**:
-  - Sincronización en tiempo real vía dirección secreta iCal para ver reuniones, duración y tiempo restante.
-- **`⌘5` 🏋️ Salud & Rendimiento Físico**:
+- **`⌘4` Salud & Rendimiento Físico**:
   - **Check-in de Entrenamiento**: 1 clic para registrar sesión (Gym, Cardio, Movilidad, Deportes, Descanso Activo).
   - **Medidor de Hidratación**: Meta diaria de 3L con botones rápidos `+250ml`, `+500ml`, `+1,000ml`.
   - **Suplementos**: Checklist rápido de Creatina, Multivitamínico, Omega 3 y Proteína.
   - **Sueño & Recuperación**: Registro de horas de sueño y calidad del descanso (1 a 5 ⭐).
   - **Importador Samsung Health**: Soporte para importar datos exportados en formato JSON.
-- **`⌘6` 💡 Proyectos & Learning Vault**:
-  - **Backlog de Proyectos**: Tarjetas con estado (*Idea, En Desarrollo, Pausado, Lanzado*), tags tecnológicos y enlaces.
-  - **Tracker de Libros & Cursos**: Porcentaje de avance de lectura, notas clave e incremento rápido de páginas.
+- **`⌘5` Bóveda**:
+  - Biblioteca y recursos archivados.
 
 ---
 
@@ -50,7 +48,7 @@
 
 ## 🌅 Rituales de Alto Rendimiento
 
-- **Ritual Matutino (`⌘M`)**: Saludo con nivel de RPG, vista previa de reuniones de Google Calendar, selección de las **3 tareas "Must-Win"** y medidor de energía (⚡ 1–5).
+- **Ritual Matutino (`⌘M`)**: Saludo con nivel de RPG, selección de las **3 tareas "Must-Win"** y medidor de energía (⚡ 1–5).
 - **Cierre Nocturno & Work Shutdown (`⌘E`)**: Auditoría de salud/daño de Habitica (Posada en 1 clic), check-in de gastos, resumen de victorias, 1 agradecimiento, Brain Dump y animación de **"Work Shutdown Complete"** para apagar la mente laboral.
 
 ---
@@ -70,12 +68,12 @@
 
 ## ⌨️ Atajos de Teclado Globales
 
+- <kbd>⌘0</kbd>: Hoy
 - <kbd>⌘1</kbd>: Tareas & Hábitos
-- <kbd>⌘2</kbd>: Brio Finanzas
-- <kbd>⌘3</kbd>: Consistencia & Balance
-- <kbd>⌘4</kbd>: Agenda Google Calendar
-- <kbd>⌘5</kbd>: Salud & Entrenamiento
-- <kbd>⌘6</kbd>: Proyectos & Lecturas
+- <kbd>⌘2</kbd>: Proyectos & Lecturas
+- <kbd>⌘3</kbd>: Brio Finanzas
+- <kbd>⌘4</kbd>: Salud & Entrenamiento
+- <kbd>⌘5</kbd>: Bóveda
 - <kbd>⌘P</kbd>: Modo Focus Zen & Audio Ambiental
 - <kbd>⌘J</kbd>: Scratchpad & Brain Vault
 - <kbd>⌘K</kbd>: Paleta de Comandos Global (Raycast style)
@@ -94,8 +92,8 @@
 ## 🧪 Pruebas Unitarias & Compilación
 
 ```bash
-# Ejecutar tests del parser y calendar
-npx tsx --test __tests__/parser.test.ts __tests__/calendar.test.ts
+# Ejecutar tests del parser y project matcher
+npx tsx --test __tests__/parser.test.ts __tests__/projectMatcher.test.ts
 
 # Compilar para producción
 npm run build

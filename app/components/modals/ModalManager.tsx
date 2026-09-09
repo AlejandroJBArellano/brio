@@ -2,7 +2,6 @@
 
 import { useCommandCenter } from "@/app/components/context/CommandCenterContext";
 import {
-  CalendarDaySchedule,
   FinanceDashboardData,
   HabiticaTag,
   HabiticaTask,
@@ -10,7 +9,6 @@ import {
   HealthDashboardData,
   ProjectsDashboardData,
 } from "@/lib/types";
-import { getTodayDateStr } from "@/lib/dateUtils";
 import dynamic from "next/dynamic";
 
 // Dynamic imports for bundle optimization - components load only when requested
@@ -100,7 +98,6 @@ interface ModalManagerProps {
   user: HabiticaUser;
   tasks?: HabiticaTask[];
   tags?: HabiticaTag[];
-  calendarSchedule?: CalendarDaySchedule;
   financeData?: FinanceDashboardData;
   healthData?: HealthDashboardData;
   projectsData?: ProjectsDashboardData;
@@ -110,11 +107,6 @@ export function ModalManager({
   user,
   tasks = [],
   tags = [],
-  calendarSchedule: _calendarSchedule = {
-    date: getTodayDateStr(),
-    events: [],
-    totalMeetingMinutes: 0,
-  },
   financeData,
   healthData,
   projectsData,
