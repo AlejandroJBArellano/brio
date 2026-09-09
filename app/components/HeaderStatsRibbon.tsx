@@ -4,7 +4,6 @@ import { toggleSleepAction } from "@/app/actions/tasks";
 import { useCommandCenter } from "@/app/components/context/CommandCenterContext";
 import { useSession } from "@/lib/auth-client";
 import { HabiticaUser } from "@/lib/types";
-import { capitalize } from "@/lib/utils";
 import {
   Activity,
   Bed,
@@ -14,7 +13,6 @@ import {
   Dumbbell,
   Edit3,
   FolderGit2,
-  LogOut,
   Moon,
   Plus,
   RotateCw,
@@ -22,7 +20,7 @@ import {
   Sparkles,
   Sun,
   Wallet,
-  Zap,
+  Zap
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -162,24 +160,21 @@ export function HeaderStatsRibbon({ user }: HeaderStatsRibbonProps) {
               <Link
                 key={item.href}
                 href={item.href}
-                className={`group flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs transition-all font-sans shrink-0 cursor-pointer ${
-                  active
-                    ? "border border-[#3D3425] bg-[#221D16] text-[#D99B43] font-bold shadow-xs"
-                    : "border border-transparent text-[#8E867B] hover:text-[#DDD6C9] hover:bg-[#1D1B18]"
-                }`}
+                className={`group flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs transition-all font-sans shrink-0 cursor-pointer ${active
+                  ? "border border-[#3D3425] bg-[#221D16] text-[#D99B43] font-bold shadow-xs"
+                  : "border border-transparent text-[#8E867B] hover:text-[#DDD6C9] hover:bg-[#1D1B18]"
+                  }`}
               >
                 <Icon
-                  className={`size-3.5 transition-colors ${
-                    active ? "text-[#D99B43]" : "text-[#8E867B] group-hover:text-[#DDD6C9]"
-                  }`}
+                  className={`size-3.5 transition-colors ${active ? "text-[#D99B43]" : "text-[#8E867B] group-hover:text-[#DDD6C9]"
+                    }`}
                 />
                 <span>{item.label}</span>
                 <kbd
-                  className={`hidden lg:inline-block rounded px-1 py-0.2 font-mono text-[9px] transition-colors ${
-                    active
-                      ? "bg-[#2E2419] text-[#D99B43] border border-[#4A3B25]"
-                      : "bg-[#141312] text-[#736B60] border border-[#22201D]"
-                  }`}
+                  className={`hidden lg:inline-block rounded px-1 py-0.2 font-mono text-[9px] transition-colors ${active
+                    ? "bg-[#2E2419] text-[#D99B43] border border-[#4A3B25]"
+                    : "bg-[#141312] text-[#736B60] border border-[#22201D]"
+                    }`}
                 >
                   {item.shortcut}
                 </kbd>
@@ -296,21 +291,19 @@ export function HeaderStatsRibbon({ user }: HeaderStatsRibbonProps) {
                   handleToggleRest();
                 }}
                 disabled={isPending}
-                className={`w-full flex items-center justify-between p-2 rounded-lg transition-colors cursor-pointer ${
-                  isResting
-                    ? "bg-[#D99B43]/15 text-[#E8AF59] hover:bg-[#D99B43]/25"
-                    : "text-[#DDD6C9] hover:bg-[#22201D] hover:text-[#F5F2EB]"
-                }`}
+                className={`w-full flex items-center justify-between p-2 rounded-lg transition-colors cursor-pointer ${isResting
+                  ? "bg-[#D99B43]/15 text-[#E8AF59] hover:bg-[#D99B43]/25"
+                  : "text-[#DDD6C9] hover:bg-[#22201D] hover:text-[#F5F2EB]"
+                  }`}
               >
                 <div className="flex items-center gap-2 min-w-0">
                   <Bed className={`size-3.5 shrink-0 ${isResting ? "text-[#E8AF59]" : "text-[#D99B43]"}`} />
                   <span className="truncate">{isResting ? "Descansando" : "Descanso"}</span>
                 </div>
-                <span className={`font-mono text-[9px] px-1.5 py-0.5 rounded border shrink-0 ${
-                  isResting
-                    ? "border-[#D99B43]/40 bg-[#221D16] text-[#E8AF59] font-bold"
-                    : "border-[#2A2723] bg-[#121110] text-[#8E867B]"
-                }`}>
+                <span className={`font-mono text-[9px] px-1.5 py-0.5 rounded border shrink-0 ${isResting
+                  ? "border-[#D99B43]/40 bg-[#221D16] text-[#E8AF59] font-bold"
+                  : "border-[#2A2723] bg-[#121110] text-[#8E867B]"
+                  }`}>
                   {isResting ? "DESCANSANDO" : "ACTIVO"}
                 </span>
               </button>
@@ -342,14 +335,11 @@ export function HeaderStatsRibbon({ user }: HeaderStatsRibbonProps) {
             onClick={() => setIsProfileOpen(!isProfileOpen)}
             className="flex items-center gap-2 rounded-lg border border-[#2A2723] bg-[#121110] px-2.5 py-1 text-xs font-mono text-[#DDD6C9] hover:border-[#38332D] hover:text-[#F5F2EB] transition-all cursor-pointer"
           >
-            <div className="size-4.5 rounded-full bg-[#221D16] border border-[#3D3425] text-[#D99B43] flex items-center justify-center text-[10px] font-bold">
-              ⚡
-            </div>
             <span className="font-semibold text-[#F5F2EB] hidden sm:inline">
               {firstName}
             </span>
             <span className="text-[10px] text-[#D99B43] font-bold">
-              Lvl {stats.lvl}
+              {stats.lvl}
             </span>
             {isResting && (
               <span className="flex size-1.5 rounded-full bg-[#D99B43] animate-pulse" title="Descansando" />
@@ -365,12 +355,9 @@ export function HeaderStatsRibbon({ user }: HeaderStatsRibbonProps) {
                   <div className="font-serif font-bold text-sm text-[#F5F2EB]">
                     {userName}
                   </div>
-                  <div className="font-mono text-[10px] text-[#8E867B]">
-                    {capitalize(stats.class || "warrior")}
-                  </div>
                 </div>
                 <div className="rounded-md border border-[#3D3425] bg-[#221D16] px-2 py-0.5 font-mono text-xs font-bold text-[#D99B43]">
-                  Nivel {stats.lvl}
+                  {stats.lvl}
                 </div>
               </div>
 
@@ -381,8 +368,8 @@ export function HeaderStatsRibbon({ user }: HeaderStatsRibbonProps) {
                   onClick={handleToggleRest}
                   disabled={isPending}
                   className={`w-full flex items-center justify-between p-2.5 rounded-lg border text-xs font-mono transition-all cursor-pointer ${isResting
-                      ? "border-[#D99B43]/50 bg-[#D99B43]/15 text-[#E8AF59]"
-                      : "border-[#2A2723] bg-[#121110] text-[#DDD6C9] hover:border-[#38332D]"
+                    ? "border-[#D99B43]/50 bg-[#D99B43]/15 text-[#E8AF59]"
+                    : "border-[#2A2723] bg-[#121110] text-[#DDD6C9] hover:border-[#38332D]"
                     }`}
                 >
                   <div className="flex items-center gap-2">
@@ -390,20 +377,8 @@ export function HeaderStatsRibbon({ user }: HeaderStatsRibbonProps) {
                     <span>Descanso</span>
                   </div>
                   <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-black/40">
-                    {isResting ? "DESCANSANDO" : "ACTIVO"}
+                    {isResting ? "DESCANSANDO" : "SIN DESCANSO"}
                   </span>
-                </button>
-              </div>
-
-              {/* Sign out */}
-              <div className="pt-1 border-t border-[#2A2723]">
-                <button
-                  type="button"
-                  onClick={handleSignOut}
-                  className="w-full flex items-center gap-2 p-2 rounded-lg text-xs text-[#E05D52] hover:bg-[#261515] transition-colors cursor-pointer"
-                >
-                  <LogOut className="size-3.5" />
-                  <span>Cerrar Sesión</span>
                 </button>
               </div>
             </div>
