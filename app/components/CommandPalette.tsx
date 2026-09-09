@@ -106,8 +106,8 @@ function CommandPaletteContent({
       },
       {
         id: "action-evening-review",
-        title: "🌙 Iniciar Cierre Nocturno",
-        subtitle: "Auditoría de daño HP, gastos del día y brain dump",
+        title: "Cierre nocturno",
+        subtitle: "Auditoría de dailies, salud y vaciado mental",
         icon: Moon,
         badge: "⌘E",
         run: () => {

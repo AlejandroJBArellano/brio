@@ -154,7 +154,7 @@ export function MorningRitualModal({
     soundFx.taskComplete();
     startTransition(async () => {
       // 1. Complete/score the active Daily on Habitica if not yet done
-      if (activeDaily && (activeDaily.isDue || activeDaily.completed === false)) {
+      if (activeDaily && activeDaily.isDue && !activeDaily.completed) {
         await toggleTaskAction(activeDaily.id, "up");
       }
 

@@ -376,8 +376,8 @@ export function checkAndTriggerSmartReminders(data: {
   if (settings.eveningReviewReminder && !data.hasCompletedEveningReview) {
     const eveningTime = parseTimeMinutes(settings.eveningReviewTime);
     if (currentTimeMinutes >= eveningTime && !alreadySentToday("evening_review")) {
-      sendBrioNotification("🌙 Cierre Nocturno & Work Shutdown", {
-        body: "Hora de apagar la mente laboral, registrar tus victorias y descansar sin daño en Habitica.",
+      sendBrioNotification("Cierre nocturno", {
+        body: "Hora de cerrar el día y proteger tu salud.",
         tag: "evening-review-reminder",
       });
       recordSentNotification("evening_review");

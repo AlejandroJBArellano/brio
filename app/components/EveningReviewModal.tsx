@@ -7,13 +7,17 @@ import { HabiticaTask, HabiticaUser } from "@/lib/types";
 import {
   ArrowLeft,
   ArrowRight,
+  BatteryCharging,
+  BatteryLow,
+  BatteryMedium,
   Bed,
   Check,
   ChevronDown,
   Heart,
   Moon,
   Sparkles,
-  X
+  X,
+  Zap,
 } from "lucide-react";
 import { useMemo, useState, useTransition } from "react";
 
@@ -29,11 +33,11 @@ interface EveningReviewModalProps {
 }
 
 const FATIGUE_LEVELS = [
-  { value: 1, label: "Agotado", emoji: "🪫", color: "text-[#E05D52] border-[#E05D52]/40 bg-[#221716]" },
-  { value: 2, label: "Cansado", emoji: "😴", color: "text-[#D99B43] border-[#D99B43]/40 bg-[#221D16]" },
-  { value: 3, label: "Normal", emoji: "⚖️", color: "text-[#8E867B] border-[#8E867B]/40 bg-[#181715]" },
-  { value: 4, label: "Con Energía", emoji: "⚡", color: "text-[#7EA35A] border-[#7EA35A]/40 bg-[#141813]" },
-  { value: 5, label: "Muy Despierto", emoji: "🔋", color: "text-[#4EAB9E] border-[#4EAB9E]/40 bg-[#141C1A]" },
+  { value: 1, label: "Agotado", icon: BatteryLow, color: "text-[#E05D52] border-[#E05D52]/40 bg-[#221716]" },
+  { value: 2, label: "Cansado", icon: Moon, color: "text-[#D99B43] border-[#D99B43]/40 bg-[#221D16]" },
+  { value: 3, label: "Normal", icon: BatteryMedium, color: "text-[#8E867B] border-[#8E867B]/40 bg-[#181715]" },
+  { value: 4, label: "Con energía", icon: Zap, color: "text-[#7EA35A] border-[#7EA35A]/40 bg-[#141813]" },
+  { value: 5, label: "Al 100%", icon: BatteryCharging, color: "text-[#4EAB9E] border-[#4EAB9E]/40 bg-[#141C1A]" },
 ];
 
 export function EveningReviewModal({
@@ -91,6 +95,7 @@ export function EveningReviewModal({
       (t) =>
         t.type === "daily" &&
         t.isDue &&
+        !t.completed &&
         !t.text.trim().startsWith("[") &&
         !optimisticCompletedDailyIds.has(t.id)
     );
@@ -151,15 +156,15 @@ export function EveningReviewModal({
             </div>
             <div className="space-y-1">
               <h3 className="font-serif text-2xl font-bold text-[#F5F2EB]">
-                Día Cerrado con Éxito
+                Día cerrado
               </h3>
               <p className="text-xs sm:text-sm text-[#8E867B] font-mono">
-                Has protegido tu salud y vaciado tu mente. ¡Que descanses!
+                Que descanses.
               </p>
             </div>
             <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#221D16] border border-[#D99B43]/30 text-xs font-mono text-[#D99B43]">
               <Sparkles className="h-3.5 w-3.5" />
-              <span>+XP Ganada en Habitica</span>
+              <span>+XP en Habitica</span>
             </div>
           </div>
         ) : (
@@ -200,11 +205,11 @@ export function EveningReviewModal({
                       <Heart className="h-4.5 w-4.5 text-[#E05D52]" />
                       <div>
                         <h4 className="text-xs font-bold text-[#F5F2EB] font-serif">
-                          Salud de Habitica (HP: {user.stats.hp}/{user.stats.maxHealth || 50})
+                          Salud ({user.stats.hp}/{user.stats.maxHealth || 50} HP)
                         </h4>
                         <p className="text-[11px] text-[#8E867B] font-mono">
                           {pendingDailies.length > 0
-                            ? `Tienes ${pendingDailies.length} daily(s) pendientes,`
+                            ? `${pendingDailies.length} pendientes`
                             : "Dailies completas"}
                         </p>
                       </div>
@@ -274,7 +279,7 @@ export function EveningReviewModal({
                                 disabled={isPending}
                                 className="px-2.5 py-1 rounded-md bg-[#7EA35A]/15 text-[#7EA35A] border border-[#7EA35A]/30 hover:bg-[#7EA35A]/25 text-[11px] font-mono font-bold transition-colors cursor-pointer shrink-0 active:scale-95"
                               >
-                                ✓ Marcar Hecha
+                                Marcar hecha
                               </button>
                             </div>
 
@@ -315,7 +320,7 @@ export function EveningReviewModal({
                                         </span>
                                       </div>
                                       <span className="font-mono text-[9px] text-[#8E867B]">
-                                        {isChecked ? "Listo ✓" : "Pendiente"}
+                                        {isChecked ? "Listo" : "Pendiente"}
                                       </span>
                                     </div>
                                   );
@@ -341,7 +346,7 @@ export function EveningReviewModal({
                     }}
                     className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#D99B43] font-bold font-mono text-xs text-[#121110] hover:bg-[#E8AF59] transition-all cursor-pointer shadow-xs"
                   >
-                    <span>Vaciado Mental</span>
+                    <span>Vaciado mental</span>
                     <ArrowRight className="h-4 w-4" />
                   </button>
                 </div>
@@ -373,26 +378,29 @@ export function EveningReviewModal({
                 {/* Fatigue / Energy Selector */}
                 <div className="rounded-xl border border-[#2A2723] bg-[#121110] p-4 space-y-2.5">
                   <span className="text-xs font-bold text-[#F5F2EB] font-serif block">
-                    Nivel de cansancio al terminar el día:
+                    Nivel de energía:
                   </span>
                   <div className="grid grid-cols-5 gap-1.5 font-mono text-xs">
-                    {FATIGUE_LEVELS.map((lvl) => (
-                      <button
-                        key={lvl.value}
-                        type="button"
-                        onClick={() => {
-                          setEnergyLevel(lvl.value);
-                          soundFx.click();
-                        }}
-                        className={`p-2 rounded-xl border transition-all cursor-pointer text-center flex flex-col items-center gap-1 ${energyLevel === lvl.value
-                          ? `${lvl.color} font-bold shadow-xs`
-                          : "bg-[#181715] border-[#2A2723] text-[#8E867B] hover:text-[#DDD6C9]"
-                          }`}
-                      >
-                        <span className="text-base">{lvl.emoji}</span>
-                        <span className="text-[10px] leading-tight">{lvl.label}</span>
-                      </button>
-                    ))}
+                    {FATIGUE_LEVELS.map((lvl) => {
+                      const Icon = lvl.icon;
+                      return (
+                        <button
+                          key={lvl.value}
+                          type="button"
+                          onClick={() => {
+                            setEnergyLevel(lvl.value);
+                            soundFx.click();
+                          }}
+                          className={`p-2 rounded-xl border transition-all cursor-pointer text-center flex flex-col items-center gap-1.5 ${energyLevel === lvl.value
+                            ? `${lvl.color} font-bold shadow-xs`
+                            : "bg-[#181715] border-[#2A2723] text-[#8E867B] hover:text-[#DDD6C9]"
+                            }`}
+                        >
+                          <Icon className="h-4 w-4 shrink-0" />
+                          <span className="text-[10px] leading-tight">{lvl.label}</span>
+                        </button>
+                      );
+                    })}
                   </div>
                 </div>
 
