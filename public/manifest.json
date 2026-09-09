@@ -1,7 +1,7 @@
 {
-  "name": "Brio OS — Command Center",
+  "name": "Brio",
   "short_name": "Brio",
-  "description": "Minimalist, zero-latency personal command center and life operating system.",
+  "description": "Alejandro's system",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#121110",

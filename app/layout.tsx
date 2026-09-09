@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
-import { Fraunces, Plus_Jakarta_Sans, JetBrains_Mono } from "next/font/google";
+import { Fraunces, JetBrains_Mono, Plus_Jakarta_Sans } from "next/font/google";
+import { ReactNode } from "react";
 import "./globals.css";
 
 const fraunces = Fraunces({
@@ -30,14 +31,13 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  title: "Brio — Command Center & Operating Dashboard",
-  description:
-    "Minimalist, zero-latency personal command center and Habitica batch synchronization hub.",
+  title: "Brio",
+  description: "Alejandro's system",
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",
-    title: "Brio OS",
+    title: "Brio",
   },
   icons: {
     icon: [
@@ -56,7 +56,7 @@ export const metadata: Metadata = {
 export default function RootLayout({
   children,
 }: {
-  children: React.ReactNode;
+  children: ReactNode;
 }) {
   return (
     <html
