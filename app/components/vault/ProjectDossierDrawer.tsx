@@ -28,6 +28,7 @@ import {
   X,
 } from "lucide-react";
 import { useEffect, useState, useTransition } from "react";
+import { DrawerResizeHandle, useResizableDrawer } from "@/app/hooks/useResizableDrawer";
 
 interface ProjectDossierDrawerProps {
   project: ProjectItem | null;
@@ -42,27 +43,27 @@ const STATUS_CONFIG: Record<
   { label: string; color: string; badge: string }
 > = {
   permanent: {
-    label: "♾️ Permanente",
+    label: "Permanente",
     color: "text-[#4EAB9E]",
     badge: "border-[#4EAB9E]/40 bg-[#142321] text-[#4EAB9E]",
   },
   in_progress: {
-    label: "⚡ En Desarrollo",
+    label: "En Desarrollo",
     color: "text-[#D99B43]",
     badge: "border-[#D99B43]/30 bg-[#221D16] text-[#D99B43]",
   },
   launched: {
-    label: "🚀 Lanzado",
+    label: "Lanzado",
     color: "text-[#7EA35A]",
     badge: "border-[#7EA35A]/30 bg-[#1C2219] text-[#7EA35A]",
   },
   idea: {
-    label: "💡 Idea",
+    label: "Idea",
     color: "text-[#C2BAAD]",
     badge: "border-[#8E867B]/30 bg-[#1A1917] text-[#C2BAAD]",
   },
   paused: {
-    label: "⏸️ Pausado",
+    label: "Pausado",
     color: "text-[#8E867B]",
     badge: "border-[#2A2723] bg-[#181715] text-[#8E867B]",
   },
@@ -75,6 +76,13 @@ export function ProjectDossierDrawer({
   onClose,
   onRefresh,
 }: ProjectDossierDrawerProps) {
+  const { width, isResizing, handleMouseDown, resetWidth } = useResizableDrawer({
+    storageKey: "brio:drawer-width:project",
+    defaultWidth: 620,
+    minWidth: 420,
+    maxWidthRatio: 0.92,
+  });
+
   const [newTaskTitle, setNewNewTaskTitle] = useState("");
   const [filterMode, setFilterMode] = useState<"pending" | "completed" | "all">("pending");
   const [isPending, startTransition] = useTransition();
@@ -221,7 +229,17 @@ export function ProjectDossierDrawer({
       <div className="absolute inset-0" onClick={onClose} />
 
       {/* Drawer Body */}
-      <div className="relative w-full max-w-xl h-full bg-[#181715] border-l border-[#2A2723] shadow-2xl flex flex-col z-10 animate-in slide-in-from-right duration-300 overflow-hidden">
+      <div
+        className={`relative w-full resizable-drawer h-full bg-[#181715] border-l border-[#2A2723] shadow-2xl flex flex-col z-10 ${
+          isResizing ? "select-none transition-none" : "animate-in slide-in-from-right duration-300"
+        } overflow-hidden`}
+        style={{ "--drawer-width": `${width}px` } as React.CSSProperties}
+      >
+        <DrawerResizeHandle
+          onMouseDown={handleMouseDown}
+          onDoubleClick={resetWidth}
+          isResizing={isResizing}
+        />
         {/* Header */}
         <div className="p-5 border-b border-[#2A2723] bg-[#141311] space-y-3">
           <div className="flex items-center justify-between">
@@ -248,11 +266,11 @@ export function ProjectDossierDrawer({
                 onChange={(e) => handleUpdateStatus(e.target.value as ProjectStatus)}
                 className={`text-[11px] font-mono font-bold px-2.5 py-0.5 rounded-lg border ${statusMeta.badge} bg-[#121110] focus:outline-none cursor-pointer`}
               >
-                <option value="permanent">♾️ Permanente</option>
-                <option value="in_progress">⚡ En Desarrollo</option>
-                <option value="launched">🚀 Lanzado / Prod</option>
-                <option value="idea">💡 Idea</option>
-                <option value="paused">⏸️ Pausado</option>
+                <option value="permanent">Permanente</option>
+                <option value="in_progress">En Desarrollo</option>
+                <option value="launched">Lanzado / Prod</option>
+                <option value="idea">Idea</option>
+                <option value="paused">Pausado</option>
               </select>
             </div>
 
@@ -379,11 +397,11 @@ export function ProjectDossierDrawer({
                       onChange={(e) => setEditStatus(e.target.value as ProjectStatus)}
                       className="w-full rounded-lg border border-[#2A2723] bg-[#121110] p-2 text-xs text-[#F5F2EB] focus:outline-none focus:border-[#D99B43] font-mono"
                     >
-                      <option value="permanent">♾️ Permanente</option>
-                      <option value="in_progress">⚡ En Desarrollo</option>
-                      <option value="launched">🚀 Lanzado</option>
-                      <option value="idea">💡 Idea</option>
-                      <option value="paused">⏸️ Pausado</option>
+                      <option value="permanent">Permanente</option>
+                      <option value="in_progress">En Desarrollo</option>
+                      <option value="launched">Lanzado</option>
+                      <option value="idea">Idea</option>
+                      <option value="paused">Pausado</option>
                     </select>
                   </div>
 
@@ -449,7 +467,7 @@ export function ProjectDossierDrawer({
                 <div className="space-y-2 pt-2 border-t border-[#2A2723]">
                   <div className="flex items-center justify-between">
                     <label className="block text-xs font-mono text-[#8E867B] font-semibold">
-                      🔗 Enlaces & Recursos (Autoclasificación):
+                      Enlaces & Recursos (Autoclasificación):
                     </label>
                     <button
                       type="button"
@@ -719,7 +737,7 @@ export function ProjectDossierDrawer({
                   ) : (
                     <div className="p-6 rounded-lg border border-dashed border-[#2A2723] text-center text-xs font-mono text-[#8E867B]">
                       {filterMode === "pending"
-                        ? "🎉 No hay tareas pendientes en este proyecto."
+                        ? "No hay tareas pendientes en este proyecto."
                         : "No hay tareas registradas con este filtro."}
                     </div>
                   )}
