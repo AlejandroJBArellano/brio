@@ -17,7 +17,9 @@ import { NoteContentRenderer } from "@/app/components/notes/NoteContentRenderer"
 import { soundFx } from "@/lib/soundFx";
 import { parseTaskMetadata } from "@/lib/taskMetadata";
 import { ContextualNote, HabiticaTask } from "@/lib/types";
+import { DrawerResizeHandle, useResizableDrawer } from "@/app/hooks/useResizableDrawer";
 import {
+  AlertCircle,
   Check,
   CheckCircle2,
   ExternalLink,
@@ -52,6 +54,13 @@ export function TaskDetailDrawer({
   onRefreshData,
 }: TaskDetailDrawerProps) {
   const [isPending, startTransition] = useTransition();
+
+  const { width, isResizing, handleMouseDown, resetWidth } = useResizableDrawer({
+    storageKey: "brio:drawer-width:task",
+    defaultWidth: 740,
+    minWidth: 420,
+    maxWidthRatio: 0.92,
+  });
 
   // Task Editing State
   const [isEditingTask, setIsEditingTask] = useState(false);
@@ -315,9 +324,18 @@ export function TaskDetailDrawer({
       <div className="absolute inset-0" onClick={onClose} />
 
       <div
-        className="relative w-full sm:w-[52vw] xl:w-[48vw] min-w-85 max-w-225 h-full bg-[#181715] border-l border-[#2A2723] p-6 sm:p-8 shadow-2xl flex flex-col justify-between overflow-y-auto animate-in slide-in-from-right duration-250 space-y-6 z-10"
+        className={`relative w-full resizable-drawer h-full bg-[#181715] border-l border-[#2A2723] p-6 sm:p-8 shadow-2xl flex flex-col justify-between overflow-y-auto space-y-6 z-10 ${
+          isResizing ? "select-none transition-none" : "animate-in slide-in-from-right duration-250"
+        }`}
+        style={{ "--drawer-width": `${width}px` } as React.CSSProperties}
         role="dialog"
       >
+        <DrawerResizeHandle
+          onMouseDown={handleMouseDown}
+          onDoubleClick={resetWidth}
+          isResizing={isResizing}
+        />
+
         {/* Header & Main Task Properties */}
         <div className="space-y-4">
           <div className="flex items-center justify-between pb-3 border-b border-[#2A2723]">
@@ -738,8 +756,9 @@ export function TaskDetailDrawer({
                 </div>
 
                 {uploadError && (
-                  <p className="text-[11px] font-mono text-[#E05D52]">
-                    ⚠️ {uploadError}
+                  <p className="flex items-center gap-1.5 text-[11px] font-mono text-[#E05D52]">
+                    <AlertCircle className="h-3.5 w-3.5 shrink-0" />
+                    <span>{uploadError}</span>
                   </p>
                 )}
 
@@ -792,8 +811,9 @@ export function TaskDetailDrawer({
                         className="space-y-3 p-3.5 rounded-xl bg-[#181715] border border-[#D99B43]/50 shadow-md animate-in zoom-in-95 duration-150"
                       >
                         <div className="flex items-center justify-between gap-2">
-                          <span className="font-mono text-[10px] text-[#D99B43] font-bold uppercase tracking-wider">
-                            ✏️ Editando Nota
+                          <span className="flex items-center gap-1.5 font-mono text-[10px] text-[#D99B43] font-bold uppercase tracking-wider">
+                            <Pencil className="h-3 w-3 shrink-0" />
+                            <span>Editando Nota</span>
                           </span>
                           <button
                             type="button"
@@ -884,8 +904,9 @@ export function TaskDetailDrawer({
                         </div>
 
                         {uploadError && (
-                          <p className="text-[11px] font-mono text-[#E05D52]">
-                            ⚠️ {uploadError}
+                          <p className="flex items-center gap-1.5 text-[11px] font-mono text-[#E05D52]">
+                            <AlertCircle className="h-3.5 w-3.5 shrink-0" />
+                            <span>{uploadError}</span>
                           </p>
                         )}
 
