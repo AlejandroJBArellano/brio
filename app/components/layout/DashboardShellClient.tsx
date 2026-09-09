@@ -79,14 +79,8 @@ export function DashboardShellClient({
           router.push("/finance");
         } else if (key === "4" && !isInputActive) {
           e.preventDefault();
-          router.push("/analytics");
-        } else if (key === "5" && !isInputActive) {
-          e.preventDefault();
-          router.push("/calendar");
-        } else if (key === "6" && !isInputActive) {
-          e.preventDefault();
           router.push("/health");
-        } else if (key === "7" && !isInputActive) {
+        } else if (key === "5" && !isInputActive) {
           e.preventDefault();
           router.push("/vault");
         }
@@ -144,20 +138,12 @@ export function DashboardShellClient({
               <kbd className="rounded bg-[#181715] px-1 py-0.5 text-[#DDD6C9] border border-[#2A2723]">⌘3</kbd> Finanzas
             </Link>
             •
-            <Link href="/analytics" className="hover:text-[#F5F2EB] inline-flex items-center gap-0.5">
-              <kbd className="rounded bg-[#181715] px-1 py-0.5 text-[#DDD6C9] border border-[#2A2723]">⌘4</kbd> Balance
-            </Link>
-            •
-            <Link href="/calendar" className="hover:text-[#F5F2EB] inline-flex items-center gap-0.5">
-              <kbd className="rounded bg-[#181715] px-1 py-0.5 text-[#DDD6C9] border border-[#2A2723]">⌘5</kbd> Agenda
-            </Link>
-            •
             <Link href="/health" className="hover:text-[#F5F2EB] inline-flex items-center gap-0.5">
-              <kbd className="rounded bg-[#181715] px-1 py-0.5 text-[#DDD6C9] border border-[#2A2723]">⌘6</kbd> Salud
+              <kbd className="rounded bg-[#181715] px-1 py-0.5 text-[#DDD6C9] border border-[#2A2723]">⌘4</kbd> Salud
             </Link>
             •
             <Link href="/vault" className="hover:text-[#F5F2EB] inline-flex items-center gap-0.5">
-              <kbd className="rounded bg-[#181715] px-1 py-0.5 text-[#DDD6C9] border border-[#2A2723]">⌘7</kbd> Bóveda
+              <kbd className="rounded bg-[#181715] px-1 py-0.5 text-[#DDD6C9] border border-[#2A2723]">⌘5</kbd> Bóveda
             </Link>
           </span>
           <span>•</span>

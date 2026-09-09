@@ -339,31 +339,6 @@ export interface ParsedFinancialInput {
   notes?: string;
 }
 
-// ----------------------------------------------------
-// Google Calendar Models
-// ----------------------------------------------------
-
-export interface CalendarEvent {
-  id: string;
-  title: string;
-  start: string; // ISO string or time
-  end: string;   // ISO string or time
-  startTimeFormatted: string; // e.g. "09:30 AM"
-  endTimeFormatted: string;   // e.g. "10:30 AM"
-  durationMinutes: number;
-  isAllDay: boolean;
-  location?: string;
-  description?: string;
-  status: "past" | "now" | "upcoming";
-  timeUntil?: string;
-}
-
-export interface CalendarDaySchedule {
-  date: string;
-  events: CalendarEvent[];
-  nextEvent?: CalendarEvent;
-  totalMeetingMinutes: number;
-}
 
 // ----------------------------------------------------
 // Ritual Models
@@ -378,35 +353,6 @@ export interface RitualLog {
   expensesLogged?: boolean;
 }
 
-// ----------------------------------------------------
-// Analytics & Consistency Heatmap Models
-// ----------------------------------------------------
-
-export interface HeatmapDay {
-  date: string; // YYYY-MM-DD
-  count: number;
-  level: 0 | 1 | 2 | 3 | 4;
-  habitsCount: number;
-  dailiesCount: number;
-  todosCount: number;
-  expensesCount: number;
-}
-
-export interface LifeTagDistribution {
-  tag: string;
-  count: number;
-  percentage: number;
-  color: string;
-}
-
-export interface AnalyticsDashboardData {
-  heatmap: HeatmapDay[];
-  tagDistributions: LifeTagDistribution[];
-  totalActivitiesLogged: number;
-  currentStreak: number;
-  longestStreak: number;
-  activeLifePillars: number;
-}
 
 // ----------------------------------------------------
 // Health & Fitness Models

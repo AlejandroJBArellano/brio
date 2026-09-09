@@ -364,8 +364,8 @@ export function checkAndTriggerSmartReminders(data: {
   if (settings.morningRitualReminder && !data.hasCompletedMorningRitual) {
     const morningTime = parseTimeMinutes(settings.morningRitualTime);
     if (currentTimeMinutes >= morningTime && !alreadySentToday("morning_ritual")) {
-      sendBrioNotification("🌅 Ritual Matutino Brio", {
-        body: "Momento de planear tus 3 tareas Must-Win del día y revisar tu agenda ⚡",
+      sendBrioNotification("Ritual matutino", {
+        body: "Momento de planear tus 3 tareas del día.",
         tag: "morning-ritual-reminder",
       });
       recordSentNotification("morning_ritual");

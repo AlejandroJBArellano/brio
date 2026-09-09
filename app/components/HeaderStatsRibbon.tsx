@@ -5,10 +5,8 @@ import { useCommandCenter } from "@/app/components/context/CommandCenterContext"
 import { useSession } from "@/lib/auth-client";
 import { HabiticaUser } from "@/lib/types";
 import {
-  Activity,
   Bed,
   BookOpen,
-  Calendar,
   ChevronDown,
   Dumbbell,
   Edit3,
@@ -105,17 +103,9 @@ export function HeaderStatsRibbon({ user }: HeaderStatsRibbonProps) {
             break;
           case "4":
             e.preventDefault();
-            router.push("/analytics");
-            break;
-          case "5":
-            e.preventDefault();
-            router.push("/calendar");
-            break;
-          case "6":
-            e.preventDefault();
             router.push("/health");
             break;
-          case "7":
+          case "5":
             e.preventDefault();
             router.push("/vault");
             break;
@@ -137,10 +127,8 @@ export function HeaderStatsRibbon({ user }: HeaderStatsRibbonProps) {
     { href: "/tasks", label: "Tareas", icon: Zap, shortcut: "⌘1" },
     { href: "/projects", label: "Proyectos", icon: FolderGit2, shortcut: "⌘2" },
     { href: "/finance", label: "Finanzas", icon: Wallet, shortcut: "⌘3" },
-    { href: "/analytics", label: "Balance", icon: Activity, shortcut: "⌘4" },
-    { href: "/calendar", label: "Agenda", icon: Calendar, shortcut: "⌘5" },
-    { href: "/health", label: "Salud", icon: Dumbbell, shortcut: "⌘6" },
-    { href: "/vault", label: "Bóveda", icon: BookOpen, shortcut: "⌘7" },
+    { href: "/health", label: "Salud", icon: Dumbbell, shortcut: "⌘4" },
+    { href: "/vault", label: "Bóveda", icon: BookOpen, shortcut: "⌘5" },
   ];
 
   const userName = session?.user?.name || user.profile.name || "Alejandro";

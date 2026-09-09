@@ -6,11 +6,12 @@ import { BrioLogo } from "@/app/components/BrioLogo";
 import { HabiticaTag, HabiticaTask } from "@/lib/types";
 import { capitalize } from "@/lib/utils";
 import {
-  Activity,
   Bed,
+  BookOpen,
   Calendar,
   Dumbbell,
   FlaskConical,
+  FolderGit2,
   Hash,
   Layers,
   ListTodo,
@@ -95,8 +96,8 @@ function CommandPaletteContent({
     return [
       {
         id: "action-morning-ritual",
-        title: "🌅 Iniciar Ritual Matutino",
-        subtitle: "Alinear energía, agenda del día y 3 Must-Wins",
+        title: "Iniciar ritual matutino",
+        subtitle: "Alinear energía y 3 Must-Wins",
         icon: Sun,
         badge: "⌘M",
         run: () => {
@@ -117,8 +118,8 @@ function CommandPaletteContent({
       },
       {
         id: "action-finance-new",
-        title: "💰 Registrar Movimiento en Brio Finanzas",
-        subtitle: "Gasto o ingreso con categoría y tarjeta en Neon DB",
+        title: "Registrar movimiento",
+        subtitle: "Gasto o ingreso en Neon DB",
         icon: Wallet,
         badge: "⌘F",
         run: () => {
@@ -128,8 +129,8 @@ function CommandPaletteContent({
       },
       {
         id: "action-hevy-sync",
-        title: "🏋️ Sincronizar Hevy Workout Tracker",
-        subtitle: "Descargar últimas sesiones de fuerza, ejercicios y volumen",
+        title: "Sincronizar Hevy",
+        subtitle: "Descargar últimas sesiones de fuerza y volumen",
         icon: Dumbbell,
         badge: "Hevy",
         run: () => {
@@ -141,101 +142,90 @@ function CommandPaletteContent({
         },
       },
       {
-        id: "action-tab-quick",
-        title: "📱 Ir a Dashboard Móvil (Hoy)",
-        subtitle: "Resumen ejecutivo con suplementos, agenda, finanzas y salud",
-        icon: Smartphone,
+        id: "action-tab-today",
+        title: "Ir a Hoy",
+        subtitle: "Resumen de hábitos, nutrición y proyectos",
+        icon: Sun,
         badge: "⌘0",
         run: () => {
-          onSelectMainTab("quick");
+          router.push("/today");
           onClose();
         },
       },
       {
         id: "action-tab-tasks",
-        title: "Ir a Tareas & Hábitos",
-        subtitle: "Vista principal de Habitica + Linear Inspector",
+        title: "Ir a Tareas",
+        subtitle: "Dailies, To-Dos y Hábitos",
         icon: Zap,
         badge: "⌘1",
         run: () => {
-          onSelectMainTab("tasks");
-          onClose();
-        },
-      },
-      {
-        id: "action-tab-finance",
-        title: "Ir a Brio Finanzas",
-        subtitle: "Termómetro mensual, gastos hormiga y metas de ahorro",
-        icon: Wallet,
-        badge: "⌘2",
-        run: () => {
-          onSelectMainTab("finance");
-          onClose();
-        },
-      },
-      {
-        id: "action-tab-analytics",
-        title: "Ir a Consistencia & Balance",
-        subtitle: "Heatmap de hábitos y balance de vida por tags",
-        icon: Activity,
-        badge: "⌘3",
-        run: () => {
-          onSelectMainTab("analytics");
-          onClose();
-        },
-      },
-      {
-        id: "action-tab-calendar",
-        title: "Ir a Agenda Google Calendar",
-        subtitle: "Timeline de eventos y reuniones sincronizadas",
-        icon: Calendar,
-        badge: "⌘4",
-        run: () => {
-          onSelectMainTab("calendar");
-          onClose();
-        },
-      },
-      {
-        id: "action-tab-health",
-        title: "Ir a Salud & Rendimiento",
-        subtitle: "Check-in de entrenamiento, hidratación 3L y sueño",
-        icon: Activity,
-        badge: "⌘5",
-        run: () => {
-          onSelectMainTab("health");
-          onClose();
-        },
-      },
-      {
-        id: "action-tab-biomarkers",
-        title: "🧪 Ver Estudios de Laboratorio & Biomarcadores",
-        subtitle: "Química Integral 45, Función Renal, Lipídica, Hepática y Hemática",
-        icon: FlaskConical,
-        badge: "Salud",
-        run: () => {
-          onSelectMainTab("health");
+          router.push("/tasks");
           onClose();
         },
       },
       {
         id: "action-tab-projects",
-        title: "🏛️ Ir a Bóveda & Intereses",
-        subtitle: "Cursos, partituras S3, libros, videos y proyectos",
-        icon: Layers,
-        badge: "⌘6",
+        title: "Ir a Proyectos",
+        subtitle: "Backlog y proyectos activos",
+        icon: FolderGit2,
+        badge: "⌘2",
         run: () => {
-          onSelectMainTab("projects");
+          router.push("/projects");
+          onClose();
+        },
+      },
+      {
+        id: "action-tab-finance",
+        title: "Ir a Finanzas",
+        subtitle: "Presupuesto, gastos y balances",
+        icon: Wallet,
+        badge: "⌘3",
+        run: () => {
+          router.push("/finance");
+          onClose();
+        },
+      },
+      {
+        id: "action-tab-health",
+        title: "Ir a Salud",
+        subtitle: "Entrenamiento, nutrición y sueño",
+        icon: Dumbbell,
+        badge: "⌘4",
+        run: () => {
+          router.push("/health");
+          onClose();
+        },
+      },
+      {
+        id: "action-tab-vault",
+        title: "Ir a Bóveda",
+        subtitle: "Biblioteca, cursos y recursos",
+        icon: BookOpen,
+        badge: "⌘5",
+        run: () => {
+          router.push("/vault");
+          onClose();
+        },
+      },
+      {
+        id: "action-tab-biomarkers",
+        title: "Biomarcadores y laboratorio",
+        subtitle: "Química Integral, función renal, lipídica y hemática",
+        icon: FlaskConical,
+        badge: "Salud",
+        run: () => {
+          router.push("/health");
           onClose();
         },
       },
       {
         id: "action-wishlist",
-        title: "🛍️ Wishlist Anti-Impulso",
-        subtitle: "Ver caprichos en enfriamiento de 30 días y dinero ahorrado",
+        title: "Wishlist anti-impulso",
+        subtitle: "Caprichos en enfriamiento de 30 días",
         icon: Sparkles,
         badge: "Finanzas",
         run: () => {
-          onSelectMainTab("finance");
+          router.push("/finance");
           onClose();
         },
       },

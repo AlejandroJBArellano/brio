@@ -16,8 +16,6 @@ export type DashboardMainTab =
   | "quick"
   | "tasks"
   | "finance"
-  | "analytics"
-  | "calendar"
   | "health"
   | "projects";
 

@@ -6,8 +6,6 @@ import {
 } from "@/app/components/context/CommandCenterContext";
 import { ModalManager } from "@/app/components/modals/ModalManager";
 import {
-  AnalyticsDashboardData,
-  CalendarDaySchedule,
   FinanceDashboardData,
   HabiticaTag,
   HabiticaTask,
@@ -19,8 +17,6 @@ import {
 } from "@/lib/types";
 import { Plus } from "lucide-react";
 import { useEffect } from "react";
-import { AnalyticsView } from "./analytics/AnalyticsView";
-import { DayScheduleView } from "./DayScheduleView";
 import { FinanceView } from "./finance/FinanceView";
 import { HeaderStatsRibbon } from "./HeaderStatsRibbon";
 import { HealthView } from "./health/HealthView";
@@ -38,9 +34,6 @@ interface BrioCommandCenterProps {
   tags: HabiticaTag[];
   isConfigured: boolean;
   financeData: FinanceDashboardData;
-  analyticsData: AnalyticsDashboardData;
-  calendarSchedule: CalendarDaySchedule;
-  isCalendarConfigured: boolean;
   healthData: HealthDashboardData;
   projectsData: ProjectsDashboardData;
   vaultData: VaultDashboardData;
@@ -61,9 +54,6 @@ function BrioCommandCenterContent({
   tags,
   isConfigured,
   financeData,
-  analyticsData,
-  calendarSchedule,
-  isCalendarConfigured,
   healthData,
   projectsData,
   vaultData,
@@ -103,19 +93,13 @@ function BrioCommandCenterContent({
           setActiveMainTab("tasks");
         } else if (e.key === "2") {
           e.preventDefault();
-          setActiveMainTab("finance");
+          setActiveMainTab("projects");
         } else if (e.key === "3") {
           e.preventDefault();
-          setActiveMainTab("analytics");
+          setActiveMainTab("finance");
         } else if (e.key === "4") {
           e.preventDefault();
-          setActiveMainTab("calendar");
-        } else if (e.key === "5") {
-          e.preventDefault();
           setActiveMainTab("health");
-        } else if (e.key === "6") {
-          e.preventDefault();
-          setActiveMainTab("projects");
         } else if (e.key.toLowerCase() === "p" && !isInputActive) {
           e.preventDefault();
           openModal("focus");
@@ -178,7 +162,6 @@ function BrioCommandCenterContent({
           tasks={tasks}
           healthData={healthData}
           financeData={financeData}
-          calendarSchedule={calendarSchedule}
           todayRitual={todayRitual}
           onOpenBottomSheet={handleOpenBottomSheetWithTab}
           onOpenNotificationSettings={() => openModal("notificationSettings")}
@@ -230,21 +213,6 @@ function BrioCommandCenterContent({
         <FinanceView data={financeData} onRefresh={refreshData} />
       )}
 
-      {activeMainTab === "analytics" && (
-        <AnalyticsView data={analyticsData} />
-      )}
-
-      {activeMainTab === "calendar" && (
-        <DayScheduleView
-          schedule={calendarSchedule}
-          isConfigured={isCalendarConfigured}
-          onRefresh={refreshData}
-          onSaveCalendarUrl={() => {
-            refreshData();
-          }}
-        />
-      )}
-
       {activeMainTab === "health" && (
         <HealthView data={healthData} onRefresh={refreshData} />
       )}
@@ -280,7 +248,6 @@ function BrioCommandCenterContent({
         user={user}
         tasks={tasks}
         tags={tags}
-        calendarSchedule={calendarSchedule}
         financeData={financeData}
         healthData={healthData}
         projectsData={projectsData}
@@ -292,7 +259,7 @@ function BrioCommandCenterContent({
           <span>Brio OS • Habitica + Neon DB + Archival Cockpit</span>
           <span>•</span>
           <span>
-            Vistas: <kbd className="rounded bg-[#181715] px-1 py-0.5 text-[#DDD6C9] border border-[#2A2723]">⌘0</kbd> Hoy • <kbd className="rounded bg-[#181715] px-1 py-0.5 text-[#DDD6C9] border border-[#2A2723]">⌘1</kbd> Tareas • <kbd className="rounded bg-[#181715] px-1 py-0.5 text-[#DDD6C9] border border-[#2A2723]">⌘2</kbd> Finanzas • <kbd className="rounded bg-[#181715] px-1 py-0.5 text-[#DDD6C9] border border-[#2A2723]">⌘3</kbd> Balance • <kbd className="rounded bg-[#181715] px-1 py-0.5 text-[#DDD6C9] border border-[#2A2723]">⌘4</kbd> Agenda • <kbd className="rounded bg-[#181715] px-1 py-0.5 text-[#DDD6C9] border border-[#2A2723]">⌘5</kbd> Salud • <kbd className="rounded bg-[#181715] px-1 py-0.5 text-[#DDD6C9] border border-[#2A2723]">⌘6</kbd> Proyectos
+            Vistas: <kbd className="rounded bg-[#181715] px-1 py-0.5 text-[#DDD6C9] border border-[#2A2723]">⌘0</kbd> Hoy • <kbd className="rounded bg-[#181715] px-1 py-0.5 text-[#DDD6C9] border border-[#2A2723]">⌘1</kbd> Tareas • <kbd className="rounded bg-[#181715] px-1 py-0.5 text-[#DDD6C9] border border-[#2A2723]">⌘2</kbd> Proyectos • <kbd className="rounded bg-[#181715] px-1 py-0.5 text-[#DDD6C9] border border-[#2A2723]">⌘3</kbd> Finanzas • <kbd className="rounded bg-[#181715] px-1 py-0.5 text-[#DDD6C9] border border-[#2A2723]">⌘4</kbd> Salud • <kbd className="rounded bg-[#181715] px-1 py-0.5 text-[#DDD6C9] border border-[#2A2723]">⌘5</kbd> Bóveda
           </span>
           <span>•</span>
           <span>

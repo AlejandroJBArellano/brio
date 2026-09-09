@@ -268,42 +268,7 @@ export function BiometricsHealthSkeleton() {
   );
 }
 
-export function CalendarSkeleton() {
-  return (
-    <div className="rounded-xl border border-[#2A2723] bg-[#181715] p-6 space-y-4 animate-pulse font-sans">
-      <div className="flex justify-between items-center pb-3 border-b border-[#2A2723]">
-        <div className="h-5 w-48 rounded bg-[#22201D]" />
-        <div className="h-8 w-24 rounded-lg bg-[#22201D]" />
-      </div>
-      <div className="space-y-3">
-        {[1, 2, 3, 4, 5, 6].map((i) => (
-          <div key={i} className="flex items-center gap-4 p-3 rounded-lg bg-[#121110] border border-[#2A2723]">
-            <div className="h-4 w-16 rounded bg-[#22201D]" />
-            <div className="h-4 flex-1 rounded bg-[#22201D]/70" />
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
 
-export function AnalyticsSkeleton() {
-  return (
-    <div className="space-y-6 animate-pulse font-sans">
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {[1, 2, 3].map((i) => (
-          <div key={i} className="rounded-xl border border-[#2A2723] bg-[#181715] p-5 space-y-2">
-            <div className="h-3 w-28 rounded bg-[#22201D]" />
-            <div className="h-8 w-20 rounded bg-[#22201D]" />
-          </div>
-        ))}
-      </div>
-      <div className="h-72 rounded-xl border border-[#2A2723] bg-[#181715] p-6 flex items-center justify-center">
-        <div className="h-4 w-48 rounded bg-[#22201D]" />
-      </div>
-    </div>
-  );
-}
 
 export function VaultSkeleton() {
   return (

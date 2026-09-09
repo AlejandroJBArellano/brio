@@ -8,7 +8,6 @@ import {
 import { toggleTaskAction } from "@/app/actions/tasks";
 import { soundFx } from "@/lib/soundFx";
 import {
-  CalendarDaySchedule,
   FinanceDashboardData,
   HabiticaTask,
   HabiticaUser,
@@ -16,10 +15,8 @@ import {
   RitualLog,
 } from "@/lib/types";
 import {
-  Calendar,
   Check,
   CheckCircle2,
-  Clock,
   Droplet,
   Pill,
   Plus,
@@ -36,7 +33,6 @@ interface MobileQuickDashboardProps {
   tasks: HabiticaTask[];
   healthData: HealthDashboardData;
   financeData: FinanceDashboardData;
-  calendarSchedule: CalendarDaySchedule;
   todayRitual: RitualLog | null;
   onOpenBottomSheet: (tab?: "expense" | "task" | "water" | "nutrition") => void;
   onOpenNotificationSettings?: () => void;
@@ -49,7 +45,6 @@ export function MobileQuickDashboard({
   tasks,
   healthData,
   financeData,
-  calendarSchedule,
   todayRitual,
   onOpenBottomSheet,
   onOpenMorningRitual,
@@ -131,9 +126,6 @@ export function MobileQuickDashboard({
   // Must-Win Tasks
   const mustWinIds = todayRitual?.mustWinTasks || [];
   const mustWinTasks = tasks.filter((t) => mustWinIds.includes(t.id));
-
-  // Next Calendar Event
-  const nextEvent = calendarSchedule.nextEvent || calendarSchedule.events.find((e) => e.status === "upcoming" || e.status === "now");
 
   // Handlers
   const handleToggleSupplement = (id: string) => {
@@ -307,7 +299,7 @@ export function MobileQuickDashboard({
         )}
       </div>
 
-      {/* 3. Widget de Agenda & Tareas Must-Win */}
+      {/* 3. Widget de Tareas Must-Win */}
       <div className="rounded-xl border border-[#2A2723] bg-[#181715] p-4.5 shadow-lg space-y-3.5">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
@@ -315,7 +307,7 @@ export function MobileQuickDashboard({
               <Zap className="size-4" />
             </div>
             <div>
-              <h3 className="font-serif text-sm font-bold text-[#F5F2EB]">Agenda & Foco Must-Win</h3>
+              <h3 className="font-serif text-sm font-bold text-[#F5F2EB]">Foco Must-Win</h3>
               <p className="text-[11px] text-[#8E867B]">
                 {mustWinTasks.filter((t) => t.completed).length}/{mustWinTasks.length} victorias de hoy
               </p>
@@ -325,40 +317,11 @@ export function MobileQuickDashboard({
           <button
             type="button"
             onClick={onOpenMorningRitual}
-            className="text-[11px] text-[#D99B43] hover:text-[#E8AF59] font-medium transition-colors"
+            className="text-[11px] text-[#D99B43] hover:text-[#E8AF59] font-medium transition-colors cursor-pointer"
           >
-            Ritual AM ⚡
+            Ritual AM
           </button>
         </div>
-
-        {/* Next Calendar Event Banner */}
-        {nextEvent ? (
-          <div className="rounded-lg border border-[#4EAB9E]/30 bg-[#141C1A] p-3 flex items-center justify-between gap-2">
-            <div className="flex items-center gap-2.5 overflow-hidden">
-              <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-[#4EAB9E]/20 text-[#4EAB9E] border border-[#4EAB9E]/30">
-                <Calendar className="size-4" />
-              </div>
-              <div className="truncate">
-                <p className="text-xs font-semibold text-[#F5F2EB] truncate">
-                  {nextEvent.title}
-                </p>
-                <p className="text-[10px] text-[#4EAB9E] font-mono">
-                  {nextEvent.startTimeFormatted} {nextEvent.timeUntil ? `(${nextEvent.timeUntil})` : ""}
-                </p>
-              </div>
-            </div>
-            {nextEvent.location && (
-              <span className="text-[10px] font-mono text-[#8E867B] truncate max-w-25">
-                {nextEvent.location}
-              </span>
-            )}
-          </div>
-        ) : (
-          <div className="rounded-lg border border-[#2A2723] bg-[#121110] p-2.5 text-center text-[11px] text-[#8E867B] flex items-center justify-center gap-1.5">
-            <Clock className="size-3.5 text-[#8E867B]" />
-            Sin reuniones pendientes para hoy
-          </div>
-        )}
 
         {/* Must-Win Tasks List */}
         {mustWinTasks.length === 0 ? (

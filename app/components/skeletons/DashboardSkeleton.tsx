@@ -62,8 +62,6 @@ export function DashboardSkeleton() {
           {[
             "Tareas & Foco",
             "Finanzas",
-            "Analytics",
-            "Agenda",
             "Salud & Gym",
             "Bóveda & Vault",
             "Proyectos",
