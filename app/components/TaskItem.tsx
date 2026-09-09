@@ -304,6 +304,28 @@ export function TaskItem({
           </div>
         )}
 
+        {/* Indicador de Fecha Límite (To-Dos) */}
+        {task.type === "todo" && task.date && (
+          <span
+            className="hidden sm:inline-flex items-center gap-1 rounded border border-[#2E2A25] bg-[#191815] px-1.5 py-0.5 font-mono text-[9px] font-medium text-[#A69E91]"
+            title={`Fecha límite: ${task.date.slice(0, 10)}`}
+          >
+            <Calendar className="size-2.5 text-[#8E867B]" />
+            <span>
+              {(() => {
+                try {
+                  const d = new Date(task.date);
+                  return isNaN(d.getTime())
+                    ? task.date.slice(0, 10)
+                    : d.toLocaleDateString(undefined, { month: "short", day: "numeric" });
+                } catch {
+                  return task.date.slice(0, 10);
+                }
+              })()}
+            </span>
+          </span>
+        )}
+
         {/* Flecha de Selección / Inspector */}
         <ChevronRight
           className={`size-3.5 transition-transform duration-200 ${isSelected

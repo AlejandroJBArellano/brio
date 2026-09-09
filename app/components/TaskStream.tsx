@@ -9,6 +9,9 @@ import {
   parseTaskPrefix,
 } from "@/lib/utils";
 import {
+  ArrowDown,
+  ArrowUp,
+  ArrowUpDown,
   Calendar,
   Check,
   CheckCircle2,
@@ -32,6 +35,75 @@ import {
 } from "lucide-react";
 import { useEffect, useMemo, useState, useTransition } from "react";
 import { TaskItem } from "./TaskItem";
+
+export type SortField = "text" | "priority" | "value" | "date" | "type";
+export type SortDirection = "asc" | "desc";
+
+function sortTasks(
+  taskList: HabiticaTask[],
+  sortField: SortField | null,
+  sortDirection: SortDirection | null
+): HabiticaTask[] {
+  if (!sortField || !sortDirection) {
+    return taskList;
+  }
+
+  return [...taskList].sort((a, b) => {
+    // Keep completed tasks always at the bottom
+    const aCompleted = Boolean(a.completed);
+    const bCompleted = Boolean(b.completed);
+    if (aCompleted !== bCompleted) {
+      return aCompleted ? 1 : -1;
+    }
+
+    let comparison = 0;
+
+    switch (sortField) {
+      case "text": {
+        const titleA = parseTaskPrefix(a.text).cleanTitle.toLowerCase().trim();
+        const titleB = parseTaskPrefix(b.text).cleanTitle.toLowerCase().trim();
+        comparison = titleA.localeCompare(titleB, undefined, { numeric: true, sensitivity: "base" });
+        break;
+      }
+      case "priority": {
+        const prioA = a.priority ?? 1;
+        const prioB = b.priority ?? 1;
+        comparison = prioA - prioB;
+        break;
+      }
+      case "value": {
+        const valA = a.value ?? 0;
+        const valB = b.value ?? 0;
+        comparison = valA - valB;
+        break;
+      }
+      case "date": {
+        const timeA = a.date ? new Date(a.date).getTime() : (a.type === "daily" ? (a.streak || 0) : null);
+        const timeB = b.date ? new Date(b.date).getTime() : (b.type === "daily" ? (b.streak || 0) : null);
+
+        if (timeA === null && timeB === null) {
+          comparison = 0;
+        } else if (timeA === null) {
+          return 1;
+        } else if (timeB === null) {
+          return -1;
+        } else {
+          comparison = timeA - timeB;
+        }
+        break;
+      }
+      case "type": {
+        const typeOrder: Record<string, number> = { daily: 1, todo: 2, habit: 3 };
+        const orderA = typeOrder[a.type] ?? 99;
+        const orderB = typeOrder[b.type] ?? 99;
+        comparison = orderA - orderB;
+        break;
+      }
+    }
+
+    return sortDirection === "asc" ? comparison : -comparison;
+  });
+}
 
 interface TaskStreamProps {
   tasks: HabiticaTask[];
@@ -59,7 +131,25 @@ export function TaskStream({
   const [viewMode, setViewMode] = useState<"grouped" | "board" | "table">("grouped");
   const [selectedProjectChip, setSelectedProjectChip] = useState<string | null>(null);
   const [collapsedProjects, setCollapsedProjects] = useState<Record<string, boolean>>({});
+  const [sortField, setSortField] = useState<SortField | null>(null);
+  const [sortDirection, setSortDirection] = useState<SortDirection | null>(null);
   const [_isPending, startTransition] = useTransition();
+
+  const handleSort = (field: SortField) => {
+    if (sortField !== field) {
+      // 1st click: intelligent initial direction
+      const initialDir: SortDirection = field === "priority" ? "desc" : "asc";
+      setSortField(field);
+      setSortDirection(initialDir);
+    } else if (sortDirection === (field === "priority" ? "desc" : "asc")) {
+      // 2nd click: invert direction
+      setSortDirection(field === "priority" ? "asc" : "desc");
+    } else {
+      // 3rd click: reset to original order
+      setSortField(null);
+      setSortDirection(null);
+    }
+  };
 
   const tagsMap = useMemo(() => {
     const map: Record<string, string> = {};
@@ -176,6 +266,21 @@ export function TaskStream({
     [filteredTasks]
   );
 
+  const sortedFilteredTasks = useMemo(
+    () => sortTasks(filteredTasks, sortField, sortDirection),
+    [filteredTasks, sortField, sortDirection]
+  );
+
+  const sortedDailies = useMemo(
+    () => sortTasks(filteredDailies, sortField, sortDirection),
+    [filteredDailies, sortField, sortDirection]
+  );
+
+  const sortedHabits = useMemo(
+    () => sortTasks(filteredHabits, sortField, sortDirection),
+    [filteredHabits, sortField, sortDirection]
+  );
+
   // Group To-Dos by Project for project accordion folders
   const todosByProject = useMemo(() => {
     const groups: Record<string, HabiticaTask[]> = {};
@@ -185,8 +290,13 @@ export function TaskStream({
       if (!groups[key]) groups[key] = [];
       groups[key].push(t);
     }
+    if (sortField && sortDirection) {
+      for (const key of Object.keys(groups)) {
+        groups[key] = sortTasks(groups[key], sortField, sortDirection);
+      }
+    }
     return groups;
-  }, [filteredTodos]);
+  }, [filteredTodos, sortField, sortDirection]);
 
   const toggleProjectCollapse = (projectName: string) => {
     setCollapsedProjects((prev) => ({
@@ -195,9 +305,40 @@ export function TaskStream({
     }));
   };
 
+  // Active task list for keyboard navigation matching visual order
+  const activeTaskList = useMemo(() => {
+    if (viewMode === "table") {
+      return sortedFilteredTasks;
+    }
+    if (viewMode === "grouped") {
+      const list: HabiticaTask[] = [];
+      if (activeTab !== "habits" && activeTab !== "todos") {
+        list.push(...sortedDailies);
+      }
+      if (activeTab !== "dailies" && activeTab !== "habits") {
+        for (const projTasks of Object.values(todosByProject)) {
+          list.push(...projTasks);
+        }
+      }
+      if (activeTab !== "dailies" && activeTab !== "todos") {
+        list.push(...sortedHabits);
+      }
+      return list;
+    }
+    return filteredTasks;
+  }, [
+    viewMode,
+    sortedFilteredTasks,
+    sortedDailies,
+    todosByProject,
+    sortedHabits,
+    filteredTasks,
+    activeTab,
+  ]);
+
   // Derived selected index from selectedTaskId
   const selectedIndex = selectedTaskId
-    ? Math.max(0, filteredTasks.findIndex((t) => t.id === selectedTaskId))
+    ? Math.max(0, activeTaskList.findIndex((t) => t.id === selectedTaskId))
     : -1;
 
   // Vim-style keyboard navigation: j/k, Space/x, +/-, Enter, d, v (toggle mode)
@@ -221,28 +362,28 @@ export function TaskStream({
         return;
       }
 
-      if (filteredTasks.length === 0) return;
+      if (activeTaskList.length === 0) return;
 
       if (e.key === "j" || e.key === "ArrowDown") {
         e.preventDefault();
         const next =
-          selectedIndex < filteredTasks.length - 1 ? selectedIndex + 1 : 0;
-        onSelectTask(filteredTasks[next] || null);
+          selectedIndex < activeTaskList.length - 1 ? selectedIndex + 1 : 0;
+        onSelectTask(activeTaskList[next] || null);
       } else if (e.key === "k" || e.key === "ArrowUp") {
         e.preventDefault();
         const next =
-          selectedIndex > 0 ? selectedIndex - 1 : filteredTasks.length - 1;
-        onSelectTask(filteredTasks[next] || null);
+          selectedIndex > 0 ? selectedIndex - 1 : activeTaskList.length - 1;
+        onSelectTask(activeTaskList[next] || null);
       } else if (e.key === " " || e.key === "x") {
         e.preventDefault();
-        const curTask = filteredTasks[selectedIndex];
+        const curTask = activeTaskList[selectedIndex];
         if (curTask) {
           startTransition(async () => {
             await toggleTaskAction(curTask.id, "up");
           });
         }
       } else if (e.key === "+" || e.key === "=") {
-        const curTask = filteredTasks[selectedIndex];
+        const curTask = activeTaskList[selectedIndex];
         if (curTask && curTask.type === "habit") {
           e.preventDefault();
           startTransition(async () => {
@@ -250,7 +391,7 @@ export function TaskStream({
           });
         }
       } else if (e.key === "-") {
-        const curTask = filteredTasks[selectedIndex];
+        const curTask = activeTaskList[selectedIndex];
         if (curTask && curTask.type === "habit") {
           e.preventDefault();
           startTransition(async () => {
@@ -259,12 +400,12 @@ export function TaskStream({
         }
       } else if (e.key === "Enter" || e.key === "e") {
         e.preventDefault();
-        const curTask = filteredTasks[selectedIndex];
+        const curTask = activeTaskList[selectedIndex];
         if (curTask) {
           onSelectTask(curTask);
         }
       } else if (e.key === "d" && !e.metaKey && !e.ctrlKey) {
-        const curTask = filteredTasks[selectedIndex];
+        const curTask = activeTaskList[selectedIndex];
         if (curTask && window.confirm(`¿Eliminar "${curTask.text}"?`)) {
           e.preventDefault();
           startTransition(async () => {
@@ -277,7 +418,7 @@ export function TaskStream({
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [filteredTasks, selectedIndex, onSelectTask]);
+  }, [activeTaskList, selectedIndex, onSelectTask]);
 
   return (
     <section className="space-y-4">
@@ -619,9 +760,13 @@ export function TaskStream({
                 </div>
 
                 <div className="rounded-xl border border-[#2A2723] bg-[#141311] overflow-hidden shadow-lg">
-                  <TableHeader />
+                  <TableHeader
+                    sortField={sortField}
+                    sortDirection={sortDirection}
+                    onSort={handleSort}
+                  />
                   <div className="divide-y divide-[#22201D]">
-                    {filteredDailies.map((task) => (
+                    {sortedDailies.map((task) => (
                       <TaskItem
                         key={task.id}
                         task={task}
@@ -699,16 +844,23 @@ export function TaskStream({
 
                         {/* Tasks inside this project */}
                         {!isCollapsed && (
-                          <div className="divide-y divide-[#22201D]">
-                            {projTasks.map((task) => (
-                              <TaskItem
-                                key={task.id}
-                                task={task}
-                                tagsMap={tagsMap}
-                                isSelected={selectedTaskId === task.id}
-                                onSelect={() => onSelectTask(task)}
-                              />
-                            ))}
+                          <div>
+                            <TableHeader
+                              sortField={sortField}
+                              sortDirection={sortDirection}
+                              onSort={handleSort}
+                            />
+                            <div className="divide-y divide-[#22201D]">
+                              {projTasks.map((task) => (
+                                <TaskItem
+                                  key={task.id}
+                                  task={task}
+                                  tagsMap={tagsMap}
+                                  isSelected={selectedTaskId === task.id}
+                                  onSelect={() => onSelectTask(task)}
+                                />
+                              ))}
+                            </div>
                           </div>
                         )}
                       </div>
@@ -736,9 +888,13 @@ export function TaskStream({
                 </div>
 
                 <div className="rounded-xl border border-[#2A2723] bg-[#141311] overflow-hidden shadow-lg">
-                  <TableHeader />
+                  <TableHeader
+                    sortField={sortField}
+                    sortDirection={sortDirection}
+                    onSort={handleSort}
+                  />
                   <div className="divide-y divide-[#22201D]">
-                    {filteredHabits.map((task) => (
+                    {sortedHabits.map((task) => (
                       <TaskItem
                         key={task.id}
                         task={task}
@@ -755,9 +911,14 @@ export function TaskStream({
         ) : (
           /* =================== 3. VISTA LEDGER TABULAR CONTINUA =================== */
           <div className="rounded-xl border border-[#2A2723] bg-[#141311] overflow-hidden shadow-lg">
-            <TableHeader showTypeColumn={activeTab === "all"} />
+            <TableHeader
+              showTypeColumn={activeTab === "all"}
+              sortField={sortField}
+              sortDirection={sortDirection}
+              onSort={handleSort}
+            />
             <div className="divide-y divide-[#22201D]">
-              {filteredTasks.map((task) => (
+              {sortedFilteredTasks.map((task) => (
                 <TaskItem
                   key={task.id}
                   task={task}
@@ -843,20 +1004,94 @@ export function TaskStream({
 }
 
 /**
- * Tabular Column Header for Archival Ledger
+ * Tabular Column Header with interactive sorting
  */
-function TableHeader({ showTypeColumn = false }: { showTypeColumn?: boolean }) {
+function TableHeader({
+  showTypeColumn = false,
+  sortField,
+  sortDirection,
+  onSort,
+}: {
+  showTypeColumn?: boolean;
+  sortField?: SortField | null;
+  sortDirection?: SortDirection | null;
+  onSort?: (field: SortField) => void;
+}) {
+  const renderSortIndicator = (field: SortField) => {
+    if (sortField !== field || !sortDirection) {
+      return (
+        <ArrowUpDown className="size-2.5 opacity-0 group-hover:opacity-60 transition-opacity shrink-0" />
+      );
+    }
+    return sortDirection === "asc" ? (
+      <ArrowUp className="size-2.5 text-[#D99B43] shrink-0" />
+    ) : (
+      <ArrowDown className="size-2.5 text-[#D99B43] shrink-0" />
+    );
+  };
+
+  const getHeaderClass = (field: SortField) => {
+    const isActive = sortField === field && Boolean(sortDirection);
+    return `group inline-flex items-center gap-1 transition-colors cursor-pointer select-none ${
+      isActive
+        ? "text-[#D99B43] font-bold"
+        : "text-[#736B60] hover:text-[#DDD6C9]"
+    }`;
+  };
+
   return (
     <div className="hidden sm:flex items-center justify-between border-b border-[#2A2723] bg-[#161513] px-4 py-1.5 text-[10px] font-mono font-semibold uppercase tracking-wider text-[#736B60] select-none">
       <div className="flex items-center gap-3 flex-1 min-w-0">
         <span className="w-5 text-center">Acc</span>
-        {showTypeColumn && <span className="w-14">Tipo</span>}
-        <span className="flex-1">Tarea & Etiquetas</span>
+        {showTypeColumn && (
+          <button
+            type="button"
+            onClick={() => onSort?.("type")}
+            className={`w-14 text-left ${getHeaderClass("type")}`}
+            title="Ordenar por Tipo"
+          >
+            <span>Tipo</span>
+            {renderSortIndicator("type")}
+          </button>
+        )}
+        <button
+          type="button"
+          onClick={() => onSort?.("text")}
+          className={`flex-1 text-left ${getHeaderClass("text")}`}
+          title="Ordenar por Tarea (A-Z)"
+        >
+          <span>Tarea & Etiquetas</span>
+          {renderSortIndicator("text")}
+        </button>
       </div>
       <div className="flex items-center gap-4 shrink-0 pr-6">
-        <span className="w-14 text-center">Prioridad</span>
-        <span className="hidden md:inline-block w-24 text-center">Salud RPG</span>
-        <span className="w-16 text-right">Métrica</span>
+        <button
+          type="button"
+          onClick={() => onSort?.("priority")}
+          className={`w-14 justify-center ${getHeaderClass("priority")}`}
+          title="Ordenar por Prioridad"
+        >
+          <span>Prioridad</span>
+          {renderSortIndicator("priority")}
+        </button>
+        <button
+          type="button"
+          onClick={() => onSort?.("value")}
+          className={`hidden md:inline-flex w-24 justify-center ${getHeaderClass("value")}`}
+          title="Ordenar por Salud RPG"
+        >
+          <span>Salud RPG</span>
+          {renderSortIndicator("value")}
+        </button>
+        <button
+          type="button"
+          onClick={() => onSort?.("date")}
+          className={`w-16 justify-end ${getHeaderClass("date")}`}
+          title="Ordenar por Métrica / Fecha"
+        >
+          <span>Métrica</span>
+          {renderSortIndicator("date")}
+        </button>
       </div>
     </div>
   );
