@@ -21,7 +21,7 @@ import {
   Tag,
   Zap,
 } from "lucide-react";
-import { useOptimistic, useTransition } from "react";
+import { useOptimistic, useState, useTransition } from "react";
 
 interface TaskItemProps {
   task: HabiticaTask;
@@ -41,6 +41,7 @@ export function TaskItem({
   showTypeBadge = false,
 }: TaskItemProps) {
   const [isPending, startTransition] = useTransition();
+  const [copied, setCopied] = useState(false);
 
   const [optimisticState, setOptimisticState] = useOptimistic(
     {
@@ -182,13 +183,27 @@ export function TaskItem({
             )}
 
             <span
-              className={`text-xs sm:text-sm font-medium leading-snug tracking-tight text-[#F5F2EB] truncate ${optimisticState.completed
+              onClick={() => {
+                navigator.clipboard.writeText(task.text);
+                soundFx.click();
+                setCopied(true);
+                setTimeout(() => setCopied(false), 1500);
+              }}
+              title="Clic para copiar título"
+              className={`text-xs sm:text-sm font-medium leading-snug tracking-tight text-[#F5F2EB] truncate cursor-pointer hover:underline underline-offset-2 decoration-[#D99B43]/50 ${optimisticState.completed
                   ? "line-through text-[#8E867B]"
                   : "group-hover:text-white"
                 }`}
             >
               {cleanTitle}
             </span>
+
+            {copied && (
+              <span className="inline-flex items-center gap-1 text-[10px] font-mono text-[#7EA35A] bg-[#7EA35A]/10 border border-[#7EA35A]/30 px-1.5 py-0.2 rounded animate-in fade-in duration-150 shrink-0">
+                <Check className="size-2.5" />
+                <span>Copiado</span>
+              </span>
+            )}
           </div>
 
           {/* Subtítulos / Subtareas / Tags */}

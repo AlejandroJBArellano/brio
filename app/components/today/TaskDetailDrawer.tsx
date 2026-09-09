@@ -22,6 +22,7 @@ import {
   AlertCircle,
   Check,
   CheckCircle2,
+  Copy,
   ExternalLink,
   Eye,
   FileText,
@@ -88,6 +89,17 @@ export function TaskDetailDrawer({
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [isEditDragging, setIsEditDragging] = useState(false);
+
+  // Copied Title Feedback State
+  const [copiedTitle, setCopiedTitle] = useState(false);
+
+  const handleCopyTitle = () => {
+    if (!task) return;
+    navigator.clipboard.writeText(task.text);
+    soundFx.click();
+    setCopiedTitle(true);
+    setTimeout(() => setCopiedTitle(false), 1500);
+  };
 
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const editFileInputRef = useRef<HTMLInputElement | null>(null);
@@ -421,13 +433,25 @@ export function TaskDetailDrawer({
             <>
               {/* Title */}
               <div>
-                <h3
-                  className={`font-serif text-lg sm:text-xl font-bold text-[#F5F2EB] ${
-                    task.completed ? "line-through text-[#8E867B]" : ""
-                  }`}
-                >
-                  {task.text}
-                </h3>
+                <div className="inline-flex items-center gap-2.5 flex-wrap">
+                  <h3
+                    onClick={handleCopyTitle}
+                    title="Clic para copiar título"
+                    className={`group/title inline-flex items-center gap-2 cursor-pointer font-serif text-lg sm:text-xl font-bold text-[#F5F2EB] hover:text-[#FFFFFF] transition-colors select-text ${
+                      task.completed ? "line-through text-[#8E867B]" : ""
+                    }`}
+                  >
+                    <span>{task.text}</span>
+                    <Copy className="h-3.5 w-3.5 text-[#8E867B] opacity-0 group-hover/title:opacity-100 transition-opacity shrink-0" />
+                  </h3>
+
+                  {copiedTitle && (
+                    <span className="inline-flex items-center gap-1 text-[11px] font-mono text-[#7EA35A] bg-[#7EA35A]/10 border border-[#7EA35A]/30 px-2 py-0.5 rounded-md animate-in fade-in duration-150 shrink-0">
+                      <Check className="h-3 w-3" />
+                      <span>Copiado</span>
+                    </span>
+                  )}
+                </div>
               </div>
 
               {/* Notes / Description from Habitica */}

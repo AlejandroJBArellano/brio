@@ -877,6 +877,7 @@ function TaskBoardCard({
   onSelect: () => void;
 }) {
   const [isPending, startTransition] = useTransition();
+  const [copied, setCopied] = useState(false);
   const { prefix, cleanTitle } = parseTaskPrefix(task.text);
   const prio = getTaskPriorityInfo(task.priority || 1);
   const valueStyle = getTaskValueColor(task.value || 0);
@@ -941,13 +942,28 @@ function TaskBoardCard({
       </div>
 
       {/* Title */}
-      <h4
-        className={`text-xs font-medium text-[#F5F2EB] leading-snug line-clamp-2 ${
-          task.completed ? "line-through text-[#8E867B]" : "group-hover:text-white"
-        }`}
-      >
-        {cleanTitle}
-      </h4>
+      <div className="flex items-center gap-1.5 flex-wrap">
+        <h4
+          onClick={() => {
+            navigator.clipboard.writeText(task.text);
+            soundFx.click();
+            setCopied(true);
+            setTimeout(() => setCopied(false), 1500);
+          }}
+          title="Clic para copiar título"
+          className={`text-xs font-medium text-[#F5F2EB] leading-snug line-clamp-2 cursor-pointer hover:underline underline-offset-2 decoration-[#D99B43]/50 ${
+            task.completed ? "line-through text-[#8E867B]" : "group-hover:text-white"
+          }`}
+        >
+          {cleanTitle}
+        </h4>
+        {copied && (
+          <span className="inline-flex items-center gap-1 text-[9px] font-mono text-[#7EA35A] bg-[#7EA35A]/10 border border-[#7EA35A]/30 px-1.5 py-0.2 rounded animate-in fade-in duration-150 shrink-0">
+            <Check className="size-2.5" />
+            <span>Copiado</span>
+          </span>
+        )}
+      </div>
 
       {/* Meta tags & checklist */}
       {(totalChecklistCount > 0 || (task.tags && task.tags.length > 0)) && (

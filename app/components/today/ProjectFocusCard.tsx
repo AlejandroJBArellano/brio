@@ -247,6 +247,9 @@ export function ProjectFocusCard({
   const [activeTaskForDrawer, setActiveTaskForDrawer] =
     useState<HabiticaTask | null>(null);
 
+  // Copied task title feedback state
+  const [copiedTaskId, setCopiedTaskId] = useState<string | null>(null);
+
   // Quick Task Creation
 
 
@@ -784,14 +787,35 @@ export function ProjectFocusCard({
 
                         {/* Title */}
                         <div className="min-w-0 space-y-1">
-                          <h4
-                            className={`text-xs sm:text-sm font-medium leading-snug wrap-break-word ${task.completed
-                              ? "line-through text-[#8E867B]"
-                              : "text-[#F5F2EB] group-hover:text-[#FFFFFF]"
-                              }`}
-                          >
-                            {task.text}
-                          </h4>
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <h4
+                              onClick={() => {
+                                navigator.clipboard.writeText(task.text);
+                                soundFx.click();
+                                setCopiedTaskId(task.id);
+                                setTimeout(
+                                  () =>
+                                    setCopiedTaskId((prev) =>
+                                      prev === task.id ? null : prev
+                                    ),
+                                  1500
+                                );
+                              }}
+                              title="Clic para copiar título"
+                              className={`text-xs sm:text-sm font-medium leading-snug wrap-break-word cursor-pointer hover:underline underline-offset-2 decoration-[#D99B43]/50 ${task.completed
+                                ? "line-through text-[#8E867B]"
+                                : "text-[#F5F2EB] group-hover:text-[#FFFFFF]"
+                                }`}
+                            >
+                              {task.text}
+                            </h4>
+                            {copiedTaskId === task.id && (
+                              <span className="inline-flex items-center gap-1 text-[10px] font-mono text-[#7EA35A] bg-[#7EA35A]/10 border border-[#7EA35A]/30 px-1.5 py-0.2 rounded animate-in fade-in duration-150 shrink-0">
+                                <Check className="h-2.5 w-2.5" />
+                                <span>Copiado</span>
+                              </span>
+                            )}
+                          </div>
                         </div>
                       </div>
 
