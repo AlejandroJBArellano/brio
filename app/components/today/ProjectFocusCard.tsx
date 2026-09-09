@@ -24,23 +24,29 @@ import {
   ChevronDown,
   ChevronRight,
   ChevronUp,
+  Cpu,
   ExternalLink,
   FileText,
   FolderGit2,
   Globe,
   Layers,
+  Lightbulb,
   ListTodo,
   Loader2,
+  Maximize2,
   Minimize2,
   Pencil,
   Plus,
   RefreshCw,
+  Scale,
   Search,
   Tag,
   Trash2,
+  Users,
+  X,
   Zap,
 } from "lucide-react";
-import { useMemo, useState, useTransition } from "react";
+import React, { useEffect, useMemo, useState, useTransition } from "react";
 import { TaskDetailDrawer } from "./TaskDetailDrawer";
 
 interface ProjectFocusCardProps {
@@ -57,14 +63,62 @@ interface ProjectFocusCardProps {
 
 const CATEGORY_META: Record<
   NoteCategory,
-  { label: string; icon: string; color: string }
+  { label: string; icon: React.ReactNode; color: string }
 > = {
-  idea: { label: "Idea", icon: "💡", color: "text-[#D99B43] bg-[#221D16] border-[#D99B43]/30" },
-  decision: { label: "Decisión", icon: "⚖️", color: "text-[#7EA35A] bg-[#141813] border-[#7EA35A]/30" },
-  technical: { label: "Técnico", icon: "⚙️", color: "text-[#4EAB9E] bg-[#141C1A] border-[#4EAB9E]/30" },
-  meeting: { label: "Reunión", icon: "👥", color: "text-[#B388FF] bg-[#1E1627] border-[#B388FF]/30" },
-  log: { label: "Log de Sesión", icon: "📋", color: "text-[#8E867B] bg-[#181715] border-[#2A2723]" },
+  idea: { label: "Idea", icon: <Lightbulb className="h-3 w-3" />, color: "text-[#D99B43] bg-[#221D16] border-[#D99B43]/30" },
+  decision: { label: "Decisión", icon: <Scale className="h-3 w-3" />, color: "text-[#7EA35A] bg-[#141813] border-[#7EA35A]/30" },
+  technical: { label: "Técnico", icon: <Cpu className="h-3 w-3" />, color: "text-[#4EAB9E] bg-[#141C1A] border-[#4EAB9E]/30" },
+  meeting: { label: "Reunión", icon: <Users className="h-3 w-3" />, color: "text-[#B388FF] bg-[#1E1627] border-[#B388FF]/30" },
+  log: { label: "Log de Sesión", icon: <FileText className="h-3 w-3" />, color: "text-[#8E867B] bg-[#181715] border-[#2A2723]" },
 };
+
+function getFirstParagraphPreview(markdown: string): string {
+  if (!markdown) return "";
+  const lines = markdown.split(/\r?\n/);
+  const textLines: string[] = [];
+
+  for (const rawLine of lines) {
+    const line = rawLine.trim();
+    if (!line) {
+      if (textLines.length > 0) break;
+      continue;
+    }
+    // Skip headings, horizontal rules, markdown tables, code fences
+    if (
+      line.startsWith("#") ||
+      line.startsWith("---") ||
+      line.startsWith("===") ||
+      line.startsWith("|") ||
+      line.startsWith("```")
+    ) {
+      continue;
+    }
+
+    // Clean bullets, numbering and markdown formatting
+    const cleanLine = line
+      .replace(/^[\*\-\+\>]+\s*/, "")
+      .replace(/^\d+[\.\)]\s*/, "")
+      .replace(/\*\*(.*?)\*\*/g, "$1")
+      .replace(/\*(.*?)\*/g, "$1")
+      .replace(/`([^`]+)`/g, "$1")
+      .trim();
+
+    if (cleanLine) {
+      textLines.push(cleanLine);
+    }
+  }
+
+  if (textLines.length === 0) {
+    const fallback = lines.find((l) => l.trim().length > 0) || "";
+    return fallback
+      .replace(/^[#\*\-\+\>\|\s]+/, "")
+      .replace(/\*\*(.*?)\*\*/g, "$1")
+      .replace(/\*(.*?)\*/g, "$1")
+      .trim();
+  }
+
+  return textLines.join(" ");
+}
 
 export function ProjectFocusCard({
   projects,
@@ -204,6 +258,16 @@ export function ProjectFocusCard({
     useState<NoteCategory>("technical");
   const [newNoteTaskId, setNewNoteTaskId] = useState<string>("");
   const [noteCategoryFilter, setNoteCategoryFilter] = useState<string>("all");
+  const [expandedNote, setExpandedNote] = useState<ContextualNote | null>(null);
+
+  useEffect(() => {
+    if (!expandedNote) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setExpandedNote(null);
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [expandedNote]);
 
   // ACCURATE Task Filtering for Active Project (ONLY TO-DOS, NEVER DAILIES)
   const projectTasks = useMemo(() => {
@@ -895,11 +959,11 @@ export function ProjectFocusCard({
                   onChange={(e) => setNewNoteCategory(e.target.value as NoteCategory)}
                   className="rounded-lg border border-[#2A2723] bg-[#181715] px-3.5 py-2 text-xs text-[#F5F2EB] focus:border-[#4EAB9E] focus:outline-none font-mono"
                 >
-                  <option value="idea">💡 Idea</option>
-                  <option value="decision">⚖️ Decisión de Arquitectura</option>
-                  <option value="technical">⚙️ Nota Técnica</option>
-                  <option value="meeting">👥 Reunión / Feedback</option>
-                  <option value="log">📋 Log de Sesión</option>
+                  <option value="idea">Idea</option>
+                  <option value="decision">Decisión de Arquitectura</option>
+                  <option value="technical">Nota Técnica</option>
+                  <option value="meeting">Reunión / Feedback</option>
+                  <option value="log">Log de Sesión</option>
                 </select>
               </div>
 
@@ -959,19 +1023,27 @@ export function ProjectFocusCard({
                 return (
                   <div
                     key={note.id}
-                    className="rounded-xl border border-[#2A2723] bg-[#121110] p-4 space-y-2 flex flex-col justify-between hover:border-[#4EAB9E]/40 transition-colors"
+                    onClick={() => {
+                      soundFx.click();
+                      setExpandedNote(note);
+                    }}
+                    className="rounded-xl border border-[#2A2723] bg-[#121110] p-3.5 space-y-2 flex flex-col justify-between hover:border-[#4EAB9E]/60 hover:bg-[#161513] transition-all cursor-pointer group shadow-xs select-none"
                   >
                     <div className="space-y-1.5">
                       <div className="flex items-center justify-between gap-2">
                         <span
-                          className={`font-mono text-[9px] font-bold px-2 py-0.5 rounded border ${meta.color}`}
+                          className={`font-mono text-[9px] font-bold px-2 py-0.5 rounded border inline-flex items-center gap-1.5 ${meta.color}`}
                         >
-                          {meta.icon} {meta.label}
+                          {meta.icon}
+                          <span>{meta.label}</span>
                         </span>
 
                         <button
                           type="button"
-                          onClick={() => handleDeleteNote(note.id)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDeleteNote(note.id);
+                          }}
                           className="text-[#8E867B] hover:text-[#E05D52] p-1 rounded transition-colors cursor-pointer"
                           title="Eliminar nota"
                         >
@@ -979,27 +1051,36 @@ export function ProjectFocusCard({
                         </button>
                       </div>
 
-                      <h4 className="font-serif text-xs sm:text-sm font-bold text-[#F5F2EB]">
+                      <h4 className="font-serif text-xs sm:text-sm font-bold text-[#F5F2EB] group-hover:text-[#4EAB9E] transition-colors line-clamp-1">
                         {note.title}
                       </h4>
 
                       {linkedTask && (
                         <span className="inline-flex items-center gap-1 text-[10px] font-mono text-[#D99B43] bg-[#221D16] px-2 py-0.5 rounded border border-[#D99B43]/30 truncate max-w-full">
-                          ⚡ {linkedTask.text}
+                          <ListTodo className="h-3 w-3 shrink-0 text-[#D99B43]" />
+                          <span className="truncate">{linkedTask.text}</span>
                         </span>
                       )}
 
-                      <NoteContentRenderer content={note.content} maxTextLines={4} />
+                      <p className="text-xs text-[#8E867B] font-sans leading-relaxed line-clamp-2 group-hover:text-[#DDD6C9] transition-colors">
+                        {getFirstParagraphPreview(note.content)}
+                      </p>
                     </div>
 
-                    <span className="font-mono text-[9px] text-[#8E867B] opacity-60">
-                      {new Date(note.updatedAt).toLocaleDateString("es-MX", {
-                        month: "short",
-                        day: "numeric",
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      })}
-                    </span>
+                    <div className="flex items-center justify-between pt-1.5 border-t border-[#2A2723]/50 text-[9px] font-mono text-[#8E867B]">
+                      <span>
+                        {new Date(note.updatedAt).toLocaleDateString("es-MX", {
+                          month: "short",
+                          day: "numeric",
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })}
+                      </span>
+                      <span className="text-[#4EAB9E] opacity-0 group-hover:opacity-100 transition-opacity inline-flex items-center gap-1 font-mono">
+                        <span>Ver completa</span>
+                        <Maximize2 className="h-2.5 w-2.5" />
+                      </span>
+                    </div>
                   </div>
                 );
               })
@@ -1047,6 +1128,104 @@ export function ProjectFocusCard({
                 </a>
               ));
             })()}
+          </div>
+        </div>
+      )}
+
+      {/* Expanded Note Modal */}
+      {expandedNote && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-3 sm:p-6 animate-in fade-in duration-150"
+          onClick={() => setExpandedNote(null)}
+        >
+          <div
+            className="relative w-full max-w-2xl max-h-[85vh] flex flex-col bg-[#141311] border border-[#2A2723] rounded-2xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-150"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Modal Header */}
+            <div className="flex items-start justify-between gap-3 p-5 sm:p-6 border-b border-[#2A2723] bg-[#181715]/90">
+              <div className="space-y-2 min-w-0">
+                <div className="flex flex-wrap items-center gap-2">
+                  {(() => {
+                    const meta =
+                      CATEGORY_META[expandedNote.category] || CATEGORY_META.idea;
+                    return (
+                      <span
+                        className={`font-mono text-[10px] font-bold px-2.5 py-0.5 rounded border inline-flex items-center gap-1.5 ${meta.color}`}
+                      >
+                        {meta.icon}
+                        <span>{meta.label}</span>
+                      </span>
+                    );
+                  })()}
+
+                  {(() => {
+                    const linkedTask = tasks.find(
+                      (t) => t.id === expandedNote.taskId
+                    );
+                    if (!linkedTask) return null;
+                    return (
+                      <span className="inline-flex items-center gap-1.5 text-[10px] font-mono text-[#D99B43] bg-[#221D16] px-2.5 py-0.5 rounded border border-[#D99B43]/30 truncate max-w-xs">
+                        <ListTodo className="h-3 w-3 shrink-0" />
+                        <span className="truncate">{linkedTask.text}</span>
+                      </span>
+                    );
+                  })()}
+
+                  <span className="font-mono text-[10px] text-[#8E867B]">
+                    {new Date(expandedNote.updatedAt).toLocaleDateString("es-MX", {
+                      year: "numeric",
+                      month: "short",
+                      day: "numeric",
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}
+                  </span>
+                </div>
+
+                <h3 className="font-serif text-lg sm:text-xl font-bold text-[#F5F2EB] leading-snug">
+                  {expandedNote.title}
+                </h3>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setExpandedNote(null)}
+                className="p-1.5 rounded-lg border border-[#2A2723] text-[#8E867B] hover:text-[#F5F2EB] hover:bg-[#22201D] transition-colors cursor-pointer shrink-0"
+                title="Cerrar (Esc)"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+
+            {/* Modal Body - Scrollable full markdown */}
+            <div className="flex-1 overflow-y-auto p-5 sm:p-7 space-y-4 font-sans text-[#DDD6C9]">
+              <NoteContentRenderer content={expandedNote.content} />
+            </div>
+
+            {/* Modal Footer */}
+            <div className="flex items-center justify-between gap-3 p-4 sm:px-6 border-t border-[#2A2723] bg-[#181715]/60 text-xs font-mono">
+              <button
+                type="button"
+                onClick={() => {
+                  const noteIdToDelete = expandedNote.id;
+                  setExpandedNote(null);
+                  handleDeleteNote(noteIdToDelete);
+                }}
+                className="text-[#8E867B] hover:text-[#E05D52] transition-colors flex items-center gap-1.5 cursor-pointer py-1 px-2 rounded hover:bg-[#E05D52]/10"
+              >
+                <Trash2 className="h-3.5 w-3.5" />
+                <span>Eliminar</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setExpandedNote(null)}
+                className="px-4 py-1.5 rounded-lg bg-[#2A2723] hover:bg-[#38332D] text-[#F5F2EB] transition-colors cursor-pointer"
+              >
+                Cerrar
+              </button>
+            </div>
           </div>
         </div>
       )}
