@@ -210,6 +210,105 @@ const TOOLS = [
       },
     },
   },
+  {
+    name: "brio_create_note",
+    description:
+      "Creates a contextual markdown note attached to a project and/or task in Brio. Keeps task descriptions clean by organizing specs, research, links, and meeting notes separately.",
+    inputSchema: {
+      type: "object",
+      required: ["title", "content"],
+      properties: {
+        title: {
+          type: "string",
+          description: "Title of the note.",
+        },
+        content: {
+          type: "string",
+          description: "Markdown body of the note.",
+        },
+        project: {
+          type: "string",
+          description:
+            "Project name, slug, or ID. If omitted, uses current workspace folder name.",
+        },
+        taskId: {
+          type: "string",
+          description: "Optional Habitica/Brio task ID to link this note directly to a specific task.",
+        },
+        category: {
+          type: "string",
+          enum: ["idea", "decision", "technical", "meeting", "log"],
+          default: "technical",
+          description: "Category of the note for contextual filtering.",
+        },
+        tags: {
+          type: "array",
+          items: { type: "string" },
+          description: "Optional tags for the note.",
+        },
+      },
+    },
+  },
+  {
+    name: "brio_get_notes",
+    description:
+      "Retrieves contextual notes for a project or task in Brio.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        project: {
+          type: "string",
+          description:
+            "Project name, slug, or ID. If omitted, uses current workspace folder name.",
+        },
+        taskId: {
+          type: "string",
+          description: "Optional task ID to filter notes for a specific task.",
+        },
+      },
+    },
+  },
+  {
+    name: "brio_create_project",
+    description: "Creates a new project in Brio with its canonical prefix and status.",
+    inputSchema: {
+      type: "object",
+      required: ["title"],
+      properties: {
+        title: {
+          type: "string",
+          description: "Title of the project.",
+        },
+        description: {
+          type: "string",
+          description: "Optional description of the project.",
+        },
+        canonicalPrefix: {
+          type: "string",
+          description: "Canonical prefix for Habitica tasks, e.g. '[Beca]'.",
+        },
+        taskPrefixes: {
+          type: "array",
+          items: { type: "string" },
+          description: "Optional alternate prefixes for task matching.",
+        },
+        status: {
+          type: "string",
+          enum: ["idea", "in_progress", "permanent", "paused", "launched"],
+          default: "in_progress",
+          description: "Initial status of the project.",
+        },
+      },
+    },
+  },
+  {
+    name: "brio_get_projects",
+    description: "Lists all projects in Brio.",
+    inputSchema: {
+      type: "object",
+      properties: {},
+    },
+  },
 ];
 
 // ----------------------------------------------------------------------
@@ -315,6 +414,83 @@ async function handleToolCall(name, args) {
       const data = await callBrio(`/api/agent/projects/${encodeURIComponent(proj)}/sync`, {
         method: "POST",
       });
+      return {
+        content: [
+          {
+            type: "text",
+            text: JSON.stringify(data, null, 2),
+          },
+        ],
+      };
+    }
+
+    case "brio_create_note": {
+      if (!args?.title) throw new Error("Argument 'title' is required.");
+      if (!args?.content) throw new Error("Argument 'content' is required.");
+      const proj = args?.project ? resolveProjectName(args.project) : undefined;
+      const payload = {
+        title: args.title,
+        content: args.content,
+        project: proj,
+        taskId: args?.taskId,
+        category: args?.category || "technical",
+        tags: args?.tags || [],
+      };
+      const data = await callBrio(`/api/agent/notes`, {
+        method: "POST",
+        body: JSON.stringify(payload),
+      });
+      return {
+        content: [
+          {
+            type: "text",
+            text: JSON.stringify(data, null, 2),
+          },
+        ],
+      };
+    }
+
+    case "brio_get_notes": {
+      const params = new URLSearchParams();
+      if (args?.project) params.set("project", resolveProjectName(args.project));
+      if (args?.taskId) params.set("taskId", args.taskId);
+      const query = params.toString() ? `?${params.toString()}` : "";
+      const data = await callBrio(`/api/agent/notes${query}`);
+      return {
+        content: [
+          {
+            type: "text",
+            text: JSON.stringify(data, null, 2),
+          },
+        ],
+      };
+    }
+
+    case "brio_create_project": {
+      if (!args?.title) throw new Error("Argument 'title' is required.");
+      const payload = {
+        title: args.title,
+        description: args?.description,
+        canonicalPrefix: args?.canonicalPrefix,
+        taskPrefixes: args?.taskPrefixes,
+        status: args?.status || "in_progress",
+      };
+      const data = await callBrio(`/api/agent/projects`, {
+        method: "POST",
+        body: JSON.stringify(payload),
+      });
+      return {
+        content: [
+          {
+            type: "text",
+            text: JSON.stringify(data, null, 2),
+          },
+        ],
+      };
+    }
+
+    case "brio_get_projects": {
+      const data = await callBrio(`/api/agent/projects`);
       return {
         content: [
           {
