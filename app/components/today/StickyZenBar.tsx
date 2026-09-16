@@ -15,6 +15,7 @@ import {
   RotateCcw,
   Volume2,
   VolumeX,
+  Waves,
   Zap,
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
@@ -175,7 +176,7 @@ export function StickyZenBar({ projectTitle }: StickyZenBarProps) {
           {activeSound !== "none" && (
             <div className="flex items-center gap-1 text-[11px] font-mono text-[#4EAB9E] bg-[#141C1A] px-2 py-0.5 rounded-full border border-[#4EAB9E]/30">
               <Headphones className="h-3 w-3 animate-pulse" />
-              <span>{activeSoundOption?.icon || "🎵"}</span>
+              <span>{activeSoundOption?.label || "Audio"}</span>
             </div>
           )}
 
@@ -289,13 +290,14 @@ export function StickyZenBar({ projectTitle }: StickyZenBarProps) {
               <button
                 type="button"
                 onClick={() => setActiveSound("none")}
-                className={`p-2 rounded-lg border text-center font-mono text-[10px] transition-all cursor-pointer ${
+                className={`p-2 rounded-lg border text-center font-mono text-[10px] transition-all cursor-pointer flex flex-col items-center justify-center gap-1 ${
                   activeSound === "none"
                     ? "bg-[#221D16] text-[#D99B43] border-[#D99B43]/40 font-bold"
                     : "bg-[#121110] text-[#8E867B] border-[#2A2723] hover:text-[#DDD6C9]"
                 }`}
               >
-                🔇 Silencio
+                <VolumeX className="h-3.5 w-3.5" />
+                <span>Silencio</span>
               </button>
 
               {AMBIENT_SOUND_OPTIONS.slice(0, 5).map((snd) => (
@@ -303,14 +305,14 @@ export function StickyZenBar({ projectTitle }: StickyZenBarProps) {
                   key={snd.id}
                   type="button"
                   onClick={() => setActiveSound(snd.id)}
-                  className={`p-2 rounded-lg border text-center transition-all cursor-pointer flex flex-col items-center gap-0.5 ${
+                  className={`p-2 rounded-lg border text-center transition-all cursor-pointer flex flex-col items-center justify-center gap-1 ${
                     activeSound === snd.id
                       ? "bg-[#141C1A] text-[#4EAB9E] border-[#4EAB9E]/50 font-bold shadow-xs"
                       : "bg-[#121110] text-[#8E867B] border-[#2A2723] hover:text-[#DDD6C9]"
                   }`}
                   title={`${snd.label} (${snd.hzBadge}) - ${snd.sublabel}`}
                 >
-                  <span className="text-sm">{snd.icon}</span>
+                  <Waves className="h-3.5 w-3.5" />
                   <span className="text-[9px] font-mono truncate max-w-full">
                     {snd.label}
                   </span>

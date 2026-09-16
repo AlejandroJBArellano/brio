@@ -275,11 +275,11 @@ export function HybridOmnibar({
       {/* Financial Detection Helper Pill */}
       {financialParse.isFinancial && (
         <div className="mt-2 flex items-center gap-2 text-[11px] text-[#E8AF59] font-mono px-2 animate-in fade-in duration-150">
-          <span>✨ Detectado Brio Finanzas:</span>
+          <span>Detectado Brio Finanzas:</span>
           <strong>{financialParse.type === "income" ? "+ Ingreso" : "- Gasto"} ${financialParse.amount}</strong>
           <span>• #{financialParse.category}</span>
           <span>• @{financialParse.account}</span>
-          {financialParse.isAntExpense && <span className="text-[#E05D52] font-bold">(Gasto Hormiga ☕)</span>}
+          {financialParse.isAntExpense && <span className="text-[#E05D52] font-bold">(Gasto Hormiga)</span>}
         </div>
       )}
 

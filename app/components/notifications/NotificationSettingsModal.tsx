@@ -72,7 +72,7 @@ function NotificationSettingsModalContent({ onClose }: { onClose: () => void }) 
       await handleRequestPermission();
       return;
     }
-    const success = await sendBrioNotification("⚡ Brio OS — Notificación de Prueba", {
+    const success = await sendBrioNotification("Brio OS — Notificación de Prueba", {
       body: "¡Tus recordatorios inteligentes están configurados correctamente y listos!",
       tag: "test-notification",
     });

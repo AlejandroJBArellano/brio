@@ -23,7 +23,6 @@ export interface AmbientSoundOption {
   label: string;
   hzBadge: string;
   sublabel: string;
-  icon: string;
   category: "brainwaves" | "solfeggio" | "noise";
 }
 
@@ -33,7 +32,6 @@ export const AMBIENT_SOUND_OPTIONS: AmbientSoundOption[] = [
     label: "Ondas Alfa",
     hzBadge: "10 Hz",
     sublabel: "Estado de flujo & concentración relajada",
-    icon: "🧘",
     category: "brainwaves",
   },
   {
@@ -41,7 +39,6 @@ export const AMBIENT_SOUND_OPTIONS: AmbientSoundOption[] = [
     label: "Ondas Theta",
     hzBadge: "6 Hz",
     sublabel: "Calma mental profunda & creatividad intuitiva",
-    icon: "🌊",
     category: "brainwaves",
   },
   {
@@ -49,7 +46,6 @@ export const AMBIENT_SOUND_OPTIONS: AmbientSoundOption[] = [
     label: "Resonancia Schumann",
     hzBadge: "7.83 Hz",
     sublabel: "Equilibrio nervioso & enraizamiento natural",
-    icon: "🌍",
     category: "brainwaves",
   },
   {
@@ -57,7 +53,6 @@ export const AMBIENT_SOUND_OPTIONS: AmbientSoundOption[] = [
     label: "Ondas Gamma",
     hzBadge: "40 Hz",
     sublabel: "Hiperfoco cognitivo & retención de datos",
-    icon: "🧠",
     category: "brainwaves",
   },
   {
@@ -65,7 +60,6 @@ export const AMBIENT_SOUND_OPTIONS: AmbientSoundOption[] = [
     label: "Ondas SMR / Beta",
     hzBadge: "14 Hz",
     sublabel: "Atención ejecutiva sostenida sin fatiga",
-    icon: "⚡",
     category: "brainwaves",
   },
   {
@@ -73,7 +67,6 @@ export const AMBIENT_SOUND_OPTIONS: AmbientSoundOption[] = [
     label: "Ondas Delta",
     hzBadge: "2.5 Hz",
     sublabel: "Relajación subconsciente & recuperación",
-    icon: "🌙",
     category: "brainwaves",
   },
   {
@@ -81,7 +74,6 @@ export const AMBIENT_SOUND_OPTIONS: AmbientSoundOption[] = [
     label: "Tono Armónico",
     hzBadge: "432 Hz",
     sublabel: "Claridad acústica & reducción de cortisol",
-    icon: "✨",
     category: "solfeggio",
   },
   {
@@ -89,7 +81,6 @@ export const AMBIENT_SOUND_OPTIONS: AmbientSoundOption[] = [
     label: "Tono Transformación",
     hzBadge: "528 Hz",
     sublabel: "Frecuencia de claridad & coherencia mental",
-    icon: "🌿",
     category: "solfeggio",
   },
   {
@@ -97,7 +88,6 @@ export const AMBIENT_SOUND_OPTIONS: AmbientSoundOption[] = [
     label: "Tono Liberación",
     hzBadge: "396 Hz",
     sublabel: "Disolución de tensión & ansiedad de trabajo",
-    icon: "🛡️",
     category: "solfeggio",
   },
   {
@@ -105,7 +95,6 @@ export const AMBIENT_SOUND_OPTIONS: AmbientSoundOption[] = [
     label: "Brown Noise Sub-Bass",
     hzBadge: "< 350 Hz",
     sublabel: "Aislamiento acústico profundo puro (Anti-TDAH)",
-    icon: "🎧",
     category: "noise",
   },
   {
@@ -113,7 +102,6 @@ export const AMBIENT_SOUND_OPTIONS: AmbientSoundOption[] = [
     label: "Silencio",
     hzBadge: "0 Hz",
     sublabel: "Sin audio de fondo",
-    icon: "🔇",
     category: "noise",
   },
 ];

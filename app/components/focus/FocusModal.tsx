@@ -21,6 +21,7 @@ import {
   Trash2,
   Tv,
   Volume2,
+  Waves,
   X,
   Zap,
 } from "lucide-react";
@@ -526,7 +527,7 @@ export function FocusModal({
                     >
                       <div className="flex items-center justify-between gap-1 mb-1">
                         <span className="flex items-center gap-1.5 font-semibold text-xs truncate">
-                          <span>{snd.icon}</span>
+                          <Waves className="h-3.5 w-3.5 shrink-0 text-[#D99B43]" />
                           <span className="truncate">{snd.label}</span>
                         </span>
                         <div className="flex items-center gap-1">
