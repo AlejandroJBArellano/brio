@@ -9,6 +9,7 @@ import {
   addChecklistItemAction,
   deleteChecklistItemAction,
   deleteTaskAction,
+  fetchSingleTaskAction,
   toggleChecklistItemAction,
   toggleTaskAction,
   updateTaskAction,
@@ -44,6 +45,7 @@ interface TaskDetailDrawerProps {
   isOpen: boolean;
   onClose: () => void;
   onRefreshData?: () => void;
+  onTaskUpdated?: (updatedTask: HabiticaTask) => void;
 }
 
 export function TaskDetailDrawer({
@@ -53,6 +55,7 @@ export function TaskDetailDrawer({
   isOpen,
   onClose,
   onRefreshData,
+  onTaskUpdated,
 }: TaskDetailDrawerProps) {
   const [isPending, startTransition] = useTransition();
 
@@ -90,12 +93,47 @@ export function TaskDetailDrawer({
   const [isDragging, setIsDragging] = useState(false);
   const [isEditDragging, setIsEditDragging] = useState(false);
 
+  const [prevTask, setPrevTask] = useState<HabiticaTask | null>(task);
+  const [currentTask, setCurrentTask] = useState<HabiticaTask | null>(task);
+
+  if (task !== prevTask) {
+    setPrevTask(task);
+    setCurrentTask(task);
+  }
+
+  const activeTask = currentTask || task;
+
+  const [prevActiveTaskId, setPrevActiveTaskId] = useState<string | null>(activeTask?.id ?? null);
+  if (activeTask && activeTask.id !== prevActiveTaskId) {
+    setPrevActiveTaskId(activeTask.id);
+    setTaskTitle(activeTask.text);
+    setTaskNotes(activeTask.notes || "");
+    setTaskPriority(activeTask.priority ?? 1.5);
+    setIsEditingTask(false);
+    setPreviewTaskNotes(false);
+  }
+
+  // SWR background fetch
+  useEffect(() => {
+    if (!isOpen || !task?.id) return;
+    let isMounted = true;
+    fetchSingleTaskAction(task.id, true).then((res) => {
+      if (isMounted && res.success && res.task) {
+        setCurrentTask(res.task);
+        if (onTaskUpdated) onTaskUpdated(res.task);
+      }
+    });
+    return () => {
+      isMounted = false;
+    };
+  }, [isOpen, task?.id, onTaskUpdated]);
+
   // Copied Title Feedback State
   const [copiedTitle, setCopiedTitle] = useState(false);
 
   const handleCopyTitle = () => {
-    if (!task) return;
-    navigator.clipboard.writeText(task.text);
+    if (!activeTask) return;
+    navigator.clipboard.writeText(activeTask.text);
     soundFx.click();
     setCopiedTitle(true);
     setTimeout(() => setCopiedTitle(false), 1500);
@@ -104,59 +142,116 @@ export function TaskDetailDrawer({
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const editFileInputRef = useRef<HTMLInputElement | null>(null);
 
-  // Synchronize internal state when task changes
-  useEffect(() => {
-    if (task) {
-      setTaskTitle(task.text);
-      setTaskNotes(task.notes || "");
-      setTaskPriority(task.priority ?? 1.5);
-      setIsEditingTask(false);
-      setPreviewTaskNotes(false);
-    }
-  }, [task?.id, task?.text, task?.notes, task?.priority]);
-
-  if (!isOpen || !task) return null;
+  if (!isOpen || !activeTask) return null;
 
   // Filter notes linked specifically to this task
-  const linkedNotes = projectNotes.filter((n) => n.taskId === task.id);
+  const linkedNotes = projectNotes.filter((n) => n.taskId === activeTask.id);
 
   const handleToggleChecklist = (itemId: string) => {
+    if (!activeTask) return;
     soundFx.taskComplete();
+    const prevTask = activeTask;
+    const updatedChecklist = (activeTask.checklist || []).map((c) =>
+      c.id === itemId ? { ...c, completed: !c.completed } : c
+    );
+    const updatedTask: HabiticaTask = {
+      ...activeTask,
+      checklist: updatedChecklist,
+    };
+    setCurrentTask(updatedTask);
+    if (onTaskUpdated) onTaskUpdated(updatedTask);
+
     startTransition(async () => {
-      await toggleChecklistItemAction(task.id, itemId);
-      if (onRefreshData) onRefreshData();
+      try {
+        const res = await toggleChecklistItemAction(activeTask.id, itemId);
+        if (res.success && res.task) {
+          setCurrentTask(res.task);
+          if (onTaskUpdated) onTaskUpdated(res.task);
+        } else {
+          setCurrentTask(prevTask);
+          if (onTaskUpdated) onTaskUpdated(prevTask);
+        }
+      } catch {
+        setCurrentTask(prevTask);
+        if (onTaskUpdated) onTaskUpdated(prevTask);
+      } finally {
+        if (onRefreshData) onRefreshData();
+      }
     });
   };
 
   const handleAddChecklist = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newChecklistText.trim()) return;
+    if (!newChecklistText.trim() || !activeTask) return;
+    const textToAdd = newChecklistText.trim();
     setIsAddingChecklist(true);
     soundFx.click();
+    const prevTask = activeTask;
+    const tempId = `temp-${Date.now()}`;
+    const optimisticTask: HabiticaTask = {
+      ...activeTask,
+      checklist: [
+        ...(activeTask.checklist || []),
+        { id: tempId, text: textToAdd, completed: false },
+      ],
+    };
+    setCurrentTask(optimisticTask);
+    if (onTaskUpdated) onTaskUpdated(optimisticTask);
+    setNewChecklistText("");
+
     try {
-      const res = await addChecklistItemAction(task.id, newChecklistText.trim());
-      if (res.success) {
-        setNewChecklistText("");
-        if (onRefreshData) onRefreshData();
+      const res = await addChecklistItemAction(activeTask.id, textToAdd);
+      if (res.success && res.task) {
+        setCurrentTask(res.task);
+        if (onTaskUpdated) onTaskUpdated(res.task);
+      } else {
+        setCurrentTask(prevTask);
+        if (onTaskUpdated) onTaskUpdated(prevTask);
       }
+    } catch {
+      setCurrentTask(prevTask);
+      if (onTaskUpdated) onTaskUpdated(prevTask);
     } finally {
       setIsAddingChecklist(false);
+      if (onRefreshData) onRefreshData();
     }
   };
 
   const handleDeleteChecklistItem = async (itemId: string, e: React.MouseEvent) => {
     e.stopPropagation();
+    if (!activeTask) return;
     soundFx.click();
-    await deleteChecklistItemAction(task.id, itemId);
-    if (onRefreshData) onRefreshData();
+    const prevTask = activeTask;
+    const optimisticTask: HabiticaTask = {
+      ...activeTask,
+      checklist: (activeTask.checklist || []).filter((c) => c.id !== itemId),
+    };
+    setCurrentTask(optimisticTask);
+    if (onTaskUpdated) onTaskUpdated(optimisticTask);
+
+    try {
+      const res = await deleteChecklistItemAction(activeTask.id, itemId);
+      if (res.success && res.task) {
+        setCurrentTask(res.task);
+        if (onTaskUpdated) onTaskUpdated(res.task);
+      } else {
+        setCurrentTask(prevTask);
+        if (onTaskUpdated) onTaskUpdated(prevTask);
+      }
+    } catch {
+      setCurrentTask(prevTask);
+      if (onTaskUpdated) onTaskUpdated(prevTask);
+    } finally {
+      if (onRefreshData) onRefreshData();
+    }
   };
 
   const handleSaveTaskChanges = async () => {
-    if (!taskTitle.trim()) return;
+    if (!taskTitle.trim() || !activeTask) return;
     setIsSavingTask(true);
     soundFx.click();
     try {
-      const res = await updateTaskAction(task.id, {
+      const res = await updateTaskAction(activeTask.id, {
         text: taskTitle.trim(),
         notes: taskNotes,
         priority: taskPriority,
@@ -164,6 +259,10 @@ export function TaskDetailDrawer({
       if (res.success) {
         soundFx.taskComplete();
         setIsEditingTask(false);
+        if (res.task) {
+          setCurrentTask(res.task);
+          if (onTaskUpdated) onTaskUpdated(res.task);
+        }
         if (onRefreshData) onRefreshData();
       } else {
         soundFx.click();
@@ -174,17 +273,19 @@ export function TaskDetailDrawer({
   };
 
   const handleDeleteTask = async () => {
+    if (!activeTask) return;
     if (!confirm("¿Eliminar esta tarea de Habitica/Brio?")) return;
     soundFx.click();
-    await deleteTaskAction(task.id);
+    await deleteTaskAction(activeTask.id);
     if (onRefreshData) onRefreshData();
     onClose();
   };
 
   const handleCompleteTask = () => {
+    if (!activeTask) return;
     soundFx.taskComplete();
     startTransition(async () => {
-      await toggleTaskAction(task.id, "up");
+      await toggleTaskAction(activeTask.id, "up");
       if (onRefreshData) onRefreshData();
       onClose();
     });
@@ -269,7 +370,7 @@ export function TaskDetailDrawer({
     startTransition(async () => {
       await saveContextualNoteAction({
         projectId,
-        taskId: task.id,
+        taskId: activeTask.id,
         title: noteTitle.trim(),
         content: noteContent.trim(),
         category: "technical",
@@ -305,7 +406,7 @@ export function TaskDetailDrawer({
       await saveContextualNoteAction({
         id: editingNoteId,
         projectId,
-        taskId: task.id,
+        taskId: activeTask.id,
         title: editNoteTitle.trim(),
         content: editNoteContent.trim(),
         category: "technical",
@@ -328,7 +429,7 @@ export function TaskDetailDrawer({
     });
   };
 
-  const meta = parseTaskMetadata(task);
+  const meta = parseTaskMetadata(activeTask);
 
   return (
     <div className="fixed inset-0 z-50 flex justify-end bg-black/75 backdrop-blur-xs animate-in fade-in duration-200 font-sans">
@@ -393,9 +494,9 @@ export function TaskDetailDrawer({
                 </a>
               )}
 
-              {task.value && (
+              {activeTask.value && (
                 <span className="font-mono text-[10px] text-[#8E867B] bg-[#121110] px-2 py-0.5 rounded border border-[#2A2723]">
-                  +{Math.round(task.value * 10)} XP
+                  +{Math.round(activeTask.value * 10)} XP
                 </span>
               )}
             </div>
@@ -405,9 +506,9 @@ export function TaskDetailDrawer({
                 <button
                   type="button"
                   onClick={() => {
-                    setTaskTitle(task.text);
-                    setTaskNotes(task.notes || "");
-                    setTaskPriority(task.priority ?? 1.5);
+                    setTaskTitle(activeTask.text);
+                    setTaskNotes(activeTask.notes || "");
+                    setTaskPriority(activeTask.priority ?? 1.5);
                     setIsEditingTask(true);
                   }}
                   className="flex items-center gap-1 text-xs font-mono text-[#D99B43] hover:text-[#E8AF59] bg-[#221D16] px-2.5 py-1 rounded-md border border-[#D99B43]/30 transition-colors cursor-pointer"
@@ -438,10 +539,10 @@ export function TaskDetailDrawer({
                     onClick={handleCopyTitle}
                     title="Clic para copiar título"
                     className={`group/title inline-flex items-center gap-2 cursor-pointer font-serif text-lg sm:text-xl font-bold text-[#F5F2EB] hover:text-[#FFFFFF] transition-colors select-text ${
-                      task.completed ? "line-through text-[#8E867B]" : ""
+                      activeTask.completed ? "line-through text-[#8E867B]" : ""
                     }`}
                   >
-                    <span>{task.text}</span>
+                    <span>{activeTask.text}</span>
                     <Copy className="h-3.5 w-3.5 text-[#8E867B] opacity-0 group-hover/title:opacity-100 transition-opacity shrink-0" />
                   </h3>
 
@@ -459,11 +560,11 @@ export function TaskDetailDrawer({
                 <div className="flex items-center justify-between pb-1 border-b border-[#2A2723]/60 text-[11px] font-mono text-[#8E867B]">
                   <div className="flex items-center gap-1.5">
                     <FileText className="h-3.5 w-3.5 text-[#D99B43]" />
-                    <span className="font-semibold text-[#DDD6C9]">Descripción / Especificación:</span>
+                    <span className="font-semibold text-[#DDD6C9]">Descripción:</span>
                   </div>
                 </div>
-                {task.notes ? (
-                  <NoteContentRenderer content={task.notes} />
+                {activeTask.notes ? (
+                  <NoteContentRenderer content={activeTask.notes} />
                 ) : (
                   <p className="text-xs text-[#8E867B] font-mono italic">
                     Sin descripción. Haz clic en &quot;Editar&quot; para añadir notas o especificación en Markdown.
@@ -597,17 +698,17 @@ export function TaskDetailDrawer({
               <div className="flex items-center gap-1.5 text-xs font-serif font-bold text-[#F5F2EB]">
                 <ListTodo className="h-4 w-4 text-[#D99B43]" />
                 <span>
-                  Subtareas / Checklist{" "}
-                  {task.checklist && task.checklist.length > 0
-                    ? `(${task.checklist.filter((c) => c.completed).length}/${task.checklist.length})`
+                  Subtareas{" "}
+                  {activeTask.checklist && activeTask.checklist.length > 0
+                    ? `(${activeTask.checklist.filter((c) => c.completed).length}/${activeTask.checklist.length})`
                     : "(0)"}
                 </span>
               </div>
             </div>
 
-            {task.checklist && task.checklist.length > 0 && (
+            {activeTask.checklist && activeTask.checklist.length > 0 && (
               <div className="space-y-1.5">
-                {task.checklist.map((item) => (
+                {activeTask.checklist.map((item) => (
                   <div
                     key={item.id}
                     onClick={() => item.id && handleToggleChecklist(item.id)}
@@ -1026,16 +1127,16 @@ export function TaskDetailDrawer({
         <div className="pt-4 border-t border-[#2A2723]">
           <button
             type="button"
-            disabled={task.completed || isPending}
+            disabled={activeTask.completed || isPending}
             onClick={handleCompleteTask}
             className={`w-full py-3 px-4 rounded-xl font-bold text-xs sm:text-sm font-sans transition-all flex items-center justify-center gap-2 cursor-pointer shadow-sm ${
-              task.completed
+              activeTask.completed
                 ? "bg-[#1C2219] text-[#7EA35A] border border-[#7EA35A]/40 opacity-75 cursor-not-allowed"
                 : "bg-[#7EA35A] hover:bg-[#8FB866] text-[#121110] active:scale-[0.99]"
             }`}
           >
             <CheckCircle2 className="h-4 w-4" />
-            <span>{task.completed ? "Completada" : "Completar"}</span>
+            <span>{activeTask.completed ? "Completada" : "Completar"}</span>
           </button>
         </div>
       </div>

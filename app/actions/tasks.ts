@@ -264,6 +264,23 @@ export async function syncHabiticaDataAction(): Promise<{ success: boolean }> {
 }
 
 /**
+ * Server Action: Fetch Single Fresh Task
+ */
+export async function fetchSingleTaskAction(
+  taskId: string,
+  skipCache: boolean = true
+): Promise<{ success: boolean; task?: HabiticaTask; error?: string }> {
+  try {
+    const task = await habiticaClient.getTask(taskId, skipCache);
+    return { success: true, task };
+  } catch (error: unknown) {
+    const message =
+      error instanceof Error ? error.message : "Failed to fetch task";
+    return { success: false, error: message };
+  }
+}
+
+/**
  * Server Action: Add Checklist Subtask Item
  */
 export async function addChecklistItemAction(

@@ -5,7 +5,13 @@ import {
   saveContextualNoteAction,
 } from "@/app/actions/notes";
 import { syncProjectFromNotionAction } from "@/app/actions/projectIntegrations";
-import { toggleTaskAction } from "@/app/actions/tasks";
+import {
+  addChecklistItemAction,
+  deleteChecklistItemAction,
+  fetchSingleTaskAction,
+  toggleChecklistItemAction,
+  toggleTaskAction,
+} from "@/app/actions/tasks";
 import { NoteContentRenderer } from "@/app/components/notes/NoteContentRenderer";
 import { getProjectKeywords } from "@/lib/projectMatcher";
 import { soundFx } from "@/lib/soundFx";
@@ -133,6 +139,15 @@ export function ProjectFocusCard({
 }: ProjectFocusCardProps) {
   const [isPending, startTransition] = useTransition();
 
+  // Local reactive tasks state
+  const [prevTasks, setPrevTasks] = useState<HabiticaTask[]>(tasks);
+  const [localTasks, setLocalTasks] = useState<HabiticaTask[]>(tasks);
+
+  if (tasks !== prevTasks) {
+    setPrevTasks(tasks);
+    setLocalTasks(tasks);
+  }
+
   // Proyectos activos para la vista de Hoy (in_progress y permanent)
   const activeProjects = useMemo(() => {
     const activeOnly = projects.filter(
@@ -140,7 +155,7 @@ export function ProjectFocusCard({
     );
     const list = activeOnly.length > 0 ? activeOnly : projects;
 
-    const todoTasks = tasks.filter((t) => t.type === "todo");
+    const todoTasks = localTasks.filter((t) => t.type === "todo");
 
     return list
       .map((p) => {
@@ -172,7 +187,7 @@ export function ProjectFocusCard({
         if (b.status === "in_progress" && a.status !== "in_progress") return 1;
         return 0;
       });
-  }, [projects, tasks]);
+  }, [projects, localTasks]);
 
   // Active Project Selection
   const [selectedProjectId, setSelectedProjectId] = useState<string>(() => {
@@ -275,7 +290,7 @@ export function ProjectFocusCard({
   // ACCURATE Task Filtering for Active Project (ONLY TO-DOS, NEVER DAILIES)
   const projectTasks = useMemo(() => {
     // 1. Strict filter: ONLY to-dos (no dailies, no habits)
-    const todoTasks = tasks.filter((t) => t.type === "todo");
+    const todoTasks = localTasks.filter((t) => t.type === "todo");
 
     // 2. Strategy A: Filter by active Habitica Tag ID if selected
     if (activeTag) {
@@ -299,7 +314,7 @@ export function ProjectFocusCard({
       }
       return false;
     });
-  }, [tasks, activeTag, activeProject]);
+  }, [localTasks, activeTag, activeProject]);
 
   // Priority & Search Filters for Tasks
   const [priorityFilter, setPriorityFilter] = useState<"all" | "high" | "medium" | "low">("all");
@@ -319,21 +334,153 @@ export function ProjectFocusCard({
   }, [projectTasks]);
 
   const filteredProjectTasks = useMemo(() => {
-    return projectTasks.filter((t) => {
-      const prio = t.priority ?? 1.5;
+    return projectTasks.filter((task) => {
+      // 1. Priority filter
+      const prio = task.priority ?? 1.5;
       if (priorityFilter === "high" && prio < 2) return false;
-      if (priorityFilter === "medium" && (prio < 1.1 || prio >= 2)) return false;
+      if (priorityFilter === "medium" && (prio < 1.5 || prio >= 2)) return false;
       if (priorityFilter === "low" && prio > 1) return false;
 
+      // 2. Search query filter
       if (taskSearchQuery.trim()) {
-        const q = taskSearchQuery.toLowerCase();
-        const matchTitle = t.text.toLowerCase().includes(q);
-        const matchNotes = (t.notes || "").toLowerCase().includes(q);
-        if (!matchTitle && !matchNotes) return false;
+        const query = taskSearchQuery.toLowerCase();
+        const textMatch = task.text.toLowerCase().includes(query);
+        const notesMatch = (task.notes || "").toLowerCase().includes(query);
+        const checklistMatch =
+          task.checklist &&
+          task.checklist.some((c) => c.text.toLowerCase().includes(query));
+        return textMatch || notesMatch || checklistMatch;
       }
+
       return true;
     });
   }, [projectTasks, priorityFilter, taskSearchQuery]);
+
+  // Subtask Accordion & State Handlers
+  const [expandedTaskIds, setExpandedTaskIds] = useState<Set<string>>(new Set());
+  const [inlineSubtaskText, setInlineSubtaskText] = useState<Record<string, string>>({});
+  const [addingSubtaskTaskId, setAddingSubtaskTaskId] = useState<string | null>(null);
+
+  const handleUpdateTaskInState = (updatedTask: HabiticaTask) => {
+    setLocalTasks((prev) =>
+      prev.map((t) => (t.id === updatedTask.id ? updatedTask : t))
+    );
+    setActiveTaskForDrawer((prev) =>
+      prev && prev.id === updatedTask.id ? updatedTask : prev
+    );
+  };
+
+  const toggleExpandTask = (taskId: string, e?: React.MouseEvent) => {
+    if (e) e.stopPropagation();
+    setExpandedTaskIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(taskId)) {
+        next.delete(taskId);
+      } else {
+        next.add(taskId);
+        // SWR fetch fresh task data
+        fetchSingleTaskAction(taskId, true).then((res) => {
+          if (res.success && res.task) {
+            handleUpdateTaskInState(res.task);
+          }
+        });
+      }
+      return next;
+    });
+  };
+
+  const handleInlineToggleChecklist = (taskId: string, itemId: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    soundFx.taskComplete();
+    const targetTask = localTasks.find((t) => t.id === taskId);
+    if (!targetTask) return;
+    const prevTask = targetTask;
+    const optimisticTask: HabiticaTask = {
+      ...targetTask,
+      checklist: (targetTask.checklist || []).map((c) =>
+        c.id === itemId ? { ...c, completed: !c.completed } : c
+      ),
+    };
+    handleUpdateTaskInState(optimisticTask);
+
+    startTransition(async () => {
+      try {
+        const res = await toggleChecklistItemAction(taskId, itemId);
+        if (res.success && res.task) {
+          handleUpdateTaskInState(res.task);
+        } else {
+          handleUpdateTaskInState(prevTask);
+        }
+      } catch {
+        handleUpdateTaskInState(prevTask);
+      } finally {
+        if (onRefreshData) onRefreshData();
+      }
+    });
+  };
+
+  const handleInlineAddChecklist = async (taskId: string, e: React.FormEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const textToAdd = (inlineSubtaskText[taskId] || "").trim();
+    if (!textToAdd) return;
+    const targetTask = localTasks.find((t) => t.id === taskId);
+    if (!targetTask) return;
+
+    soundFx.click();
+    setAddingSubtaskTaskId(taskId);
+    const prevTask = targetTask;
+    const tempId = `temp-${Date.now()}`;
+    const optimisticTask: HabiticaTask = {
+      ...targetTask,
+      checklist: [
+        ...(targetTask.checklist || []),
+        { id: tempId, text: textToAdd, completed: false },
+      ],
+    };
+    handleUpdateTaskInState(optimisticTask);
+    setInlineSubtaskText((prev) => ({ ...prev, [taskId]: "" }));
+
+    try {
+      const res = await addChecklistItemAction(taskId, textToAdd);
+      if (res.success && res.task) {
+        handleUpdateTaskInState(res.task);
+      } else {
+        handleUpdateTaskInState(prevTask);
+      }
+    } catch {
+      handleUpdateTaskInState(prevTask);
+    } finally {
+      setAddingSubtaskTaskId(null);
+      if (onRefreshData) onRefreshData();
+    }
+  };
+
+  const handleInlineDeleteChecklist = async (taskId: string, itemId: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    soundFx.click();
+    const targetTask = localTasks.find((t) => t.id === taskId);
+    if (!targetTask) return;
+    const prevTask = targetTask;
+    const optimisticTask: HabiticaTask = {
+      ...targetTask,
+      checklist: (targetTask.checklist || []).filter((c) => c.id !== itemId),
+    };
+    handleUpdateTaskInState(optimisticTask);
+
+    try {
+      const res = await deleteChecklistItemAction(taskId, itemId);
+      if (res.success && res.task) {
+        handleUpdateTaskInState(res.task);
+      } else {
+        handleUpdateTaskInState(prevTask);
+      }
+    } catch {
+      handleUpdateTaskInState(prevTask);
+    } finally {
+      if (onRefreshData) onRefreshData();
+    }
+  };
 
   // Filter Contextual Notes for this Project
   const projectNotes = useMemo(() => {
@@ -391,10 +538,21 @@ export function ProjectFocusCard({
     if (loadingTaskId === task.id) return;
     soundFx.taskComplete();
     setLoadingTaskId(task.id);
+    const prevTask = task;
+    const optimisticTask: HabiticaTask = {
+      ...task,
+      completed: !task.completed,
+    };
+    handleUpdateTaskInState(optimisticTask);
     startTransition(async () => {
       try {
-        await toggleTaskAction(task.id, "up");
+        const res = await toggleTaskAction(task.id, "up");
+        if (!res.success) {
+          handleUpdateTaskInState(prevTask);
+        }
         if (onRefreshData) onRefreshData();
+      } catch {
+        handleUpdateTaskInState(prevTask);
       } finally {
         setLoadingTaskId(null);
       }
@@ -873,15 +1031,39 @@ export function ProjectFocusCard({
                         </span>
                       )}
 
-                      {/* Checklist Progress Pill */}
-                      {task.checklist && task.checklist.length > 0 && (
-                        <span className="px-2 py-0.5 rounded-md border border-[#D99B43]/30 bg-[#221D16] text-[#D99B43] flex items-center gap-1">
+                      {/* Checklist Progress Pill / Button */}
+                      {task.checklist && task.checklist.length > 0 ? (
+                        <button
+                          type="button"
+                          onClick={(e) => toggleExpandTask(task.id, e)}
+                          className={`px-2 py-0.5 rounded-md border text-[10px] font-mono flex items-center gap-1.5 transition-all cursor-pointer ${
+                            expandedTaskIds.has(task.id)
+                              ? "bg-[#D99B43]/20 border-[#D99B43] text-[#F5F2EB]"
+                              : "border-[#D99B43]/30 bg-[#221D16] text-[#D99B43] hover:border-[#D99B43]/60 hover:text-[#FFFFFF]"
+                          }`}
+                          title={expandedTaskIds.has(task.id) ? "Ocultar subtareas" : "Ver subtareas"}
+                        >
                           <ListTodo className="h-3 w-3" />
                           <span>
                             {task.checklist.filter((c) => c.completed).length}/
                             {task.checklist.length}
                           </span>
-                        </span>
+                          {expandedTaskIds.has(task.id) ? (
+                            <ChevronUp className="h-3 w-3 opacity-75" />
+                          ) : (
+                            <ChevronDown className="h-3 w-3 opacity-75" />
+                          )}
+                        </button>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={(e) => toggleExpandTask(task.id, e)}
+                          className="px-2 py-0.5 rounded-md border border-[#2A2723] hover:border-[#D99B43]/40 bg-[#181715] text-[#8E867B] hover:text-[#D99B43] flex items-center gap-1 transition-colors cursor-pointer text-[10px] font-mono"
+                          title="Añadir subtareas"
+                        >
+                          <ListTodo className="h-3 w-3" />
+                          <span>+ Subtarea</span>
+                        </button>
                       )}
 
                       {/* Direct Notion Link */}
@@ -899,6 +1081,107 @@ export function ProjectFocusCard({
                         </a>
                       )}
                     </div>
+
+                    {/* Inline Subtasks Accordion */}
+                    {expandedTaskIds.has(task.id) && (
+                      <div
+                        onClick={(e) => e.stopPropagation()}
+                        className="mt-1 pt-2.5 border-t border-[#2A2723] space-y-2 cursor-default"
+                      >
+                        {/* Subtasks List */}
+                        {task.checklist && task.checklist.length > 0 ? (
+                          <div className="space-y-1 pl-1">
+                            {task.checklist.map((item) => (
+                              <div
+                                key={item.id}
+                                onClick={(e) =>
+                                  item.id && handleInlineToggleChecklist(task.id, item.id, e)
+                                }
+                                className={`flex items-center justify-between py-1.5 px-2.5 rounded-lg border transition-colors cursor-pointer select-none group/item ${
+                                  item.completed
+                                    ? "bg-[#141813] border-[#7EA35A]/20 text-[#8E867B]"
+                                    : "bg-[#181715] border-[#2A2723] hover:border-[#38332D] text-[#F5F2EB]"
+                                }`}
+                              >
+                                <div className="flex items-center gap-2.5 min-w-0">
+                                  <div
+                                    className={`flex h-4 w-4 shrink-0 items-center justify-center rounded border transition-colors ${
+                                      item.completed
+                                        ? "bg-[#7EA35A] border-[#7EA35A] text-[#121110] font-bold"
+                                        : "border-[#38332D] bg-[#121110]"
+                                    }`}
+                                  >
+                                    {item.completed && <Check className="h-2.5 w-2.5 stroke-3" />}
+                                  </div>
+                                  <span
+                                    className={`text-xs ${
+                                      item.completed
+                                        ? "line-through text-[#8E867B]"
+                                        : "text-[#DDD6C9]"
+                                    }`}
+                                  >
+                                    {item.text}
+                                  </span>
+                                </div>
+
+                                {item.id && (
+                                  <button
+                                    type="button"
+                                    onClick={(e) =>
+                                      item.id && handleInlineDeleteChecklist(task.id, item.id, e)
+                                    }
+                                    className="opacity-0 group-hover/item:opacity-100 p-1 rounded text-[#8E867B] hover:text-[#FF6369] transition-opacity cursor-pointer"
+                                    title="Eliminar subtarea"
+                                  >
+                                    <Trash2 className="h-3 w-3" />
+                                  </button>
+                                )}
+                              </div>
+                            ))}
+                          </div>
+                        ) : (
+                          <p className="text-[11px] font-mono text-[#8E867B] pl-2 italic">
+                            Sin subtareas aún.
+                          </p>
+                        )}
+
+                        {/* Compact Subtask Input Form */}
+                        <form
+                          onSubmit={(e) => handleInlineAddChecklist(task.id, e)}
+                          className="flex items-center gap-1.5 pt-1"
+                        >
+                          <input
+                            type="text"
+                            value={inlineSubtaskText[task.id] || ""}
+                            onChange={(e) =>
+                              setInlineSubtaskText((prev) => ({
+                                ...prev,
+                                [task.id]: e.target.value,
+                              }))
+                            }
+                            placeholder="Nueva subtarea..."
+                            disabled={addingSubtaskTaskId === task.id}
+                            className="flex-1 px-2.5 py-1 text-xs rounded-md border border-[#2A2723] bg-[#181715] text-[#F5F2EB] placeholder-[#8E867B] focus:outline-none focus:border-[#D99B43] transition-colors font-mono"
+                          />
+                          <button
+                            type="submit"
+                            disabled={
+                              !inlineSubtaskText[task.id]?.trim() ||
+                              addingSubtaskTaskId === task.id
+                            }
+                            className="py-1 px-2.5 rounded-md bg-[#221D16] hover:bg-[#2A2723] text-[#D99B43] hover:text-[#FFFFFF] border border-[#D99B43]/30 disabled:opacity-40 disabled:pointer-events-none transition-colors flex items-center gap-1 text-xs font-mono cursor-pointer"
+                            title="Añadir subtarea"
+                          >
+                            {addingSubtaskTaskId === task.id ? (
+                              <Loader2 className="h-3 w-3 animate-spin" />
+                            ) : (
+                              <Plus className="h-3 w-3" />
+                            )}
+                            <span>Añadir</span>
+                          </button>
+                        </form>
+                      </div>
+                    )}
                   </div>
                 );
               })
@@ -1042,7 +1325,7 @@ export function ProjectFocusCard({
             {filteredProjectNotes.length > 0 ? (
               filteredProjectNotes.map((note) => {
                 const meta = CATEGORY_META[note.category] || CATEGORY_META.idea;
-                const linkedTask = tasks.find((t) => t.id === note.taskId);
+                const linkedTask = localTasks.find((t) => t.id === note.taskId);
 
                 return (
                   <div
@@ -1184,7 +1467,7 @@ export function ProjectFocusCard({
                   })()}
 
                   {(() => {
-                    const linkedTask = tasks.find(
+                    const linkedTask = localTasks.find(
                       (t) => t.id === expandedNote.taskId
                     );
                     if (!linkedTask) return null;
@@ -1262,6 +1545,7 @@ export function ProjectFocusCard({
         isOpen={Boolean(activeTaskForDrawer)}
         onClose={() => setActiveTaskForDrawer(null)}
         onRefreshData={onRefreshData}
+        onTaskUpdated={handleUpdateTaskInState}
       />
     </div>
   );

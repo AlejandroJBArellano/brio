@@ -574,6 +574,31 @@ export class HabiticaClient {
   }
 
   /**
+   * Fetches a single task by ID.
+   */
+  public async getTask(
+    taskId: string,
+    skipCache: boolean = false
+  ): Promise<HabiticaTask> {
+    if (!isHabiticaConfigured() && !this.customUserId) {
+      const task = inMemoryMockTasks.find((t) => t.id === taskId);
+      if (task) {
+        return task;
+      }
+      throw new HabiticaApiError("Task not found", 404);
+    }
+
+    if (skipCache) {
+      const cacheKey = `${this.customUserId || "default"}:/tasks/${taskId}`;
+      apiCache.delete(cacheKey);
+    }
+
+    return this.request<HabiticaTask>(`/tasks/${taskId}`, {
+      method: "GET",
+    });
+  }
+
+  /**
    * Adds a checklist item to an existing task.
    */
   public async createChecklistItem(
