@@ -148,7 +148,7 @@ export function ProjectFocusCard({
     setLocalTasks(tasks);
   }
 
-  // Proyectos activos para la vista de Hoy (in_progress y permanent)
+  // Proyectos activos para la vista de Hoy (in_progress y permanent) con tareas pendientes
   const activeProjects = useMemo(() => {
     const activeOnly = projects.filter(
       (p) => p.status === "in_progress" || p.status === "permanent"
@@ -157,7 +157,7 @@ export function ProjectFocusCard({
 
     const todoTasks = localTasks.filter((t) => t.type === "todo");
 
-    return list
+    const mapped = list
       .map((p) => {
         const { prefixes } = getProjectKeywords(p);
         const pendingCount = todoTasks.filter((t) => {
@@ -177,16 +177,21 @@ export function ProjectFocusCard({
           ...p,
           pendingTasksCount: pendingCount,
         };
-      })
-      .sort((a, b) => {
-        // Proyectos con tareas pendientes primero
-        if (b.pendingTasksCount !== a.pendingTasksCount) {
-          return b.pendingTasksCount - a.pendingTasksCount;
-        }
-        if (a.status === "in_progress" && b.status !== "in_progress") return -1;
-        if (b.status === "in_progress" && a.status !== "in_progress") return 1;
-        return 0;
       });
+
+    // Sólo mostrar proyectos que tengan tareas pendientes (> 0)
+    const withTasks = mapped.filter((p) => p.pendingTasksCount > 0);
+    const listToShow = withTasks.length > 0 ? withTasks : mapped;
+
+    return listToShow.sort((a, b) => {
+      // Proyectos con tareas pendientes primero
+      if (b.pendingTasksCount !== a.pendingTasksCount) {
+        return b.pendingTasksCount - a.pendingTasksCount;
+      }
+      if (a.status === "in_progress" && b.status !== "in_progress") return -1;
+      if (b.status === "in_progress" && a.status !== "in_progress") return 1;
+      return 0;
+    });
   }, [projects, localTasks]);
 
   // Active Project Selection
@@ -198,8 +203,8 @@ export function ProjectFocusCard({
   const activeProject = useMemo(() => {
     return (
       activeProjects.find((p) => p.id === selectedProjectId) ||
-      projects.find((p) => p.id === selectedProjectId) ||
       activeProjects[0] ||
+      projects.find((p) => p.id === selectedProjectId) ||
       projects[0] || {
         id: "default_project",
         title: "Brio OS",
