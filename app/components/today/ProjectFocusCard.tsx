@@ -334,26 +334,35 @@ export function ProjectFocusCard({
   }, [projectTasks]);
 
   const filteredProjectTasks = useMemo(() => {
-    return projectTasks.filter((task) => {
-      // 1. Priority filter
-      const prio = task.priority ?? 1.5;
-      if (priorityFilter === "high" && prio < 2) return false;
-      if (priorityFilter === "medium" && (prio < 1.5 || prio >= 2)) return false;
-      if (priorityFilter === "low" && prio > 1) return false;
+    return projectTasks
+      .filter((task) => {
+        // 1. Priority filter
+        const prio = task.priority ?? 1.5;
+        if (priorityFilter === "high" && prio < 2) return false;
+        if (priorityFilter === "medium" && (prio < 1.5 || prio >= 2)) return false;
+        if (priorityFilter === "low" && prio > 1) return false;
 
-      // 2. Search query filter
-      if (taskSearchQuery.trim()) {
-        const query = taskSearchQuery.toLowerCase();
-        const textMatch = task.text.toLowerCase().includes(query);
-        const notesMatch = (task.notes || "").toLowerCase().includes(query);
-        const checklistMatch =
-          task.checklist &&
-          task.checklist.some((c) => c.text.toLowerCase().includes(query));
-        return textMatch || notesMatch || checklistMatch;
-      }
+        // 2. Search query filter
+        if (taskSearchQuery.trim()) {
+          const query = taskSearchQuery.toLowerCase();
+          const textMatch = task.text.toLowerCase().includes(query);
+          const notesMatch = (task.notes || "").toLowerCase().includes(query);
+          const checklistMatch =
+            task.checklist &&
+            task.checklist.some((c) => c.text.toLowerCase().includes(query));
+          return textMatch || notesMatch || checklistMatch;
+        }
 
-      return true;
-    });
+        return true;
+      })
+      .sort((a, b) => {
+        const titleA = parseTaskPrefix(a.text || "").cleanTitle.toLowerCase();
+        const titleB = parseTaskPrefix(b.text || "").cleanTitle.toLowerCase();
+        return titleA.localeCompare(titleB, "es", {
+          numeric: true,
+          sensitivity: "base",
+        });
+      });
   }, [projectTasks, priorityFilter, taskSearchQuery]);
 
   // Subtask Accordion & State Handlers

@@ -15,10 +15,10 @@ import {
   updateTaskAction,
 } from "@/app/actions/tasks";
 import { NoteContentRenderer } from "@/app/components/notes/NoteContentRenderer";
+import { DrawerResizeHandle, useResizableDrawer } from "@/app/hooks/useResizableDrawer";
 import { soundFx } from "@/lib/soundFx";
 import { parseTaskMetadata } from "@/lib/taskMetadata";
 import { ContextualNote, HabiticaTask } from "@/lib/types";
-import { DrawerResizeHandle, useResizableDrawer } from "@/app/hooks/useResizableDrawer";
 import {
   AlertCircle,
   Check,
@@ -437,9 +437,8 @@ export function TaskDetailDrawer({
       <div className="absolute inset-0" onClick={onClose} />
 
       <div
-        className={`relative w-full resizable-drawer h-full bg-[#181715] border-l border-[#2A2723] p-6 sm:p-8 shadow-2xl flex flex-col justify-between overflow-y-auto space-y-6 z-10 ${
-          isResizing ? "select-none transition-none" : "animate-in slide-in-from-right duration-250"
-        }`}
+        className={`relative w-full resizable-drawer h-full bg-[#181715] border-l border-[#2A2723] p-6 sm:p-8 shadow-2xl flex flex-col justify-between overflow-y-auto space-y-6 z-10 ${isResizing ? "select-none transition-none" : "animate-in slide-in-from-right duration-250"
+          }`}
         style={{ "--drawer-width": `${width}px` } as React.CSSProperties}
         role="dialog"
       >
@@ -538,9 +537,8 @@ export function TaskDetailDrawer({
                   <h3
                     onClick={handleCopyTitle}
                     title="Clic para copiar título"
-                    className={`group/title inline-flex items-center gap-2 cursor-pointer font-serif text-lg sm:text-xl font-bold text-[#F5F2EB] hover:text-[#FFFFFF] transition-colors select-text ${
-                      activeTask.completed ? "line-through text-[#8E867B]" : ""
-                    }`}
+                    className={`group/title inline-flex items-center gap-2 cursor-pointer font-serif text-lg sm:text-xl font-bold text-[#F5F2EB] hover:text-[#FFFFFF] transition-colors select-text ${activeTask.completed ? "line-through text-[#8E867B]" : ""
+                      }`}
                   >
                     <span>{activeTask.text}</span>
                     <Copy className="h-3.5 w-3.5 text-[#8E867B] opacity-0 group-hover/title:opacity-100 transition-opacity shrink-0" />
@@ -606,11 +604,10 @@ export function TaskDetailDrawer({
                       key={p.value}
                       type="button"
                       onClick={() => setTaskPriority(p.value)}
-                      className={`py-1.5 px-2 rounded-lg text-xs font-mono font-semibold border transition-all cursor-pointer text-center ${
-                        taskPriority === p.value
-                          ? `${p.color} ring-1 ring-inset ring-current`
-                          : "border-[#2A2723] bg-[#121110] text-[#8E867B] hover:text-[#DDD6C9]"
-                      }`}
+                      className={`py-1.5 px-2 rounded-lg text-xs font-mono font-semibold border transition-all cursor-pointer text-center ${taskPriority === p.value
+                        ? `${p.color} ring-1 ring-inset ring-current`
+                        : "border-[#2A2723] bg-[#121110] text-[#8E867B] hover:text-[#DDD6C9]"
+                        }`}
                     >
                       {p.label}
                     </button>
@@ -712,28 +709,25 @@ export function TaskDetailDrawer({
                   <div
                     key={item.id}
                     onClick={() => item.id && handleToggleChecklist(item.id)}
-                    className={`flex items-center justify-between p-2.5 rounded-lg border transition-all cursor-pointer select-none group ${
-                      item.completed
-                        ? "bg-[#141813] border-[#7EA35A]/30 text-[#8E867B]"
-                        : "bg-[#181715] border-[#2A2723] hover:border-[#38332D] text-[#F5F2EB]"
-                    }`}
+                    className={`flex items-center justify-between p-2.5 rounded-lg border transition-all cursor-pointer select-none group ${item.completed
+                      ? "bg-[#141813] border-[#7EA35A]/30 text-[#8E867B]"
+                      : "bg-[#181715] border-[#2A2723] hover:border-[#38332D] text-[#F5F2EB]"
+                      }`}
                   >
                     <div className="flex items-center gap-2.5 min-w-0">
                       <div
-                        className={`flex h-4.5 w-4.5 shrink-0 items-center justify-center rounded border transition-colors ${
-                          item.completed
-                            ? "bg-[#7EA35A] border-[#7EA35A] text-[#121110] font-bold"
-                            : "border-[#38332D] bg-[#121110]"
-                        }`}
+                        className={`flex h-4.5 w-4.5 shrink-0 items-center justify-center rounded border transition-colors ${item.completed
+                          ? "bg-[#7EA35A] border-[#7EA35A] text-[#121110] font-bold"
+                          : "border-[#38332D] bg-[#121110]"
+                          }`}
                       >
                         {item.completed && <Check className="h-3 w-3 stroke-3" />}
                       </div>
                       <span
-                        className={`text-xs ${
-                          item.completed
-                            ? "line-through text-[#8E867B]"
-                            : "text-[#F5F2EB]"
-                        }`}
+                        className={`text-xs ${item.completed
+                          ? "line-through text-[#8E867B]"
+                          : "text-[#F5F2EB]"
+                          }`}
                       >
                         {item.text}
                       </span>
@@ -823,11 +817,10 @@ export function TaskDetailDrawer({
                     const files = e.dataTransfer.files;
                     if (files && files.length > 0) await handleUploadFile(files[0], false);
                   }}
-                  className={`relative rounded-lg border transition-all ${
-                    isDragging
-                      ? "border-[#4EAB9E] bg-[#141C1A]"
-                      : "border-[#2A2723] bg-[#121110]"
-                  }`}
+                  className={`relative rounded-lg border transition-all ${isDragging
+                    ? "border-[#4EAB9E] bg-[#141C1A]"
+                    : "border-[#2A2723] bg-[#121110]"
+                    }`}
                 >
                   <textarea
                     rows={4}
@@ -885,16 +878,6 @@ export function TaskDetailDrawer({
                     <AlertCircle className="h-3.5 w-3.5 shrink-0" />
                     <span>{uploadError}</span>
                   </p>
-                )}
-
-                {/* Real-time Preview */}
-                {noteContent && (
-                  <div className="p-2.5 rounded-lg bg-[#121110] border border-[#2A2723] space-y-1">
-                    <span className="font-mono text-[9px] text-[#8E867B] uppercase tracking-wider block">
-                      Vista previa:
-                    </span>
-                    <NoteContentRenderer content={noteContent} maxTextLines={2} />
-                  </div>
                 )}
 
                 <div className="flex items-center justify-end gap-2 pt-1">
@@ -971,11 +954,10 @@ export function TaskDetailDrawer({
                             const files = e.dataTransfer.files;
                             if (files && files.length > 0) await handleUploadFile(files[0], true);
                           }}
-                          className={`relative rounded-lg border transition-all ${
-                            isEditDragging
-                              ? "border-[#D99B43] bg-[#221D16]"
-                              : "border-[#2A2723] bg-[#121110]"
-                          }`}
+                          className={`relative rounded-lg border transition-all ${isEditDragging
+                            ? "border-[#D99B43] bg-[#221D16]"
+                            : "border-[#2A2723] bg-[#121110]"
+                            }`}
                         >
                           <textarea
                             rows={5}
@@ -1033,16 +1015,6 @@ export function TaskDetailDrawer({
                             <AlertCircle className="h-3.5 w-3.5 shrink-0" />
                             <span>{uploadError}</span>
                           </p>
-                        )}
-
-                        {/* Live Preview for Edit */}
-                        {editNoteContent && (
-                          <div className="p-2.5 rounded-lg bg-[#121110] border border-[#2A2723] space-y-1">
-                            <span className="font-mono text-[9px] text-[#8E867B] uppercase tracking-wider block">
-                              Vista previa:
-                            </span>
-                            <NoteContentRenderer content={editNoteContent} maxTextLines={3} />
-                          </div>
                         )}
 
                         <div className="flex items-center justify-end gap-2 pt-1">
@@ -1129,11 +1101,10 @@ export function TaskDetailDrawer({
             type="button"
             disabled={activeTask.completed || isPending}
             onClick={handleCompleteTask}
-            className={`w-full py-3 px-4 rounded-xl font-bold text-xs sm:text-sm font-sans transition-all flex items-center justify-center gap-2 cursor-pointer shadow-sm ${
-              activeTask.completed
-                ? "bg-[#1C2219] text-[#7EA35A] border border-[#7EA35A]/40 opacity-75 cursor-not-allowed"
-                : "bg-[#7EA35A] hover:bg-[#8FB866] text-[#121110] active:scale-[0.99]"
-            }`}
+            className={`w-full py-3 px-4 rounded-xl font-bold text-xs sm:text-sm font-sans transition-all flex items-center justify-center gap-2 cursor-pointer shadow-sm ${activeTask.completed
+              ? "bg-[#1C2219] text-[#7EA35A] border border-[#7EA35A]/40 opacity-75 cursor-not-allowed"
+              : "bg-[#7EA35A] hover:bg-[#8FB866] text-[#121110] active:scale-[0.99]"
+              }`}
           >
             <CheckCircle2 className="h-4 w-4" />
             <span>{activeTask.completed ? "Completada" : "Completar"}</span>
