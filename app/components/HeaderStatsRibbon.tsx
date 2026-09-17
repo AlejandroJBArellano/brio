@@ -1,10 +1,6 @@
-"use client";
-
-import { toggleSleepAction } from "@/app/actions/tasks";
 import { useCommandCenter } from "@/app/components/context/CommandCenterContext";
 import { HabiticaUser } from "@/lib/types";
 import {
-  Bed,
   BookOpen,
   ChevronDown,
   Dumbbell,
@@ -21,7 +17,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useEffect, useRef, useState, useTransition } from "react";
+import { useEffect, useRef, useState } from "react";
 
 interface HeaderStatsRibbonProps {
   user: HabiticaUser;
@@ -31,33 +27,11 @@ interface HeaderStatsRibbonProps {
 export function HeaderStatsRibbon({ user }: HeaderStatsRibbonProps) {
   const router = useRouter();
   const pathname = usePathname();
-  const [isPending, startTransition] = useTransition();
   const { openModal, refreshData } = useCommandCenter();
 
   const [isActionsOpen, setIsActionsOpen] = useState(false);
 
   const actionsRef = useRef<HTMLDivElement>(null);
-
-  // Close dropdown on outside click
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (actionsRef.current && !actionsRef.current.contains(event.target as Node)) {
-        setIsActionsOpen(false);
-      }
-    };
-    if (isActionsOpen) {
-      document.addEventListener("mousedown", handleClickOutside);
-    }
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, [isActionsOpen]);
-
-  const isResting = Boolean(user.preferences?.sleep ?? user.flags?.rest ?? false);
-
-  const handleToggleRest = () => {
-    startTransition(async () => {
-      await toggleSleepAction();
-    });
-  };
 
   // Keyboard navigation shortcuts: ⌘0 to ⌘6
   useEffect(() => {
@@ -250,31 +224,6 @@ export function HeaderStatsRibbon({ user }: HeaderStatsRibbonProps) {
                   <span>Scratchpad Rápido</span>
                 </div>
                 <kbd className="font-mono text-[10px] text-[#8E867B] bg-[#121110] px-1 rounded border border-[#2A2723]">⌘J</kbd>
-              </button>
-
-              {/* Habitica Inn / Sleep Button in Actions Menu */}
-              <button
-                type="button"
-                onClick={() => {
-                  setIsActionsOpen(false);
-                  handleToggleRest();
-                }}
-                disabled={isPending}
-                className={`w-full flex items-center justify-between p-2 rounded-lg transition-colors cursor-pointer ${isResting
-                  ? "bg-[#D99B43]/15 text-[#E8AF59] hover:bg-[#D99B43]/25"
-                  : "text-[#DDD6C9] hover:bg-[#22201D] hover:text-[#F5F2EB]"
-                  }`}
-              >
-                <div className="flex items-center gap-2 min-w-0">
-                  <Bed className={`size-3.5 shrink-0 ${isResting ? "text-[#E8AF59]" : "text-[#D99B43]"}`} />
-                  <span className="truncate">{isResting ? "Descansando" : "Descanso"}</span>
-                </div>
-                <span className={`font-mono text-[9px] px-1.5 py-0.5 rounded border shrink-0 ${isResting
-                  ? "border-[#D99B43]/40 bg-[#221D16] text-[#E8AF59] font-bold"
-                  : "border-[#2A2723] bg-[#121110] text-[#8E867B]"
-                  }`}>
-                  {isResting ? "DESCANSANDO" : "ACTIVO"}
-                </span>
               </button>
 
               <div className="my-1 h-px bg-[#2A2723]" />

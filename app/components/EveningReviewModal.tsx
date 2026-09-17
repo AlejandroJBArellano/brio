@@ -1,7 +1,7 @@
 "use client";
 
 import { saveEveningReviewAction } from "@/app/actions/rituals";
-import { toggleChecklistItemAction, toggleSleepAction, toggleTaskAction } from "@/app/actions/tasks";
+import { toggleChecklistItemAction, toggleTaskAction } from "@/app/actions/tasks";
 import { soundFx } from "@/lib/soundFx";
 import { HabiticaTask, HabiticaUser } from "@/lib/types";
 import {
@@ -10,10 +10,9 @@ import {
   BatteryCharging,
   BatteryLow,
   BatteryMedium,
-  Bed,
   Check,
+  CheckCircle2,
   ChevronDown,
-  Heart,
   Moon,
   Sparkles,
   X,
@@ -101,8 +100,6 @@ export function EveningReviewModal({
     );
   }, [tasks, optimisticCompletedDailyIds]);
 
-  const isResting = Boolean(user.preferences?.sleep ?? user.flags?.rest ?? false);
-
   if (!isOpen) return null;
 
   const handleToggleDaily = (taskId: string) => {
@@ -110,13 +107,6 @@ export function EveningReviewModal({
     setOptimisticCompletedDailyIds((prev) => new Set(prev).add(taskId));
     startTransition(async () => {
       await toggleTaskAction(taskId, "up");
-    });
-  };
-
-  const handleToggleInn = () => {
-    soundFx.click();
-    startTransition(async () => {
-      await toggleSleepAction();
     });
   };
 
@@ -198,36 +188,22 @@ export function EveningReviewModal({
             {/* ========================================================================= */}
             {step === 1 && (
               <div className="mt-5 space-y-4 animate-in fade-in duration-200">
-                {/* Habitica Health & Dailies Audit Card */}
+                {/* Dailies Audit Card */}
                 <div className="p-4 rounded-xl border border-[#2A2723] bg-[#121110] space-y-3">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2.5">
-                      <Heart className="h-4.5 w-4.5 text-[#E05D52]" />
+                      <CheckCircle2 className="h-4.5 w-4.5 text-[#4EAB9E]" />
                       <div>
-                        <h4 className="text-xs font-bold text-[#F5F2EB] font-serif">
-                          Salud ({user.stats.hp}/{user.stats.maxHealth || 50} HP)
+                        <h4 className="text-xs font-bold text-[#F5F2EB] font-sans">
+                          Cumplimiento de Diarias
                         </h4>
                         <p className="text-[11px] text-[#8E867B] font-mono">
                           {pendingDailies.length > 0
-                            ? `${pendingDailies.length} pendientes`
-                            : "Dailies completas"}
+                            ? `${pendingDailies.length} pendientes hoy`
+                            : "Todas las diarias completadas hoy"}
                         </p>
                       </div>
                     </div>
-
-                    {/* Rest / Sleep Button */}
-                    <button
-                      type="button"
-                      onClick={handleToggleInn}
-                      disabled={isPending}
-                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-mono font-semibold transition-all cursor-pointer ${isResting
-                        ? "bg-[#3D3425] text-[#E8AF59] border border-[#D99B43]/40 shadow-xs"
-                        : "bg-[#181715] text-[#8E867B] hover:text-[#DDD6C9] border border-[#2A2723]"
-                        }`}
-                    >
-                      <Bed className="h-3.5 w-3.5" />
-                      <span>{isResting ? "Descansando" : "Descanso"}</span>
-                    </button>
                   </div>
 
                   {/* Pending Dailies Quick Checklist with Subtasks Breakdown */}
