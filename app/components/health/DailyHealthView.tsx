@@ -84,7 +84,7 @@ export function DailyHealthView({ data, onRefresh }: DailyHealthViewProps) {
     <div className="space-y-6 animate-in fade-in duration-200">
       {/* 1. Hormonal Circadian Engine & 7 Androgenic Pillars */}
       <HormonalCircadianWidget
-        onOpenHevy={() => router.push("/health/training")}
+        onOpenTraining={() => router.push("/health/training")}
         onOpenPantry={() => router.push("/health/nutrition")}
       />
 

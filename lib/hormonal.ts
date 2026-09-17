@@ -36,7 +36,7 @@ export const HORMONAL_PHASES_CATALOG: Record<HormonalPhaseId, HormonalPhaseConfi
     shortName: "Luz Solar & Hidratación",
     startTime: "07:30",
     endTime: "08:30",
-    icon: "🌅",
+    icon: "Sun",
     color: "#f59e0b", // Amber
     hormoneFocus: "Pico de Testosterona (+35%) & Cortisol Natural",
     actionHeadline: "Carga de Luz Natural & Electrolitos",
@@ -54,7 +54,7 @@ export const HORMONAL_PHASES_CATALOG: Record<HormonalPhaseId, HormonalPhaseConfi
     shortName: "Deep Work Matutino",
     startTime: "08:30",
     endTime: "12:00",
-    icon: "⚡",
+    icon: "Zap",
     color: "#3b82f6", // Blue
     hormoneFocus: "Máxima Agudeza Analítica & Dopamina",
     actionHeadline: "Atacar Tareas de Mayor Fricción (Must-Win 3)",
@@ -69,17 +69,17 @@ export const HORMONAL_PHASES_CATALOG: Record<HormonalPhaseId, HormonalPhaseConfi
   gym_power: {
     id: "gym_power",
     name: "Gimnasio & Entrenamiento de Fuerza",
-    shortName: "Gym & Fuerza (Hevy)",
+    shortName: "Gym & Fuerza",
     startTime: "12:00",
     endTime: "14:00",
-    icon: "🏋️",
+    icon: "Dumbbell",
     color: "#ef4444", // Red / Rose
     hormoneFocus: "Pico Neuromuscular & Estímulo Anabólico",
     actionHeadline: "Entrenamiento Intenso & Desconexión Mental",
     description:
       "Tu temperatura corporal y activación neuromuscular están en ascenso. Este bloque es un corte total con el trabajo mental para canalizar energía al entrenamiento de sobrecarga progresiva.",
     keyNutrientsOrTips: [
-      "Registrar sets y cargas en Hevy (⌘5)",
+      "Registrar series y cargas en Brio (⌘5)",
       "Creatina 5g + agua durante/post sesión",
       "Ducha fría/tibia de reinicio tras el entrenamiento",
     ],
@@ -90,7 +90,7 @@ export const HORMONAL_PHASES_CATALOG: Record<HormonalPhaseId, HormonalPhaseConfi
     shortName: "Almuerzo <15 min",
     startTime: "14:00",
     endTime: "15:00",
-    icon: "🥗",
+    icon: "Utensils",
     color: "#10b981", // Emerald
     hormoneFocus: "Sensibilidad a Insulina & Reposición de Glucógeno",
     actionHeadline: "Comida Densa en Nutrientes sin Pesadez",
@@ -108,7 +108,7 @@ export const HORMONAL_PHASES_CATALOG: Record<HormonalPhaseId, HormonalPhaseConfi
     shortName: "Trabajo & Proyectos",
     startTime: "15:00",
     endTime: "19:00",
-    icon: "💼",
+    icon: "Briefcase",
     color: "#8b5cf6", // Purple
     hormoneFocus: "Foco Sostenido & Tareas Operativas",
     actionHeadline: "Avanzar Proyectos y Preparar Cierre",
@@ -126,7 +126,7 @@ export const HORMONAL_PHASES_CATALOG: Record<HormonalPhaseId, HormonalPhaseConfi
     shortName: "Hard Stop 7PM & Relax",
     startTime: "19:00",
     endTime: "21:30",
-    icon: "⛔",
+    icon: "Moon",
     color: "#ec4899", // Pink / Sunset
     hormoneFocus: "Caída de Cortisol & Producción de Melatonina",
     actionHeadline: "Cierre Total de Trabajo (⌘E) & Desconexión",
@@ -145,7 +145,7 @@ export const HORMONAL_PHASES_CATALOG: Record<HormonalPhaseId, HormonalPhaseConfi
     shortName: "10h Sueño Profundo",
     startTime: "21:30",
     endTime: "07:30",
-    icon: "💤",
+    icon: "Moon",
     color: "#6366f1", // Indigo
     hormoneFocus: "80%+ Síntesis Nocturna de Testosterona & Hormona de Crecimiento (GH)",
     actionHeadline: "Regeneración Celular, Neuromuscular y Hormonal",

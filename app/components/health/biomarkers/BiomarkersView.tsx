@@ -229,7 +229,7 @@ export function BiomarkersView({ data, onRefresh }: BiomarkersViewProps) {
                 <span className="font-serif">Recambio Muscular (LDH & Albúmina)</span>
               </div>
               <p className="text-[#8E867B] text-[11px] leading-relaxed">
-                La <strong className="text-[#DDD6C9]">LDH en 287 U/L</strong> (ref 125-239) y la <strong className="text-[#DDD6C9]">Albúmina en 5.2 g/dL</strong> son marcadores clásicos de microdaño y alta síntesis de tejido por entrenamiento de hipertrofia en Gym / Hevy.
+                La <strong className="text-[#DDD6C9]">LDH en 287 U/L</strong> (ref 125-239) y la <strong className="text-[#DDD6C9]">Albúmina en 5.2 g/dL</strong> son marcadores clásicos de microdaño y alta síntesis de tejido por entrenamiento de hipertrofia y fuerza.
               </p>
             </div>
 

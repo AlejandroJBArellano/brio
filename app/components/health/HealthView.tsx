@@ -28,12 +28,11 @@ import {
 import { useState, useTransition } from "react";
 import { BiomarkersView } from "./biomarkers/BiomarkersView";
 import { BodyCompositionWidget } from "./BodyCompositionWidget";
-import { HevyWidget } from "./HevyWidget";
 import { HormonalCircadianWidget } from "./HormonalCircadianWidget";
 import { ManageSupplementsModal } from "./ManageSupplementsModal";
-import { MuscleRecoveryWidget } from "./MuscleRecoveryWidget";
 import { NutritionView } from "./nutrition/NutritionView";
 import { SmartFitModal } from "./SmartFitModal";
+import { TrainingHealthView } from "./TrainingHealthView";
 
 interface HealthViewProps {
   data: HealthDashboardData;
@@ -47,7 +46,6 @@ export function HealthView({ data, onRefresh }: HealthViewProps) {
   const [activeHealthTab, setActiveHealthTab] = useState<HealthMainTab>("daily");
 
   // Sub-tab selectors for composite pillars
-  const [trainingSubTab, setTrainingSubTab] = useState<"hevy" | "recovery">("hevy");
   const [biometricsSubTab, setBiometricsSubTab] = useState<"biomarkers" | "composition">("biomarkers");
 
   // Modals and state
@@ -186,9 +184,8 @@ export function HealthView({ data, onRefresh }: HealthViewProps) {
         <div className="space-y-6 animate-in fade-in duration-200">
           {/* Hormonal Circadian Engine & 7 Androgenic Pillars */}
           <HormonalCircadianWidget
-            onOpenHevy={() => {
+            onOpenTraining={() => {
               setActiveHealthTab("training");
-              setTrainingSubTab("hevy");
             }}
             onOpenPantry={() => setActiveHealthTab("nutrition")}
           />
@@ -308,16 +305,16 @@ export function HealthView({ data, onRefresh }: HealthViewProps) {
                 <div className="min-w-0">
                   <div className="flex items-center gap-2">
                     <h3 className="font-serif text-sm font-bold text-[#F5F2EB] tracking-tight">
-                      Entrenamiento & Hevy
+                      Entrenamiento & Fuerza
                     </h3>
                     <span className="rounded bg-[#221D16] border border-[#D99B43]/30 px-1.5 py-0.5 text-[10px] font-mono font-bold text-[#D99B43]">
                       {data.weeklyWorkoutsCount} sesiones esta semana
                     </span>
                   </div>
                   <p className="text-xs text-[#8E867B] mt-1 line-clamp-1">
-                    {data.recentHevyWorkouts && data.recentHevyWorkouts.length > 0
-                      ? `Última sesión: ${data.recentHevyWorkouts[0].title} (${toDateStr(data.recentHevyWorkouts[0].startTime)})`
-                      : "Sincronizado automáticamente con Hevy Tracker"}
+                    {data.recentWorkouts && data.recentWorkouts.length > 0
+                      ? `Última sesión: ${data.recentWorkouts[0].title} (${toDateStr(data.recentWorkouts[0].startTime)})`
+                      : "Registro en vivo y sobrecarga progresiva"}
                   </p>
                 </div>
               </div>
@@ -327,11 +324,10 @@ export function HealthView({ data, onRefresh }: HealthViewProps) {
                   type="button"
                   onClick={() => {
                     setActiveHealthTab("training");
-                    setTrainingSubTab("hevy");
                   }}
                   className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#D99B43] hover:text-[#E8AF59] transition-colors cursor-pointer"
                 >
-                  <span>Abrir Gym & Hevy</span>
+                  <span>Abrir Gym & Fuerza</span>
                   <ArrowRight className="h-3.5 w-3.5" />
                 </button>
               </div>
@@ -544,57 +540,24 @@ export function HealthView({ data, onRefresh }: HealthViewProps) {
       )}
 
       {/* ========================================================================= */}
-      {/* 2. PILAR: ENTRENAMIENTO (HEVY + RECUPERACIÓN MUSCULAR)                     */}
+      {/* 2. PILAR: ENTRENAMIENTO                                                     */}
       {/* ========================================================================= */}
       {activeHealthTab === "training" && (
         <div className="space-y-6 animate-in fade-in duration-200">
-          {/* Sub-Navigation: Hevy Tracker vs Recuperación Muscular */}
-          <div className="flex items-center justify-between gap-3 border-b border-[#2A2723] pb-3">
-            <div className="flex items-center gap-1.5 p-1 bg-[#181715] rounded-lg border border-[#2A2723]">
-              <button
-                type="button"
-                onClick={() => setTrainingSubTab("hevy")}
-                className={`flex items-center gap-2 px-3.5 py-1.5 rounded-md text-xs font-semibold transition-all cursor-pointer ${trainingSubTab === "hevy"
-                  ? "bg-[#D99B43] text-[#121110] font-bold shadow-xs"
-                  : "text-[#8E867B] hover:text-[#DDD6C9] hover:bg-[#22201D]"
-                  }`}
-              >
-                <Dumbbell className="h-3.5 w-3.5" />
-                <span>Hevy Sync & Métricas</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setTrainingSubTab("recovery")}
-                className={`flex items-center gap-2 px-3.5 py-1.5 rounded-md text-xs font-semibold transition-all cursor-pointer ${trainingSubTab === "recovery"
-                  ? "bg-[#D99B43] text-[#121110] font-bold shadow-xs"
-                  : "text-[#8E867B] hover:text-[#DDD6C9] hover:bg-[#22201D]"
-                  }`}
-              >
-                <Activity className="h-3.5 w-3.5" />
-                <span>Mapa de Recuperación Muscular</span>
-              </button>
-            </div>
-
-            <div className="hidden sm:flex items-center gap-2 text-xs font-mono text-[#8E867B]">
-              <Flame className="h-3.5 w-3.5 text-[#D99B43]" />
-              <span>Racha: <strong className="text-[#F5F2EB]">{data.workoutStreak} días</strong></span>
-            </div>
-          </div>
-
-          {/* SUB-VIEW 1: HEVY TRACKER */}
-          {trainingSubTab === "hevy" && (
-            <HevyWidget
-              recentWorkouts={data.recentHevyWorkouts}
-              stats={data.hevyStats}
-              onRefresh={onRefresh}
-            />
-          )}
-
-          {/* SUB-VIEW 2: RECUPERACIÓN MUSCULAR */}
-          {trainingSubTab === "recovery" && (
-            <MuscleRecoveryWidget recentWorkouts={data.recentHevyWorkouts} />
-          )}
+          <TrainingHealthView
+            data={{
+              recentWorkouts: data.recentWorkouts || [],
+              routines: [],
+              exercises: [],
+              stats: data.workoutStats || {
+                totalWorkouts: 0,
+                totalVolumeKg: 0,
+              },
+              workoutStreak: data.workoutStreak,
+              weeklyWorkoutsCount: data.weeklyWorkoutsCount,
+            }}
+            onRefresh={onRefresh}
+          />
         </div>
       )}
 

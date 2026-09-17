@@ -176,7 +176,7 @@ export function TrainingHealthSkeleton() {
         <div className="h-5 w-24 rounded bg-[#22201D]/60" />
       </div>
 
-      {/* Hevy Metrics Cards */}
+      {/* Workout Metrics Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         {[1, 2, 3].map((i) => (
           <div key={i} className="rounded-xl border border-[#2A2723] bg-[#181715] p-4.5 space-y-2">

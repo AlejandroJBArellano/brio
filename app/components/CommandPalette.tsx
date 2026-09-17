@@ -1,6 +1,5 @@
 "use client";
 
-import { syncHevyWorkoutsAction } from "@/app/actions/health";
 import { toggleSleepAction } from "@/app/actions/tasks";
 import { BrioLogo } from "@/app/components/BrioLogo";
 import { HabiticaTag, HabiticaTask } from "@/lib/types";
@@ -126,17 +125,14 @@ function CommandPaletteContent({
         },
       },
       {
-        id: "action-hevy-sync",
-        title: "Sincronizar Hevy",
-        subtitle: "Descargar últimas sesiones de fuerza y volumen",
+        id: "action-workout",
+        title: "Iniciar Entrenamiento",
+        subtitle: "Abrir tracker de entrenamiento en vivo",
         icon: Dumbbell,
-        badge: "Hevy",
+        badge: "Entreno",
         run: () => {
           onClose();
-          startTransition(async () => {
-            await syncHevyWorkoutsAction({ maxPages: 3 });
-            router.refresh();
-          });
+          router.push("/health/training");
         },
       },
       {

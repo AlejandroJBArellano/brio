@@ -1,7 +1,6 @@
 "use server";
 
 import { getDb } from "@/lib/db";
-import { fetchHevyWorkoutsList, saveHevyWorkoutToDb } from "@/lib/hevy";
 import {
   BiomarkerCategoryKey,
   BiomarkerLog,
@@ -15,17 +14,15 @@ import {
   FoodGroupKey,
   HealthDashboardData,
   HealthLog,
-  HevyExercise,
-  HevyStats,
-  HevyWorkout,
   LabTestReport,
   NutritionSummary,
   SupplementItem,
   TrainingHealthData,
   UserSupplement,
+  WorkoutExercise,
+  WorkoutSession,
   WorkoutType,
 } from "@/lib/types";
-import { awardHabiticaEvent } from "@/lib/habiticaEvents";
 import { revalidatePath } from "next/cache";
 import { fetchNutritionDashboardDataAction } from "./nutrition";
 import { getTodayDateStr, toDateStr } from "@/lib/dateUtils";
@@ -104,22 +101,6 @@ interface HealthLogDbRow {
   steps_count?: number | string;
 }
 
-interface HevyDbRow {
-  id: string;
-  title: string;
-  description?: string;
-  start_time?: Date | string;
-  end_time?: Date | string;
-  date: Date | string;
-  duration_seconds?: number | string;
-  total_volume_kg?: number | string;
-  exercises_count?: number | string;
-  sets_count?: number | string;
-  exercises?: unknown;
-  created_at?: Date | string;
-  hevy_updated_at?: Date | string;
-}
-
 interface WorkoutDbRow {
   id: string;
   date: Date | string;
@@ -127,7 +108,7 @@ interface WorkoutDbRow {
   notes?: string;
   exercises?: unknown;
   created_at?: Date | string;
-  hevy_updated_at?: Date | string;
+  updated_at?: Date | string;
 }
 
 type SqlClient = { (strings: TemplateStringsArray, ...values: unknown[]): Promise<unknown[]> };
@@ -362,13 +343,13 @@ export async function fetchDailyHealthDataAction(): Promise<DailyHealthData> {
     catalog,
     todayRows,
     recentRows,
-    latestHevyRow,
+    latestWorkoutRow,
     nutritionData,
   ] = await Promise.all([
     getSupplementsCatalog(sql),
     sql`SELECT * FROM health_logs WHERE date = ${todayStr} LIMIT 1;`,
     sql`SELECT * FROM health_logs ORDER BY date DESC LIMIT 14;`,
-    sql`SELECT title, start_time, date FROM hevy_workouts ORDER BY date DESC, start_time DESC LIMIT 1;`,
+    sql`SELECT title, start_time, date FROM workout_sessions WHERE status = 'completed' ORDER BY date DESC, start_time DESC LIMIT 1;`,
     fetchNutritionDashboardDataAction(todayStr).catch(() => null),
   ]);
 
@@ -494,8 +475,8 @@ export async function fetchDailyHealthDataAction(): Promise<DailyHealthData> {
   }
 
   let lastWorkoutSummary = undefined;
-  if (latestHevyRow.length > 0) {
-    const r = latestHevyRow[0] as unknown as { title: string; date: Date | string };
+  if (latestWorkoutRow.length > 0) {
+    const r = latestWorkoutRow[0] as unknown as { title: string; date: Date | string };
     lastWorkoutSummary = {
       title: r.title || "Entrenamiento",
       date: toDateStr(r.date),
@@ -515,20 +496,32 @@ export async function fetchDailyHealthDataAction(): Promise<DailyHealthData> {
   };
 }
 
-/**
- * Server Action: Fetches dedicated training & workouts data (Hevy history, stats, streaks).
- */
+import {
+  ensureWorkoutTables,
+  fetchActiveWorkoutSessionAction,
+  fetchExerciseCatalogAction,
+  fetchRoutinesAction,
+  fetchWorkoutHistoryAction,
+} from "./workouts";
+
 export async function fetchTrainingHealthDataAction(): Promise<TrainingHealthData> {
   const sql = getDb();
+  await ensureWorkoutTables(sql);
 
   const [
     recentRows,
-    hevyRows,
-    statsRows,
+    nativeStatsRows,
+    activeSession,
+    routines,
+    exercises,
+    historyRes,
   ] = await Promise.all([
     sql`SELECT * FROM health_logs ORDER BY date DESC LIMIT 14;`,
-    sql`SELECT * FROM hevy_workouts ORDER BY date DESC, start_time DESC LIMIT 20;`,
-    sql`SELECT COUNT(*)::int as count, COALESCE(SUM(total_volume_kg), 0)::float as volume, MAX(created_at) as last_sync FROM hevy_workouts;`,
+    sql`SELECT COUNT(*)::int as count, COALESCE(SUM(total_volume_kg), 0)::float as volume, MAX(created_at) as last_sync FROM workout_sessions WHERE status = 'completed';`,
+    fetchActiveWorkoutSessionAction(),
+    fetchRoutinesAction(),
+    fetchExerciseCatalogAction(),
+    fetchWorkoutHistoryAction({ limit: 20 }),
   ]);
 
   const recentLogs: HealthLog[] = (recentRows as unknown as HealthLogDbRow[]).map((r) => ({
@@ -555,31 +548,21 @@ export async function fetchTrainingHealthDataAction(): Promise<TrainingHealthDat
     }
   }
 
-  const recentHevyWorkouts: HevyWorkout[] = (hevyRows as unknown as HevyDbRow[]).map((r) => ({
-    id: r.id,
-    title: r.title,
-    description: r.description || undefined,
-    startTime: r.start_time instanceof Date ? r.start_time.toISOString() : (r.start_time?.toString() || new Date().toISOString()),
-    endTime: r.end_time instanceof Date ? r.end_time.toISOString() : (r.end_time?.toString() || new Date().toISOString()),
-    date: toDateStr(r.date),
-    durationSeconds: Number(r.duration_seconds) || 0,
-    totalVolumeKg: Number(r.total_volume_kg) || 0,
-    exercisesCount: Number(r.exercises_count) || 0,
-    setsCount: Number(r.sets_count) || 0,
-    exercises: Array.isArray(r.exercises) ? (r.exercises as HevyExercise[]) : [],
-    createdAt: r.created_at?.toString(),
-    updatedAt: r.hevy_updated_at?.toString(),
-  }));
+  const totalNativeCount = Number(nativeStatsRows[0]?.count || 0);
+  const totalVolume = Number(nativeStatsRows[0]?.volume || 0);
 
-  const hevyStats: HevyStats = {
-    totalWorkouts: Number(statsRows[0]?.count || 0),
-    totalVolumeKg: Number(statsRows[0]?.volume || 0),
-    lastSyncedAt: statsRows[0]?.last_sync?.toString(),
+  const stats = {
+    totalWorkouts: totalNativeCount > 0 ? totalNativeCount : historyRes.totalCount,
+    totalVolumeKg: totalVolume,
+    lastSyncedAt: nativeStatsRows[0]?.last_sync?.toString(),
   };
 
   return {
-    recentHevyWorkouts,
-    hevyStats,
+    activeSession,
+    recentWorkouts: historyRes.workouts,
+    routines,
+    exercises,
+    stats,
     workoutStreak,
     weeklyWorkoutsCount,
   };
@@ -612,7 +595,7 @@ export async function fetchBiometricsHealthDataAction(): Promise<BiometricsHealt
 
 /**
  * Server Action: Fetches physical health metrics, hydration, workouts, sleep, and body composition.
- * Uses Promise.all to fetch supplements, body composition, health logs, hevy workouts, nutrition, and biomarkers concurrently.
+ * Uses Promise.all to fetch supplements, body composition, health logs, workouts, nutrition, and biomarkers concurrently.
  */
 export async function fetchHealthDashboardDataAction(): Promise<HealthDashboardData> {
   const sql = getDb();
@@ -624,7 +607,7 @@ export async function fetchHealthDashboardDataAction(): Promise<HealthDashboardD
     bodyCompositionLogs,
     todayRows,
     recentRows,
-    hevyRows,
+    workoutRows,
     statsRows,
     nutritionData,
     biomarkersData,
@@ -633,8 +616,8 @@ export async function fetchHealthDashboardDataAction(): Promise<HealthDashboardD
     getBodyCompositionLogs(sql),
     sql`SELECT * FROM health_logs WHERE date = ${todayStr} LIMIT 1;`,
     sql`SELECT * FROM health_logs ORDER BY date DESC LIMIT 14;`,
-    sql`SELECT * FROM hevy_workouts ORDER BY date DESC, start_time DESC LIMIT 10;`,
-    sql`SELECT COUNT(*)::int as count, COALESCE(SUM(total_volume_kg), 0)::float as volume, MAX(created_at) as last_sync FROM hevy_workouts;`,
+    sql`SELECT * FROM workout_sessions WHERE status = 'completed' ORDER BY date DESC, start_time DESC LIMIT 10;`,
+    sql`SELECT COUNT(*)::int as count, COALESCE(SUM(total_volume_kg), 0)::float as volume, MAX(created_at) as last_sync FROM workout_sessions WHERE status = 'completed';`,
     fetchNutritionDashboardDataAction(todayStr),
     getBiomarkersDashboardData(sql),
   ]);
@@ -725,8 +708,24 @@ export async function fetchHealthDashboardDataAction(): Promise<HealthDashboardD
 
   const waterPercent = Math.min(100, Math.round((todayHealth.waterMl / 3000) * 100));
 
-  // Process Hevy workouts
-  const recentHevyWorkouts: HevyWorkout[] = (hevyRows as unknown as HevyDbRow[]).map((r) => ({
+  // Process workout sessions
+  const recentWorkouts: WorkoutSession[] = (workoutRows as unknown as Array<{
+    id: string;
+    title: string;
+    description?: string;
+    start_time: Date | string;
+    end_time?: Date | string;
+    date: Date | string;
+    duration_seconds?: number | string;
+    total_volume_kg?: number | string;
+    exercises_count?: number | string;
+    sets_count?: number | string;
+    status?: string;
+    routine_id?: string;
+    exercises?: unknown;
+    created_at?: Date | string;
+    updated_at?: Date | string;
+  }>).map((r) => ({
     id: r.id,
     title: r.title,
     description: r.description || undefined,
@@ -737,12 +736,14 @@ export async function fetchHealthDashboardDataAction(): Promise<HealthDashboardD
     totalVolumeKg: Number(r.total_volume_kg) || 0,
     exercisesCount: Number(r.exercises_count) || 0,
     setsCount: Number(r.sets_count) || 0,
-    exercises: Array.isArray(r.exercises) ? (r.exercises as HevyExercise[]) : [],
+    status: (r.status as "in_progress" | "completed" | "discarded") || "completed",
+    routineId: r.routine_id || undefined,
+    exercises: Array.isArray(r.exercises) ? (r.exercises as WorkoutExercise[]) : [],
     createdAt: r.created_at?.toString(),
-    updatedAt: r.hevy_updated_at?.toString(),
+    updatedAt: r.updated_at?.toString(),
   }));
 
-  const hevyStats: HevyStats = {
+  const workoutStats = {
     totalWorkouts: Number(statsRows[0]?.count || 0),
     totalVolumeKg: Number(statsRows[0]?.volume || 0),
     lastSyncedAt: statsRows[0]?.last_sync?.toString(),
@@ -764,8 +765,8 @@ export async function fetchHealthDashboardDataAction(): Promise<HealthDashboardD
     bodyCompositionLogs,
     latestBodyComposition,
     previousBodyComposition,
-    recentHevyWorkouts,
-    hevyStats,
+    recentWorkouts,
+    workoutStats,
     nutritionData,
     biomarkersData,
   };
@@ -1375,89 +1376,6 @@ export async function createBodyCompositionAction(input: {
     skeletalMuscleKg: input.skeletalMuscleKg,
     notes: input.notes,
   });
-}
-
-/**
- * Server Action: Synchronizes workouts from Hevy API into Neon DB.
- */
-export async function syncHevyWorkoutsAction(options?: {
-  maxPages?: number;
-  pageSize?: number;
-}): Promise<{
-  success: boolean;
-  syncedCount: number;
-  totalVolume: number;
-  error?: string;
-}> {
-  try {
-    const sql = getDb();
-    const maxPages = options?.maxPages || 3;
-    const pageSize = options?.pageSize || 10;
-
-    let totalSynced = 0;
-    let totalVolume = 0;
-
-    for (let p = 1; p <= maxPages; p++) {
-      const result = await fetchHevyWorkoutsList(p, pageSize);
-      if (!result.workouts || result.workouts.length === 0) break;
-
-      for (const workout of result.workouts) {
-        await saveHevyWorkoutToDb(sql, workout);
-        totalSynced++;
-        totalVolume += workout.totalVolumeKg;
-      }
-
-      if (p >= result.pageCount) break;
-    }
-
-    if (totalSynced > 0) {
-      await awardHabiticaEvent("WORKOUT_COMPLETED", {
-        customTitle: `[Brio] Hevy: ${totalSynced} Entrenamientos Sincronizados`,
-        customNotes: `Sincronización de Hevy: ${totalSynced} sesiones y ${Math.round(totalVolume)} kg de volumen total levantados.`,
-      });
-    }
-
-    revalidatePath("/");
-    return {
-      success: true,
-      syncedCount: totalSynced,
-      totalVolume: Math.round(totalVolume),
-    };
-  } catch (error) {
-    console.error("[Hevy Sync Action Error]:", error);
-    return {
-      success: false,
-      syncedCount: 0,
-      totalVolume: 0,
-      error: error instanceof Error ? error.message : "Failed to sync Hevy workouts",
-    };
-  }
-}
-
-/**
- * Server Action: Fetches recent Hevy workouts from DB.
- */
-export async function fetchRecentHevyWorkoutsAction(limit = 10): Promise<HevyWorkout[]> {
-  const sql = getDb();
-  const rows = await sql`
-    SELECT * FROM hevy_workouts ORDER BY date DESC, start_time DESC LIMIT ${limit};
-  `;
-
-  return (rows as unknown as HevyDbRow[]).map((r) => ({
-    id: r.id,
-    title: r.title,
-    description: r.description || undefined,
-    startTime: r.start_time instanceof Date ? r.start_time.toISOString() : (r.start_time?.toString() || new Date().toISOString()),
-    endTime: r.end_time instanceof Date ? r.end_time.toISOString() : (r.end_time?.toString() || new Date().toISOString()),
-    date: toDateStr(r.date),
-    durationSeconds: Number(r.duration_seconds) || 0,
-    totalVolumeKg: Number(r.total_volume_kg) || 0,
-    exercisesCount: Number(r.exercises_count) || 0,
-    setsCount: Number(r.sets_count) || 0,
-    exercises: Array.isArray(r.exercises) ? (r.exercises as HevyExercise[]) : [],
-    createdAt: r.created_at?.toString(),
-    updatedAt: r.hevy_updated_at?.toString(),
-  }));
 }
 
 /**

@@ -35,7 +35,7 @@ import {
 import { useEffect, useState, useTransition } from "react";
 
 interface HormonalCircadianWidgetProps {
-  onOpenHevy?: () => void;
+  onOpenTraining?: () => void;
   onOpenPantry?: () => void;
   onOpenFocus?: () => void;
   onOpenEveningReview?: () => void;
@@ -45,62 +45,54 @@ const CHECKLIST_ITEMS: {
   key: keyof HormonalDailyChecklist;
   label: string;
   sublabel: string;
-  icon: string;
   phaseId: HormonalPhaseId;
 }[] = [
   {
     key: "sleep10hLogged",
     label: "10 Horas de Sueño Profundo",
     sublabel: "21:30 - 07:30: Síntesis de Testosterona y Hormona de Crecimiento",
-    icon: "💤",
     phaseId: "deep_sleep_10h",
   },
   {
     key: "morningSunlight",
     label: "Carga de Luz Solar & Hidratación",
     sublabel: "07:30 - 08:30: 10-15m sol directo + 500ml agua con electrolitos",
-    icon: "☀️",
     phaseId: "wake_sunlight",
   },
   {
     key: "morningDeepWorkDone",
     label: "Deep Work Matutino (Must-Win)",
     sublabel: "08:30 - 12:00: Tareas de mayor dificultad en pico de dopamina",
-    icon: "⚡",
     phaseId: "morning_deep_work",
   },
   {
     key: "gymSessionCompleted",
-    label: "Entrenamiento de Fuerza en Gym",
-    sublabel: "12:00 - 14:00: Sobrecarga progresiva y corte mental (Hevy)",
-    icon: "🏋️",
+    label: "Entrenamiento de Fuerza",
+    sublabel: "12:00 - 14:00: Sobrecarga progresiva y corte mental",
     phaseId: "gym_power",
   },
   {
     key: "postGymNutrition",
     label: "Almuerzo Anabólico Post-Gym",
     sublabel: "14:00 - 15:00: Comida <15m densa en proteína/grasas sin somnolencia",
-    icon: "🥗",
     phaseId: "anabolic_lunch",
   },
   {
     key: "hardStop7pmRespected",
     label: "Hard Stop a las 7:00 PM",
     sublabel: "19:00: Cierre absoluto del trabajo laboral (Work Shutdown ⌘E)",
-    icon: "⛔",
     phaseId: "evening_hard_stop",
   },
   {
     key: "nightDimLightMagnesium",
     label: "Dim Light & Magnesio / Zinc",
     sublabel: "20:00 - 21:30: Luz cálida tenue y preparación para el sueño",
-    icon: "🌙",
     phaseId: "evening_hard_stop",
   },
 ];
 
 export function HormonalCircadianWidget({
-  onOpenHevy,
+  onOpenTraining,
   onOpenPantry,
   onOpenFocus,
   onOpenEveningReview,
@@ -323,11 +315,11 @@ export function HormonalCircadianWidget({
 
             {activePhase.id === "gym_power" && (
               <button
-                onClick={onOpenHevy}
+                onClick={onOpenTraining}
                 className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-[#D99B43] hover:bg-[#E8AF59] text-[#121110] text-xs font-bold shadow-xs transition-all cursor-pointer font-sans"
               >
                 <Dumbbell className="h-4 w-4" />
-                <span>Ver Hevy Workout (Gym)</span>
+                <span>Ver Entrenamiento</span>
               </button>
             )}
 
@@ -454,7 +446,7 @@ export function HormonalCircadianWidget({
               <div className="grid grid-cols-2 gap-3">
                 <div className="flex flex-col gap-1.5">
                   <label className="text-[11px] font-sans font-medium text-[#DDD6C9]">
-                    💤 Inicio Sueño (10h)
+                    Inicio Sueño (10h)
                   </label>
                   <input
                     type="time"
@@ -465,7 +457,7 @@ export function HormonalCircadianWidget({
                 </div>
                 <div className="flex flex-col gap-1.5">
                   <label className="text-[11px] font-sans font-medium text-[#DDD6C9]">
-                    ☀️ Despertar
+                    Despertar
                   </label>
                   <input
                     type="time"
@@ -479,7 +471,7 @@ export function HormonalCircadianWidget({
               <div className="grid grid-cols-2 gap-3">
                 <div className="flex flex-col gap-1.5">
                   <label className="text-[11px] font-sans font-medium text-[#DDD6C9]">
-                    ⚡ Inicio Deep Work
+                    Inicio Deep Work
                   </label>
                   <input
                     type="time"
@@ -490,7 +482,7 @@ export function HormonalCircadianWidget({
                 </div>
                 <div className="flex flex-col gap-1.5">
                   <label className="text-[11px] font-sans font-medium text-[#DDD6C9]">
-                    🏋️ Inicio Gym (Hevy)
+                    Inicio Gym
                   </label>
                   <input
                     type="time"
@@ -504,7 +496,7 @@ export function HormonalCircadianWidget({
               <div className="grid grid-cols-2 gap-3">
                 <div className="flex flex-col gap-1.5">
                   <label className="text-[11px] font-sans font-medium text-[#DDD6C9]">
-                    🥗 Almuerzo Post-Gym
+                    Almuerzo Post-Gym
                   </label>
                   <input
                     type="time"
@@ -515,7 +507,7 @@ export function HormonalCircadianWidget({
                 </div>
                 <div className="flex flex-col gap-1.5">
                   <label className="text-[11px] font-sans font-medium text-[#DDD6C9]">
-                    ⛔ Hard Stop Laboral
+                    Hard Stop Laboral
                   </label>
                   <input
                     type="time"

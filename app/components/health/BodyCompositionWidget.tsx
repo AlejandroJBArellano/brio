@@ -202,24 +202,24 @@ export function BodyCompositionWidget({
         {/* Quick Protocol Targets Grid */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 font-mono text-xs">
           <div className="rounded-lg bg-[#121110] p-2.5 border border-[#2A2723]/80">
-            <span className="text-[10px] text-[#8E867B] block font-sans">🔥 Déficit Calórico</span>
+            <span className="text-[10px] text-[#8E867B] block font-sans">Déficit Calórico</span>
             <span className="font-bold text-[#F5F2EB] text-xs">~2,050 kcal/d</span>
             <span className="text-[9px] text-[#7EA35A] block">-400 kcal vs TDEE</span>
           </div>
           <div className="rounded-lg bg-[#121110] p-2.5 border border-[#2A2723]/80">
-            <span className="text-[10px] text-[#8E867B] block font-sans">🥩 Proteína Diaria</span>
+            <span className="text-[10px] text-[#8E867B] block font-sans">Proteína Diaria</span>
             <span className="font-bold text-[#F5F2EB] text-xs">160 g / día</span>
             <span className="text-[9px] text-[#8E867B] block">2.1g/kg masa magra</span>
           </div>
           <div className="rounded-lg bg-[#121110] p-2.5 border border-[#2A2723]/80">
-            <span className="text-[10px] text-[#8E867B] block font-sans">💧 Hidratación Meta</span>
+            <span className="text-[10px] text-[#8E867B] block font-sans">Hidratación Meta</span>
             <span className="font-bold text-[#F5F2EB] text-xs">3,000 ml / día</span>
             <span className="text-[9px] text-[#4EAB9E] block">40L Agua corporal</span>
           </div>
           <div className="rounded-lg bg-[#121110] p-2.5 border border-[#2A2723]/80">
-            <span className="text-[10px] text-[#8E867B] block font-sans">👟 Actividad NEAT</span>
+            <span className="text-[10px] text-[#8E867B] block font-sans">Actividad NEAT</span>
             <span className="font-bold text-[#F5F2EB] text-xs">+10,000 pasos</span>
-            <span className="text-[9px] text-[#D99B43] block">Gym Fuerza Hevy</span>
+            <span className="text-[9px] text-[#D99B43] block">Gym & Fuerza</span>
           </div>
         </div>
       </div>
