@@ -6,19 +6,23 @@ import {
   ProjectsPageData,
   updateProjectStatusAction,
 } from "@/app/actions/projects";
-import { ProjectDossierDrawer } from "@/app/components/vault/ProjectDossierDrawer";
 import { matchTasksToProject } from "@/lib/projectMatcher";
 import { soundFx } from "@/lib/soundFx";
 import { ProjectItem, ProjectStatus } from "@/lib/types";
 import {
-  Code2,
-  ExternalLink,
+  CheckCircle2,
   FolderGit2,
+  Kanban,
+  LayoutGrid,
+  Lightbulb,
   ListTodo,
+  PauseCircle,
   Plus,
   Search,
+  Shield,
   Trash2,
   X,
+  Zap,
 } from "lucide-react";
 import Link from "next/link";
 import { useMemo, useState, useTransition } from "react";
@@ -28,43 +32,70 @@ interface ProjectsViewProps {
   onRefresh?: () => void;
 }
 
-const STATUS_LABELS: Record<ProjectStatus, { label: string; color: string; badge: string }> = {
-  permanent: {
-    label: "Permanente",
-    color: "border-[#4EAB9E]/40 bg-[#142321] text-[#4EAB9E]",
-    badge: "text-[#4EAB9E] bg-[#142321] border-[#4EAB9E]/30",
+interface BoardColumn {
+  id: string;
+  statuses: ProjectStatus[];
+  title: string;
+  defaultStatus: ProjectStatus;
+  badgeStyle: string;
+  icon: React.ReactNode;
+}
+
+const BOARD_COLUMNS: BoardColumn[] = [
+  {
+    id: "idea",
+    statuses: ["idea"],
+    title: "Ideas",
+    defaultStatus: "idea",
+    badgeStyle: "border-[#8E867B]/30 bg-[#1A1917] text-[#C2BAAD]",
+    icon: <Lightbulb className="size-3.5 text-[#C2BAAD]" />,
   },
-  in_progress: {
-    label: "En Desarrollo",
-    color: "border-[#D99B43]/30 bg-[#221D16] text-[#D99B43]",
-    badge: "text-[#D99B43] bg-[#221D16] border-[#D99B43]/30",
+  {
+    id: "in_progress",
+    statuses: ["in_progress"],
+    title: "En Desarrollo",
+    defaultStatus: "in_progress",
+    badgeStyle: "border-[#D99B43]/30 bg-[#221D16] text-[#D99B43]",
+    icon: <Zap className="size-3.5 text-[#D99B43]" />,
   },
-  completed: {
-    label: "Completado",
-    color: "border-[#7EA35A]/40 bg-[#17241A] text-[#7EA35A]",
-    badge: "text-[#7EA35A] bg-[#17241A] border-[#7EA35A]/30",
+  {
+    id: "permanent",
+    statuses: ["permanent"],
+    title: "Permanentes",
+    defaultStatus: "permanent",
+    badgeStyle: "border-[#4EAB9E]/30 bg-[#142321] text-[#4EAB9E]",
+    icon: <Shield className="size-3.5 text-[#4EAB9E]" />,
   },
-  launched: {
-    label: "Lanzado",
-    color: "border-[#7EA35A]/30 bg-[#1C2219] text-[#7EA35A]",
-    badge: "text-[#7EA35A] bg-[#1C2219] border-[#7EA35A]/30",
+  {
+    id: "paused",
+    statuses: ["paused"],
+    title: "Pausados",
+    defaultStatus: "paused",
+    badgeStyle: "border-[#2A2723] bg-[#181715] text-[#8E867B]",
+    icon: <PauseCircle className="size-3.5 text-[#8E867B]" />,
   },
-  idea: {
-    label: "Idea",
-    color: "border-[#8E867B]/30 bg-[#1A1917] text-[#C2BAAD]",
-    badge: "text-[#C2BAAD] bg-[#1A1917] border-[#8E867B]/30",
+  {
+    id: "completed",
+    statuses: ["completed", "launched"],
+    title: "Completados",
+    defaultStatus: "completed",
+    badgeStyle: "border-[#7EA35A]/30 bg-[#17241A] text-[#7EA35A]",
+    icon: <CheckCircle2 className="size-3.5 text-[#7EA35A]" />,
   },
-  paused: {
-    label: "Pausado",
-    color: "border-[#2A2723] bg-[#181715] text-[#8E867B]",
-    badge: "text-[#8E867B] bg-[#181715] border-[#2A2723]",
-  },
-};
+];
+
+const STATUS_SELECT_OPTIONS: { value: ProjectStatus; label: string }[] = [
+  { value: "idea", label: "Idea" },
+  { value: "in_progress", label: "En Desarrollo" },
+  { value: "permanent", label: "Permanente" },
+  { value: "paused", label: "Pausado" },
+  { value: "completed", label: "Completado" },
+  { value: "launched", label: "Lanzado" },
+];
 
 export function ProjectsView({ data, onRefresh }: ProjectsViewProps) {
-  const [selectedProject, setSelectedProject] = useState<ProjectItem | null>(null);
-  const [activeFilter, setActiveFilter] = useState<"all" | ProjectStatus>("all");
   const [searchQuery, setSearchQuery] = useState("");
+  const [viewMode, setViewMode] = useState<"board" | "grid">("board");
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
 
@@ -75,32 +106,10 @@ export function ProjectsView({ data, onRefresh }: ProjectsViewProps) {
   const [newCanonicalPrefix, setNewCanonicalPrefix] = useState("");
   const [newTaskPrefixes, setNewTaskPrefixes] = useState("");
 
-  const counts = useMemo(() => {
-    const list = data.projects || [];
-    return {
-      all: list.length,
-      in_progress: list.filter((p) => p.status === "in_progress").length,
-      completed: list.filter((p) => p.status === "completed").length,
-      launched: list.filter((p) => p.status === "launched").length,
-      permanent: list.filter((p) => p.status === "permanent").length,
-      idea: list.filter((p) => p.status === "idea").length,
-      paused: list.filter((p) => p.status === "paused").length,
-    };
-  }, [data.projects]);
-
-  const filteredProjects = useMemo(() => {
-    return (data.projects || []).filter((p) => {
-      const matchesFilter = activeFilter === "all" || p.status === activeFilter;
-      if (!matchesFilter) return false;
-
-      if (!searchQuery.trim()) return true;
-      const q = searchQuery.toLowerCase();
-      const titleMatch = p.title.toLowerCase().includes(q);
-      const descMatch = (p.description || "").toLowerCase().includes(q);
-
-      return titleMatch || descMatch;
-    });
-  }, [data.projects, activeFilter, searchQuery]);
+  const handleOpenAddWithStatus = (status: ProjectStatus) => {
+    setNewStatus(status);
+    setIsAddModalOpen(true);
+  };
 
   const handleUpdateStatus = (id: string, status: ProjectStatus) => {
     startTransition(async () => {
@@ -146,243 +155,300 @@ export function ProjectsView({ data, onRefresh }: ProjectsViewProps) {
     });
   };
 
+  const filteredProjects = useMemo(() => {
+    const list = data.projects || [];
+    if (!searchQuery.trim()) return list;
+
+    const q = searchQuery.toLowerCase();
+    return list.filter((p) => {
+      const titleMatch = p.title.toLowerCase().includes(q);
+      const descMatch = (p.description || "").toLowerCase().includes(q);
+      const prefixMatch = (p.canonicalPrefix || "").toLowerCase().includes(q);
+      return titleMatch || descMatch || prefixMatch;
+    });
+  }, [data.projects, searchQuery]);
+
   return (
-    <div className="space-y-6 font-sans">
-      {/* 1. Header & Quick Action */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-[#2A2723]">
-        <div className="space-y-1">
-          <div className="flex items-center gap-2">
-            <span className="p-2 rounded-xl bg-[#221D16] border border-[#3D3425] text-[#D99B43]">
-              <FolderGit2 className="size-5" />
-            </span>
-            <div>
-              <h1 className="font-serif text-xl sm:text-2xl font-bold text-[#F5F2EB] tracking-tight flex items-center gap-2">
-                <span>Proyectos</span>
-                <span className="font-mono text-xs text-[#8E867B] font-normal px-2 py-0.5 rounded-full bg-[#181715] border border-[#2A2723]">
-                  {counts.all}
-                </span>
-              </h1>
-            </div>
+    <div className="space-y-5 font-sans">
+      {/* 1. Header & Controls */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-3 border-b border-[#2A2723]">
+        <div className="flex items-center gap-2.5">
+          <span className="p-2 rounded-xl bg-[#221D16] border border-[#3D3425] text-[#D99B43]">
+            <FolderGit2 className="size-5" />
+          </span>
+          <div>
+            <h1 className="font-serif text-xl sm:text-2xl font-bold text-[#F5F2EB] tracking-tight flex items-center gap-2">
+              <span>Proyectos</span>
+              <span className="font-mono text-xs text-[#8E867B] font-normal px-2 py-0.5 rounded-full bg-[#181715] border border-[#2A2723]">
+                {data.projects?.length || 0}
+              </span>
+            </h1>
           </div>
         </div>
 
-        <button
-          type="button"
-          onClick={() => setIsAddModalOpen(true)}
-          className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#D99B43] hover:bg-[#E8AF59] px-4 py-2 text-xs font-mono font-bold text-[#121110] transition-all shadow-xs cursor-pointer shrink-0"
-        >
-          <Plus className="size-4 stroke-3" />
-          <span>Nuevo Proyecto</span>
-        </button>
-      </div>
-
-      {/* 2. Filters & Search Bar */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
-        {/* Status Pills */}
-        <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-1">
-          <button
-            type="button"
-            onClick={() => setActiveFilter("all")}
-            className={`px-3 py-1.5 rounded-lg text-xs font-mono transition-all cursor-pointer shrink-0 flex items-center gap-1.5 ${activeFilter === "all"
-              ? "bg-[#221D16] text-[#D99B43] border border-[#D99B43]/50 font-bold"
-              : "bg-[#181715] text-[#8E867B] hover:text-[#DDD6C9] border border-[#2A2723]"
+        <div className="flex items-center gap-2 flex-wrap">
+          {/* View Switcher */}
+          <div className="flex items-center p-0.5 rounded-lg bg-[#181715] border border-[#2A2723] font-mono text-xs">
+            <button
+              type="button"
+              onClick={() => setViewMode("board")}
+              className={`p-1.5 rounded transition-all cursor-pointer ${
+                viewMode === "board"
+                  ? "bg-[#221D16] text-[#D99B43]"
+                  : "text-[#8E867B] hover:text-[#DDD6C9]"
               }`}
-          >
-            <span>Todos</span>
-            <span className="text-[10px] opacity-70">({counts.all})</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setActiveFilter("in_progress")}
-            className={`px-3 py-1.5 rounded-lg text-xs font-mono transition-all cursor-pointer shrink-0 flex items-center gap-1.5 ${activeFilter === "in_progress"
-              ? "bg-[#221D16] text-[#D99B43] border border-[#D99B43]/50 font-bold"
-              : "bg-[#181715] text-[#8E867B] hover:text-[#DDD6C9] border border-[#2A2723]"
+              title="Vista Tablero"
+            >
+              <Kanban className="size-4" />
+            </button>
+            <button
+              type="button"
+              onClick={() => setViewMode("grid")}
+              className={`p-1.5 rounded transition-all cursor-pointer ${
+                viewMode === "grid"
+                  ? "bg-[#221D16] text-[#D99B43]"
+                  : "text-[#8E867B] hover:text-[#DDD6C9]"
               }`}
-          >
-            <span>En Desarrollo</span>
-            <span className="text-[10px] opacity-70">({counts.in_progress})</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setActiveFilter("completed")}
-            className={`px-3 py-1.5 rounded-lg text-xs font-mono transition-all cursor-pointer shrink-0 flex items-center gap-1.5 ${activeFilter === "completed"
-              ? "bg-[#17241A] text-[#7EA35A] border border-[#7EA35A]/50 font-bold"
-              : "bg-[#181715] text-[#8E867B] hover:text-[#DDD6C9] border border-[#2A2723]"
-              }`}
-          >
-            <span>Completado</span>
-            <span className="text-[10px] opacity-70">({counts.completed})</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setActiveFilter("launched")}
-            className={`px-3 py-1.5 rounded-lg text-xs font-mono transition-all cursor-pointer shrink-0 flex items-center gap-1.5 ${activeFilter === "launched"
-              ? "bg-[#1C2219] text-[#7EA35A] border border-[#7EA35A]/50 font-bold"
-              : "bg-[#181715] text-[#8E867B] hover:text-[#DDD6C9] border border-[#2A2723]"
-              }`}
-          >
-            <span>Lanzado</span>
-            <span className="text-[10px] opacity-70">({counts.launched})</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setActiveFilter("permanent")}
-            className={`px-3 py-1.5 rounded-lg text-xs font-mono transition-all cursor-pointer shrink-0 flex items-center gap-1.5 ${activeFilter === "permanent"
-              ? "bg-[#142321] text-[#4EAB9E] border border-[#4EAB9E]/50 font-bold"
-              : "bg-[#181715] text-[#8E867B] hover:text-[#DDD6C9] border border-[#2A2723]"
-              }`}
-          >
-            <span>Permanente</span>
-            <span className="text-[10px] opacity-70">({counts.permanent})</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setActiveFilter("idea")}
-            className={`px-3 py-1.5 rounded-lg text-xs font-mono transition-all cursor-pointer shrink-0 flex items-center gap-1.5 ${activeFilter === "idea"
-              ? "bg-[#1A1917] text-[#C2BAAD] border border-[#8E867B]/50 font-bold"
-              : "bg-[#181715] text-[#8E867B] hover:text-[#DDD6C9] border border-[#2A2723]"
-              }`}
-          >
-            <span>Idea</span>
-            <span className="text-[10px] opacity-70">({counts.idea})</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setActiveFilter("paused")}
-            className={`px-3 py-1.5 rounded-lg text-xs font-mono transition-all cursor-pointer shrink-0 flex items-center gap-1.5 ${activeFilter === "paused"
-              ? "bg-[#181715] text-[#8E867B] border border-[#8E867B]/50 font-bold"
-              : "bg-[#181715] text-[#8E867B] hover:text-[#DDD6C9] border border-[#2A2723]"
-              }`}
-          >
-            <span>Pausado</span>
-            <span className="text-[10px] opacity-70">({counts.paused})</span>
-          </button>
-        </div>
-
-        {/* Search Bar */}
-        <div className="relative min-w-56">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-3.5 text-[#8E867B]" />
-          <input
-            type="text"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Buscar proyecto o stack..."
-            className="w-full rounded-lg border border-[#2A2723] bg-[#181715] pl-8 pr-3 py-1.5 text-xs text-[#F5F2EB] placeholder:text-[#8E867B] focus:outline-none focus:border-[#D99B43] font-mono"
-          />
-        </div>
-      </div>
-
-      {/* 3. Project Cards Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3.5">
-        {filteredProjects.length === 0 ? (
-          <div className="col-span-full p-12 text-center rounded-xl border border-dashed border-[#2A2723] bg-[#121110]">
-            <Code2 className="size-8 text-[#8E867B] mx-auto mb-2 opacity-60" />
-            <p className="text-sm font-semibold text-[#DDD6C9]">
-              No hay proyectos en esta vista
-            </p>
-            <p className="text-xs text-[#8E867B] mt-1 font-mono">
-              Prueba cambiando los filtros o crea un nuevo proyecto con el botón superior.
-            </p>
+              title="Vista Cuadrícula"
+            >
+              <LayoutGrid className="size-4" />
+            </button>
           </div>
-        ) : (
-          filteredProjects.map((proj) => {
-            const statusMeta = STATUS_LABELS[proj.status] || STATUS_LABELS.idea;
-            const metrics = matchTasksToProject(proj, data.tasks || []);
+
+          {/* Search Box */}
+          <div className="relative min-w-48 sm:min-w-64">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-3.5 text-[#8E867B]" />
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Buscar proyecto..."
+              className="w-full rounded-lg border border-[#2A2723] bg-[#181715] pl-8 pr-3 py-1.5 text-xs text-[#F5F2EB] placeholder:text-[#8E867B] focus:outline-none focus:border-[#D99B43] font-mono"
+            />
+          </div>
+
+          {/* Create Button */}
+          <button
+            type="button"
+            onClick={() => handleOpenAddWithStatus("in_progress")}
+            className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-[#D99B43] hover:bg-[#E8AF59] px-3.5 py-1.5 text-xs font-mono font-bold text-[#121110] transition-all shadow-xs cursor-pointer shrink-0"
+          >
+            <Plus className="size-4 stroke-3" />
+            <span>Nuevo Proyecto</span>
+          </button>
+        </div>
+      </div>
+
+      {/* 2. Board / Kanban View */}
+      {viewMode === "board" ? (
+        <div className="flex gap-4 overflow-x-auto pb-6 items-start">
+          {BOARD_COLUMNS.map((column) => {
+            const columnProjects = filteredProjects.filter((p) =>
+              column.statuses.includes(p.status)
+            );
 
             return (
               <div
-                key={proj.id}
-                onClick={() => setSelectedProject(proj)}
-                className="group rounded-xl border border-[#2A2723] bg-[#181715] hover:border-[#38332D] hover:bg-[#1D1B18] p-3.5 sm:p-4 shadow-sm transition-all flex flex-col justify-between cursor-pointer space-y-2.5"
+                key={column.id}
+                className="w-80 shrink-0 flex flex-col rounded-2xl border border-[#2A2723] bg-[#141311] p-3 space-y-3 shadow-sm"
               >
-                <div className="space-y-2">
-                  {/* Status & Delete button */}
-                  <div
-                    className="flex items-center justify-between font-mono"
-                    onClick={(e) => e.stopPropagation()}
-                  >
-                    <div className="flex items-center gap-1.5 flex-wrap">
-                      <select
-                        value={proj.status}
-                        onChange={(e) =>
-                          handleUpdateStatus(proj.id, e.target.value as ProjectStatus)
-                        }
-                        className={`text-[10px] font-bold px-2 py-0.5 rounded border ${statusMeta.color} bg-[#121110] focus:outline-none cursor-pointer`}
-                      >
-                        <option value="in_progress">En Desarrollo</option>
-                        <option value="completed">Completado</option>
-                        <option value="launched">Lanzado</option>
-                        <option value="permanent">Permanente</option>
-                        <option value="idea">Idea</option>
-                        <option value="paused">Pausado</option>
-                      </select>
-                      <span className="rounded bg-[#221D16] border border-[#3D3425] px-1.5 py-0.5 font-mono text-[9px] text-[#D99B43] font-semibold">
-                        {metrics.canonicalPrefix}
-                      </span>
-                    </div>
-
-                    <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-all">
-                      <Link
-                        href={`/projects/${proj.id}`}
-                        onClick={(e) => e.stopPropagation()}
-                        className="p-1 text-[#8E867B] hover:text-[#4EAB9E] transition-all cursor-pointer"
-                        title="Abrir página completa"
-                      >
-                        <ExternalLink className="size-3.5" />
-                      </Link>
-                      <button
-                        type="button"
-                        onClick={() => handleDeleteProject(proj.id)}
-                        className="p-1 text-[#8E867B] hover:text-[#E05D52] transition-all cursor-pointer"
-                        title="Eliminar proyecto"
-                      >
-                        <Trash2 className="size-3.5" />
-                      </button>
-                    </div>
-                  </div>
-
-                  {/* Title & Description */}
-                  <div>
-                    <h3
-                      className="font-serif text-sm font-bold text-[#F5F2EB] tracking-tight group-hover:text-white transition-colors truncate"
-                      title={proj.title}
-                    >
-                      {proj.title}
+                {/* Column Header */}
+                <div className="flex items-center justify-between pb-2 border-b border-[#2A2723]">
+                  <div className="flex items-center gap-2">
+                    <span className="p-1.5 rounded-lg bg-[#181715] border border-[#2A2723]">
+                      {column.icon}
+                    </span>
+                    <h3 className="font-serif text-xs font-bold text-[#F5F2EB] tracking-wide">
+                      {column.title}
                     </h3>
+                    <span className="font-mono text-[10px] px-1.5 py-0.2 rounded-full bg-[#181715] text-[#8E867B] border border-[#2A2723]">
+                      {columnProjects.length}
+                    </span>
                   </div>
 
-                  {/* Habitica Task Live Metrics */}
-                  <div className="space-y-1">
-                    <div className="flex items-center justify-between text-[10px] font-mono">
-                      <span className="text-[#8E867B] flex items-center gap-1">
-                        <ListTodo className="size-2.5 text-[#D99B43]" />
-                        <span>
-                          {metrics.completedCount}/{metrics.totalCount} completadas
-                        </span>
-                      </span>
-                      <span className="font-bold text-[#DDD6C9]">
-                        {metrics.progressPercent}%
-                      </span>
+                  <button
+                    type="button"
+                    onClick={() => handleOpenAddWithStatus(column.defaultStatus)}
+                    className="p-1 rounded text-[#8E867B] hover:text-[#D99B43] hover:bg-[#221D16] transition-colors cursor-pointer"
+                    title={`Agregar proyecto en ${column.title}`}
+                  >
+                    <Plus className="size-3.5" />
+                  </button>
+                </div>
+
+                {/* Column Cards List */}
+                <div className="space-y-2.5 min-h-32">
+                  {columnProjects.length > 0 ? (
+                    columnProjects.map((proj) => {
+                      const metrics = matchTasksToProject(proj, data.tasks || []);
+
+                      return (
+                        <Link
+                          key={proj.id}
+                          href={`/projects/${proj.id}`}
+                          className="group block rounded-xl border border-[#2A2723] bg-[#181715] hover:border-[#D99B43]/50 hover:bg-[#1D1B18] p-3.5 shadow-sm transition-all space-y-3 cursor-pointer"
+                        >
+                          {/* Card Top: Prefix, Status Dropdown, Delete */}
+                          <div
+                            className="flex items-center justify-between gap-1"
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            <span className="rounded bg-[#221D16] border border-[#3D3425] px-1.5 py-0.5 font-mono text-[9px] text-[#D99B43] font-semibold truncate max-w-36">
+                              {metrics.canonicalPrefix}
+                            </span>
+
+                            <div className="flex items-center gap-1">
+                              <select
+                                value={proj.status}
+                                onChange={(e) =>
+                                  handleUpdateStatus(proj.id, e.target.value as ProjectStatus)
+                                }
+                                className="text-[9px] font-mono font-bold px-1.5 py-0.5 rounded border border-[#2A2723] bg-[#121110] text-[#8E867B] hover:text-[#DDD6C9] focus:outline-none cursor-pointer"
+                              >
+                                {STATUS_SELECT_OPTIONS.map((opt) => (
+                                  <option key={opt.value} value={opt.value}>
+                                    {opt.label}
+                                  </option>
+                                ))}
+                              </select>
+
+                              <button
+                                type="button"
+                                onClick={() => handleDeleteProject(proj.id)}
+                                className="opacity-0 group-hover:opacity-100 p-1 text-[#8E867B] hover:text-[#E05D52] transition-opacity cursor-pointer"
+                                title="Eliminar proyecto"
+                              >
+                                <Trash2 className="size-3.5" />
+                              </button>
+                            </div>
+                          </div>
+
+                          {/* Card Title & Description */}
+                          <div className="space-y-1">
+                            <h4 className="font-serif text-sm font-bold text-[#F5F2EB] group-hover:text-[#FFFFFF] transition-colors leading-snug line-clamp-2">
+                              {proj.title}
+                            </h4>
+                            {proj.description && (
+                              <p className="text-xs text-[#8E867B] line-clamp-2 font-sans leading-relaxed">
+                                {proj.description}
+                              </p>
+                            )}
+                          </div>
+
+                          {/* Habitica Tasks Progress Bar */}
+                          <div className="space-y-1.5 pt-1">
+                            <div className="flex items-center justify-between text-[10px] font-mono">
+                              <span className="text-[#8E867B] flex items-center gap-1">
+                                <ListTodo className="size-3 text-[#D99B43]" />
+                                <span>
+                                  {metrics.completedCount}/{metrics.totalCount} hechas
+                                </span>
+                              </span>
+                              <span className="font-bold text-[#DDD6C9]">
+                                {metrics.progressPercent}%
+                              </span>
+                            </div>
+                            <div className="relative h-1 w-full overflow-hidden rounded-full bg-[#121110] border border-[#2A2723]">
+                              <div
+                                className="h-full rounded-full bg-linear-to-r from-[#D99B43] to-[#4EAB9E] transition-all duration-300"
+                                style={{ width: `${metrics.progressPercent}%` }}
+                              />
+                            </div>
+                          </div>
+                        </Link>
+                      );
+                    })
+                  ) : (
+                    <div className="p-6 rounded-xl border border-dashed border-[#2A2723]/60 text-center text-xs font-mono text-[#8E867B]">
+                      Sin proyectos
                     </div>
-                    <div className="relative h-1 w-full overflow-hidden rounded-full bg-[#121110] border border-[#2A2723]">
-                      <div
-                        className="h-full rounded-full bg-linear-to-r from-[#D99B43] to-[#4EAB9E] transition-all duration-500"
-                        style={{ width: `${metrics.progressPercent}%` }}
-                      />
-                    </div>
-                  </div>
+                  )}
                 </div>
               </div>
             );
-          })
-        )}
-      </div>
+          })}
+        </div>
+      ) : (
+        /* 3. Grid View Alternative */
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3.5">
+          {filteredProjects.map((proj) => {
+            const metrics = matchTasksToProject(proj, data.tasks || []);
+
+            return (
+              <Link
+                key={proj.id}
+                href={`/projects/${proj.id}`}
+                className="group rounded-xl border border-[#2A2723] bg-[#181715] hover:border-[#D99B43]/50 hover:bg-[#1D1B18] p-4 shadow-sm transition-all space-y-3 cursor-pointer block"
+              >
+                <div
+                  className="flex items-center justify-between font-mono"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <span className="rounded bg-[#221D16] border border-[#3D3425] px-1.5 py-0.5 font-mono text-[9px] text-[#D99B43] font-semibold">
+                    {metrics.canonicalPrefix}
+                  </span>
+
+                  <div className="flex items-center gap-1">
+                    <select
+                      value={proj.status}
+                      onChange={(e) =>
+                        handleUpdateStatus(proj.id, e.target.value as ProjectStatus)
+                      }
+                      className="text-[10px] font-bold px-2 py-0.5 rounded border border-[#2A2723] bg-[#121110] text-[#8E867B] focus:outline-none cursor-pointer"
+                    >
+                      {STATUS_SELECT_OPTIONS.map((opt) => (
+                        <option key={opt.value} value={opt.value}>
+                          {opt.label}
+                        </option>
+                      ))}
+                    </select>
+
+                    <button
+                      type="button"
+                      onClick={() => handleDeleteProject(proj.id)}
+                      className="opacity-0 group-hover:opacity-100 p-1 text-[#8E867B] hover:text-[#E05D52] transition-all cursor-pointer"
+                      title="Eliminar proyecto"
+                    >
+                      <Trash2 className="size-3.5" />
+                    </button>
+                  </div>
+                </div>
+
+                <div>
+                  <h3 className="font-serif text-sm font-bold text-[#F5F2EB] group-hover:text-white transition-colors truncate">
+                    {proj.title}
+                  </h3>
+                  {proj.description && (
+                    <p className="text-xs text-[#8E867B] line-clamp-1 mt-0.5">
+                      {proj.description}
+                    </p>
+                  )}
+                </div>
+
+                <div className="space-y-1">
+                  <div className="flex items-center justify-between text-[10px] font-mono">
+                    <span className="text-[#8E867B] flex items-center gap-1">
+                      <ListTodo className="size-2.5 text-[#D99B43]" />
+                      <span>
+                        {metrics.completedCount}/{metrics.totalCount} hechas
+                      </span>
+                    </span>
+                    <span className="font-bold text-[#DDD6C9]">
+                      {metrics.progressPercent}%
+                    </span>
+                  </div>
+                  <div className="relative h-1 w-full overflow-hidden rounded-full bg-[#121110] border border-[#2A2723]">
+                    <div
+                      className="h-full rounded-full bg-linear-to-r from-[#D99B43] to-[#4EAB9E] transition-all duration-500"
+                      style={{ width: `${metrics.progressPercent}%` }}
+                    />
+                  </div>
+                </div>
+              </Link>
+            );
+          })}
+        </div>
+      )}
 
       {/* 4. Add Project Modal */}
       {isAddModalOpen && (
@@ -414,44 +480,42 @@ export function ProjectsView({ data, onRefresh }: ProjectsViewProps) {
                   required
                   value={newTitle}
                   onChange={(e) => setNewTitle(e.target.value)}
-                  placeholder="ej. Strata Analytics, Unpo, Brio OS..."
-                  className="w-full rounded-lg border border-[#2A2723] bg-[#121110] p-2.5 text-xs text-[#F5F2EB] focus:outline-none focus:border-[#D99B43]"
+                  placeholder="ej. Brio, Hybridge, Plataforma Web..."
+                  className="w-full rounded-lg border border-[#2A2723] bg-[#121110] p-2.5 text-xs text-[#F5F2EB] placeholder:text-[#8E867B] focus:outline-none focus:border-[#D99B43]"
+                  autoFocus
                 />
               </div>
 
               <div className="space-y-1">
                 <label className="block text-xs font-mono text-[#8E867B]">
-                  Estado Inicial:
-                </label>
-                <select
-                  value={newStatus}
-                  onChange={(e) => setNewStatus(e.target.value as ProjectStatus)}
-                  className="w-full rounded-lg border border-[#2A2723] bg-[#121110] p-2 text-xs text-[#F5F2EB] focus:outline-none focus:border-[#D99B43] font-mono cursor-pointer"
-                >
-                  <option value="in_progress">En Desarrollo</option>
-                  <option value="completed">Completado</option>
-                  <option value="idea">Idea</option>
-                  <option value="launched">Lanzado</option>
-                  <option value="permanent">Permanente</option>
-                  <option value="paused">Pausado</option>
-                </select>
-              </div>
-
-              <div className="space-y-1">
-                <label className="block text-xs font-mono text-[#8E867B]">
-                  Descripción / Resumen:
+                  Descripción (Opcional)
                 </label>
                 <textarea
                   rows={2}
                   value={newDescription}
                   onChange={(e) => setNewDescription(e.target.value)}
-                  placeholder="Propósito del proyecto, arquitectura o metas..."
-                  className="w-full rounded-lg border border-[#2A2723] bg-[#121110] p-2.5 text-xs text-[#F5F2EB] focus:outline-none focus:border-[#D99B43] resize-none font-sans"
+                  placeholder="Resumen del alcance o tecnología..."
+                  className="w-full rounded-lg border border-[#2A2723] bg-[#121110] p-2.5 text-xs text-[#F5F2EB] placeholder:text-[#8E867B] focus:outline-none focus:border-[#D99B43] resize-none font-sans"
                 />
               </div>
 
-              {/* Dynamic Prefixes for Habitica matcher */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 p-3 rounded-lg border border-[#2A2723] bg-[#100F0E]">
+              <div className="space-y-1">
+                <label className="block text-xs font-mono text-[#8E867B]">Estado</label>
+                <select
+                  value={newStatus}
+                  onChange={(e) => setNewStatus(e.target.value as ProjectStatus)}
+                  className="w-full rounded-lg border border-[#2A2723] bg-[#121110] p-2 text-xs text-[#F5F2EB] focus:outline-none focus:border-[#D99B43] font-mono"
+                >
+                  <option value="idea">Idea</option>
+                  <option value="in_progress">En Desarrollo</option>
+                  <option value="permanent">Permanente</option>
+                  <option value="paused">Pausado</option>
+                  <option value="completed">Completado</option>
+                  <option value="launched">Lanzado</option>
+                </select>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div className="space-y-1">
                   <label className="block text-[11px] font-mono text-[#8E867B]">
                     Prefijo Canónico:
@@ -497,17 +561,6 @@ export function ProjectsView({ data, onRefresh }: ProjectsViewProps) {
             </form>
           </div>
         </div>
-      )}
-
-      {/* 5. Project Dossier Drawer */}
-      {selectedProject && (
-        <ProjectDossierDrawer
-          project={selectedProject}
-          tasks={data.tasks || []}
-          tags={data.tags || []}
-          onClose={() => setSelectedProject(null)}
-          onRefresh={onRefresh}
-        />
       )}
     </div>
   );
