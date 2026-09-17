@@ -291,31 +291,147 @@ export async function updateProjectDetailsAction(payload: {
   progress?: number;
   taskPrefixes?: string[];
   canonicalPrefix?: string;
+  integrations?: Record<string, any>;
 }): Promise<{ success: boolean; error?: string }> {
   try {
     const sql = getDb();
     const prefixesJson = JSON.stringify(payload.taskPrefixes || []);
 
-    await sql`
-      UPDATE projects
-      SET title = ${payload.title},
-          description = ${payload.description || null},
-          status = ${payload.status},
-          progress = ${payload.progress ?? 0},
-          task_prefixes = ${prefixesJson}::jsonb,
-          canonical_prefix = ${payload.canonicalPrefix || null},
-          updated_at = NOW()
-      WHERE id = ${payload.id};
-    `;
+    if (payload.integrations !== undefined) {
+      const integrationsJson = JSON.stringify(payload.integrations);
+      await sql`
+        UPDATE projects
+        SET title = ${payload.title},
+            description = ${payload.description || null},
+            status = ${payload.status},
+            progress = ${payload.progress ?? 0},
+            task_prefixes = ${prefixesJson}::jsonb,
+            canonical_prefix = ${payload.canonicalPrefix || null},
+            integrations = ${integrationsJson}::jsonb,
+            updated_at = NOW()
+        WHERE id = ${payload.id};
+      `;
+    } else {
+      await sql`
+        UPDATE projects
+        SET title = ${payload.title},
+            description = ${payload.description || null},
+            status = ${payload.status},
+            progress = ${payload.progress ?? 0},
+            task_prefixes = ${prefixesJson}::jsonb,
+            canonical_prefix = ${payload.canonicalPrefix || null},
+            updated_at = NOW()
+        WHERE id = ${payload.id};
+      `;
+    }
 
     revalidatePath("/");
     revalidatePath("/vault");
     revalidatePath("/projects");
+    revalidatePath(`/projects/${payload.id}`);
     revalidatePath("/today");
     return { success: true };
   } catch (error) {
     console.error("[Update Project Details Error]:", error);
     return { success: false, error: "Failed to update project details" };
+  }
+}
+
+/**
+ * Server Action: Appends a resource link (GitHub, Figma, Notion, Docs, Staging, Live, etc.) to a project.
+ */
+export async function addProjectResourceAction(
+  projectId: string,
+  url: string,
+  label?: string
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    const sql = getDb();
+    await sql`ALTER TABLE projects ADD COLUMN IF NOT EXISTS integrations JSONB DEFAULT '{}'::jsonb;`;
+
+    const rows = await sql`SELECT integrations FROM projects WHERE id = ${projectId} LIMIT 1;`;
+    if (rows.length === 0) return { success: false, error: "Proyecto no encontrado" };
+
+    const currentIntegrations = (rows[0].integrations as Record<string, any>) || {};
+    const existingResources = Array.isArray(currentIntegrations.resources)
+      ? currentIntegrations.resources
+      : [];
+
+    const cleanUrl = url.trim();
+    if (!cleanUrl) return { success: false, error: "URL requerida" };
+
+    const filtered = existingResources.filter(
+      (r: any) => (typeof r === "string" ? r : r.url) !== cleanUrl
+    );
+    const newResource = label?.trim() ? { url: cleanUrl, label: label.trim() } : { url: cleanUrl };
+    const updatedResources = [...filtered, newResource];
+
+    const updatedIntegrations = {
+      ...currentIntegrations,
+      resources: updatedResources,
+    };
+
+    await sql`
+      UPDATE projects
+      SET integrations = ${JSON.stringify(updatedIntegrations)}::jsonb,
+          updated_at = NOW()
+      WHERE id = ${projectId};
+    `;
+
+    revalidatePath("/");
+    revalidatePath("/projects");
+    revalidatePath(`/projects/${projectId}`);
+    revalidatePath("/vault");
+    revalidatePath("/today");
+    return { success: true };
+  } catch (error) {
+    console.error("[Add Project Resource Error]:", error);
+    return { success: false, error: "Error al agregar recurso" };
+  }
+}
+
+/**
+ * Server Action: Removes a resource link from a project.
+ */
+export async function removeProjectResourceAction(
+  projectId: string,
+  url: string
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    const sql = getDb();
+    const rows = await sql`SELECT integrations FROM projects WHERE id = ${projectId} LIMIT 1;`;
+    if (rows.length === 0) return { success: false, error: "Proyecto no encontrado" };
+
+    const currentIntegrations = (rows[0].integrations as Record<string, any>) || {};
+    const existingResources = Array.isArray(currentIntegrations.resources)
+      ? currentIntegrations.resources
+      : [];
+
+    const updatedResources = existingResources.filter(
+      (r: any) => (typeof r === "string" ? r : r.url) !== url
+    );
+
+    const updatedIntegrations = {
+      ...currentIntegrations,
+      resources: updatedResources,
+    };
+
+    await sql`
+      UPDATE projects
+      SET integrations = ${JSON.stringify(updatedIntegrations)}::jsonb,
+          updated_at = NOW()
+      WHERE id = ${projectId};
+    `;
+
+    revalidatePath("/");
+    revalidatePath("/projects");
+    revalidatePath(`/projects/${projectId}`);
+    revalidatePath("/vault");
+    revalidatePath("/today");
+    return { success: true };
+  } catch (error) {
+    console.error("[Remove Project Resource Error]:", error);
+    return { success: false, error: "Error al eliminar recurso" };
   }
 }
 

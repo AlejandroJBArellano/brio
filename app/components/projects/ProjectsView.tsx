@@ -12,13 +12,15 @@ import { soundFx } from "@/lib/soundFx";
 import { ProjectItem, ProjectStatus } from "@/lib/types";
 import {
   Code2,
+  ExternalLink,
   FolderGit2,
   ListTodo,
   Plus,
   Search,
   Trash2,
-  X
+  X,
 } from "lucide-react";
+import Link from "next/link";
 import { useMemo, useState, useTransition } from "react";
 
 interface ProjectsViewProps {
@@ -325,14 +327,24 @@ export function ProjectsView({ data, onRefresh }: ProjectsViewProps) {
                       </span>
                     </div>
 
-                    <button
-                      type="button"
-                      onClick={() => handleDeleteProject(proj.id)}
-                      className="opacity-0 group-hover:opacity-100 p-1 text-[#8E867B] hover:text-[#E05D52] transition-all cursor-pointer"
-                      title="Eliminar proyecto"
-                    >
-                      <Trash2 className="size-3.5" />
-                    </button>
+                    <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-all">
+                      <Link
+                        href={`/projects/${proj.id}`}
+                        onClick={(e) => e.stopPropagation()}
+                        className="p-1 text-[#8E867B] hover:text-[#4EAB9E] transition-all cursor-pointer"
+                        title="Abrir página completa"
+                      >
+                        <ExternalLink className="size-3.5" />
+                      </Link>
+                      <button
+                        type="button"
+                        onClick={() => handleDeleteProject(proj.id)}
+                        className="p-1 text-[#8E867B] hover:text-[#E05D52] transition-all cursor-pointer"
+                        title="Eliminar proyecto"
+                      >
+                        <Trash2 className="size-3.5" />
+                      </button>
+                    </div>
                   </div>
 
                   {/* Title & Description */}

@@ -33,7 +33,6 @@ import {
   ExternalLink,
   FileText,
   FolderGit2,
-  Layers,
   Lightbulb,
   ListTodo,
   Loader2,
