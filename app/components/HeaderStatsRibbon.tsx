@@ -2,7 +2,6 @@
 
 import { toggleSleepAction } from "@/app/actions/tasks";
 import { useCommandCenter } from "@/app/components/context/CommandCenterContext";
-import { useSession } from "@/lib/auth-client";
 import { HabiticaUser } from "@/lib/types";
 import {
   Bed,
@@ -30,48 +29,33 @@ interface HeaderStatsRibbonProps {
 }
 
 export function HeaderStatsRibbon({ user }: HeaderStatsRibbonProps) {
-  const { data: session } = useSession();
   const router = useRouter();
   const pathname = usePathname();
   const [isPending, startTransition] = useTransition();
   const { openModal, refreshData } = useCommandCenter();
 
   const [isActionsOpen, setIsActionsOpen] = useState(false);
-  const [isProfileOpen, setIsProfileOpen] = useState(false);
 
   const actionsRef = useRef<HTMLDivElement>(null);
-  const profileRef = useRef<HTMLDivElement>(null);
 
-  // Close dropdowns on outside click
+  // Close dropdown on outside click
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (actionsRef.current && !actionsRef.current.contains(event.target as Node)) {
         setIsActionsOpen(false);
       }
-      if (profileRef.current && !profileRef.current.contains(event.target as Node)) {
-        setIsProfileOpen(false);
-      }
     };
-    if (isActionsOpen || isProfileOpen) {
+    if (isActionsOpen) {
       document.addEventListener("mousedown", handleClickOutside);
     }
     return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, [isActionsOpen, isProfileOpen]);
+  }, [isActionsOpen]);
 
-  const stats = user.stats;
   const isResting = Boolean(user.preferences?.sleep ?? user.flags?.rest ?? false);
 
   const handleToggleRest = () => {
     startTransition(async () => {
       await toggleSleepAction();
-    });
-  };
-
-  const handleSignOut = () => {
-    startTransition(async () => {
-      const { logoutOwnerAction } = await import("@/app/actions/auth");
-      await logoutOwnerAction();
-      window.location.reload();
     });
   };
 
@@ -131,9 +115,6 @@ export function HeaderStatsRibbon({ user }: HeaderStatsRibbonProps) {
     { href: "/vault", label: "Bóveda", icon: BookOpen, shortcut: "⌘5" },
   ];
 
-  const userName = session?.user?.name || user.profile.name || "Alejandro";
-  const firstName = userName.split(" ")[0];
-
   return (
     <header className="rounded-xl border border-[#2A2723] bg-[#181715] px-3.5 py-2.5 transition-all relative z-30 flex items-center justify-between gap-3 shadow-xs">
       {/* Left: Branding + Nav Tabs (Single Row) */}
@@ -172,7 +153,7 @@ export function HeaderStatsRibbon({ user }: HeaderStatsRibbonProps) {
         </nav>
       </div>
 
-      {/* Right: Command Bar Trigger + Quick Capture + Actions + Profile Popover */}
+      {/* Right: Command Bar Trigger + Quick Capture + Actions */}
       <div className="flex items-center gap-2 shrink-0">
         {/* Search & Omnibar Trigger (⌘K) */}
         <button
@@ -312,63 +293,6 @@ export function HeaderStatsRibbon({ user }: HeaderStatsRibbonProps) {
                 </div>
                 <kbd className="text-[10px] text-[#8E867B] bg-[#121110] px-1 rounded border border-[#2A2723]">⌘R</kbd>
               </button>
-            </div>
-          )}
-        </div>
-
-        {/* Profile Popover (Sleek Avatar Pill with Level, Rest & Sign Out) */}
-        <div className="relative" ref={profileRef}>
-          <button
-            type="button"
-            onClick={() => setIsProfileOpen(!isProfileOpen)}
-            className="flex items-center gap-2 rounded-lg border border-[#2A2723] bg-[#121110] px-2.5 py-1 text-xs font-mono text-[#DDD6C9] hover:border-[#38332D] hover:text-[#F5F2EB] transition-all cursor-pointer"
-          >
-            <span className="font-semibold text-[#F5F2EB] hidden sm:inline">
-              {firstName}
-            </span>
-            <span className="text-[10px] text-[#D99B43] font-bold">
-              {stats.lvl}
-            </span>
-            {isResting && (
-              <span className="flex size-1.5 rounded-full bg-[#D99B43] animate-pulse" title="Descansando" />
-            )}
-            <ChevronDown className={`size-3 text-[#8E867B] transition-transform ${isProfileOpen ? "rotate-180" : ""}`} />
-          </button>
-
-          {isProfileOpen && (
-            <div className="absolute right-0 mt-2 w-64 rounded-xl border border-[#2A2723] bg-[#181715] p-3 shadow-2xl z-50 animate-in fade-in zoom-in-95 duration-100 font-sans text-xs space-y-3">
-              {/* Header inside popover */}
-              <div className="flex items-center justify-between pb-2 border-b border-[#2A2723]">
-                <div>
-                  <div className="font-serif font-bold text-sm text-[#F5F2EB]">
-                    {userName}
-                  </div>
-                </div>
-                <div className="rounded-md border border-[#3D3425] bg-[#221D16] px-2 py-0.5 font-mono text-xs font-bold text-[#D99B43]">
-                  {stats.lvl}
-                </div>
-              </div>
-
-              {/* Rest toggle */}
-              <div>
-                <button
-                  type="button"
-                  onClick={handleToggleRest}
-                  disabled={isPending}
-                  className={`w-full flex items-center justify-between p-2.5 rounded-lg border text-xs font-mono transition-all cursor-pointer ${isResting
-                    ? "border-[#D99B43]/50 bg-[#D99B43]/15 text-[#E8AF59]"
-                    : "border-[#2A2723] bg-[#121110] text-[#DDD6C9] hover:border-[#38332D]"
-                    }`}
-                >
-                  <div className="flex items-center gap-2">
-                    <Bed className="size-4" />
-                    <span>Descanso</span>
-                  </div>
-                  <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-black/40">
-                    {isResting ? "DESCANSANDO" : "SIN DESCANSO"}
-                  </span>
-                </button>
-              </div>
             </div>
           )}
         </div>

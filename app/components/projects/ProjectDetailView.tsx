@@ -38,13 +38,12 @@ import {
   FileText,
   FolderGit2,
   Globe,
-  Layers,
   ListTodo,
   Plus,
   Search,
   Sparkles,
   Trash2,
-  X,
+  X
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -381,11 +380,10 @@ export function ProjectDetailView({
             <button
               type="button"
               onClick={() => setIsEditing(!isEditing)}
-              className={`px-3 py-1.5 rounded-lg text-xs font-mono font-semibold border transition-all cursor-pointer flex items-center gap-1.5 ${
-                isEditing
+              className={`px-3 py-1.5 rounded-lg text-xs font-mono font-semibold border transition-all cursor-pointer flex items-center gap-1.5 ${isEditing
                   ? "bg-[#221D16] text-[#D99B43] border-[#D99B43]/50"
                   : "bg-[#181715] text-[#8E867B] hover:text-[#DDD6C9] border-[#2A2723]"
-              }`}
+                }`}
             >
               <Edit2 className="size-3.5" />
               <span>{isEditing ? "Ver Proyecto" : "Editar"}</span>
@@ -597,33 +595,30 @@ export function ProjectDetailView({
                   <button
                     type="button"
                     onClick={() => setFilterMode("pending")}
-                    className={`px-2 py-0.5 rounded transition-all cursor-pointer ${
-                      filterMode === "pending"
+                    className={`px-2 py-0.5 rounded transition-all cursor-pointer ${filterMode === "pending"
                         ? "bg-[#221D16] text-[#D99B43] font-bold"
                         : "text-[#8E867B] hover:text-[#DDD6C9]"
-                    }`}
+                      }`}
                   >
                     Pendientes ({metrics.pendingCount})
                   </button>
                   <button
                     type="button"
                     onClick={() => setFilterMode("completed")}
-                    className={`px-2 py-0.5 rounded transition-all cursor-pointer ${
-                      filterMode === "completed"
+                    className={`px-2 py-0.5 rounded transition-all cursor-pointer ${filterMode === "completed"
                         ? "bg-[#1C2219] text-[#7EA35A] font-bold"
                         : "text-[#8E867B] hover:text-[#DDD6C9]"
-                    }`}
+                      }`}
                   >
                     Completadas ({metrics.completedCount})
                   </button>
                   <button
                     type="button"
                     onClick={() => setFilterMode("all")}
-                    className={`px-2 py-0.5 rounded transition-all cursor-pointer ${
-                      filterMode === "all"
+                    className={`px-2 py-0.5 rounded transition-all cursor-pointer ${filterMode === "all"
                         ? "bg-[#1A1917] text-[#F5F2EB] font-bold"
                         : "text-[#8E867B] hover:text-[#DDD6C9]"
-                    }`}
+                      }`}
                   >
                     Todas ({metrics.totalCount})
                   </button>
@@ -687,8 +682,8 @@ export function ProjectDetailView({
                   {taskSearchQuery
                     ? "Ninguna tarea coincide con la búsqueda."
                     : filterMode === "pending"
-                    ? "No hay tareas pendientes en este proyecto."
-                    : "No hay tareas registradas con este filtro."}
+                      ? "No hay tareas pendientes en este proyecto."
+                      : "No hay tareas registradas con este filtro."}
                 </p>
               </div>
             )}
@@ -915,40 +910,6 @@ export function ProjectDetailView({
                   No hay enlaces registrados.
                 </div>
               )}
-            </div>
-          </div>
-
-          {/* Project Progress Summary Card */}
-          <div className="rounded-xl border border-[#2A2723] bg-[#181715] p-5 space-y-3">
-            <div className="flex items-center gap-2">
-              <Layers className="size-4 text-[#D99B43]" />
-              <h3 className="font-serif text-xs font-bold uppercase tracking-wider text-[#F5F2EB]">
-                Resumen de Métricas
-              </h3>
-            </div>
-
-            {project.status !== "permanent" && (
-              <div className="h-2 w-full rounded-full bg-[#121110] overflow-hidden border border-[#2A2723]">
-                <div
-                  className="h-full rounded-full bg-linear-to-r from-[#D99B43] to-[#4EAB9E] transition-all duration-300"
-                  style={{ width: `${metrics.progressPercent}%` }}
-                />
-              </div>
-            )}
-
-            <div className="grid grid-cols-3 gap-2 pt-1 text-center font-mono">
-              <div className="rounded-lg bg-[#141311] p-2 border border-[#22201D]">
-                <span className="text-[9px] uppercase text-[#8E867B] block">Total</span>
-                <span className="text-xs font-bold text-[#F5F2EB]">{metrics.totalCount}</span>
-              </div>
-              <div className="rounded-lg bg-[#141311] p-2 border border-[#22201D]">
-                <span className="text-[9px] uppercase text-[#7EA35A] block">Hechas</span>
-                <span className="text-xs font-bold text-[#7EA35A]">{metrics.completedCount}</span>
-              </div>
-              <div className="rounded-lg bg-[#141311] p-2 border border-[#22201D]">
-                <span className="text-[9px] uppercase text-[#D99B43] block">Pendientes</span>
-                <span className="text-xs font-bold text-[#D99B43]">{metrics.pendingCount}</span>
-              </div>
             </div>
           </div>
         </div>
