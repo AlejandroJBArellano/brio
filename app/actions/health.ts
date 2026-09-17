@@ -1204,44 +1204,6 @@ export async function logSleepAction(
   }
 }
 
-/**
- * Server Action: Imports Samsung Health JSON export data.
- */
-export async function importSamsungHealthDataAction(
-  jsonDataString: string
-): Promise<{ success: boolean; importedCount: number; error?: string }> {
-  try {
-    const sql = getDb();
-    const data = JSON.parse(jsonDataString);
-
-    let count = 0;
-    if (Array.isArray(data)) {
-      for (const item of data) {
-        if (item.date) {
-          const dateStr = toDateStr(item.date);
-          const steps = Number(item.steps || item.step_count) || 0;
-          const sleep = Number(item.sleep_hours || item.sleepDuration) || 7.5;
-
-          await sql`
-            INSERT INTO health_logs (date, steps_count, sleep_hours, updated_at)
-            VALUES (${dateStr}, ${steps}, ${sleep}, NOW())
-            ON CONFLICT (date) DO UPDATE
-            SET steps_count = ${steps},
-                sleep_hours = ${sleep},
-                updated_at = NOW();
-          `;
-          count++;
-        }
-      }
-    }
-
-    revalidatePath("/");
-    return { success: true, importedCount: count };
-  } catch (error) {
-    console.error("[Samsung Health Import Error]:", error);
-    return { success: false, importedCount: 0, error: "Failed to parse Samsung Health data" };
-  }
-}
 
 /**
  * Server Action: Fetches all body composition logs.

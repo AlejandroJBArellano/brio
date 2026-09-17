@@ -2,14 +2,12 @@
 
 import {
   addWaterAction,
-  importSamsungHealthDataAction,
   logSleepAction,
   toggleSupplementAction,
 } from "@/app/actions/health";
 import { toDateStr } from "@/lib/dateUtils";
 import { HealthDashboardData } from "@/lib/types";
 import {
-  Activity,
   ArrowRight,
   Check,
   Droplet,
@@ -22,8 +20,7 @@ import {
   Salad,
   Scale,
   Settings2,
-  UploadCloud,
-  X
+  Star,
 } from "lucide-react";
 import { useState, useTransition } from "react";
 import { BiomarkersView } from "./biomarkers/BiomarkersView";
@@ -49,11 +46,9 @@ export function HealthView({ data, onRefresh }: HealthViewProps) {
   const [biometricsSubTab, setBiometricsSubTab] = useState<"biomarkers" | "composition">("biomarkers");
 
   // Modals and state
-  const [isImportModalOpen, setIsImportModalOpen] = useState(false);
   const [isManageSupplementsOpen, setIsManageSupplementsOpen] = useState(false);
   const [isSmartFitModalOpen, setIsSmartFitModalOpen] = useState(false);
-  const [importJson, setImportJson] = useState("");
-  const [sleepHours, setSleepHours] = useState(data.todayHealth.sleepHours || 10.0);
+  const [sleepHours, setSleepHours] = useState(data.todayHealth.sleepHours || 7.5);
   const [sleepQuality, setSleepQuality] = useState(data.todayHealth.sleepQuality || 4);
   const [isPending, startTransition] = useTransition();
 
@@ -74,16 +69,6 @@ export function HealthView({ data, onRefresh }: HealthViewProps) {
   const handleSaveSleep = () => {
     startTransition(async () => {
       await logSleepAction(sleepHours, sleepQuality);
-      if (onRefresh) onRefresh();
-    });
-  };
-
-  const handleImportSamsungHealth = () => {
-    if (!importJson.trim()) return;
-    startTransition(async () => {
-      await importSamsungHealthDataAction(importJson.trim());
-      setIsImportModalOpen(false);
-      setImportJson("");
       if (onRefresh) onRefresh();
     });
   };
@@ -195,11 +180,11 @@ export function HealthView({ data, onRefresh }: HealthViewProps) {
             {/* Workout Streak */}
             <div className="rounded-xl border border-[#2A2723] bg-[#181715] p-4 shadow-sm">
               <div className="flex items-center justify-between text-xs text-[#8E867B] font-mono">
-                <span>Racha de Entrenamiento</span>
+                <span>Entrenamiento</span>
                 <Flame className="h-4 w-4 text-[#D99B43]" />
               </div>
               <div className="mt-2 text-2xl font-bold font-mono text-[#7EA35A]">
-                {data.workoutStreak} días seguidos
+                {data.workoutStreak} días
               </div>
               <div className="mt-1 text-[11px] font-mono text-[#8E867B]">
                 {data.weeklyWorkoutsCount} sesiones esta semana
@@ -209,49 +194,51 @@ export function HealthView({ data, onRefresh }: HealthViewProps) {
             {/* Hydration */}
             <div className="rounded-xl border border-[#2A2723] bg-[#181715] p-4 shadow-sm">
               <div className="flex items-center justify-between text-xs text-[#8E867B] font-mono">
-                <span>Hidratación Hoy</span>
+                <span>Hidratación</span>
                 <Droplet className="h-4 w-4 text-[#4EAB9E]" />
               </div>
               <div className="mt-2 text-2xl font-bold font-mono text-[#4EAB9E]">
                 {data.todayHealth.waterMl} / 3000 ml
               </div>
               <div className="mt-1 text-[11px] font-mono text-[#8E867B]">
-                {data.waterPercent}% de tu meta diaria de 3L
+                {data.waterPercent}% de la meta
               </div>
             </div>
 
             {/* Sleep Average */}
             <div className="rounded-xl border border-[#2A2723] bg-[#181715] p-4 shadow-sm">
               <div className="flex items-center justify-between text-xs text-[#8E867B] font-mono">
-                <span>Sueño & Descanso</span>
+                <span>Sueño</span>
                 <Moon className="h-4 w-4 text-[#DDD6C9]" />
               </div>
               <div className="mt-2 text-2xl font-bold font-mono text-[#F5F2EB]">
                 {data.todayHealth.sleepHours} hrs
               </div>
-              <div className="mt-1 text-[11px] font-mono text-[#8E867B]">
-                Calidad: {data.todayHealth.sleepQuality} de 5 ⭐ (Promedio: {data.averageSleepHours}h)
+              <div className="mt-1 text-[11px] font-mono text-[#8E867B] flex items-center gap-1">
+                <span>Calidad {data.todayHealth.sleepQuality}/5</span>
+                <Star className="h-3 w-3 text-[#D99B43] fill-[#D99B43]" />
+                <span>• Prom: {data.averageSleepHours}h</span>
               </div>
             </div>
 
-            {/* Daily Steps */}
+            {/* Nutrition */}
             <div className="rounded-xl border border-[#2A2723] bg-[#181715] p-4 shadow-sm">
               <div className="flex items-center justify-between text-xs text-[#8E867B] font-mono">
-                <span>Pasos / Movimiento</span>
-                <Activity className="h-4 w-4 text-[#D99B43]" />
+                <span>Nutrición</span>
+                <Salad className="h-4 w-4 text-[#7EA35A]" />
               </div>
               <div className="mt-2 text-2xl font-bold font-mono text-[#F5F2EB]">
-                {data.todayHealth.stepsCount > 0
-                  ? `${data.todayHealth.stepsCount.toLocaleString()} pasos`
-                  : "Samsung Sync"}
+                {data.nutritionData
+                  ? `${data.nutritionData.todayLog.calculatedMacros.kcal} kcal`
+                  : "0 kcal"}
               </div>
               <div className="mt-1 text-[11px] font-mono text-[#8E867B]">
                 <button
                   type="button"
-                  onClick={() => setIsImportModalOpen(true)}
-                  className="text-[#D99B43] hover:underline font-semibold cursor-pointer"
+                  onClick={() => setActiveHealthTab("nutrition")}
+                  className="text-[#7EA35A] hover:underline font-semibold cursor-pointer"
                 >
-                  Importar Samsung Health ↗
+                  Ver nutrición →
                 </button>
               </div>
             </div>
@@ -516,7 +503,7 @@ export function HealthView({ data, onRefresh }: HealthViewProps) {
 
               <div>
                 <label className="block text-xs font-medium text-[#DDD6C9] mb-1.5">
-                  Calidad de descanso: <strong className="text-[#F5F2EB]">{sleepQuality} / 5 ⭐</strong>
+                  Calidad: <strong className="text-[#F5F2EB] font-mono">{sleepQuality} / 5</strong>
                 </label>
                 <div className="flex items-center gap-2 font-mono">
                   {[1, 2, 3, 4, 5].map((q) => (
@@ -524,12 +511,13 @@ export function HealthView({ data, onRefresh }: HealthViewProps) {
                       key={q}
                       type="button"
                       onClick={() => setSleepQuality(q)}
-                      className={`flex-1 py-2 rounded-md border text-xs font-bold transition-all cursor-pointer ${sleepQuality === q
+                      className={`flex-1 py-1.5 rounded-md border text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1 ${sleepQuality === q
                         ? "bg-[#221D16] border-[#D99B43]/40 text-[#D99B43]"
                         : "bg-[#121110] border-[#2A2723] text-[#8E867B] hover:text-[#DDD6C9]"
                         }`}
                     >
-                      {q} ⭐
+                      <span>{q}</span>
+                      <Star className={`h-3 w-3 ${sleepQuality >= q ? "text-[#D99B43] fill-[#D99B43]" : "text-[#8E867B] fill-none"}`} />
                     </button>
                   ))}
                 </div>
@@ -650,62 +638,6 @@ export function HealthView({ data, onRefresh }: HealthViewProps) {
       {/* MODALS & OVERLAYS                                                         */}
       {/* ========================================================================= */}
 
-      {/* Samsung Health Import Modal */}
-      {isImportModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-xs animate-in fade-in duration-200">
-          <div className="w-full max-w-lg rounded-xl border border-[#2A2723] bg-[#181715] p-6 shadow-2xl">
-            <div className="flex items-center justify-between pb-4 border-b border-[#2A2723]">
-              <div className="flex items-center gap-2.5">
-                <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#221D16] text-[#D99B43] border border-[#D99B43]/30">
-                  <UploadCloud className="h-5 w-5" />
-                </div>
-                <div>
-                  <h3 className="font-serif text-base font-bold text-[#F5F2EB] tracking-tight">
-                    Importar Datos de Samsung Health
-                  </h3>
-                  <p className="text-xs text-[#8E867B]">
-                    Pega el contenido JSON o registros exportados
-                  </p>
-                </div>
-              </div>
-              <button
-                type="button"
-                onClick={() => setIsImportModalOpen(false)}
-                className="rounded-lg p-1.5 text-[#8E867B] hover:bg-[#22201D] hover:text-[#F5F2EB] cursor-pointer"
-              >
-                <X className="h-5 w-5" />
-              </button>
-            </div>
-
-            <div className="mt-4 space-y-3 font-mono">
-              <textarea
-                rows={6}
-                placeholder={'[{"date": "2026-08-22", "steps": 8500, "sleep_hours": 7.8}]'}
-                value={importJson}
-                onChange={(e) => setImportJson(e.target.value)}
-                className="w-full rounded-lg border border-[#2A2723] bg-[#121110] p-3 text-xs text-[#F5F2EB] placeholder:text-[#8E867B] focus:border-[#D99B43] focus:outline-none"
-              />
-              <div className="flex justify-end gap-2 font-sans">
-                <button
-                  type="button"
-                  onClick={() => setIsImportModalOpen(false)}
-                  className="px-3.5 py-2 text-xs text-[#8E867B] hover:text-[#DDD6C9] cursor-pointer"
-                >
-                  Cancelar
-                </button>
-                <button
-                  type="button"
-                  onClick={handleImportSamsungHealth}
-                  disabled={isPending || !importJson.trim()}
-                  className="px-4 py-2 rounded-lg bg-[#D99B43] font-bold text-xs text-[#121110] hover:bg-[#E8AF59] disabled:opacity-50 cursor-pointer"
-                >
-                  {isPending ? "Importando..." : "Importar a Neon DB"}
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* Manage Supplements Modal */}
       <ManageSupplementsModal

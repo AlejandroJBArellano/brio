@@ -24,22 +24,21 @@
 - **`⌘4` Salud & Rendimiento Físico**:
   - **Check-in de Entrenamiento**: 1 clic para registrar sesión (Gym, Cardio, Movilidad, Deportes, Descanso Activo).
   - **Medidor de Hidratación**: Meta diaria de 3L con botones rápidos `+250ml`, `+500ml`, `+1,000ml`.
-  - **Suplementos**: Checklist rápido de Creatina, Multivitamínico, Omega 3 y Proteína.
-  - **Sueño & Recuperación**: Registro de horas de sueño y calidad del descanso (1 a 5 ⭐).
-  - **Importador Samsung Health**: Soporte para importar datos exportados en formato JSON.
+  - **Suplementos**: Checklist de suplementos diarios.
+  - **Sueño & Recuperación**: Registro de horas de sueño y calidad del descanso.
 - **`⌘5` Bóveda**:
   - Biblioteca y recursos archivados.
 
 ---
 
-## ⏱️ Deep Work & Focus Engine (`⌘P`)
+## Deep Work & Focus Engine (`⌘P`)
 
 - **Flow Timer (25m / 50m / 90m / Sprint)** con **generador nativo de audio ambiental** (Brown Noise, Lluvia, Ruido Blanco, Ondas Alfa) mediante Web Audio API (cero dependencias externas, corre offline).
 - **Gamificación RPG**: Al completar una sesión de Deep Work, otorga automáticamente **+EXP y Oro** en Habitica y registra la actividad en Neon DB.
 
 ---
 
-## 📝 Scratchpad & Brain Vault (`⌘J`)
+## Scratchpad & Brain Vault (`⌘J`)
 
 - Bloc de notas flotante con Markdown y **autoguardado en tiempo real** en Neon PostgreSQL.
 - Botón para **convertir líneas y checklists directamente en tareas de Habitica**.
