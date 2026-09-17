@@ -70,7 +70,7 @@ export function PdfViewerModal({
               }
               download={fileName || title}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#181715] hover:bg-[#22201D] border border-[#2A2723] text-xs font-semibold text-[#DDD6C9] hover:text-[#F5F2EB] transition-all cursor-pointer"
-              title="Descargar archivo"
+              title="Descargar"
             >
               <Download className="h-3.5 w-3.5 text-[#D99B43]" />
               <span className="hidden sm:inline">Descargar</span>
@@ -81,7 +81,7 @@ export function PdfViewerModal({
               target="_blank"
               rel="noreferrer"
               className="p-2 rounded-lg text-[#8E867B] hover:text-[#F5F2EB] hover:bg-[#22201D] border border-[#2A2723] transition-all"
-              title="Abrir en pestaña nueva"
+              title="Abrir"
             >
               <ExternalLink className="h-4 w-4" />
             </a>

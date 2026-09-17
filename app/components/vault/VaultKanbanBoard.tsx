@@ -47,48 +47,48 @@ export function VaultKanbanBoard({
         return [
           {
             id: "backlog",
-            title: "Por Aprender 🎼",
+            title: "Por aprender",
             badgeColor: "bg-[#121110] text-[#8E867B] border-[#2A2723]",
             borderColor: "border-[#2A2723]",
-            icon: "🎼",
+            icon: "",
           },
           {
             id: "in_progress",
-            title: "En Práctica 🎹",
+            title: "En práctica",
             badgeColor: "bg-[#162121] text-[#4EAB9E] border-[#4EAB9E]/30",
             borderColor: "border-[#2A2723]",
-            icon: "🎹",
+            icon: "",
           },
           {
             id: "completed",
-            title: "Dominada (Repertorio) ✨",
+            title: "Dominadas",
             badgeColor: "bg-[#1C2219] text-[#7EA35A] border-[#7EA35A]/30",
             borderColor: "border-[#2A2723]",
-            icon: "✨",
+            icon: "",
           },
         ];
       case "course":
         return [
           {
             id: "backlog",
-            title: "Por Empezar 🎓",
+            title: "Por empezar",
             badgeColor: "bg-[#121110] text-[#8E867B] border-[#2A2723]",
             borderColor: "border-[#2A2723]",
-            icon: "🎓",
+            icon: "",
           },
           {
             id: "in_progress",
-            title: "En Curso (Estudiando) 📖",
+            title: "En curso",
             badgeColor: "bg-[#221D16] text-[#D99B43] border-[#D99B43]/30",
             borderColor: "border-[#2A2723]",
-            icon: "📖",
+            icon: "",
           },
           {
             id: "completed",
-            title: "Completado & Certificado ✨",
+            title: "Completados",
             badgeColor: "bg-[#1C2219] text-[#7EA35A] border-[#7EA35A]/30",
             borderColor: "border-[#2A2723]",
-            icon: "✨",
+            icon: "",
           },
         ];
       case "video":
@@ -97,24 +97,24 @@ export function VaultKanbanBoard({
         return [
           {
             id: "backlog",
-            title: "Por Ver / Estudiar 📺",
+            title: "Por ver",
             badgeColor: "bg-[#121110] text-[#8E867B] border-[#2A2723]",
             borderColor: "border-[#2A2723]",
-            icon: "📺",
+            icon: "",
           },
           {
             id: "in_progress",
-            title: "En Revisión / Viendo 📑",
+            title: "En progreso",
             badgeColor: "bg-[#221D16] text-[#D99B43] border-[#D99B43]/30",
             borderColor: "border-[#2A2723]",
-            icon: "📑",
+            icon: "",
           },
           {
             id: "completed",
-            title: "Visto & Asimilado ✅",
+            title: "Completados",
             badgeColor: "bg-[#1C2219] text-[#7EA35A] border-[#7EA35A]/30",
             borderColor: "border-[#2A2723]",
-            icon: "✅",
+            icon: "",
           },
         ];
       case "book":
@@ -122,24 +122,24 @@ export function VaultKanbanBoard({
         return [
           {
             id: "backlog",
-            title: "Por Leer 📚",
+            title: "Por leer",
             badgeColor: "bg-[#121110] text-[#8E867B] border-[#2A2723]",
             borderColor: "border-[#2A2723]",
-            icon: "📚",
+            icon: "",
           },
           {
             id: "in_progress",
-            title: "Leyendo Actualmente 📖",
+            title: "Leyendo",
             badgeColor: "bg-[#221D16] text-[#D99B43] border-[#D99B43]/30",
             borderColor: "border-[#2A2723]",
-            icon: "📖",
+            icon: "",
           },
           {
             id: "completed",
-            title: "Completado & Leído ✅",
+            title: "Leídos",
             badgeColor: "bg-[#1C2219] text-[#7EA35A] border-[#7EA35A]/30",
             borderColor: "border-[#2A2723]",
-            icon: "✅",
+            icon: "",
           },
         ];
     }
@@ -162,7 +162,7 @@ export function VaultKanbanBoard({
   };
 
   const handleDelete = (id: string, title: string) => {
-    if (!confirm(`¿Eliminar "${title}" de la bóveda?`)) return;
+    if (!confirm(`¿Eliminar "${title}"?`)) return;
     startTransition(async () => {
       await deleteVaultItemAction(id);
       if (onRefresh) onRefresh();
@@ -231,18 +231,12 @@ export function VaultKanbanBoard({
                           <div className="flex items-center gap-1.5 flex-wrap">
                             {item.platform && (
                               <span className="px-2 py-0.5 rounded-md border font-semibold bg-[#181715] border-[#2A2723] text-[#DDD6C9]">
-                                {item.platform === "YouTube"
-                                  ? "📺 YouTube"
-                                  : item.platform === "GitHub"
-                                  ? "🐙 GitHub"
-                                  : item.platform === "Notion"
-                                  ? "📑 Notion"
-                                  : `🎓 ${item.platform}`}
+                                {item.platform}
                               </span>
                             )}
                             {item.instrument && (
                               <span className="px-2 py-0.5 rounded-md bg-[#162121] text-[#4EAB9E] border border-[#4EAB9E]/30 font-semibold">
-                                🎹 {item.instrument}
+                                {item.instrument}
                               </span>
                             )}
                             {item.difficulty && (
@@ -256,7 +250,7 @@ export function VaultKanbanBoard({
                             type="button"
                             onClick={() => handleDelete(item.id, item.title)}
                             className="opacity-0 group-hover:opacity-100 p-1 text-[#8E867B] hover:text-[#E05D52] transition-all cursor-pointer"
-                            title="Eliminar de la bóveda"
+                            title="Eliminar"
                           >
                             <Trash2 className="h-3.5 w-3.5" />
                           </button>
@@ -283,15 +277,7 @@ export function VaultKanbanBoard({
                             className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-[#4EAB9E] hover:underline bg-[#181715] px-2.5 py-1 rounded-md border border-[#2A2723] w-fit"
                           >
                             <span>
-                              {item.platform === "Notion"
-                                ? "📑 Abrir en Notion"
-                                : item.platform === "GitHub"
-                                ? "🐙 Ver en GitHub"
-                                : item.platform === "YouTube"
-                                ? "📺 Ver en YouTube"
-                                : isCourse
-                                ? "🎓 Abrir Clase / Curso"
-                                : "Abrir Enlace"}
+                              Abrir enlace
                             </span>
                             <ExternalLink className="h-3 w-3" />
                           </a>
@@ -355,10 +341,10 @@ export function VaultKanbanBoard({
                             <FileText className="h-3.5 w-3.5 text-[#D99B43]" />
                             <span>
                               {isSheetMusic
-                                ? "Ver Partitura (PDF)"
+                                ? "Ver partitura"
                                 : isCourse
-                                ? "Ver Certificado/Notas (PDF)"
-                                : "Abrir Archivo (PDF)"}
+                                  ? "Ver notas"
+                                  : "Ver archivo"}
                             </span>
                           </button>
                         )}
@@ -383,8 +369,8 @@ export function VaultKanbanBoard({
                                   ? isSheetMusic
                                     ? "Práctica"
                                     : isCourse
-                                    ? "En curso"
-                                    : "Leyendo"
+                                      ? "En curso"
+                                      : "Leyendo"
                                   : "Pendiente"}
                               </span>
                             </button>
@@ -409,13 +395,13 @@ export function VaultKanbanBoard({
                                   ? isSheetMusic
                                     ? "Estudiar"
                                     : isCourse
-                                    ? "Comenzar"
-                                    : "Empezar"
+                                      ? "Comenzar"
+                                      : "Empezar"
                                   : isSheetMusic
-                                  ? "Dominada ✨"
-                                  : isCourse
-                                  ? "Certificar 🎓"
-                                  : "Terminar ✅"}
+                                    ? "Dominada"
+                                    : isCourse
+                                      ? "Completar"
+                                      : "Terminar"}
                               </span>
                               <ChevronRight className="h-3.5 w-3.5" />
                             </button>

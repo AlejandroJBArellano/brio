@@ -49,7 +49,7 @@ export function VaultView({ data, onRefresh, onOpenScratchpad }: VaultViewProps)
               }`}
           >
             <GraduationCap className="h-3.5 w-3.5" />
-            <span>🎓 Cursos</span>
+            <span>Cursos</span>
             <span className="px-1.5 py-0.2 rounded bg-[#181715] text-[10px] font-mono">
               {data.courses?.length || 0}
             </span>
@@ -64,7 +64,7 @@ export function VaultView({ data, onRefresh, onOpenScratchpad }: VaultViewProps)
               }`}
           >
             <BookOpen className="h-3.5 w-3.5" />
-            <span>📚 Libros</span>
+            <span>Libros</span>
             <span className="px-1.5 py-0.2 rounded bg-[#181715] text-[10px] font-mono">
               {data.books.length}
             </span>
@@ -79,7 +79,7 @@ export function VaultView({ data, onRefresh, onOpenScratchpad }: VaultViewProps)
               }`}
           >
             <Music className="h-3.5 w-3.5" />
-            <span>🎼 Partituras</span>
+            <span>Partituras</span>
             <span className="px-1.5 py-0.2 rounded bg-[#181715] text-[10px] font-mono">
               {data.sheetMusic.length}
             </span>
@@ -94,7 +94,7 @@ export function VaultView({ data, onRefresh, onOpenScratchpad }: VaultViewProps)
               }`}
           >
             <Video className="h-3.5 w-3.5" />
-            <span>📺 Watchlist & Recursos</span>
+            <span>Recursos</span>
             <span className="px-1.5 py-0.2 rounded bg-[#181715] text-[10px] font-mono">
               {data.resources?.length || 0}
             </span>
@@ -109,7 +109,7 @@ export function VaultView({ data, onRefresh, onOpenScratchpad }: VaultViewProps)
               onClick={onOpenScratchpad}
               className="flex items-center gap-1.5 px-3 py-2 rounded-lg border border-[#2A2723] bg-[#181715] hover:bg-[#22201D] text-xs font-semibold text-[#DDD6C9] transition-all cursor-pointer"
             >
-              <span>📝 Scratchpad</span>
+              <span>Scratchpad</span>
               <kbd className="text-[10px] font-mono text-[#8E867B]">⌘J</kbd>
             </button>
           )}
@@ -132,12 +132,12 @@ export function VaultView({ data, onRefresh, onOpenScratchpad }: VaultViewProps)
             <Plus className="h-4 w-4" />
             <span>
               {activeTab === "courses"
-                ? "Agregar Curso"
+                ? "Nuevo curso"
                 : activeTab === "books"
-                  ? "Agregar Libro (S3)"
+                  ? "Nuevo libro"
                   : activeTab === "resources"
-                    ? "Guardar Video/Link"
-                    : "Subir Partitura (S3)"}
+                    ? "Nuevo recurso"
+                    : "Nueva partitura"}
             </span>
           </button>
         </div>

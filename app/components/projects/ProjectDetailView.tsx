@@ -381,8 +381,8 @@ export function ProjectDetailView({
               type="button"
               onClick={() => setIsEditing(!isEditing)}
               className={`px-3 py-1.5 rounded-lg text-xs font-mono font-semibold border transition-all cursor-pointer flex items-center gap-1.5 ${isEditing
-                  ? "bg-[#221D16] text-[#D99B43] border-[#D99B43]/50"
-                  : "bg-[#181715] text-[#8E867B] hover:text-[#DDD6C9] border-[#2A2723]"
+                ? "bg-[#221D16] text-[#D99B43] border-[#D99B43]/50"
+                : "bg-[#181715] text-[#8E867B] hover:text-[#DDD6C9] border-[#2A2723]"
                 }`}
             >
               <Edit2 className="size-3.5" />
@@ -414,12 +414,12 @@ export function ProjectDetailView({
                   onChange={(e) => handleUpdateStatus(e.target.value as ProjectStatus)}
                   className={`text-xs font-mono font-bold px-3 py-1 rounded-lg border ${statusMeta.badge} bg-[#121110] focus:outline-none cursor-pointer`}
                 >
+                  <option value="idea">To-Do</option>
                   <option value="in_progress">En Desarrollo</option>
-                  <option value="completed">Completado</option>
-                  <option value="launched">Lanzado / Prod</option>
-                  <option value="permanent">Permanente</option>
-                  <option value="idea">Idea</option>
                   <option value="paused">Pausado</option>
+                  <option value="completed">Completado</option>
+                  <option value="launched">Lanzado</option>
+                  <option value="permanent">Permanente</option>
                 </select>
 
                 {project.taskPrefixes && project.taskPrefixes.length > 0 && (
@@ -596,8 +596,8 @@ export function ProjectDetailView({
                     type="button"
                     onClick={() => setFilterMode("pending")}
                     className={`px-2 py-0.5 rounded transition-all cursor-pointer ${filterMode === "pending"
-                        ? "bg-[#221D16] text-[#D99B43] font-bold"
-                        : "text-[#8E867B] hover:text-[#DDD6C9]"
+                      ? "bg-[#221D16] text-[#D99B43] font-bold"
+                      : "text-[#8E867B] hover:text-[#DDD6C9]"
                       }`}
                   >
                     Pendientes ({metrics.pendingCount})
@@ -606,8 +606,8 @@ export function ProjectDetailView({
                     type="button"
                     onClick={() => setFilterMode("completed")}
                     className={`px-2 py-0.5 rounded transition-all cursor-pointer ${filterMode === "completed"
-                        ? "bg-[#1C2219] text-[#7EA35A] font-bold"
-                        : "text-[#8E867B] hover:text-[#DDD6C9]"
+                      ? "bg-[#1C2219] text-[#7EA35A] font-bold"
+                      : "text-[#8E867B] hover:text-[#DDD6C9]"
                       }`}
                   >
                     Completadas ({metrics.completedCount})
@@ -616,8 +616,8 @@ export function ProjectDetailView({
                     type="button"
                     onClick={() => setFilterMode("all")}
                     className={`px-2 py-0.5 rounded transition-all cursor-pointer ${filterMode === "all"
-                        ? "bg-[#1A1917] text-[#F5F2EB] font-bold"
-                        : "text-[#8E867B] hover:text-[#DDD6C9]"
+                      ? "bg-[#1A1917] text-[#F5F2EB] font-bold"
+                      : "text-[#8E867B] hover:text-[#DDD6C9]"
                       }`}
                   >
                     Todas ({metrics.totalCount})

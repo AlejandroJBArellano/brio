@@ -151,10 +151,10 @@ export function AddVaultItemModal({
             </div>
             <div>
               <h3 className="font-serif text-base font-bold text-[#F5F2EB] tracking-tight">
-                Agregar a la Bóveda
+                Nuevo elemento
               </h3>
               <p className="text-xs text-[#8E867B]">
-                Almacenamiento en AWS S3 & seguimiento de progreso
+                Guarda y organiza tus recursos
               </p>
             </div>
           </div>
@@ -178,16 +178,16 @@ export function AddVaultItemModal({
           {/* Category Selector Buttons */}
           <div>
             <label className="block text-xs font-sans font-medium text-[#DDD6C9] mb-2">
-              Tipo de Elemento
+              Tipo
             </label>
             <div className="grid grid-cols-3 sm:grid-cols-6 gap-1.5 font-sans">
               {[
                 { id: "course", label: "Curso", icon: GraduationCap },
                 { id: "book", label: "Libro", icon: BookOpen },
                 { id: "sheet_music", label: "Partitura", icon: Music },
-                { id: "video", label: "Video/YT", icon: Video },
-                { id: "link", label: "GitHub/Link", icon: FolderGit2 },
-                { id: "document", label: "Doc S3", icon: FileText },
+                { id: "video", label: "Video", icon: Video },
+                { id: "link", label: "Enlace", icon: FolderGit2 },
+                { id: "document", label: "Documento", icon: FileText },
               ].map((c) => {
                 const Icon = c.icon;
                 return (
@@ -224,9 +224,9 @@ export function AddVaultItemModal({
                   category === "sheet_music"
                     ? "Ej. Clair de Lune"
                     : category === "course"
-                    ? "Ej. Next.js 15 & React 19 Pro"
+                    ? "Ej. Next.js Pro"
                     : category === "video"
-                    ? "Ej. Charla Arquitectura Distribuida"
+                    ? "Ej. Arquitectura distribuida"
                     : "Ej. Designing Data-Intensive Applications"
                 }
                 className="w-full rounded-lg border border-[#2A2723] bg-[#121110] p-2.5 text-xs text-[#F5F2EB] placeholder:text-[#8E867B]/50 focus:outline-none focus:border-[#D99B43]"
@@ -238,14 +238,14 @@ export function AddVaultItemModal({
                 {category === "sheet_music"
                   ? "Compositor"
                   : category === "course" || category === "video"
-                  ? "Instructor / Canal"
+                  ? "Instructor o autor"
                   : "Autor"}
               </label>
               <input
                 type="text"
                 value={authorOrCreator}
                 onChange={(e) => setAuthorOrCreator(e.target.value)}
-                placeholder="Ej. Claude Debussy / Martin Kleppmann"
+                placeholder="Ej. Martin Kleppmann"
                 className="w-full rounded-lg border border-[#2A2723] bg-[#121110] p-2.5 text-xs text-[#F5F2EB] placeholder:text-[#8E867B]/50 focus:outline-none focus:border-[#D99B43]"
               />
             </div>
@@ -273,13 +273,13 @@ export function AddVaultItemModal({
 
               <div className="sm:col-span-2">
                 <label className="block text-xs font-sans font-medium text-[#DDD6C9] mb-1.5">
-                  Enlace Web (URL de YouTube / Notion / GitHub / Curso)
+                  Enlace
                 </label>
                 <input
                   type="url"
                   value={url}
                   onChange={(e) => handleUrlChange(e.target.value)}
-                  placeholder="https://notion.so/... o https://youtube.com/watch?v=..."
+                  placeholder="https://..."
                   className="w-full rounded-lg border border-[#2A2723] bg-[#121110] p-2.5 text-xs text-[#F5F2EB] placeholder:text-[#8E867B]/50 focus:outline-none focus:border-[#D99B43]"
                 />
               </div>
@@ -308,7 +308,7 @@ export function AddVaultItemModal({
 
               <div>
                 <label className="block text-xs font-sans font-medium text-[#DDD6C9] mb-1.5">
-                  Nivel de Dificultad
+                  Dificultad
                 </label>
                 <select
                   value={difficulty}
@@ -330,42 +330,42 @@ export function AddVaultItemModal({
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
               <div>
                 <label className="block text-xs font-sans font-medium text-[#DDD6C9] mb-1.5">
-                  {category === "course" ? "Lecciones Totales" : "Páginas Totales"}
+                  {category === "course" ? "Total lecciones" : "Total páginas"}
                 </label>
                 <input
                   type="number"
                   value={totalPages}
                   onChange={(e) => setTotalPages(e.target.value)}
-                  placeholder={category === "course" ? "Ej. 48 clases" : "Ej. 320 págs"}
+                  placeholder={category === "course" ? "Ej. 48" : "Ej. 320"}
                   className="w-full rounded-lg border border-[#2A2723] bg-[#121110] p-2.5 text-xs font-mono text-[#F5F2EB] placeholder:text-[#8E867B]/50 focus:outline-none focus:border-[#D99B43]"
                 />
               </div>
 
               <div>
                 <label className="block text-xs font-sans font-medium text-[#DDD6C9] mb-1.5">
-                  Progreso Actual
+                  Progreso
                 </label>
                 <input
                   type="number"
                   value={progress}
                   onChange={(e) => setProgress(e.target.value)}
-                  placeholder={category === "course" ? "Clases hechas" : "Págs leídas"}
+                  placeholder="Ej. 12"
                   className="w-full rounded-lg border border-[#2A2723] bg-[#121110] p-2.5 text-xs font-mono text-[#F5F2EB] placeholder:text-[#8E867B]/50 focus:outline-none focus:border-[#D99B43]"
                 />
               </div>
 
               <div className="col-span-2 sm:col-span-1">
                 <label className="block text-xs font-sans font-medium text-[#DDD6C9] mb-1.5">
-                  Estado Inicial
+                  Estado
                 </label>
                 <select
                   value={status}
                   onChange={(e) => setStatus(e.target.value as VaultItemStatus)}
                   className="w-full rounded-lg border border-[#2A2723] bg-[#121110] p-2.5 text-xs text-[#F5F2EB] focus:outline-none cursor-pointer"
                 >
-                  <option value="backlog">Por Empezar / Backlog</option>
-                  <option value="in_progress">En Curso / Práctica</option>
-                  <option value="completed">Completado / Dominado</option>
+                  <option value="backlog">Por empezar</option>
+                  <option value="in_progress">En curso</option>
+                  <option value="completed">Completado</option>
                 </select>
               </div>
             </div>
@@ -373,15 +373,12 @@ export function AddVaultItemModal({
 
           {/* S3 File Upload Box (PDF / Archivo) */}
           <div>
-            <label className="flex items-center justify-between text-xs font-sans font-medium text-[#DDD6C9] mb-1.5">
-              <span>
-                {category === "sheet_music"
-                  ? "Partitura PDF (Subir a AWS S3)"
-                  : category === "course"
-                  ? "Certificado o Notas PDF (AWS S3)"
-                  : "Archivo PDF / Documento (AWS S3)"}
-              </span>
-              <span className="text-[10px] text-[#4EAB9E] font-mono">Bucket: brio-media-vault-2026</span>
+            <label className="block text-xs font-sans font-medium text-[#DDD6C9] mb-1.5">
+              {category === "sheet_music"
+                ? "Partitura (PDF)"
+                : category === "course"
+                ? "Certificado o notas (PDF)"
+                : "Archivo (PDF)"}
             </label>
 
             <div className="relative rounded-xl border-2 border-dashed border-[#2A2723] bg-[#121110] p-4 text-center hover:border-[#D99B43]/50 transition-all">
@@ -395,15 +392,15 @@ export function AddVaultItemModal({
                 <UploadCloud className="h-6 w-6 text-[#D99B43]" />
                 {selectedFile ? (
                   <div className="text-xs font-bold text-[#7EA35A]">
-                    ✓ {selectedFile.name} ({(selectedFile.size / 1024 / 1024).toFixed(2)} MB)
+                    {selectedFile.name} ({(selectedFile.size / 1024 / 1024).toFixed(2)} MB)
                   </div>
                 ) : (
                   <>
                     <p className="text-xs font-sans font-semibold text-[#DDD6C9]">
-                      Arrastra tu PDF aquí o haz clic para examinar
+                      Arrastra un archivo o haz clic para subirlo
                     </p>
                     <p className="text-[10px] text-[#8E867B] font-sans">
-                      Se subirá de forma segura y privada a tu bucket de S3
+                      Formatos: PDF, DOC, DOCX
                     </p>
                   </>
                 )}
@@ -414,13 +411,13 @@ export function AddVaultItemModal({
           {/* Notes & Takeaways */}
           <div>
             <label className="block text-xs font-sans font-medium text-[#DDD6C9] mb-1.5">
-              Notas, Digitaciones o Conceptos Clave
+              Notas
             </label>
             <textarea
               rows={2}
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
-              placeholder="Apuntes rápidos sobre este recurso..."
+              placeholder="Apuntes o notas clave..."
               className="w-full rounded-lg border border-[#2A2723] bg-[#121110] p-2.5 text-xs text-[#F5F2EB] placeholder:text-[#8E867B]/50 focus:outline-none focus:border-[#D99B43]"
             />
           </div>
@@ -428,13 +425,13 @@ export function AddVaultItemModal({
           {/* Tags */}
           <div>
             <label className="block text-xs font-sans font-medium text-[#DDD6C9] mb-1.5">
-              Etiquetas (Separadas por comas)
+              Etiquetas
             </label>
             <input
               type="text"
               value={tags}
               onChange={(e) => setTags(e.target.value)}
-              placeholder="piano, clasica, debussy o react, backend, ai"
+              placeholder="Separadas por comas..."
               className="w-full rounded-lg border border-[#2A2723] bg-[#121110] p-2.5 text-xs text-[#F5F2EB] placeholder:text-[#8E867B]/50 focus:outline-none focus:border-[#D99B43]"
             />
           </div>
@@ -454,7 +451,7 @@ export function AddVaultItemModal({
               className="px-5 py-2.5 rounded-lg bg-[#D99B43] hover:bg-[#E8AF59] font-bold text-xs text-[#121110] transition-all shadow-xs disabled:opacity-50 inline-flex items-center gap-2 cursor-pointer"
             >
               <Plus className="h-3.5 w-3.5" />
-              <span>{isPending ? "Subiendo a S3..." : "Guardar en Bóveda"}</span>
+              <span>{isPending ? "Guardando..." : "Guardar"}</span>
             </button>
           </div>
         </form>
