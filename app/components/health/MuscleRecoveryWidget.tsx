@@ -1,6 +1,6 @@
 "use client";
 
-import { HevyWorkout, MuscleGroupId, MuscleRecoveryItem } from "@/lib/types";
+import { MuscleGroupId, MuscleRecoveryItem, WorkoutSession } from "@/lib/types";
 import { calculateMuscleRecovery } from "@/lib/muscleRecovery";
 import {
   Activity,
@@ -13,7 +13,7 @@ import {
 import { useMemo, useState } from "react";
 
 interface MuscleRecoveryWidgetProps {
-  recentWorkouts?: HevyWorkout[];
+  recentWorkouts?: WorkoutSession[];
 }
 
 export function MuscleRecoveryWidget({ recentWorkouts = [] }: MuscleRecoveryWidgetProps) {
@@ -41,7 +41,7 @@ export function MuscleRecoveryWidget({ recentWorkouts = [] }: MuscleRecoveryWidg
           progressBg: "bg-red-500",
           text: "text-red-400",
           border: "border-red-500/30",
-          label: "Fatiga Aguda",
+          label: "Fatiga",
         };
       case "recovering":
         return {
@@ -52,7 +52,7 @@ export function MuscleRecoveryWidget({ recentWorkouts = [] }: MuscleRecoveryWidg
           progressBg: "bg-amber-400",
           text: "text-amber-300",
           border: "border-amber-500/30",
-          label: "En Recuperación",
+          label: "Recuperando",
         };
       case "recovered":
         return {
@@ -63,7 +63,7 @@ export function MuscleRecoveryWidget({ recentWorkouts = [] }: MuscleRecoveryWidg
           progressBg: "bg-emerald-400",
           text: "text-emerald-400",
           border: "border-emerald-500/30",
-          label: "100% Recuperado",
+          label: "Listo",
         };
       case "rested":
       default:
@@ -75,7 +75,7 @@ export function MuscleRecoveryWidget({ recentWorkouts = [] }: MuscleRecoveryWidg
           progressBg: "bg-sky-400",
           text: "text-sky-400",
           border: "border-sky-500/30",
-          label: "Descansado (>5d)",
+          label: "Descansado",
         };
     }
   };
@@ -126,7 +126,7 @@ export function MuscleRecoveryWidget({ recentWorkouts = [] }: MuscleRecoveryWidg
 
   return (
     <div className="rounded-xl border border-[#2A2723] bg-[#181715] p-5 sm:p-6 shadow-sm font-sans flex flex-col gap-6">
-      {/* 1. Header with Cyberpunk Recovery Badge */}
+      {/* 1. Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[#2A2723]">
         <div className="flex items-center gap-3">
           <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-[#221D16] border border-[#D99B43]/30 text-[#D99B43] shadow-xs">
@@ -135,14 +135,14 @@ export function MuscleRecoveryWidget({ recentWorkouts = [] }: MuscleRecoveryWidg
           <div>
             <div className="flex items-center gap-2">
               <h3 className="font-serif text-base font-bold text-[#F5F2EB] tracking-tight flex items-center gap-2">
-                Heatmap de Recuperación Muscular
+                Recuperación muscular
                 <span className="inline-flex items-center gap-1 rounded-md bg-[#221D16] px-2 py-0.5 text-[10px] font-mono font-bold text-[#D99B43] border border-[#D99B43]/30">
-                  <Zap className="h-3 w-3" /> HEVY ENGINE
+                  <Zap className="h-3 w-3" /> Motor
                 </span>
               </h3>
             </div>
             <p className="text-xs text-[#8E867B] mt-0.5">
-              Estado biológico de fatiga, sobrecarga sistemática y síntesis proteica
+              Estado de fatiga y síntesis proteica
             </p>
           </div>
         </div>
@@ -151,7 +151,7 @@ export function MuscleRecoveryWidget({ recentWorkouts = [] }: MuscleRecoveryWidg
         <div className="flex items-center gap-4 bg-[#121110] border border-[#2A2723] rounded-xl px-4 py-2.5">
           <div className="text-right">
             <div className="text-[10px] uppercase font-mono tracking-wider text-[#8E867B]">
-              Recuperación Sistémica
+              Recuperación general
             </div>
             <div className="text-lg font-bold font-mono text-[#F5F2EB] flex items-center justify-end gap-1.5">
               <span>{recoverySummary.overallRecoveryPercent}%</span>
@@ -171,7 +171,7 @@ export function MuscleRecoveryWidget({ recentWorkouts = [] }: MuscleRecoveryWidg
       <div className="flex flex-wrap items-center justify-between gap-3 p-3 rounded-lg bg-[#121110] border border-[#2A2723]">
         <div className="flex items-center gap-2 text-xs">
           <Sparkles className="h-4 w-4 text-[#D99B43]" />
-          <span className="text-[#8E867B]">Sugeridos para entrenar hoy:</span>
+          <span className="text-[#8E867B]">Hoy sugerido:</span>
           <div className="flex flex-wrap gap-1.5">
             {recoverySummary.suggestedFocusToday.map((focus) => (
               <span
@@ -189,45 +189,48 @@ export function MuscleRecoveryWidget({ recentWorkouts = [] }: MuscleRecoveryWidg
           <button
             type="button"
             onClick={() => setFilterState("ready")}
-            className={`px-2 py-0.5 rounded cursor-pointer transition-all ${
+            className={`flex items-center gap-1.5 px-2 py-0.5 rounded cursor-pointer transition-all ${
               filterState === "ready"
                 ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/40"
                 : "text-[#8E867B] hover:text-[#DDD6C9]"
             }`}
           >
-            🟢 {recoverySummary.readyToTrainCount} Listos
+            <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
+            {recoverySummary.readyToTrainCount} Listos
           </button>
           <button
             type="button"
             onClick={() => setFilterState("recovering")}
-            className={`px-2 py-0.5 rounded cursor-pointer transition-all ${
+            className={`flex items-center gap-1.5 px-2 py-0.5 rounded cursor-pointer transition-all ${
               filterState === "recovering"
                 ? "bg-amber-500/20 text-amber-300 border border-amber-500/40"
                 : "text-[#8E867B] hover:text-[#DDD6C9]"
             }`}
           >
-            🟡 {recoverySummary.recoveringCount} Recuperando
+            <span className="h-1.5 w-1.5 rounded-full bg-amber-400" />
+            {recoverySummary.recoveringCount} Recuperando
           </button>
           {recoverySummary.exhaustedCount > 0 && (
             <button
               type="button"
               onClick={() => setFilterState("exhausted")}
-              className={`px-2 py-0.5 rounded cursor-pointer transition-all ${
+              className={`flex items-center gap-1.5 px-2 py-0.5 rounded cursor-pointer transition-all ${
                 filterState === "exhausted"
                   ? "bg-red-500/20 text-red-300 border border-red-500/40"
-                : "text-[#8E867B] hover:text-[#DDD6C9]"
+                  : "text-[#8E867B] hover:text-[#DDD6C9]"
               }`}
             >
-              🔴 {recoverySummary.exhaustedCount} Fatiga
+              <span className="h-1.5 w-1.5 rounded-full bg-red-400" />
+              {recoverySummary.exhaustedCount} Fatiga
             </button>
           )}
           {filterState !== "all" && (
             <button
               type="button"
               onClick={() => setFilterState("all")}
-              className="text-[10px] text-[#8E867B] underline hover:text-[#DDD6C9] ml-1"
+              className="text-[10px] text-[#8E867B] underline hover:text-[#DDD6C9] ml-1 cursor-pointer"
             >
-              Ver todos
+              Todos
             </button>
           )}
         </div>
@@ -241,7 +244,7 @@ export function MuscleRecoveryWidget({ recentWorkouts = [] }: MuscleRecoveryWidg
           <div className="flex items-center justify-between w-full pb-3 border-b border-[#2A2723]/60">
             <span className="text-xs font-mono text-[#8E867B] uppercase tracking-wider flex items-center gap-1.5">
               <Layers className="h-3.5 w-3.5 text-[#D99B43]" />
-              Proyección Anatómica
+              Vista anatómica
             </span>
             <div className="flex items-center gap-1 p-0.5 rounded-lg bg-[#181715] border border-[#2A2723]">
               <button
@@ -253,7 +256,7 @@ export function MuscleRecoveryWidget({ recentWorkouts = [] }: MuscleRecoveryWidg
                     : "text-[#8E867B] hover:text-[#DDD6C9]"
                 }`}
               >
-                Frontal (Anterior)
+                Frontal
               </button>
               <button
                 type="button"
@@ -264,7 +267,7 @@ export function MuscleRecoveryWidget({ recentWorkouts = [] }: MuscleRecoveryWidg
                     : "text-[#8E867B] hover:text-[#DDD6C9]"
                 }`}
               >
-                Dorsal (Posterior)
+                Posterior
               </button>
             </div>
           </div>
@@ -700,19 +703,15 @@ export function MuscleRecoveryWidget({ recentWorkouts = [] }: MuscleRecoveryWidg
                   <h4 className="font-serif text-lg font-bold text-[#F5F2EB]">
                     {selectedMuscle.name}
                   </h4>
-                  <span className="text-xs font-mono text-[#8E867B]">
-                    ({selectedMuscle.nameEn})
-                  </span>
                 </div>
                 <div className="text-xs text-[#8E867B] font-mono mt-0.5">
-                  Categoría:{" "}
                   {selectedMuscle.category === "upper_push"
-                    ? "Empuje Superior"
+                    ? "Empuje"
                     : selectedMuscle.category === "upper_pull"
-                    ? "Tracción Superior"
+                    ? "Tracción"
                     : selectedMuscle.category === "lower"
-                    ? "Tren Inferior / Pierna"
-                    : "Core & Abdomen"}
+                    ? "Pierna"
+                    : "Abdomen"}
                 </div>
               </div>
 
@@ -734,7 +733,7 @@ export function MuscleRecoveryWidget({ recentWorkouts = [] }: MuscleRecoveryWidg
             {/* Recovery Progress Bar */}
             <div className="space-y-1.5">
               <div className="flex items-center justify-between text-xs font-mono">
-                <span className="text-[#8E867B]">Nivel de Recuperación</span>
+                <span className="text-[#8E867B]">Recuperación</span>
                 <span className={`font-bold ${getStateColor(selectedMuscle.state).text}`}>
                   {selectedMuscle.recoveryPercent}%
                 </span>
@@ -752,7 +751,7 @@ export function MuscleRecoveryWidget({ recentWorkouts = [] }: MuscleRecoveryWidg
             {/* Recovery Stats Grid */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 pt-1">
               <div className="rounded-lg bg-[#181715] border border-[#2A2723] p-2.5">
-                <div className="text-[10px] font-mono text-[#8E867B] uppercase">Último Estímulo</div>
+                <div className="text-[10px] font-mono text-[#8E867B] uppercase">Último entreno</div>
                 <div className="text-xs font-mono font-bold text-[#F5F2EB] mt-0.5">
                   {selectedMuscle.hoursSinceLastTrained !== undefined
                     ? selectedMuscle.hoursSinceLastTrained < 24
@@ -766,15 +765,15 @@ export function MuscleRecoveryWidget({ recentWorkouts = [] }: MuscleRecoveryWidg
                 <div className="text-[10px] font-mono text-[#8E867B] uppercase">Tiempo a 100%</div>
                 <div className="text-xs font-mono font-bold text-[#F5F2EB] mt-0.5">
                   {selectedMuscle.hoursToFullRecovery > 0
-                    ? `~${selectedMuscle.hoursToFullRecovery} horas`
-                    : "Listo ✅"}
+                    ? `~${selectedMuscle.hoursToFullRecovery}h`
+                    : "Listo"}
                 </div>
               </div>
 
               <div className="rounded-lg bg-[#181715] border border-[#2A2723] p-2.5">
                 <div className="text-[10px] font-mono text-[#8E867B] uppercase">Series (7d)</div>
                 <div className="text-xs font-mono font-bold text-[#F5F2EB] mt-0.5">
-                  {selectedMuscle.totalSetsLast7Days} series
+                  {selectedMuscle.totalSetsLast7Days}
                 </div>
               </div>
 
@@ -786,11 +785,11 @@ export function MuscleRecoveryWidget({ recentWorkouts = [] }: MuscleRecoveryWidg
               </div>
             </div>
 
-            {/* Scientific Recommendation Alert */}
+            {/* Recommendation Alert */}
             <div className="rounded-lg bg-[#181715] border border-[#2A2723] p-3.5 flex items-start gap-3">
               <Info className="h-4 w-4 text-[#D99B43] mt-0.5 shrink-0" />
               <div className="text-xs leading-relaxed text-[#DDD6C9]">
-                <span className="font-semibold text-[#F5F2EB]">Prescripción de Entrenamiento: </span>
+                <span className="font-semibold text-[#F5F2EB]">Recomendación: </span>
                 {selectedMuscle.recommendation}
               </div>
             </div>
@@ -799,7 +798,7 @@ export function MuscleRecoveryWidget({ recentWorkouts = [] }: MuscleRecoveryWidg
             {selectedMuscle.recentExercises.length > 0 && (
               <div className="pt-2 border-t border-[#2A2723]/60 flex flex-col gap-1.5">
                 <div className="text-[11px] font-mono text-[#8E867B]">
-                  Ejercicios recientes que activaron este grupo:
+                  Ejercicios recientes:
                 </div>
                 <div className="flex flex-wrap gap-1.5">
                   {selectedMuscle.recentExercises.map((ex) => (
@@ -819,8 +818,8 @@ export function MuscleRecoveryWidget({ recentWorkouts = [] }: MuscleRecoveryWidg
           {/* Quick Muscle Selector Pills */}
           <div className="flex flex-col gap-2">
             <div className="text-xs font-mono text-[#8E867B] uppercase tracking-wider flex items-center justify-between">
-              <span>Todos los Grupos Musculares</span>
-              <span className="text-[10px] text-[#D99B43]">{filteredMuscles.length} grupos</span>
+              <span>Grupos musculares</span>
+              <span className="text-[10px] text-[#D99B43]">{filteredMuscles.length}</span>
             </div>
 
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
@@ -851,10 +850,7 @@ export function MuscleRecoveryWidget({ recentWorkouts = [] }: MuscleRecoveryWidg
                         : "bg-[#121110] border-[#2A2723] hover:border-[#3A3630]"
                     }`}
                   >
-                    <div className="flex flex-col">
-                      <span className="text-xs font-semibold text-[#F5F2EB]">{m.name}</span>
-                      <span className="text-[10px] font-mono text-[#8E867B]">{m.nameEn}</span>
-                    </div>
+                    <span className="text-xs font-semibold text-[#F5F2EB]">{m.name}</span>
                     <div className="flex items-center gap-1.5">
                       <span className={`text-xs font-mono font-bold ${stateConfig.text}`}>
                         {m.recoveryPercent}%

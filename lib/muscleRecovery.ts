@@ -1,4 +1,4 @@
-import { HevyWorkout, MuscleGroupId, MuscleRecoveryItem, MuscleRecoverySummary } from "./types";
+import { MuscleGroupId, MuscleRecoveryItem, MuscleRecoverySummary, WorkoutSession } from "./types";
 
 interface MuscleMappingRule {
   primary: MuscleGroupId[];
@@ -9,18 +9,18 @@ export const MUSCLE_METADATA: Record<
   MuscleGroupId,
   { name: string; nameEn: string; category: "upper_push" | "upper_pull" | "core" | "lower" }
 > = {
-  chest: { name: "Pectorales", nameEn: "Chest", category: "upper_push" },
-  shoulders: { name: "Deltoides / Hombros", nameEn: "Shoulders", category: "upper_push" },
-  triceps: { name: "Tríceps", nameEn: "Triceps", category: "upper_push" },
-  upper_back: { name: "Trapecios / Alta Espalda", nameEn: "Upper Back", category: "upper_pull" },
-  lats: { name: "Dorsales", nameEn: "Lats", category: "upper_pull" },
-  biceps: { name: "Bíceps", nameEn: "Biceps", category: "upper_pull" },
-  forearms: { name: "Antebrazos", nameEn: "Forearms", category: "upper_pull" },
-  abs: { name: "Abdomen & Core", nameEn: "Abs & Core", category: "core" },
-  quads: { name: "Cuádriceps", nameEn: "Quads", category: "lower" },
-  hamstrings: { name: "Femorales / Isquios", nameEn: "Hamstrings", category: "lower" },
-  glutes: { name: "Glúteos", nameEn: "Glutes", category: "lower" },
-  calves: { name: "Gemelos / Pantorrillas", nameEn: "Calves", category: "lower" },
+  chest: { name: "Pecho", nameEn: "Pecho", category: "upper_push" },
+  shoulders: { name: "Hombros", nameEn: "Hombros", category: "upper_push" },
+  triceps: { name: "Tríceps", nameEn: "Tríceps", category: "upper_push" },
+  upper_back: { name: "Espalda alta", nameEn: "Espalda alta", category: "upper_pull" },
+  lats: { name: "Dorsales", nameEn: "Dorsales", category: "upper_pull" },
+  biceps: { name: "Bíceps", nameEn: "Bíceps", category: "upper_pull" },
+  forearms: { name: "Antebrazos", nameEn: "Antebrazos", category: "upper_pull" },
+  abs: { name: "Abdomen", nameEn: "Abdomen", category: "core" },
+  quads: { name: "Cuádriceps", nameEn: "Cuádriceps", category: "lower" },
+  hamstrings: { name: "Isquios", nameEn: "Isquios", category: "lower" },
+  glutes: { name: "Glúteos", nameEn: "Glúteos", category: "lower" },
+  calves: { name: "Pantorrillas", nameEn: "Pantorrillas", category: "lower" },
 };
 
 /**
@@ -241,10 +241,10 @@ export function identifyMusclesForExercise(title: string): MuscleMappingRule {
 }
 
 /**
- * Calculates complete muscle recovery status from recent Hevy workouts.
+ * Calculates complete muscle recovery status from recent workout sessions.
  */
 export function calculateMuscleRecovery(
-  recentWorkouts: HevyWorkout[] = [],
+  recentWorkouts: WorkoutSession[] = [],
   now: Date = new Date()
 ): MuscleRecoverySummary {
   const muscleGroups: MuscleGroupId[] = [
@@ -370,7 +370,7 @@ export function calculateMuscleRecovery(
         totalSetsLast7Days: 0,
         totalVolumeLast7Days: 0,
         recentExercises: [],
-        recommendation: "Músculo descansado (> 7 días sin estímulo). Listo para ser entrenado con alta intensidad.",
+        recommendation: "Descansado. Listo para entrenar.",
       };
       readyToTrainCount++;
       totalRecoverySum += 100;
@@ -395,10 +395,10 @@ export function calculateMuscleRecovery(
       recoveryPercent = 100;
       if (hoursSince > 120) {
         state = "rested";
-        recommendation = `Descansado (${Math.round(hoursSince / 24)} días sin estímulo). Excelente momento para entrenarlo hoy.`;
+        recommendation = `Descansado (${Math.round(hoursSince / 24)}d). Listo para entrenar.`;
       } else {
         state = "recovered";
-        recommendation = "100% Recuperado. Glucógeno y fuerza restaurados. Óptimo para sobrecarga progresiva.";
+        recommendation = "Recuperado. Listo para entrenar.";
       }
       readyToTrainCount++;
       suggestedFocusToday.push(meta.name);
@@ -408,11 +408,11 @@ export function calculateMuscleRecovery(
 
       if (recoveryPercent < 40) {
         state = "exhausted";
-        recommendation = `Fatiga aguda / Daño muscular (listo en ~${hoursToFullRecovery}h). Prioriza proteína, agua e hidratación.`;
+        recommendation = `En fatiga (listo en ~${hoursToFullRecovery}h). Descansar.`;
         exhaustedCount++;
       } else {
         state = "recovering";
-        recommendation = `Recuperación activa (faltan ~${hoursToFullRecovery}h). Evita series al fallo en este grupo hoy.`;
+        recommendation = `En recuperación (faltan ~${hoursToFullRecovery}h). Evitar fallo.`;
         recoveringCount++;
       }
     }
