@@ -6,9 +6,10 @@ import {
   updateProjectStatusAction,
 } from "@/app/actions/projects";
 import { createSingleTaskAction, toggleTaskAction } from "@/app/actions/tasks";
+import { DrawerResizeHandle, useResizableDrawer } from "@/app/hooks/useResizableDrawer";
+import { matchTasksToProject } from "@/lib/projectMatcher";
 import { soundFx } from "@/lib/soundFx";
 import { HabiticaTag, HabiticaTask, ProjectItem, ProjectStatus } from "@/lib/types";
-import { matchTasksToProject } from "@/lib/projectMatcher";
 import { getTaskPriorityInfo, parseTaskPrefix } from "@/lib/utils";
 import {
   Check,
@@ -20,7 +21,6 @@ import {
   X,
 } from "lucide-react";
 import { useEffect, useState, useTransition } from "react";
-import { DrawerResizeHandle, useResizableDrawer } from "@/app/hooks/useResizableDrawer";
 
 interface ProjectDossierDrawerProps {
   project: ProjectItem | null;
@@ -205,9 +205,8 @@ export function ProjectDossierDrawer({
 
       {/* Drawer Body */}
       <div
-        className={`relative w-full resizable-drawer h-full bg-[#181715] border-l border-[#2A2723] shadow-2xl flex flex-col z-10 ${
-          isResizing ? "select-none transition-none" : "animate-in slide-in-from-right duration-300"
-        } overflow-hidden`}
+        className={`relative w-full resizable-drawer h-full bg-[#181715] border-l border-[#2A2723] shadow-2xl flex flex-col z-10 ${isResizing ? "select-none transition-none" : "animate-in slide-in-from-right duration-300"
+          } overflow-hidden`}
         style={{ "--drawer-width": `${width}px` } as React.CSSProperties}
       >
         <DrawerResizeHandle
@@ -255,11 +254,10 @@ export function ProjectDossierDrawer({
               <button
                 type="button"
                 onClick={() => (isEditing ? setIsEditing(false) : handleOpenEdit())}
-                className={`px-3 py-1 rounded-lg text-xs font-mono font-semibold border transition-all cursor-pointer flex items-center gap-1.5 ${
-                  isEditing
+                className={`px-3 py-1 rounded-lg text-xs font-mono font-semibold border transition-all cursor-pointer flex items-center gap-1.5 ${isEditing
                     ? "bg-[#221D16] text-[#D99B43] border-[#D99B43]/50"
                     : "bg-[#181715] text-[#8E867B] hover:text-[#DDD6C9] border-[#2A2723]"
-                }`}
+                  }`}
               >
                 <Edit2 className="size-3.5" />
                 <span>{isEditing ? "Ver Dossier" : "Editar Proyecto"}</span>
@@ -523,7 +521,7 @@ export function ProjectDossierDrawer({
                   <div className="flex items-center gap-2">
                     <ListTodo className="size-4 text-[#4EAB9E]" />
                     <h3 className="font-serif text-xs font-bold uppercase tracking-wider text-[#F5F2EB]">
-                      To-Dos del Proyecto en Habitica ({metrics.totalCount})
+                      Tareas ({metrics.totalCount})
                     </h3>
                   </div>
 
@@ -531,33 +529,30 @@ export function ProjectDossierDrawer({
                     <button
                       type="button"
                       onClick={() => setFilterMode("pending")}
-                      className={`px-2 py-0.5 rounded transition-all cursor-pointer ${
-                        filterMode === "pending"
+                      className={`px-2 py-0.5 rounded transition-all cursor-pointer ${filterMode === "pending"
                           ? "bg-[#221D16] text-[#D99B43] font-bold"
                           : "text-[#8E867B] hover:text-[#DDD6C9]"
-                      }`}
+                        }`}
                     >
                       Pendientes ({metrics.pendingCount})
                     </button>
                     <button
                       type="button"
                       onClick={() => setFilterMode("completed")}
-                      className={`px-2 py-0.5 rounded transition-all cursor-pointer ${
-                        filterMode === "completed"
+                      className={`px-2 py-0.5 rounded transition-all cursor-pointer ${filterMode === "completed"
                           ? "bg-[#1C2219] text-[#7EA35A] font-bold"
                           : "text-[#8E867B] hover:text-[#DDD6C9]"
-                      }`}
+                        }`}
                     >
                       Completadas ({metrics.completedCount})
                     </button>
                     <button
                       type="button"
                       onClick={() => setFilterMode("all")}
-                      className={`px-2 py-0.5 rounded transition-all cursor-pointer ${
-                        filterMode === "all"
+                      className={`px-2 py-0.5 rounded transition-all cursor-pointer ${filterMode === "all"
                           ? "bg-[#1A1917] text-[#F5F2EB] font-bold"
                           : "text-[#8E867B] hover:text-[#DDD6C9]"
-                      }`}
+                        }`}
                     >
                       Todas ({metrics.totalCount})
                     </button>
@@ -574,27 +569,24 @@ export function ProjectDossierDrawer({
                         <div
                           key={task.id}
                           onClick={() => handleToggleTask(task.id, Boolean(task.completed))}
-                          className={`flex items-center justify-between p-3 rounded-lg border transition-all cursor-pointer select-none group ${
-                            task.completed
+                          className={`flex items-center justify-between p-3 rounded-lg border transition-all cursor-pointer select-none group ${task.completed
                               ? "bg-[#141813] border-[#7EA35A]/30 text-[#8E867B]"
                               : "bg-[#141311] border-[#2A2723] hover:border-[#3D3425] text-[#F5F2EB]"
-                          }`}
+                            }`}
                         >
                           <div className="flex items-center gap-3 flex-1 min-w-0">
                             <div
-                              className={`flex size-4.5 shrink-0 items-center justify-center rounded border transition-colors ${
-                                task.completed
+                              className={`flex size-4.5 shrink-0 items-center justify-center rounded border transition-colors ${task.completed
                                   ? "bg-[#7EA35A] border-[#7EA35A] text-[#121110] font-bold"
                                   : "border-[#38332D] bg-[#181715] group-hover:border-[#D99B43]"
-                              }`}
+                                }`}
                             >
                               {task.completed && <Check className="size-3 stroke-3" />}
                             </div>
 
                             <span
-                              className={`text-xs truncate ${
-                                task.completed ? "line-through text-[#8E867B]" : "text-[#F5F2EB]"
-                              }`}
+                              className={`text-xs truncate ${task.completed ? "line-through text-[#8E867B]" : "text-[#F5F2EB]"
+                                }`}
                             >
                               {cleanTitle}
                             </span>

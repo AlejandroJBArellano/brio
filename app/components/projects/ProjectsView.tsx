@@ -11,14 +11,13 @@ import { matchTasksToProject } from "@/lib/projectMatcher";
 import { soundFx } from "@/lib/soundFx";
 import { ProjectItem, ProjectStatus } from "@/lib/types";
 import {
-  ChevronRight,
   Code2,
   FolderGit2,
   ListTodo,
   Plus,
   Search,
   Trash2,
-  X,
+  X
 } from "lucide-react";
 import { useMemo, useState, useTransition } from "react";
 
@@ -366,14 +365,6 @@ export function ProjectsView({ data, onRefresh }: ProjectsViewProps) {
                       />
                     </div>
                   </div>
-                </div>
-
-                {/* Footer: Open Dossier */}
-                <div className="pt-2 border-t border-[#2A2723] flex items-center justify-end text-xs font-mono text-[#8E867B] group-hover:text-[#D99B43] transition-colors">
-                  <span className="flex items-center gap-1">
-                    <span>Dossier</span>
-                    <ChevronRight className="size-3.5" />
-                  </span>
                 </div>
               </div>
             );

@@ -2,6 +2,7 @@
 
 import { getDb } from "@/lib/db";
 import {
+  ContextualNote,
   HabiticaTag,
   HabiticaTask,
   LearningItem,
@@ -13,6 +14,7 @@ import {
 } from "@/lib/types";
 import { awardHabiticaEvent } from "@/lib/habiticaEvents";
 import { getCachedHabiticaTags, getCachedHabiticaTasksWithCompleted } from "@/lib/dal/habitica";
+import { fetchContextualNotesAction } from "./notes";
 import { revalidatePath } from "next/cache";
 
 interface ProjectDbRow {
@@ -47,6 +49,58 @@ export interface ProjectsPageData {
   projects: ProjectItem[];
   tasks: HabiticaTask[];
   tags: HabiticaTag[];
+}
+
+export interface ProjectDetailPageData {
+  project: ProjectItem | null;
+  tasks: HabiticaTask[];
+  tags: HabiticaTag[];
+  notes: ContextualNote[];
+}
+
+/**
+ * Server Action: Fetches a single project with its tasks, tags, and contextual notes.
+ */
+export async function fetchProjectByIdAction(id: string): Promise<ProjectDetailPageData> {
+  const sql = getDb();
+
+  await sql`ALTER TABLE projects ADD COLUMN IF NOT EXISTS integrations JSONB DEFAULT '{}'::jsonb;`;
+
+  const [projectRows, tasks, tags, notes] = await Promise.all([
+    sql`SELECT * FROM projects WHERE id = ${id} LIMIT 1;`,
+    getCachedHabiticaTasksWithCompleted().catch(() => []),
+    getCachedHabiticaTags().catch(() => []),
+    fetchContextualNotesAction(id).catch(() => []),
+  ]);
+
+  if (projectRows.length === 0) {
+    return {
+      project: null,
+      tasks: [],
+      tags: [],
+      notes: [],
+    };
+  }
+
+  const p = projectRows[0] as unknown as ProjectDbRow;
+  const project: ProjectItem = {
+    id: p.id,
+    title: p.title,
+    description: p.description || undefined,
+    status: p.status as ProjectStatus,
+    progress: Number(p.progress) || 0,
+    taskPrefixes: Array.isArray(p.task_prefixes) ? p.task_prefixes : [],
+    canonicalPrefix: p.canonical_prefix || undefined,
+    integrations: p.integrations || undefined,
+    createdAt: p.created_at?.toString(),
+  };
+
+  return {
+    project,
+    tasks,
+    tags,
+    notes,
+  };
 }
 
 /**
