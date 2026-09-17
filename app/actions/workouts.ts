@@ -10,6 +10,7 @@ import {
   PRRecord,
   WorkoutExercise,
   WorkoutRoutine,
+  WorkoutRoutineExercise,
   WorkoutSession,
   WorkoutSet,
 } from "@/lib/types";
@@ -126,7 +127,7 @@ export async function ensureWorkoutTables(sql: NeonSql) {
               ${item.notes || null},
               ${item.isCustom},
               ${item.maxWeightKg || null},
-              ${item.maxEstimated1rm || null},
+              ${item.maxEstimated1Rm || null},
               ${item.lastTrainedAt || null},
               ${item.totalSessionsCount || 0},
               NOW(),

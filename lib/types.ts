@@ -647,6 +647,20 @@ export interface HealthDashboardData {
 
 export type ProjectStatus = "idea" | "in_progress" | "completed" | "permanent" | "paused" | "launched";
 
+export interface ProjectIntegrations {
+  notion?: {
+    enabled?: boolean;
+    pageId?: string;
+    databaseId?: string;
+    lastSyncedAt?: string;
+  };
+  github?: {
+    enabled?: boolean;
+    repo?: string;
+  };
+  [key: string]: unknown;
+}
+
 export interface ProjectItem {
   id: string;
   title: string;
@@ -655,7 +669,7 @@ export interface ProjectItem {
   progress: number;
   taskPrefixes?: string[];
   canonicalPrefix?: string;
-  integrations?: Record<string, unknown>;
+  integrations?: ProjectIntegrations;
   createdAt?: string;
 }
 

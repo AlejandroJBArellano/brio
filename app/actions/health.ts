@@ -26,6 +26,7 @@ import {
 import { revalidatePath } from "next/cache";
 import { fetchNutritionDashboardDataAction } from "./nutrition";
 import { getTodayDateStr, toDateStr } from "@/lib/dateUtils";
+import { awardHabiticaEvent } from "@/lib/habiticaEvents";
 
 interface LabTestReportDbRow {
   id: string;

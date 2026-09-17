@@ -402,7 +402,6 @@ export function HormonalCircadianWidget({
                 </div>
                 <div className="flex flex-col">
                   <div className="flex items-center gap-1.5 text-xs font-semibold text-[#F5F2EB]">
-                    <span>{item.icon}</span>
                     <span className={isDone ? "line-through text-[#8E867B]" : ""}>
                       {item.label}
                     </span>
