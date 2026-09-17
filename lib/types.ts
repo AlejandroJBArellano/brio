@@ -732,7 +732,7 @@ export interface VaultDashboardData {
 }
 
 // ----------------------------------------------------
-// Módulo de Nutrición & Dietas (Plan Mariana Mont & Tracking)
+// Módulo de Nutrición & Dietas (Plan  & Tracking)
 // ----------------------------------------------------
 
 export type FoodGroupKey =
@@ -781,7 +781,7 @@ export interface NutritionRecipe {
   mealSlot: MealSlotType;
   category?: string; // "Lechadas", "Quesos & Patés", "Sopas & Cremas", "Platos Fuertes", "Ensaladas", "Snacks & Postres", "Smoothies", "Shots & Infusiones"
   bookSource?: string; // "La Luna Verde", "Detox 7 Días", "Detox Otoñal", "Plan Semanal"
-  weekNumber?: number; // 1 to 4 for Mariana Mont plan presets
+  weekNumber?: number; // 1 to 4 for  plan presets
   optionLabel?: string; // "Opción 1", "Opción 2", "Opción A", etc.
   portions: Partial<Record<FoodGroupKey, number>>;
   ingredients: string[];

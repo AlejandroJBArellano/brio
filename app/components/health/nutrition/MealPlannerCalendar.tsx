@@ -5,6 +5,7 @@ import {
   scheduleMealSlotAction,
   toggleScheduledMealCompletedAction,
 } from "@/app/actions/nutrition";
+import { getTodayDateStr } from "@/lib/dateUtils";
 import { FOOD_GROUPS_CATALOG } from "@/lib/nutritionPresets";
 import {
   FoodGroupKey,
@@ -12,7 +13,6 @@ import {
   NutritionRecipe,
   ScheduledMealItem,
 } from "@/lib/types";
-import { getTodayDateStr } from "@/lib/dateUtils";
 import {
   Calendar as CalendarIcon,
   Check,
@@ -41,42 +41,42 @@ const MEAL_SLOTS: Array<{
   icon: string;
   badgeColor: string;
 }> = [
-  {
-    id: "breakfast",
-    title: "Desayuno",
-    subtitle: "Smoothie matutino + Suplementos",
-    icon: "🌅",
-    badgeColor: "amber",
-  },
-  {
-    id: "lunch",
-    title: "Almuerzo",
-    subtitle: "Bowl, avena, tostadas o tofu",
-    icon: "🥣",
-    badgeColor: "sky",
-  },
-  {
-    id: "dinner",
-    title: "Comida Fuerte",
-    subtitle: "Platillo principal + Ensalada",
-    icon: "🍲",
-    badgeColor: "emerald",
-  },
-  {
-    id: "snack",
-    title: "Snack de Media Tarde",
-    subtitle: "Fruta, semillas, obleas o pudín",
-    icon: "🍎",
-    badgeColor: "rose",
-  },
-  {
-    id: "smoothie",
-    title: "Cena",
-    subtitle: "Green smoothie + taquitos/tostada",
-    icon: "🥗",
-    badgeColor: "violet",
-  },
-];
+    {
+      id: "breakfast",
+      title: "Desayuno",
+      subtitle: "Smoothie matutino + Suplementos",
+      icon: "🌅",
+      badgeColor: "amber",
+    },
+    {
+      id: "lunch",
+      title: "Almuerzo",
+      subtitle: "Bowl, avena, tostadas o tofu",
+      icon: "🥣",
+      badgeColor: "sky",
+    },
+    {
+      id: "dinner",
+      title: "Comida Fuerte",
+      subtitle: "Platillo principal + Ensalada",
+      icon: "🍲",
+      badgeColor: "emerald",
+    },
+    {
+      id: "snack",
+      title: "Snack de Media Tarde",
+      subtitle: "Fruta, semillas, obleas o pudín",
+      icon: "🍎",
+      badgeColor: "rose",
+    },
+    {
+      id: "smoothie",
+      title: "Cena",
+      subtitle: "Green smoothie + taquitos/tostada",
+      icon: "🥗",
+      badgeColor: "violet",
+    },
+  ];
 
 export function MealPlannerCalendar({
   scheduledMeals,
@@ -234,13 +234,12 @@ export function MealPlannerCalendar({
                 key={day.dateStr}
                 type="button"
                 onClick={() => handleDayClick(day.dateStr)}
-                className={`relative flex flex-col items-center justify-center p-2.5 rounded-lg border text-xs transition-all cursor-pointer ${
-                  day.isSelected
+                className={`relative flex flex-col items-center justify-center p-2.5 rounded-lg border text-xs transition-all cursor-pointer ${day.isSelected
                     ? "bg-[#221D16] border-[#D99B43]/40 text-[#F5F2EB] shadow-xs"
                     : day.isToday
-                    ? "bg-[#181715] border-[#D99B43]/30 text-[#D99B43]"
-                    : "bg-[#121110] border-[#2A2723] text-[#8E867B] hover:border-[#38332D] hover:text-[#DDD6C9]"
-                }`}
+                      ? "bg-[#181715] border-[#D99B43]/30 text-[#D99B43]"
+                      : "bg-[#121110] border-[#2A2723] text-[#8E867B] hover:border-[#38332D] hover:text-[#DDD6C9]"
+                  }`}
               >
                 <span className="text-[10px] font-semibold uppercase">{day.dayName}</span>
                 <span className="font-mono text-base font-bold mt-0.5">{day.dayNumber}</span>
@@ -300,20 +299,18 @@ export function MealPlannerCalendar({
                     return (
                       <div
                         key={meal.id}
-                        className={`flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3.5 rounded-lg border transition-all ${
-                          meal.isCompleted
+                        className={`flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3.5 rounded-lg border transition-all ${meal.isCompleted
                             ? "border-[#7EA35A]/40 bg-[#1C2219]"
                             : "border-[#2A2723] bg-[#121110]"
-                        }`}
+                          }`}
                       >
                         <div className="space-y-1.5">
                           <div className="flex items-center gap-2">
                             <span
-                              className={`text-xs font-bold tracking-tight font-serif ${
-                                meal.isCompleted
+                              className={`text-xs font-bold tracking-tight font-serif ${meal.isCompleted
                                   ? "text-[#7EA35A] line-through opacity-80"
                                   : "text-[#F5F2EB]"
-                              }`}
+                                }`}
                             >
                               {title}
                             </span>
@@ -360,11 +357,10 @@ export function MealPlannerCalendar({
                             type="button"
                             onClick={() => handleToggleCompleted(meal.id)}
                             disabled={isPending}
-                            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-bold transition-all cursor-pointer font-sans ${
-                              meal.isCompleted
+                            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-bold transition-all cursor-pointer font-sans ${meal.isCompleted
                                 ? "bg-[#7EA35A] border-[#7EA35A] text-[#121110]"
                                 : "bg-[#181715] border border-[#2A2723] text-[#7EA35A] hover:bg-[#1C2219]"
-                            }`}
+                              }`}
                           >
                             <Check className="h-3.5 w-3.5 stroke-3" />
                             <span>{meal.isCompleted ? "¡Consumido!" : "Marcar Comido"}</span>
@@ -418,10 +414,10 @@ export function MealPlannerCalendar({
             </div>
 
             <div className="mt-4 flex-1 overflow-y-auto space-y-4 pr-1">
-              {/* Option A: Pick from Mariana Mont Presets */}
+              {/* Option A: Pick from  Presets */}
               <div>
                 <label className="block text-xs font-bold text-[#DDD6C9] mb-2 font-serif">
-                  Seleccionar del Recetario de Mariana Mont:
+                  Seleccionar del Recetario de :
                 </label>
                 <div className="relative mb-2.5">
                   <Search className="absolute left-3 top-2.5 h-4 w-4 text-[#8E867B]" />
@@ -446,11 +442,10 @@ export function MealPlannerCalendar({
                           setSelectedRecipeId(recipe.id);
                           setCustomTitle("");
                         }}
-                        className={`w-full flex flex-col items-start p-3 rounded-lg border text-left transition-all cursor-pointer ${
-                          isSelected
+                        className={`w-full flex flex-col items-start p-3 rounded-lg border text-left transition-all cursor-pointer ${isSelected
                             ? "bg-[#221D16] border-[#D99B43]/40 text-[#F5F2EB]"
                             : "bg-[#121110] border-[#2A2723] text-[#8E867B] hover:border-[#38332D]"
-                        }`}
+                          }`}
                       >
                         <div className="flex items-center justify-between w-full">
                           <span className="text-xs font-bold text-[#F5F2EB] font-serif">

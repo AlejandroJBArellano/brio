@@ -1,14 +1,15 @@
 "use client";
 
 import {
+  quickAdjustPortionAction,
+  scheduleMealSlotAction,
+} from "@/app/actions/nutrition";
+import {
   addCustomPantryItemAction,
   fetchPantryItemsAction,
   togglePantryItemAction,
 } from "@/app/actions/pantry";
-import {
-  quickAdjustPortionAction,
-  scheduleMealSlotAction,
-} from "@/app/actions/nutrition";
+import { getTodayDateStr } from "@/lib/dateUtils";
 import { MARIANA_MONT_PRESET_RECIPES } from "@/lib/nutritionPresets";
 import { PANTRY_CATEGORIES_META } from "@/lib/pantryCatalog";
 import {
@@ -17,7 +18,6 @@ import {
   PantryCategory,
   PantryItem,
 } from "@/lib/types";
-import { getTodayDateStr } from "@/lib/dateUtils";
 import {
   AlertCircle,
   Check,
@@ -292,11 +292,10 @@ export function PantryAssistantModal({
             <div className="flex items-center p-1 rounded-lg bg-[#181715] border border-[#2A2723]">
               <button
                 onClick={() => setActiveTab("recipes")}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-semibold transition-all cursor-pointer ${
-                  activeTab === "recipes"
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-semibold transition-all cursor-pointer ${activeTab === "recipes"
                     ? "bg-[#221D16] text-[#D99B43] border border-[#D99B43]/30 shadow-xs"
                     : "text-[#8E867B] hover:text-[#DDD6C9]"
-                }`}
+                  }`}
               >
                 <Utensils className="h-3.5 w-3.5" />
                 <span>Sugerencias de Recetas</span>
@@ -304,11 +303,10 @@ export function PantryAssistantModal({
 
               <button
                 onClick={() => setActiveTab("pantry")}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-semibold transition-all cursor-pointer ${
-                  activeTab === "pantry"
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-semibold transition-all cursor-pointer ${activeTab === "pantry"
                     ? "bg-[#221D16] text-[#D99B43] border border-[#D99B43]/30 shadow-xs"
                     : "text-[#8E867B] hover:text-[#DDD6C9]"
-                }`}
+                  }`}
               >
                 <Layers className="h-3.5 w-3.5" />
                 <span>Mi Despensa ({inStockCount})</span>
@@ -344,54 +342,49 @@ export function PantryAssistantModal({
               <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0 scrollbar-none text-xs">
                 <button
                   onClick={() => setActiveFilter("all")}
-                  className={`px-3 py-1.5 rounded-md font-medium shrink-0 transition-colors cursor-pointer border ${
-                    activeFilter === "all"
+                  className={`px-3 py-1.5 rounded-md font-medium shrink-0 transition-colors cursor-pointer border ${activeFilter === "all"
                       ? "bg-[#221D16] text-[#D99B43] border-[#D99B43]/30"
                       : "bg-[#181715] text-[#8E867B] border-[#2A2723] hover:text-[#DDD6C9]"
-                  }`}
+                    }`}
                 >
                   Todas ({matchedRecipes.length})
                 </button>
                 <button
                   onClick={() => setActiveFilter("100_match")}
-                  className={`flex items-center gap-1 px-3 py-1.5 rounded-md font-medium shrink-0 transition-colors cursor-pointer border ${
-                    activeFilter === "100_match"
+                  className={`flex items-center gap-1 px-3 py-1.5 rounded-md font-medium shrink-0 transition-colors cursor-pointer border ${activeFilter === "100_match"
                       ? "bg-[#1C2219] text-[#7EA35A] border-[#7EA35A]/40"
                       : "bg-[#181715] text-[#8E867B] border-[#2A2723] hover:text-[#DDD6C9]"
-                  }`}
+                    }`}
                 >
                   <Sparkles className="h-3 w-3 text-[#7EA35A]" />
                   <span>100% Despensa</span>
                 </button>
                 <button
                   onClick={() => setActiveFilter("post_gym")}
-                  className={`flex items-center gap-1 px-3 py-1.5 rounded-md font-medium shrink-0 transition-colors cursor-pointer border ${
-                    activeFilter === "post_gym"
+                  className={`flex items-center gap-1 px-3 py-1.5 rounded-md font-medium shrink-0 transition-colors cursor-pointer border ${activeFilter === "post_gym"
                       ? "bg-[#251A18] text-[#E05D52] border-[#E05D52]/40"
                       : "bg-[#181715] text-[#8E867B] border-[#2A2723] hover:text-[#DDD6C9]"
-                  }`}
+                    }`}
                 >
                   <Dumbbell className="h-3 w-3 text-[#E05D52]" />
                   <span>Post-Gym 12-2PM</span>
                 </button>
                 <button
                   onClick={() => setActiveFilter("fast_15m")}
-                  className={`flex items-center gap-1 px-3 py-1.5 rounded-md font-medium shrink-0 transition-colors cursor-pointer border ${
-                    activeFilter === "fast_15m"
+                  className={`flex items-center gap-1 px-3 py-1.5 rounded-md font-medium shrink-0 transition-colors cursor-pointer border ${activeFilter === "fast_15m"
                       ? "bg-[#221D16] text-[#D99B43] border-[#D99B43]/40"
                       : "bg-[#181715] text-[#8E867B] border-[#2A2723] hover:text-[#DDD6C9]"
-                  }`}
+                    }`}
                 >
                   <Clock className="h-3 w-3 text-[#D99B43]" />
                   <span>Express &lt;15 min</span>
                 </button>
                 <button
                   onClick={() => setActiveFilter("lunch")}
-                  className={`px-3 py-1.5 rounded-md font-medium shrink-0 transition-colors cursor-pointer border ${
-                    activeFilter === "lunch"
+                  className={`px-3 py-1.5 rounded-md font-medium shrink-0 transition-colors cursor-pointer border ${activeFilter === "lunch"
                       ? "bg-[#1A2221] text-[#4EAB9E] border-[#4EAB9E]/40"
                       : "bg-[#181715] text-[#8E867B] border-[#2A2723] hover:text-[#DDD6C9]"
-                  }`}
+                    }`}
                 >
                   Almuerzos
                 </button>
@@ -430,11 +423,10 @@ export function PantryAssistantModal({
                   return (
                     <div
                       key={recipe.id}
-                      className={`flex flex-col justify-between p-4 rounded-lg border transition-all duration-150 ${
-                        isFullyAvailable
+                      className={`flex flex-col justify-between p-4 rounded-lg border transition-all duration-150 ${isFullyAvailable
                           ? "bg-[#141813] border-[#7EA35A]/40 hover:border-[#7EA35A]/60"
                           : "bg-[#121110] border-[#2A2723] hover:border-[#38332D]"
-                      }`}
+                        }`}
                     >
                       <div className="flex flex-col gap-2.5">
                         {/* Tags / Badges */}
@@ -464,7 +456,7 @@ export function PantryAssistantModal({
                           </div>
 
                           <span className="text-[10px] font-medium text-[#8E867B] font-mono">
-                            {recipe.category || "Mariana Mont"}
+                            {recipe.category || ""}
                           </span>
                         </div>
 
@@ -513,11 +505,10 @@ export function PantryAssistantModal({
                         <button
                           onClick={() => handleLogRecipe(recipe)}
                           disabled={isPending}
-                          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer font-sans ${
-                            isFullyAvailable
+                          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer font-sans ${isFullyAvailable
                               ? "bg-[#7EA35A] hover:bg-[#8FB866] text-[#121110]"
                               : "bg-[#221D16] hover:bg-[#2A241C] text-[#D99B43] border border-[#D99B43]/30"
-                          }`}
+                            }`}
                         >
                           <Utensils className="h-3.5 w-3.5" />
                           <span>Cocinar y Registrar</span>
@@ -539,11 +530,10 @@ export function PantryAssistantModal({
               <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0 scrollbar-none text-xs">
                 <button
                   onClick={() => setSelectedPantryCat("all")}
-                  className={`px-3 py-1.5 rounded-md font-medium shrink-0 transition-colors cursor-pointer border ${
-                    selectedPantryCat === "all"
+                  className={`px-3 py-1.5 rounded-md font-medium shrink-0 transition-colors cursor-pointer border ${selectedPantryCat === "all"
                       ? "bg-[#221D16] text-[#D99B43] border-[#D99B43]/30 font-bold"
                       : "bg-[#181715] text-[#8E867B] border-[#2A2723] hover:text-[#DDD6C9]"
-                  }`}
+                    }`}
                 >
                   Todos ({pantryItems.length})
                 </button>
@@ -552,11 +542,10 @@ export function PantryAssistantModal({
                     <button
                       key={catKey}
                       onClick={() => setSelectedPantryCat(catKey)}
-                      className={`flex items-center gap-1 px-3 py-1.5 rounded-md font-medium shrink-0 transition-colors cursor-pointer border ${
-                        selectedPantryCat === catKey
+                      className={`flex items-center gap-1 px-3 py-1.5 rounded-md font-medium shrink-0 transition-colors cursor-pointer border ${selectedPantryCat === catKey
                           ? "bg-[#221D16] text-[#D99B43] border-[#D99B43]/30 font-bold"
                           : "bg-[#181715] text-[#8E867B] border-[#2A2723] hover:text-[#DDD6C9]"
-                      }`}
+                        }`}
                     >
                       <span>{meta.icon}</span>
                       <span>{meta.label}</span>
@@ -628,11 +617,10 @@ export function PantryAssistantModal({
                   <button
                     key={item.id}
                     onClick={() => handleTogglePantryItem(item.id)}
-                    className={`flex items-center justify-between gap-2 p-3 rounded-lg border text-left transition-all duration-150 cursor-pointer ${
-                      item.inStock
+                    className={`flex items-center justify-between gap-2 p-3 rounded-lg border text-left transition-all duration-150 cursor-pointer ${item.inStock
                         ? "bg-[#1C2219] border-[#7EA35A]/40 text-[#F5F2EB]"
                         : "bg-[#121110] border-[#2A2723] text-[#8E867B] hover:border-[#38332D]"
-                    }`}
+                      }`}
                   >
                     <div className="flex items-center gap-2 truncate">
                       <span className="text-base">{item.icon || "🥑"}</span>
@@ -642,11 +630,10 @@ export function PantryAssistantModal({
                     </div>
 
                     <div
-                      className={`flex h-4 w-4 shrink-0 items-center justify-center rounded border text-[10px] ${
-                        item.inStock
+                      className={`flex h-4 w-4 shrink-0 items-center justify-center rounded border text-[10px] ${item.inStock
                           ? "bg-[#7EA35A] border-[#7EA35A] text-[#121110]"
                           : "border-[#2A2723] bg-[#181715] text-transparent"
-                      }`}
+                        }`}
                     >
                       <Check className="h-3 w-3 stroke-3" />
                     </div>
@@ -672,7 +659,7 @@ export function PantryAssistantModal({
                   {selectedRecipe.category || "Receta"}
                 </span>
                 <span className="text-xs text-[#8E867B]">
-                  {selectedRecipe.bookSource || "Mariana Mont"}
+                  {selectedRecipe.bookSource || ""}
                 </span>
               </div>
 

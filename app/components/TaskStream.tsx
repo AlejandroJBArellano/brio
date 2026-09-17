@@ -39,7 +39,7 @@ import { TaskItem } from "./TaskItem";
 export type SortField = "text" | "priority" | "value" | "date" | "type";
 export type SortDirection = "asc" | "desc";
 
-function sortTasks(
+export function sortTasks(
   taskList: HabiticaTask[],
   sortField: SortField | null,
   sortDirection: SortDirection | null
@@ -1006,7 +1006,7 @@ export function TaskStream({
 /**
  * Tabular Column Header with interactive sorting
  */
-function TableHeader({
+export function TableHeader({
   showTypeColumn = false,
   sortField,
   sortDirection,

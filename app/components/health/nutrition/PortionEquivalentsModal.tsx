@@ -1,12 +1,11 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
-import { FoodGroupKey } from "@/lib/types";
 import {
   MARIANA_MONT_PORTION_EQUIVALENTS,
   PortionEquivalentItem,
 } from "@/lib/nutritionPresets";
 import { soundFx } from "@/lib/soundFx";
+import { FoodGroupKey } from "@/lib/types";
 import {
   Apple,
   CookingPot,
@@ -20,6 +19,7 @@ import {
   Wheat,
   X,
 } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
 
 interface PortionEquivalentsModalProps {
   isOpen: boolean;
@@ -201,14 +201,13 @@ export function PortionEquivalentsModal({
               </h2>
               <div className="flex items-center gap-2 mt-0.5">
                 <span
-                  className={`font-mono text-xs font-bold ${
-                    isGoalMet ? "text-[#7EA35A]" : "text-[#DDD6C9]"
-                  }`}
+                  className={`font-mono text-xs font-bold ${isGoalMet ? "text-[#7EA35A]" : "text-[#DDD6C9]"
+                    }`}
                 >
                   {currentPortions} / {targetPortions} {groupConfig.unit}
                 </span>
                 <span className="text-[10px] text-[#8E867B] font-mono">
-                  • Plan Mariana Mont
+                  • Plan
                 </span>
               </div>
             </div>
@@ -282,11 +281,10 @@ export function PortionEquivalentsModal({
                 <div
                   key={item.id}
                   onClick={() => handleAddItem(item)}
-                  className={`group rounded-xl border p-3 transition-all flex items-center justify-between gap-3 cursor-pointer select-none active:scale-[0.99] ${
-                    hasAdded
+                  className={`group rounded-xl border p-3 transition-all flex items-center justify-between gap-3 cursor-pointer select-none active:scale-[0.99] ${hasAdded
                       ? "border-[#7EA35A]/50 bg-[#141813]"
                       : "border-[#2A2723] bg-[#121110] hover:border-[#38332D] hover:bg-[#151412]"
-                  }`}
+                    }`}
                 >
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2">
@@ -325,11 +323,10 @@ export function PortionEquivalentsModal({
                     <button
                       type="button"
                       onClick={() => handleAddItem(item)}
-                      className={`flex h-7 w-7 items-center justify-center rounded-lg border text-xs font-mono font-bold transition-all cursor-pointer ${
-                        hasAdded
+                      className={`flex h-7 w-7 items-center justify-center rounded-lg border text-xs font-mono font-bold transition-all cursor-pointer ${hasAdded
                           ? "border-[#7EA35A] bg-[#7EA35A] text-[#121110] shadow-xs"
                           : "border-[#38332D] bg-[#181715] text-[#DDD6C9] group-hover:border-[#7EA35A]/70 group-hover:text-[#7EA35A]"
-                      }`}
+                        }`}
                       title="Sumar 1 porción"
                     >
                       <Plus className="h-3.5 w-3.5 stroke-[2.5]" />

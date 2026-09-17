@@ -84,8 +84,8 @@ const EVENT_TEMPLATES: Record<HabiticaEventType, EventTemplate> = {
   },
   NUTRITION_HABIT: {
     type: "habit",
-    text: "[Brio] Nutrición & Mariana Mont",
-    notes: "Alimentación limpia, ensalada diaria, suplementación o cumplimiento de porciones del plan Mariana Mont.",
+    text: "[Brio] Nutrición & ",
+    notes: "Alimentación limpia, ensalada diaria, suplementación o cumplimiento de porciones del plan .",
     priority: 1.5,
     up: true,
     down: false,
@@ -93,8 +93,8 @@ const EVENT_TEMPLATES: Record<HabiticaEventType, EventTemplate> = {
   },
   SCHEDULED_MEAL_COMPLETED: {
     type: "habit",
-    text: "[Brio] Receta / Comida Mariana Mont",
-    notes: "Comer según la planificación o recetas clínicas de la nutrióloga Mariana Mont.",
+    text: "[Brio] Receta / Comida ",
+    notes: "Comer según la planificación o recetas clínicas de la nutrióloga .",
     priority: 1.5,
     up: true,
     down: false,
@@ -184,8 +184,8 @@ async function findOrCreateHabiticaTask(
       template.type === "habit"
         ? "habits"
         : template.type === "daily"
-        ? "dailys"
-        : "todos"
+          ? "dailys"
+          : "todos"
     );
 
     const match = existingTasks.find(

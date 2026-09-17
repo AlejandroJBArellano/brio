@@ -1,7 +1,7 @@
 "use client";
 
-import { toggleNutritionHabitAction } from "@/app/actions/nutrition";
 import { toggleSupplementAction } from "@/app/actions/health";
+import { toggleNutritionHabitAction } from "@/app/actions/nutrition";
 import { NutritionHabitLog, SupplementItem, UserSupplement } from "@/lib/types";
 import {
   Check,
@@ -54,19 +54,19 @@ export function NutritionHabitsChecklist({
     description: string;
     icon: LucideIcon;
   }> = [
-    {
-      key: "dailySalad",
-      title: "1 Ensalada Diaria con Semillas",
-      description: "2 tz de verdura cruda + 2 cdas de pepitas de calabaza, ajonjolí o girasol + germinados",
-      icon: Salad,
-    },
-    {
-      key: "noUltraProcessed",
-      title: "Cero Ultraprocesados & Fritos",
-      description: "Sin productos procesados, enlatados, harinas/sal refinada ni edulcorantes artificiales",
-      icon: ShieldCheck,
-    },
-  ];
+      {
+        key: "dailySalad",
+        title: "1 Ensalada Diaria con Semillas",
+        description: "2 tz de verdura cruda + 2 cdas de pepitas de calabaza, ajonjolí o girasol + germinados",
+        icon: Salad,
+      },
+      {
+        key: "noUltraProcessed",
+        title: "Cero Ultraprocesados & Fritos",
+        description: "Sin productos procesados, enlatados, harinas/sal refinada ni edulcorantes artificiales",
+        icon: ShieldCheck,
+      },
+    ];
 
   const dietaryCompletedCount = dietaryHabitItems.filter(
     (item) => habits[item.key]
@@ -95,7 +95,7 @@ export function NutritionHabitsChecklist({
               </span>
             </div>
             <p className="text-xs text-[#8E867B] font-mono">
-              Reglas clínicas de Mariana Mont sincronizadas con tu personaje (+EXP/Oro)
+              Reglas clínicas de  sincronizadas con tu personaje (+EXP/Oro)
             </p>
           </div>
         </div>
@@ -141,28 +141,25 @@ export function NutritionHabitsChecklist({
                 type="button"
                 onClick={() => handleToggleHabit(item.key)}
                 disabled={isPending}
-                className={`flex flex-col justify-between p-3 rounded-lg border text-left transition-all cursor-pointer ${
-                  isDone
+                className={`flex flex-col justify-between p-3 rounded-lg border text-left transition-all cursor-pointer ${isDone
                     ? "border-[#7EA35A]/40 bg-[#1C2219] text-[#F5F2EB]"
                     : "border-[#2A2723] bg-[#121110] text-[#8E867B] hover:border-[#38332D] hover:bg-[#181715]"
-                }`}
+                  }`}
               >
                 <div className="flex items-start justify-between w-full">
                   <div
-                    className={`flex h-7 w-7 shrink-0 items-center justify-center rounded border ${
-                      isDone
+                    className={`flex h-7 w-7 shrink-0 items-center justify-center rounded border ${isDone
                         ? "bg-[#1C2219] border-[#7EA35A]/40 text-[#7EA35A]"
                         : "bg-[#181715] border-[#2A2723] text-[#8E867B]"
-                    }`}
+                      }`}
                   >
                     <Icon className="h-3.5 w-3.5" />
                   </div>
                   <div
-                    className={`flex h-5 w-5 shrink-0 items-center justify-center rounded border transition-all ${
-                      isDone
+                    className={`flex h-5 w-5 shrink-0 items-center justify-center rounded border transition-all ${isDone
                         ? "bg-[#7EA35A] border-[#7EA35A] text-[#121110]"
                         : "border-[#2A2723] bg-[#181715]"
-                    }`}
+                      }`}
                   >
                     {isDone && <Check className="h-3.5 w-3.5 stroke-3" />}
                   </div>
@@ -170,9 +167,8 @@ export function NutritionHabitsChecklist({
 
                 <div className="mt-2.5">
                   <span
-                    className={`text-xs font-bold block font-serif ${
-                      isDone ? "text-[#F5F2EB]" : "text-[#DDD6C9]"
-                    }`}
+                    className={`text-xs font-bold block font-serif ${isDone ? "text-[#F5F2EB]" : "text-[#DDD6C9]"
+                      }`}
                   >
                     {item.title}
                   </span>
@@ -222,11 +218,10 @@ export function NutritionHabitsChecklist({
                 type="button"
                 onClick={() => handleToggleSupplement(item.id)}
                 disabled={isPending}
-                className={`flex items-start justify-between p-3 rounded-lg border text-left transition-all cursor-pointer ${
-                  item.taken
+                className={`flex items-start justify-between p-3 rounded-lg border text-left transition-all cursor-pointer ${item.taken
                     ? "border-[#7EA35A]/40 bg-[#1C2219] text-[#F5F2EB]"
                     : "border-[#2A2723] bg-[#121110] text-[#8E867B] hover:border-[#38332D] hover:bg-[#181715]"
-                }`}
+                  }`}
               >
                 <div className="space-y-0.5">
                   <div className="flex items-center gap-1.5">
@@ -242,11 +237,10 @@ export function NutritionHabitsChecklist({
                 </div>
 
                 <div
-                  className={`flex h-5 w-5 shrink-0 items-center justify-center rounded border transition-all ${
-                    item.taken
+                  className={`flex h-5 w-5 shrink-0 items-center justify-center rounded border transition-all ${item.taken
                       ? "bg-[#7EA35A] border-[#7EA35A] text-[#121110]"
                       : "border-[#2A2723] bg-[#181715]"
-                  }`}
+                    }`}
                 >
                   {item.taken && <Check className="h-3.5 w-3.5 stroke-3" />}
                 </div>

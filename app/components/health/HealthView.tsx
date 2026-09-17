@@ -100,8 +100,8 @@ export function HealthView({ data, onRefresh }: HealthViewProps) {
             type="button"
             onClick={() => setActiveHealthTab("daily")}
             className={`flex items-center gap-2 px-3.5 py-1.5 rounded-md text-xs font-semibold transition-all cursor-pointer ${activeHealthTab === "daily"
-                ? "bg-[#D99B43] text-[#121110] font-bold shadow-xs"
-                : "text-[#8E867B] hover:text-[#DDD6C9] hover:bg-[#22201D]"
+              ? "bg-[#D99B43] text-[#121110] font-bold shadow-xs"
+              : "text-[#8E867B] hover:text-[#DDD6C9] hover:bg-[#22201D]"
               }`}
           >
             <Flame className={`h-3.5 w-3.5 ${activeHealthTab === "daily" ? "text-[#121110]" : "text-[#D99B43]"}`} />
@@ -113,8 +113,8 @@ export function HealthView({ data, onRefresh }: HealthViewProps) {
             type="button"
             onClick={() => setActiveHealthTab("training")}
             className={`flex items-center gap-2 px-3.5 py-1.5 rounded-md text-xs font-semibold transition-all cursor-pointer ${activeHealthTab === "training"
-                ? "bg-[#D99B43] text-[#121110] font-bold shadow-xs"
-                : "text-[#8E867B] hover:text-[#DDD6C9] hover:bg-[#22201D]"
+              ? "bg-[#D99B43] text-[#121110] font-bold shadow-xs"
+              : "text-[#8E867B] hover:text-[#DDD6C9] hover:bg-[#22201D]"
               }`}
           >
             <Dumbbell className="h-3.5 w-3.5" />
@@ -122,8 +122,8 @@ export function HealthView({ data, onRefresh }: HealthViewProps) {
             {data.weeklyWorkoutsCount > 0 && (
               <span
                 className={`ml-0.5 rounded px-1.5 py-0.2 text-[9px] font-mono font-bold ${activeHealthTab === "training"
-                    ? "bg-[#121110] text-[#D99B43]"
-                    : "bg-[#221D16] text-[#D99B43] border border-[#D99B43]/30"
+                  ? "bg-[#121110] text-[#D99B43]"
+                  : "bg-[#221D16] text-[#D99B43] border border-[#D99B43]/30"
                   }`}
               >
                 {data.weeklyWorkoutsCount} sem
@@ -136,8 +136,8 @@ export function HealthView({ data, onRefresh }: HealthViewProps) {
             type="button"
             onClick={() => setActiveHealthTab("nutrition")}
             className={`flex items-center gap-2 px-3.5 py-1.5 rounded-md text-xs font-semibold transition-all cursor-pointer ${activeHealthTab === "nutrition"
-                ? "bg-[#7EA35A] text-[#121110] font-bold shadow-xs"
-                : "text-[#8E867B] hover:text-[#DDD6C9] hover:bg-[#22201D]"
+              ? "bg-[#7EA35A] text-[#121110] font-bold shadow-xs"
+              : "text-[#8E867B] hover:text-[#DDD6C9] hover:bg-[#22201D]"
               }`}
           >
             <Salad className="h-3.5 w-3.5" />
@@ -145,8 +145,8 @@ export function HealthView({ data, onRefresh }: HealthViewProps) {
             {data.nutritionData && (
               <span
                 className={`ml-0.5 rounded px-1.5 py-0.2 text-[9px] font-mono font-bold ${activeHealthTab === "nutrition"
-                    ? "bg-[#121110] text-[#7EA35A]"
-                    : "bg-[#1C2219] text-[#7EA35A] border border-[#7EA35A]/30"
+                  ? "bg-[#121110] text-[#7EA35A]"
+                  : "bg-[#1C2219] text-[#7EA35A] border border-[#7EA35A]/30"
                   }`}
               >
                 {data.nutritionData.todayLog.calculatedMacros.kcal} kcal
@@ -159,8 +159,8 @@ export function HealthView({ data, onRefresh }: HealthViewProps) {
             type="button"
             onClick={() => setActiveHealthTab("biometrics")}
             className={`flex items-center gap-2 px-3.5 py-1.5 rounded-md text-xs font-semibold transition-all cursor-pointer ${activeHealthTab === "biometrics"
-                ? "bg-[#4EAB9E] text-[#121110] font-bold shadow-xs"
-                : "text-[#8E867B] hover:text-[#DDD6C9] hover:bg-[#22201D]"
+              ? "bg-[#4EAB9E] text-[#121110] font-bold shadow-xs"
+              : "text-[#8E867B] hover:text-[#DDD6C9] hover:bg-[#22201D]"
               }`}
           >
             <FlaskConical className="h-3.5 w-3.5" />
@@ -168,8 +168,8 @@ export function HealthView({ data, onRefresh }: HealthViewProps) {
             {data.biomarkersData && (
               <span
                 className={`ml-0.5 rounded px-1.5 py-0.2 text-[9px] font-mono font-bold ${activeHealthTab === "biometrics"
-                    ? "bg-[#121110] text-[#4EAB9E]"
-                    : "bg-[#162121] text-[#4EAB9E] border border-[#4EAB9E]/30"
+                  ? "bg-[#121110] text-[#4EAB9E]"
+                  : "bg-[#162121] text-[#4EAB9E] border border-[#4EAB9E]/30"
                   }`}
               >
                 {data.biomarkersData.totalBiomarkersTracked} pruebas
@@ -281,7 +281,7 @@ export function HealthView({ data, onRefresh }: HealthViewProps) {
                     <p className="text-xs text-[#8E867B] mt-1 line-clamp-1">
                       {data.nutritionData.scheduledMealsToday.length > 0
                         ? `Próxima comida: ${data.nutritionData.scheduledMealsToday[0].recipe?.title || data.nutritionData.scheduledMealsToday[0].customTitle || "Programada"}`
-                        : "Plan Mariana Mont activo • Registra tus porciones del día"}
+                        : "Plan  activo • Registra tus porciones del día"}
                     </p>
                   </div>
                 </div>
@@ -443,8 +443,8 @@ export function HealthView({ data, onRefresh }: HealthViewProps) {
                       onClick={() => handleToggleSupplement(supp.id)}
                       disabled={isPending}
                       className={`flex items-center justify-between p-3 rounded-lg border transition-all text-xs font-semibold cursor-pointer ${supp.taken
-                          ? "border-[#7EA35A]/40 bg-[#1C2219] text-[#7EA35A]"
-                          : "border-[#2A2723] bg-[#121110] text-[#DDD6C9] hover:border-[#38332D]"
+                        ? "border-[#7EA35A]/40 bg-[#1C2219] text-[#7EA35A]"
+                        : "border-[#2A2723] bg-[#121110] text-[#DDD6C9] hover:border-[#38332D]"
                         }`}
                     >
                       <div className="flex flex-col items-start text-left">
@@ -457,8 +457,8 @@ export function HealthView({ data, onRefresh }: HealthViewProps) {
                       </div>
                       <div
                         className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-md border ml-2 ${supp.taken
-                            ? "bg-[#7EA35A] border-[#7EA35A] text-[#121110]"
-                            : "border-[#2A2723] bg-[#181715]"
+                          ? "bg-[#7EA35A] border-[#7EA35A] text-[#121110]"
+                          : "border-[#2A2723] bg-[#181715]"
                           }`}
                       >
                         {supp.taken && <Check className="h-3.5 w-3.5 stroke-3" />}
@@ -529,8 +529,8 @@ export function HealthView({ data, onRefresh }: HealthViewProps) {
                       type="button"
                       onClick={() => setSleepQuality(q)}
                       className={`flex-1 py-2 rounded-md border text-xs font-bold transition-all cursor-pointer ${sleepQuality === q
-                          ? "bg-[#221D16] border-[#D99B43]/40 text-[#D99B43]"
-                          : "bg-[#121110] border-[#2A2723] text-[#8E867B] hover:text-[#DDD6C9]"
+                        ? "bg-[#221D16] border-[#D99B43]/40 text-[#D99B43]"
+                        : "bg-[#121110] border-[#2A2723] text-[#8E867B] hover:text-[#DDD6C9]"
                         }`}
                     >
                       {q} ⭐
@@ -555,8 +555,8 @@ export function HealthView({ data, onRefresh }: HealthViewProps) {
                 type="button"
                 onClick={() => setTrainingSubTab("hevy")}
                 className={`flex items-center gap-2 px-3.5 py-1.5 rounded-md text-xs font-semibold transition-all cursor-pointer ${trainingSubTab === "hevy"
-                    ? "bg-[#D99B43] text-[#121110] font-bold shadow-xs"
-                    : "text-[#8E867B] hover:text-[#DDD6C9] hover:bg-[#22201D]"
+                  ? "bg-[#D99B43] text-[#121110] font-bold shadow-xs"
+                  : "text-[#8E867B] hover:text-[#DDD6C9] hover:bg-[#22201D]"
                   }`}
               >
                 <Dumbbell className="h-3.5 w-3.5" />
@@ -567,8 +567,8 @@ export function HealthView({ data, onRefresh }: HealthViewProps) {
                 type="button"
                 onClick={() => setTrainingSubTab("recovery")}
                 className={`flex items-center gap-2 px-3.5 py-1.5 rounded-md text-xs font-semibold transition-all cursor-pointer ${trainingSubTab === "recovery"
-                    ? "bg-[#D99B43] text-[#121110] font-bold shadow-xs"
-                    : "text-[#8E867B] hover:text-[#DDD6C9] hover:bg-[#22201D]"
+                  ? "bg-[#D99B43] text-[#121110] font-bold shadow-xs"
+                  : "text-[#8E867B] hover:text-[#DDD6C9] hover:bg-[#22201D]"
                   }`}
               >
                 <Activity className="h-3.5 w-3.5" />
@@ -599,7 +599,7 @@ export function HealthView({ data, onRefresh }: HealthViewProps) {
       )}
 
       {/* ========================================================================= */}
-      {/* 3. PILAR: NUTRICIÓN & MARIANA MONT                                        */}
+      {/* 3. PILAR: NUTRICIÓN &                                         */}
       {/* ========================================================================= */}
       {activeHealthTab === "nutrition" && data.nutritionData && (
         <NutritionView
@@ -621,8 +621,8 @@ export function HealthView({ data, onRefresh }: HealthViewProps) {
                 type="button"
                 onClick={() => setBiometricsSubTab("biomarkers")}
                 className={`flex items-center gap-2 px-3.5 py-1.5 rounded-md text-xs font-semibold transition-all cursor-pointer ${biometricsSubTab === "biomarkers"
-                    ? "bg-[#4EAB9E] text-[#121110] font-bold shadow-xs"
-                    : "text-[#8E867B] hover:text-[#DDD6C9] hover:bg-[#22201D]"
+                  ? "bg-[#4EAB9E] text-[#121110] font-bold shadow-xs"
+                  : "text-[#8E867B] hover:text-[#DDD6C9] hover:bg-[#22201D]"
                   }`}
               >
                 <FlaskConical className="h-3.5 w-3.5" />
@@ -630,8 +630,8 @@ export function HealthView({ data, onRefresh }: HealthViewProps) {
                 {data.biomarkersData && (
                   <span
                     className={`ml-1 rounded px-1.5 py-0.2 text-[9px] font-mono font-bold ${biometricsSubTab === "biomarkers"
-                        ? "bg-[#121110] text-[#4EAB9E]"
-                        : "bg-[#162121] text-[#4EAB9E] border border-[#4EAB9E]/30"
+                      ? "bg-[#121110] text-[#4EAB9E]"
+                      : "bg-[#162121] text-[#4EAB9E] border border-[#4EAB9E]/30"
                       }`}
                   >
                     {data.biomarkersData.totalBiomarkersTracked}
@@ -643,8 +643,8 @@ export function HealthView({ data, onRefresh }: HealthViewProps) {
                 type="button"
                 onClick={() => setBiometricsSubTab("composition")}
                 className={`flex items-center gap-2 px-3.5 py-1.5 rounded-md text-xs font-semibold transition-all cursor-pointer ${biometricsSubTab === "composition"
-                    ? "bg-[#4EAB9E] text-[#121110] font-bold shadow-xs"
-                    : "text-[#8E867B] hover:text-[#DDD6C9] hover:bg-[#22201D]"
+                  ? "bg-[#4EAB9E] text-[#121110] font-bold shadow-xs"
+                  : "text-[#8E867B] hover:text-[#DDD6C9] hover:bg-[#22201D]"
                   }`}
               >
                 <Scale className="h-3.5 w-3.5" />

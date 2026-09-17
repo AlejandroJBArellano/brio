@@ -1123,8 +1123,8 @@ export function TodayViewClient({
                             {calculatedMacros.kcal
                               ? `${calculatedMacros.kcal} kcal`
                               : nutritionSummary?.kcal
-                              ? `${nutritionSummary.kcal} kcal`
-                              : "0 kcal"}
+                                ? `${nutritionSummary.kcal} kcal`
+                                : "0 kcal"}
                           </div>
                         </div>
                       </div>
@@ -1145,7 +1145,7 @@ export function TodayViewClient({
                               ? `Próxima: ${nutritionSummary.nextMealTitle}`
                               : `${calculatedMacros.kcal || nutritionSummary?.kcal
                                 ? `${calculatedMacros.kcal || nutritionSummary?.kcal} kcal hoy`
-                                : "Plan Mariana Mont"
+                                : "Plan "
                               }`}
                           </p>
                         </div>
@@ -1167,7 +1167,7 @@ export function TodayViewClient({
         </div>
       )}
 
-      {/* Modal de Equivalentes de Porciones Mariana Mont */}
+      {/* Modal de Equivalentes de Porciones  */}
       <PortionEquivalentsModal
         isOpen={Boolean(activePortionGroup)}
         onClose={() => setActivePortionGroup(null)}

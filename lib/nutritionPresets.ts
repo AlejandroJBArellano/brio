@@ -7,7 +7,7 @@ import {
 } from "./types";
 
 /**
- * Metadata and macro approximation multipliers for each food group in the Mariana Mont nutrition system.
+ * Metadata and macro approximation multipliers for each food group in the  nutrition system.
  */
 export const FOOD_GROUPS_CATALOG: Record<FoodGroupKey, FoodGroupMeta> = {
   fruits: {
@@ -132,7 +132,7 @@ export const FOOD_GROUPS_CATALOG: Record<FoodGroupKey, FoodGroupMeta> = {
 };
 
 /**
- * Default nutrition settings matching Mariana Mont's clinical plan.
+ * Default nutrition settings matching 's clinical plan.
  */
 export const DEFAULT_NUTRITION_SETTINGS: NutritionSettings = {
   dailyPortionGoals: {
@@ -190,7 +190,7 @@ export function calculateMacrosFromPortions(
 }
 
 /**
- * Reference tables and guidelines from Mariana Mont nutritionist PDF.
+ * Reference tables and guidelines from  nutritionist PDF.
  */
 export const MARIANA_MONT_KNOWLEDGE_BASE = {
   indications: [
@@ -287,7 +287,7 @@ export interface PortionEquivalentItem {
 }
 
 /**
- * Standard portion equivalencies per food group from Mariana Mont clinical plan.
+ * Standard portion equivalencies per food group from  clinical plan.
  * Used by the Portion Equivalents Modal to quickly add portions by food item.
  */
 export const MARIANA_MONT_PORTION_EQUIVALENTS: Record<FoodGroupKey, PortionEquivalentItem[]> = {
@@ -367,7 +367,7 @@ export const MARIANA_MONT_PORTION_EQUIVALENTS: Record<FoodGroupKey, PortionEquiv
 };
 
 /**
- * Complete pre-seeded recipe catalog from Mariana Mont's books:
+ * Complete pre-seeded recipe catalog from 's books:
  * - "La Luna Verde (Recetas Veganas)"
  * - "DTX Plant Based / Renueva tus Hábitos en 7 Días"
  * - "Recetario Detox Otoñal"
@@ -1029,7 +1029,7 @@ export const MARIANA_MONT_PRESET_RECIPES: NutritionRecipe[] = [
   // ==========================================
   {
     id: "rec-formula-smoothie",
-    title: "Fórmula Maestra de Smoothies Mariana Mont",
+    title: "Fórmula Maestra de Smoothies ",
     mealSlot: "smoothie",
     category: "Smoothies",
     bookSource: "DTX Plant Based",

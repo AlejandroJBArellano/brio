@@ -1,7 +1,8 @@
 "use server";
 
-import { getDb } from "@/lib/db";
 import { getWeekDateRange, toDateStr } from "@/lib/dateUtils";
+import { getDb } from "@/lib/db";
+import { awardHabiticaEvent } from "@/lib/habiticaEvents";
 import {
   DEFAULT_NUTRITION_SETTINGS,
   MARIANA_MONT_PRESET_RECIPES,
@@ -20,7 +21,6 @@ import {
   NutritionSettings,
   ScheduledMealItem,
 } from "@/lib/types";
-import { awardHabiticaEvent } from "@/lib/habiticaEvents";
 import { revalidatePath } from "next/cache";
 
 const DEFAULT_HABITS: NutritionHabitLog = {
@@ -331,9 +331,9 @@ const FOOD_GROUP_NAMES: Record<FoodGroupKey, string> = {
 };
 
 const MARIANA_MONT_HABIT_NAMES: Record<keyof NutritionHabitLog, string> = {
-  dailySalad: "Ensalada Diaria Mariana Mont",
+  dailySalad: "Ensalada Diaria ",
   noUltraProcessed: "Cero Ultraprocesados & Comida Limpia",
-  b12Weekly: "Suplemento Vitamina B12 (Mariana Mont)",
+  b12Weekly: "Suplemento Vitamina B12 ()",
   hydrationGoal: "Meta de Hidratación 2.5L",
   spirulina: "Suplemento Espirulina",
   omega3Dha: "Suplemento Omega-3 DHA",
@@ -394,8 +394,8 @@ export async function logDailyPortionsAction(
     const totalPortions = Object.values(portions).reduce((acc, v) => acc + (Number(v) || 0), 0);
     if (totalPortions > 0) {
       await awardHabiticaEvent("NUTRITION_HABIT", {
-        customTitle: "[Brio] Plan Mariana Mont: Porciones Registradas",
-        customNotes: `Registro de ${totalPortions} porciones de comida limpia del plan Mariana Mont.`,
+        customTitle: "[Brio] Plan : Porciones Registradas",
+        customNotes: `Registro de ${totalPortions} porciones de comida limpia del plan .`,
       });
     }
 
@@ -459,8 +459,8 @@ export async function quickAdjustPortionAction(
     if (delta > 0) {
       const groupLabel = FOOD_GROUP_NAMES[group] || group;
       await awardHabiticaEvent("NUTRITION_HABIT", {
-        customTitle: `[Brio] Nutrición Mariana Mont: +${delta} ${groupLabel}`,
-        customNotes: `Porción saludable registrada en el plan de Mariana Mont (${groupLabel}).`,
+        customTitle: `[Brio] Nutrición : +${delta} ${groupLabel}`,
+        customNotes: `Porción saludable registrada en el plan de  (${groupLabel}).`,
       });
     }
 
@@ -521,7 +521,7 @@ export async function toggleNutritionHabitAction(
       const habitLabel = MARIANA_MONT_HABIT_NAMES[habitKey] || habitKey;
       await awardHabiticaEvent("NUTRITION_HABIT", {
         customTitle: `[Brio] ${habitLabel}`,
-        customNotes: `Hábito cumplido del plan Mariana Mont: ${habitLabel}`,
+        customNotes: `Hábito cumplido del plan : ${habitLabel}`,
       });
     }
 
@@ -662,8 +662,8 @@ export async function toggleScheduledMealCompletedAction(
     if (newCompleted) {
       const mealTitle = meal.custom_title || `Comida (${meal.meal_slot})`;
       await awardHabiticaEvent("SCHEDULED_MEAL_COMPLETED", {
-        customTitle: `[Brio] Mariana Mont: ${mealTitle}`,
-        customNotes: `Receta o comida completada del plan clínico de Mariana Mont (${meal.meal_slot}).`,
+        customTitle: `[Brio] : ${mealTitle}`,
+        customNotes: `Receta o comida completada del plan clínico de  (${meal.meal_slot}).`,
       });
     }
 

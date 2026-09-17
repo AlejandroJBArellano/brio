@@ -72,11 +72,10 @@ export function RecipeLibraryGuide({
           <button
             type="button"
             onClick={() => setActiveTab("recipes")}
-            className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-md text-xs font-bold transition-all shrink-0 cursor-pointer ${
-              activeTab === "recipes"
+            className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-md text-xs font-bold transition-all shrink-0 cursor-pointer ${activeTab === "recipes"
                 ? "bg-[#221D16] text-[#D99B43] border border-[#D99B43]/30 shadow-xs"
                 : "text-[#8E867B] hover:text-[#DDD6C9]"
-            }`}
+              }`}
           >
             <BookOpen className="h-3.5 w-3.5" />
             <span>Recetario ({recipesCatalog.length})</span>
@@ -85,11 +84,10 @@ export function RecipeLibraryGuide({
           <button
             type="button"
             onClick={() => setActiveTab("guidelines")}
-            className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-md text-xs font-bold transition-all shrink-0 cursor-pointer ${
-              activeTab === "guidelines"
+            className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-md text-xs font-bold transition-all shrink-0 cursor-pointer ${activeTab === "guidelines"
                 ? "bg-[#221D16] text-[#D99B43] border border-[#D99B43]/30 shadow-xs"
                 : "text-[#8E867B] hover:text-[#DDD6C9]"
-            }`}
+              }`}
           >
             <ChefHat className="h-3.5 w-3.5" />
             <span>Insumos & Tips de Cocina</span>
@@ -98,11 +96,10 @@ export function RecipeLibraryGuide({
           <button
             type="button"
             onClick={() => setActiveTab("equivalencies")}
-            className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-md text-xs font-bold transition-all shrink-0 cursor-pointer ${
-              activeTab === "equivalencies"
+            className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-md text-xs font-bold transition-all shrink-0 cursor-pointer ${activeTab === "equivalencies"
                 ? "bg-[#221D16] text-[#D99B43] border border-[#D99B43]/30 shadow-xs"
                 : "text-[#8E867B] hover:text-[#DDD6C9]"
-            }`}
+              }`}
           >
             <Layers className="h-3.5 w-3.5" />
             <span>Tabla de Alimentos</span>
@@ -133,11 +130,10 @@ export function RecipeLibraryGuide({
                 key={cat.id}
                 type="button"
                 onClick={() => setSelectedCategory(cat.id)}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-bold transition-all shrink-0 cursor-pointer ${
-                  selectedCategory === cat.id
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-bold transition-all shrink-0 cursor-pointer ${selectedCategory === cat.id
                     ? "bg-[#221D16] text-[#D99B43] border-[#D99B43]/40 shadow-xs"
                     : "bg-[#121110] border-[#2A2723] text-[#8E867B] hover:text-[#DDD6C9] hover:border-[#38332D]"
-                }`}
+                  }`}
               >
                 <span>{cat.icon}</span>
                 <span>{cat.label}</span>
@@ -158,11 +154,10 @@ export function RecipeLibraryGuide({
                 key={b.id}
                 type="button"
                 onClick={() => setSelectedBook(b.id)}
-                className={`px-2.5 py-0.5 rounded-md text-[11px] font-medium transition-all cursor-pointer border ${
-                  selectedBook === b.id
+                className={`px-2.5 py-0.5 rounded-md text-[11px] font-medium transition-all cursor-pointer border ${selectedBook === b.id
                     ? "bg-[#221D16] text-[#D99B43] font-bold border-[#D99B43]/30"
                     : "text-[#8E867B] border-transparent hover:text-[#DDD6C9]"
-                }`}
+                  }`}
               >
                 {b.label}
               </button>
@@ -254,7 +249,7 @@ export function RecipeLibraryGuide({
           <div className="rounded-xl border border-[#2A2723] bg-[#181715] p-5 shadow-sm">
             <h3 className="font-serif text-sm font-bold text-[#F5F2EB] tracking-tight flex items-center gap-2 mb-4">
               <Sparkles className="h-4 w-4 text-[#7EA35A]" />
-              <span>Indicaciones Clave de Mariana Mont</span>
+              <span>Indicaciones Clave de </span>
             </h3>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -474,7 +469,7 @@ export function RecipeLibraryGuide({
             <div className="flex items-start justify-between pb-4 border-b border-[#2A2723]">
               <div>
                 <span className="text-xs font-bold text-[#D99B43] font-mono">
-                  {activeRecipeModal.bookSource || "Mariana Mont"} • {activeRecipeModal.category || activeRecipeModal.mealSlot}
+                  {activeRecipeModal.bookSource || ""} • {activeRecipeModal.category || activeRecipeModal.mealSlot}
                 </span>
                 <h3 className="font-serif text-lg font-bold text-[#F5F2EB] tracking-tight mt-0.5">
                   {activeRecipeModal.title}

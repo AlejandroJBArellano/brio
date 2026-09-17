@@ -84,7 +84,7 @@ export function NutritionView({
                 Nutrición Holística & Dietas
               </h2>
               <span className="rounded-md border border-[#7EA35A]/30 bg-[#1C2219] px-2 py-0.5 text-[10px] font-mono font-bold text-[#7EA35A]">
-                Plan Mariana Mont
+                Plan
               </span>
             </div>
             <p className="text-xs text-[#8E867B] mt-0.5 font-mono">
@@ -99,11 +99,10 @@ export function NutritionView({
             <button
               type="button"
               onClick={() => setActiveSubTab("daily")}
-              className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-md text-xs font-bold transition-all cursor-pointer ${
-                activeSubTab === "daily"
+              className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-md text-xs font-bold transition-all cursor-pointer ${activeSubTab === "daily"
                   ? "bg-[#221D16] text-[#D99B43] border border-[#D99B43]/30 shadow-xs"
                   : "text-[#8E867B] hover:text-[#DDD6C9]"
-              }`}
+                }`}
             >
               <CalendarDays className="h-3.5 w-3.5" />
               <span>Diario de Hoy</span>
@@ -112,11 +111,10 @@ export function NutritionView({
             <button
               type="button"
               onClick={() => setActiveSubTab("planner")}
-              className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-md text-xs font-bold transition-all cursor-pointer ${
-                activeSubTab === "planner"
+              className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-md text-xs font-bold transition-all cursor-pointer ${activeSubTab === "planner"
                   ? "bg-[#221D16] text-[#D99B43] border border-[#D99B43]/30 shadow-xs"
                   : "text-[#8E867B] hover:text-[#DDD6C9]"
-              }`}
+                }`}
             >
               <Calendar className="h-3.5 w-3.5" />
               <span>Planificador</span>
@@ -125,11 +123,10 @@ export function NutritionView({
             <button
               type="button"
               onClick={() => setActiveSubTab("recipes")}
-              className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-md text-xs font-bold transition-all cursor-pointer ${
-                activeSubTab === "recipes"
+              className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-md text-xs font-bold transition-all cursor-pointer ${activeSubTab === "recipes"
                   ? "bg-[#221D16] text-[#D99B43] border border-[#D99B43]/30 shadow-xs"
                   : "text-[#8E867B] hover:text-[#DDD6C9]"
-              }`}
+                }`}
             >
               <BookOpen className="h-3.5 w-3.5" />
               <span>Recetas & Guía</span>
@@ -138,11 +135,10 @@ export function NutritionView({
             <button
               type="button"
               onClick={() => setActiveSubTab("grocery")}
-              className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-md text-xs font-bold transition-all cursor-pointer ${
-                activeSubTab === "grocery"
+              className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-md text-xs font-bold transition-all cursor-pointer ${activeSubTab === "grocery"
                   ? "bg-[#221D16] text-[#D99B43] border border-[#D99B43]/30 shadow-xs"
                   : "text-[#8E867B] hover:text-[#DDD6C9]"
-              }`}
+                }`}
             >
               <ShoppingBag className="h-3.5 w-3.5" />
               <span>Lista del Súper</span>
@@ -253,11 +249,10 @@ export function NutritionView({
                   return (
                     <div
                       key={meal.id}
-                      className={`flex items-center justify-between p-3 rounded-lg border transition-all ${
-                        meal.isCompleted
+                      className={`flex items-center justify-between p-3 rounded-lg border transition-all ${meal.isCompleted
                           ? "border-[#7EA35A]/40 bg-[#1C2219] text-[#7EA35A]"
                           : "border-[#2A2723] bg-[#121110] text-[#F5F2EB]"
-                      }`}
+                        }`}
                     >
                       <div className="space-y-0.5">
                         <span className="text-xs font-bold block line-clamp-1 font-serif">{title}</span>
@@ -270,11 +265,10 @@ export function NutritionView({
                         type="button"
                         onClick={() => handleToggleMeal(meal.id)}
                         disabled={isPending}
-                        className={`flex h-6 px-2.5 items-center justify-center rounded text-xs font-bold transition-all cursor-pointer ${
-                          meal.isCompleted
+                        className={`flex h-6 px-2.5 items-center justify-center rounded text-xs font-bold transition-all cursor-pointer ${meal.isCompleted
                             ? "bg-[#7EA35A] text-[#121110] font-extrabold"
                             : "bg-[#181715] border border-[#2A2723] text-[#7EA35A] hover:bg-[#1C2219]"
-                        }`}
+                          }`}
                       >
                         {meal.isCompleted ? "Comido ✓" : "Comer"}
                       </button>

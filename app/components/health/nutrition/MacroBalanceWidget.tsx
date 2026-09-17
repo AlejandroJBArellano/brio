@@ -60,7 +60,7 @@ export function MacroBalanceWidget({ macros }: MacroBalanceWidgetProps) {
       {showInfo && (
         <div className="mt-3 p-3 rounded-lg bg-[#121110] border border-[#2A2723] text-xs text-[#DDD6C9] leading-relaxed animate-in fade-in duration-150 font-sans">
           <p>
-            💡 <strong className="text-[#F5F2EB]">Estimación Nutricional:</strong> Las calorías y gramos de proteína, carbohidratos, grasas y fibra se calculan según los factores equivalentes estándar de cada grupo del plan de la nutrióloga Mariana Mont. Te permite llevar un control aproximado sin necesidad de pesar cada gramo de comida.
+            💡 <strong className="text-[#F5F2EB]">Estimación Nutricional:</strong> Las calorías y gramos de proteína, carbohidratos, grasas y fibra se calculan según los factores equivalentes estándar de cada grupo del plan de la nutrióloga . Te permite llevar un control aproximado sin necesidad de pesar cada gramo de comida.
           </p>
         </div>
       )}
