@@ -4,7 +4,7 @@ import {
   CommandCenterProvider,
 } from "@/app/components/context/CommandCenterContext";
 import { DashboardShellClient } from "@/app/components/layout/DashboardShellClient";
-import { getCachedHabiticaDashboardData } from "@/lib/dal/habitica";
+import { getCachedDashboardData } from "@/lib/dal/tasks";
 import { ReactNode } from "react";
 
 export const dynamic = "force-dynamic";
@@ -20,16 +20,16 @@ export default async function DashboardLayout({
     return <AuthGate />;
   }
 
-  // 2. Fetch master Habitica user & tags from cached DAL
-  const habiticaData = await getCachedHabiticaDashboardData();
+  // 2. Fetch master user & tags from native tasks DAL
+  const dashboardData = await getCachedDashboardData();
 
   return (
     <CommandCenterProvider>
       <DashboardShellClient
-        user={habiticaData.user}
-        tasks={habiticaData.tasks}
-        tags={habiticaData.tags}
-        isConfigured={habiticaData.isConfigured}
+        user={dashboardData.user}
+        tasks={dashboardData.tasks}
+        tags={dashboardData.tags}
+        isConfigured={dashboardData.isConfigured}
       >
         {children}
       </DashboardShellClient>
