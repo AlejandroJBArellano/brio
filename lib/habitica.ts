@@ -123,7 +123,44 @@ interface CacheEntry<T> {
 }
 const apiCache = new Map<string, CacheEntry<unknown>>();
 const lastKnownData = new Map<string, unknown>();
-const CACHE_TTL_MS = 20000; // 20 seconds TTL
+const CACHE_TTL_MS = 60000; // 60 seconds TTL
+
+// Rate limiter state to strictly prevent Habitica 429 errors (max 30 req/min)
+const requestTimestamps: number[] = [];
+const MAX_REQUESTS_PER_MINUTE = 25; // Leave buffer below Habitica 30 req/min threshold
+const MIN_REQUEST_INTERVAL_MS = 200; // Minimum delay between consecutive outbound calls
+let lastRequestTime = 0;
+let requestQueue: Promise<void> = Promise.resolve();
+
+async function throttleRequest(): Promise<void> {
+  return new Promise((resolve) => {
+    requestQueue = requestQueue.then(async () => {
+      const now = Date.now();
+      const timeSinceLast = now - lastRequestTime;
+      if (timeSinceLast < MIN_REQUEST_INTERVAL_MS) {
+        await new Promise((r) => setTimeout(r, MIN_REQUEST_INTERVAL_MS - timeSinceLast));
+      }
+
+      while (true) {
+        const currentTime = Date.now();
+        while (requestTimestamps.length > 0 && currentTime - requestTimestamps[0] > 60000) {
+          requestTimestamps.shift();
+        }
+
+        if (requestTimestamps.length < MAX_REQUESTS_PER_MINUTE) {
+          requestTimestamps.push(currentTime);
+          lastRequestTime = currentTime;
+          break;
+        }
+
+        const waitMs = 60000 - (currentTime - requestTimestamps[0]) + 150;
+        await new Promise((r) => setTimeout(r, Math.max(waitMs, 100)));
+      }
+
+      resolve();
+    });
+  });
+}
 
 /**
  * Habitica REST API Client.
@@ -182,13 +219,16 @@ export class HabiticaClient {
     const method = (options.method || "GET").toUpperCase();
     const cacheKey = `${this.customUserId || "default"}:${endpoint}`;
 
-    // 1. Check in-memory cache for GET requests
+    // 1. Check in-memory cache for GET requests before entering rate limiter
     if (method === "GET") {
       const cached = apiCache.get(cacheKey);
       if (cached && Date.now() - cached.timestamp < CACHE_TTL_MS) {
         return cached.data as T;
       }
     }
+
+    // 2. Throttle outbound requests through sliding window queue
+    await throttleRequest();
 
     const baseUrl = this.getBaseUrl();
     const url = `${baseUrl}${endpoint.startsWith("/") ? "" : "/"}${endpoint}`;
@@ -204,20 +244,20 @@ export class HabiticaClient {
         cache: "no-store",
       });
 
-      // 2. Gracefully handle Habitica 429 Rate Limit
+      // 3. Gracefully handle Habitica 429 Rate Limit
       if (response.status === 429) {
         console.warn(`[Habitica 429 Rate Limit]: Hit on ${endpoint}. Serving cached/fallback data.`);
         if (lastKnownData.has(cacheKey)) {
           return lastKnownData.get(cacheKey) as T;
         }
-        if (endpoint.includes("/user")) {
-          return MOCK_USER as unknown as T;
-        }
-        if (endpoint.includes("/tasks/user")) {
+        if (endpoint.includes("/tasks")) {
           return MOCK_TASKS as unknown as T;
         }
         if (endpoint.includes("/tags")) {
           return [] as unknown as T;
+        }
+        if (endpoint.includes("/user")) {
+          return MOCK_USER as unknown as T;
         }
       }
 
@@ -239,7 +279,7 @@ export class HabiticaClient {
         throw new HabiticaApiError(errorMsg, response.status, json);
       }
 
-      // 3. Cache successful GET responses
+      // 4. Cache successful GET responses
       if (method === "GET") {
         apiCache.set(cacheKey, { data: json.data, timestamp: Date.now() });
         lastKnownData.set(cacheKey, json.data);
