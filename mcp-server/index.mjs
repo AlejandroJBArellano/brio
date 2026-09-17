@@ -99,7 +99,7 @@ const TOOLS = [
   {
     name: "brio_complete_task",
     description:
-      "Marks a task as completed in Brio and Habitica upon finishing implementation.",
+      "Marks a task as completed in Brio upon finishing implementation.",
     inputSchema: {
       type: "object",
       required: ["taskId"],
@@ -133,7 +133,7 @@ const TOOLS = [
   {
     name: "brio_create_task",
     description:
-      "Creates a new task in Brio/Habitica for the specified project with full markdown technical specifications and optional checklist items (used by /definir or manual task creation).",
+      "Creates a new task in Brio for the specified project with full markdown technical specifications and optional checklist items (used by /definir or manual task creation).",
     inputSchema: {
       type: "object",
       required: ["title"],
@@ -161,7 +161,7 @@ const TOOLS = [
           type: "string",
           enum: ["trivial", "easy", "medium", "hard", "urgent"],
           default: "medium",
-          description: "Task difficulty/priority in Habitica.",
+          description: "Task difficulty/priority in Brio.",
         },
         tags: {
           type: "array",
@@ -233,7 +233,7 @@ const TOOLS = [
         },
         taskId: {
           type: "string",
-          description: "Optional Habitica/Brio task ID to link this note directly to a specific task.",
+          description: "Optional task ID to link this note directly to a specific task in Brio.",
         },
         category: {
           type: "string",
@@ -285,7 +285,7 @@ const TOOLS = [
         },
         canonicalPrefix: {
           type: "string",
-          description: "Canonical prefix for Habitica tasks, e.g. '[Beca]'.",
+          description: "Canonical prefix for project tasks, e.g. '[Beca]'.",
         },
         taskPrefixes: {
           type: "array",

@@ -1,5 +1,5 @@
-import { habiticaClient } from "./habitica";
-import { getCachedHabiticaTasks } from "./dal/habitica";
+import { getDb } from "./db";
+import { getCachedTasks } from "./dal/tasks";
 import { HabiticaTask } from "./types";
 
 export interface NotionTaskItem {
@@ -231,8 +231,8 @@ export async function syncNotionTasksToHabitica(params: {
     ["Backlog", "Ready", "In Progress"].includes(t.status)
   );
 
-  // 2. Fetch existing Habitica tasks to prevent duplicates
-  const existingHabiticaTasks: HabiticaTask[] = await getCachedHabiticaTasks().catch(() => []);
+  // 2. Fetch existing tasks to prevent duplicates
+  const existingTasks: HabiticaTask[] = await getCachedTasks().catch(() => []);
 
   let createdCount = 0;
   let skippedCount = 0;
@@ -242,12 +242,14 @@ export async function syncNotionTasksToHabitica(params: {
     ? canonicalPrefix
     : `[${canonicalPrefix}]`;
 
+  const sql = getDb();
+
   for (const notionTask of activeTasks) {
     const expectedTitle = `${prefixWithBracket} ${notionTask.title}`.trim();
     const notionTag = `<!-- notion_id: ${notionTask.id} -->`;
 
-    // Check if task already exists in Habitica
-    const alreadyExists = existingHabiticaTasks.some((ht) => {
+    // Check if task already exists
+    const alreadyExists = existingTasks.some((ht) => {
       const notesMatch = ht.notes && ht.notes.includes(notionTask.id);
       const titleMatch =
         ht.text.toLowerCase().trim() === expectedTitle.toLowerCase().trim() ||
@@ -260,11 +262,11 @@ export async function syncNotionTasksToHabitica(params: {
       continue;
     }
 
-    // Determine Habitica priority
+    // Determine priority
     // 0.1 = Trivial, 1 = Easy, 1.5 = Medium, 2 = Hard
-    let habiticaPriority = 1.5;
-    if (notionTask.priority?.includes("High")) habiticaPriority = 2;
-    else if (notionTask.priority?.includes("Low")) habiticaPriority = 1;
+    let priorityNum = 1.5;
+    if (notionTask.priority?.includes("High")) priorityNum = 2;
+    else if (notionTask.priority?.includes("Low")) priorityNum = 1;
 
     const cleanId = notionTask.id.replace(/-/g, "");
     const notionUrl = `https://app.notion.com/${cleanId}`;
@@ -281,12 +283,11 @@ export async function syncNotionTasksToHabitica(params: {
       .join("\n");
 
     try {
-      await habiticaClient.createTask({
-        type: "todo",
-        text: expectedTitle,
-        priority: habiticaPriority,
-        notes: notesContent,
-      });
+      const taskId = crypto.randomUUID();
+      await sql`
+        INSERT INTO tasks (id, text, notes, type, priority, completed, created_at, updated_at)
+        VALUES (${taskId}, ${expectedTitle}, ${notesContent}, 'todo', ${priorityNum}, FALSE, NOW(), NOW());
+      `;
 
       createdCount++;
       createdTitles.push(notionTask.title);

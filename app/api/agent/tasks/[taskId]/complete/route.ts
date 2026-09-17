@@ -1,5 +1,5 @@
 import { verifyAgentAuth } from "@/lib/agentAuth";
-import { habiticaClient } from "@/lib/habitica";
+import { getDb } from "@/lib/db";
 import { revalidatePath } from "next/cache";
 import { NextResponse } from "next/server";
 
@@ -9,7 +9,7 @@ interface RouteContext {
 
 /**
  * POST /api/agent/tasks/[taskId]/complete
- * Marks a task as completed in Habitica.
+ * Marks a task as completed in PostgreSQL.
  */
 export async function POST(request: Request, context: RouteContext) {
   const auth = verifyAgentAuth(request);
@@ -20,20 +20,53 @@ export async function POST(request: Request, context: RouteContext) {
   const { taskId } = await context.params;
 
   try {
-    const result = await habiticaClient.scoreTask(taskId, "up");
+    const sql = getDb();
+    const rows = await sql`SELECT * FROM tasks WHERE id = ${taskId} LIMIT 1;`;
+    if (rows.length === 0) {
+      return NextResponse.json({ error: "Task not found" }, { status: 404 });
+    }
+    const task = rows[0];
 
-    revalidatePath("/");
+    if (task.type === "todo") {
+      await sql`
+        UPDATE tasks
+        SET completed = TRUE,
+            completed_at = NOW(),
+            updated_at = NOW()
+        WHERE id = ${taskId};
+      `;
+    } else if (task.type === "daily") {
+      const currentStreak = Number(task.streak) || 0;
+      await sql`
+        UPDATE tasks
+        SET completed = TRUE,
+            completed_at = NOW(),
+            streak = ${currentStreak + 1},
+            updated_at = NOW()
+        WHERE id = ${taskId};
+      `;
+    } else if (task.type === "habit") {
+      await sql`
+        UPDATE tasks
+        SET counter_up = counter_up + 1,
+            updated_at = NOW()
+        WHERE id = ${taskId};
+      `;
+    }
+
+    revalidatePath("/", "layout");
+    revalidatePath("/today");
+    revalidatePath("/tasks");
     revalidatePath("/projects");
 
     return NextResponse.json({
       success: true,
       completedTaskId: taskId,
-      result,
     });
   } catch (error) {
     console.error("[Agent API Complete Task Error]:", error);
     return NextResponse.json(
-      { error: "Failed to mark task as completed in Habitica." },
+      { error: "Failed to mark task as completed in PostgreSQL." },
       { status: 500 }
     );
   }

@@ -1,5 +1,6 @@
 import { resolveProject, verifyAgentAuth } from "@/lib/agentAuth";
-import { habiticaClient } from "@/lib/habitica";
+import { getCachedTasksWithCompleted } from "@/lib/dal/tasks";
+import { getDb } from "@/lib/db";
 import { getProjectKeywords, matchTasksToProject } from "@/lib/projectMatcher";
 import { HabiticaTask } from "@/lib/types";
 import { revalidatePath } from "next/cache";
@@ -16,6 +17,17 @@ const PRIORITY_MAP: Record<string, number> = {
   hard: 2,
   urgent: 2,
 };
+
+function stripEmojis(str = "") {
+  if (!str) return "";
+  return str
+    .replace(
+      /[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{1F700}-\u{1F77F}\u{1F780}-\u{1F7FF}\u{1F800}-\u{1F8FF}\u{1F900}-\u{1F9FF}\u{1FA00}-\u{1FA6F}\u{1FA70}-\u{1FAFF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}\u{2300}-\u{23FF}\u{2B50}\u{FE0F}\u{200D}\u{200C}]/gu,
+      ""
+    )
+    .replace(/\s+/g, " ")
+    .trim();
+}
 
 /**
  * GET /api/agent/projects/[identifier]/tasks
@@ -44,12 +56,8 @@ export async function GET(request: Request, context: RouteContext) {
   const statusFilter = searchParams.get("status") || "pending";
 
   try {
-    const [activeTodos, completedTodos] = await Promise.all([
-      habiticaClient.getUserTasks("todos").catch(() => []),
-      habiticaClient.getUserTasks("completedTodos").catch(() => []),
-    ]);
-    const rawTasks = [...activeTodos, ...completedTodos.map((t) => ({ ...t, completed: true }))];
-    const metrics = matchTasksToProject(project, rawTasks);
+    const allTasks = await getCachedTasksWithCompleted();
+    const metrics = matchTasksToProject(project, allTasks);
 
     let filteredTasks: HabiticaTask[] = metrics.matchedTasks;
     if (statusFilter === "pending") {
@@ -62,7 +70,6 @@ export async function GET(request: Request, context: RouteContext) {
 
     // Format tasks cleanly
     const tasks = filteredTasks.map((t) => {
-      // Strip canonical prefix for clean title
       let cleanTitle = t.text;
       if (cleanTitle.startsWith(canonicalPrefix)) {
         cleanTitle = cleanTitle.slice(canonicalPrefix.length).trim();
@@ -102,7 +109,7 @@ export async function GET(request: Request, context: RouteContext) {
   } catch (error) {
     console.error("[Agent API GET Tasks Error]:", error);
     return NextResponse.json(
-      { error: "Failed to fetch project tasks from Habitica." },
+      { error: "Failed to fetch project tasks from database." },
       { status: 500 }
     );
   }
@@ -110,7 +117,7 @@ export async function GET(request: Request, context: RouteContext) {
 
 /**
  * POST /api/agent/projects/[identifier]/tasks
- * Creates a new task in Habitica with the project's canonical prefix, markdown notes, and checklist items.
+ * Creates a new task in PostgreSQL with the project's canonical prefix, markdown notes, and checklist items.
  */
 export async function POST(request: Request, context: RouteContext) {
   const auth = verifyAgentAuth(request);
@@ -142,9 +149,12 @@ export async function POST(request: Request, context: RouteContext) {
     const { canonicalPrefix } = getProjectKeywords(project);
 
     // Inject canonical prefix if missing
-    const finalTitle = title.startsWith(canonicalPrefix)
+    const rawTitle = title.startsWith(canonicalPrefix)
       ? title
       : `${canonicalPrefix} ${title}`;
+
+    const cleanTitle = stripEmojis(rawTitle);
+    const cleanNotes = stripEmojis(body.notes || "");
 
     // Resolve priority
     let priorityNum = 1.5;
@@ -157,35 +167,65 @@ export async function POST(request: Request, context: RouteContext) {
       }
     }
 
-    // Create main task in Habitica
-    const created = await habiticaClient.createTask({
-      text: finalTitle,
-      type: "todo",
-      notes: body.notes || "",
-      priority: priorityNum,
-      tags: Array.isArray(body.tags) ? body.tags : [],
-    });
+    const sql = getDb();
+    const taskId = crypto.randomUUID();
+
+    await sql`
+      INSERT INTO tasks (
+        id, text, notes, type, priority, completed,
+        project_id, created_at, updated_at
+      ) VALUES (
+        ${taskId}, ${cleanTitle}, ${cleanNotes}, 'todo', ${priorityNum},
+        FALSE, ${project.id}, NOW(), NOW()
+      );
+    `;
 
     // Add checklist items if provided
     const checklistInputs = Array.isArray(body.checklist) ? body.checklist : [];
     const addedChecklist: Array<{ id: string; text: string; completed: boolean }> = [];
 
-    for (const item of checklistInputs) {
+    for (let i = 0; i < checklistInputs.length; i++) {
+      const item = checklistInputs[i];
       const itemText = typeof item === "string" ? item.trim() : item?.text?.trim();
       if (itemText) {
-        try {
-          const updated = await habiticaClient.createChecklistItem(created.id, itemText);
-          const newItem = (updated.checklist || []).slice(-1)[0];
-          if (newItem) {
-            addedChecklist.push({
-              id: newItem.id || "",
-              text: newItem.text,
-              completed: newItem.completed ?? false,
-            });
-          }
-        } catch (chkErr) {
-          console.warn(`[Failed to create checklist item "${itemText}"]:`, chkErr);
+        const cleanItemText = stripEmojis(itemText);
+        const chkId = crypto.randomUUID();
+        await sql`
+          INSERT INTO task_checklists (id, task_id, text, completed, order_index, created_at)
+          VALUES (${chkId}, ${taskId}, ${cleanItemText}, FALSE, ${i}, NOW());
+        `;
+        addedChecklist.push({
+          id: chkId,
+          text: cleanItemText,
+          completed: false,
+        });
+      }
+    }
+
+    // Add tags if provided
+    if (Array.isArray(body.tags) && body.tags.length > 0) {
+      for (const tagIdOrName of body.tags) {
+        const cleanTag = stripEmojis(tagIdOrName);
+        const existing = await sql`
+          SELECT id FROM tags WHERE id = ${tagIdOrName} OR name = ${cleanTag} LIMIT 1;
+        `;
+        let tagId = tagIdOrName;
+        if (existing.length === 0) {
+          tagId = crypto.randomUUID();
+          await sql`
+            INSERT INTO tags (id, name, created_at)
+            VALUES (${tagId}, ${cleanTag}, NOW())
+            ON CONFLICT (name) DO UPDATE SET name = EXCLUDED.name;
+          `;
+        } else {
+          tagId = existing[0].id;
         }
+
+        await sql`
+          INSERT INTO task_tags (task_id, tag_id)
+          VALUES (${taskId}, ${tagId})
+          ON CONFLICT (task_id, tag_id) DO NOTHING;
+        `;
       }
     }
 
@@ -196,15 +236,15 @@ export async function POST(request: Request, context: RouteContext) {
       {
         success: true,
         task: {
-          id: created.id,
+          id: taskId,
           title: title.startsWith(canonicalPrefix)
             ? title.slice(canonicalPrefix.length).trim()
             : title,
-          rawTitle: created.text,
-          completed: created.completed,
-          notes: created.notes || "",
-          priority: created.priority,
-          checklist: addedChecklist.length > 0 ? addedChecklist : created.checklist || [],
+          rawTitle: cleanTitle,
+          completed: false,
+          notes: cleanNotes,
+          priority: priorityNum,
+          checklist: addedChecklist,
         },
       },
       { status: 201 }
@@ -212,7 +252,7 @@ export async function POST(request: Request, context: RouteContext) {
   } catch (error) {
     console.error("[Agent API POST Task Error]:", error);
     return NextResponse.json(
-      { error: "Failed to create task in Habitica." },
+      { error: "Failed to create task in PostgreSQL." },
       { status: 500 }
     );
   }

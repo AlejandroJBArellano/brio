@@ -1,5 +1,5 @@
 import { verifyAgentAuth } from "@/lib/agentAuth";
-import { habiticaClient } from "@/lib/habitica";
+import { getDb } from "@/lib/db";
 import { revalidatePath } from "next/cache";
 import { NextResponse } from "next/server";
 
@@ -20,24 +20,36 @@ export async function POST(request: Request, context: RouteContext) {
   const { taskId, checklistId } = await context.params;
 
   try {
-    const updated = await habiticaClient.scoreChecklistItem(taskId, checklistId);
+    const sql = getDb();
+    const rows = await sql`
+      UPDATE task_checklists
+      SET completed = NOT completed
+      WHERE id = ${checklistId} AND task_id = ${taskId}
+      RETURNING id, text, completed;
+    `;
 
-    revalidatePath("/");
+    if (rows.length === 0) {
+      return NextResponse.json({ error: "Checklist item not found" }, { status: 404 });
+    }
+
+    const item = rows[0];
+
+    revalidatePath("/", "layout");
+    revalidatePath("/today");
+    revalidatePath("/tasks");
     revalidatePath("/projects");
-
-    const item = (updated.checklist || []).find((c) => c.id === checklistId);
 
     return NextResponse.json({
       success: true,
       taskId,
       checklistId,
-      completed: item?.completed ?? true,
+      completed: Boolean(item.completed),
       item,
     });
   } catch (error) {
     console.error("[Agent API Checklist Score Error]:", error);
     return NextResponse.json(
-      { error: "Failed to toggle checklist item in Habitica." },
+      { error: "Failed to toggle checklist item in PostgreSQL." },
       { status: 500 }
     );
   }
@@ -56,9 +68,15 @@ export async function DELETE(request: Request, context: RouteContext) {
   const { taskId, checklistId } = await context.params;
 
   try {
-    await habiticaClient.deleteChecklistItem(taskId, checklistId);
+    const sql = getDb();
+    await sql`
+      DELETE FROM task_checklists
+      WHERE id = ${checklistId} AND task_id = ${taskId};
+    `;
 
-    revalidatePath("/");
+    revalidatePath("/", "layout");
+    revalidatePath("/today");
+    revalidatePath("/tasks");
     revalidatePath("/projects");
 
     return NextResponse.json({
@@ -68,7 +86,7 @@ export async function DELETE(request: Request, context: RouteContext) {
   } catch (error) {
     console.error("[Agent API Delete Checklist Error]:", error);
     return NextResponse.json(
-      { error: "Failed to delete checklist item in Habitica." },
+      { error: "Failed to delete checklist item from PostgreSQL." },
       { status: 500 }
     );
   }
