@@ -1,17 +1,25 @@
 "use client";
 
 import {
+  deleteContextualNoteAction,
+  saveContextualNoteAction,
+} from "@/app/actions/notes";
+import {
   addProjectResourceAction,
   deleteProjectAction,
   removeProjectResourceAction,
   updateProjectDetailsAction,
   updateProjectStatusAction,
 } from "@/app/actions/projects";
+import { createSingleTaskAction } from "@/app/actions/tasks";
+import { TaskInspectorPane } from "@/app/components/TaskInspectorPane";
+import { TaskItem } from "@/app/components/TaskItem";
 import {
-  deleteContextualNoteAction,
-  saveContextualNoteAction,
-} from "@/app/actions/notes";
-import { createSingleTaskAction, toggleTaskAction } from "@/app/actions/tasks";
+  SortDirection,
+  SortField,
+  sortTasks,
+  TableHeader,
+} from "@/app/components/TaskStream";
 import { matchTasksToProject } from "@/lib/projectMatcher";
 import { soundFx } from "@/lib/soundFx";
 import {
@@ -23,10 +31,8 @@ import {
   ProjectStatus,
 } from "@/lib/types";
 import { classifyUrl, LinkCategory } from "@/lib/urlClassifier";
-import { getTaskPriorityInfo, parseTaskPrefix } from "@/lib/utils";
 import {
   ArrowLeft,
-  Check,
   Edit2,
   ExternalLink,
   FileText,
@@ -35,7 +41,10 @@ import {
   Layers,
   ListTodo,
   Plus,
+  Search,
+  Sparkles,
   Trash2,
+  X,
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -46,6 +55,15 @@ interface ProjectDetailViewProps {
   tasks?: HabiticaTask[];
   tags?: HabiticaTag[];
   initialNotes?: ContextualNote[];
+}
+
+interface ClassifiedProjectResource {
+  url: string;
+  label: string;
+  category: LinkCategory;
+  domain: string;
+  badgeStyle: string;
+  isCustom: boolean;
 }
 
 const STATUS_CONFIG: Record<
@@ -121,7 +139,11 @@ export function ProjectDetailView({
 
   // Tasks State
   const [newTaskTitle, setNewTaskTitle] = useState("");
+  const [taskSearchQuery, setTaskSearchQuery] = useState("");
   const [filterMode, setFilterMode] = useState<"pending" | "completed" | "all">("pending");
+  const [sortField, setSortField] = useState<SortField | null>(null);
+  const [sortDirection, setSortDirection] = useState<SortDirection | null>(null);
+  const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
 
   // Resources State
   const [newResourceUrl, setNewResourceUrl] = useState("");
@@ -144,17 +166,19 @@ export function ProjectDetailView({
     Array.isArray(project.taskPrefixes) ? project.taskPrefixes.join(", ") : ""
   );
 
-interface ClassifiedProjectResource {
-  url: string;
-  label: string;
-  category: LinkCategory;
-  domain: string;
-  badgeStyle: string;
-  isCustom: boolean;
-}
-
   const metrics = matchTasksToProject(project, tasks);
   const statusMeta = STATUS_CONFIG[project.status] || STATUS_CONFIG.idea;
+
+  // Tags lookup dictionary
+  const tagsMap = useMemo(() => {
+    const map: Record<string, string> = {};
+    if (_tags) {
+      for (const t of _tags) {
+        map[t.id] = t.name;
+      }
+    }
+    return map;
+  }, [_tags]);
 
   // Extract Resources (explicitly registered resources)
   const integrations = project.integrations;
@@ -180,24 +204,54 @@ interface ClassifiedProjectResource {
       .filter((r): r is ClassifiedProjectResource => Boolean(r));
   }, [integrations]);
 
-  const filteredTasks = metrics.matchedTasks.filter((t) => {
-    if (filterMode === "pending") return !t.completed;
-    if (filterMode === "completed") return t.completed;
-    return true;
-  });
-
-  const handleToggleTask = (taskId: string, isCompleted: boolean) => {
-    if (!isCompleted) {
-      soundFx.taskComplete();
+  // Handle Sort Toggle
+  const handleSort = (field: SortField) => {
+    if (sortField !== field) {
+      const initialDir: SortDirection = field === "priority" ? "desc" : "asc";
+      setSortField(field);
+      setSortDirection(initialDir);
+    } else if (sortDirection === (field === "priority" ? "desc" : "asc")) {
+      setSortDirection(field === "priority" ? "asc" : "desc");
     } else {
-      soundFx.click();
+      setSortField(null);
+      setSortDirection(null);
     }
-
-    startTransition(async () => {
-      await toggleTaskAction(taskId, "up");
-      router.refresh();
-    });
   };
+
+  // Filtered Tasks
+  const filteredTasks = useMemo(() => {
+    return metrics.matchedTasks.filter((t) => {
+      if (filterMode === "pending" && t.completed) return false;
+      if (filterMode === "completed" && !t.completed) return false;
+
+      if (taskSearchQuery.trim()) {
+        const query = taskSearchQuery.toLowerCase();
+        const matchesText = t.text.toLowerCase().includes(query);
+        const matchesNotes = t.notes?.toLowerCase().includes(query);
+        const matchesTags = t.tags?.some((tagId) => {
+          const tagName = tagsMap[tagId] || tagId;
+          return (
+            tagId.toLowerCase().includes(query) ||
+            tagName.toLowerCase().includes(query)
+          );
+        });
+        return matchesText || matchesNotes || matchesTags;
+      }
+
+      return true;
+    });
+  }, [metrics.matchedTasks, filterMode, taskSearchQuery, tagsMap]);
+
+  // Sorted Tasks
+  const sortedTasks = useMemo(() => {
+    return sortTasks(filteredTasks, sortField, sortDirection);
+  }, [filteredTasks, sortField, sortDirection]);
+
+  // Currently selected task for Inspector Pane
+  const selectedTask = useMemo(() => {
+    if (!selectedTaskId) return null;
+    return tasks.find((t) => t.id === selectedTaskId) || null;
+  }, [selectedTaskId, tasks]);
 
   const handleAddTask = (e: React.FormEvent) => {
     e.preventDefault();
@@ -505,9 +559,10 @@ interface ClassifiedProjectResource {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
         {/* Left Column (2 Cols): Tasks & Contextual Notes */}
         <div className="lg:col-span-2 space-y-6">
-          {/* Section: Habitica Tasks */}
+          {/* Section: Habitica Tasks Table (Ledger) */}
           <div className="rounded-xl border border-[#2A2723] bg-[#181715] p-5 space-y-4 shadow-sm">
-            <div className="flex items-center justify-between pb-3 border-b border-[#2A2723]">
+            {/* Header: Title, Search, and Status Tabs */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-[#2A2723]">
               <div className="flex items-center gap-2">
                 <ListTodo className="size-4 text-[#D99B43]" />
                 <h2 className="font-serif text-sm font-bold uppercase tracking-wider text-[#F5F2EB]">
@@ -515,40 +570,64 @@ interface ClassifiedProjectResource {
                 </h2>
               </div>
 
-              <div className="flex rounded-lg bg-[#121110] p-0.5 border border-[#2A2723] font-mono text-[10px]">
-                <button
-                  type="button"
-                  onClick={() => setFilterMode("pending")}
-                  className={`px-2 py-0.5 rounded transition-all cursor-pointer ${
-                    filterMode === "pending"
-                      ? "bg-[#221D16] text-[#D99B43] font-bold"
-                      : "text-[#8E867B] hover:text-[#DDD6C9]"
-                  }`}
-                >
-                  Pendientes ({metrics.pendingCount})
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setFilterMode("completed")}
-                  className={`px-2 py-0.5 rounded transition-all cursor-pointer ${
-                    filterMode === "completed"
-                      ? "bg-[#1C2219] text-[#7EA35A] font-bold"
-                      : "text-[#8E867B] hover:text-[#DDD6C9]"
-                  }`}
-                >
-                  Completadas ({metrics.completedCount})
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setFilterMode("all")}
-                  className={`px-2 py-0.5 rounded transition-all cursor-pointer ${
-                    filterMode === "all"
-                      ? "bg-[#1A1917] text-[#F5F2EB] font-bold"
-                      : "text-[#8E867B] hover:text-[#DDD6C9]"
-                  }`}
-                >
-                  Todas ({metrics.totalCount})
-                </button>
+              <div className="flex items-center gap-2 flex-wrap">
+                {/* Search Bar */}
+                <div className="relative flex-1 sm:w-44">
+                  <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 size-3 text-[#8E867B]" />
+                  <input
+                    type="text"
+                    value={taskSearchQuery}
+                    onChange={(e) => setTaskSearchQuery(e.target.value)}
+                    placeholder="Buscar tareas..."
+                    className="w-full rounded-lg border border-[#2A2723] bg-[#121110] pl-7 pr-7 py-1 text-xs text-[#F5F2EB] placeholder:text-[#8E867B] focus:border-[#D99B43] focus:outline-none transition-all font-sans"
+                  />
+                  {taskSearchQuery && (
+                    <button
+                      type="button"
+                      onClick={() => setTaskSearchQuery("")}
+                      className="absolute right-2 top-1/2 -translate-y-1/2 text-[#8E867B] hover:text-[#DDD6C9] cursor-pointer"
+                    >
+                      <X className="size-3" />
+                    </button>
+                  )}
+                </div>
+
+                {/* Status Filter Pills */}
+                <div className="flex rounded-lg bg-[#121110] p-0.5 border border-[#2A2723] font-mono text-[10px] shrink-0">
+                  <button
+                    type="button"
+                    onClick={() => setFilterMode("pending")}
+                    className={`px-2 py-0.5 rounded transition-all cursor-pointer ${
+                      filterMode === "pending"
+                        ? "bg-[#221D16] text-[#D99B43] font-bold"
+                        : "text-[#8E867B] hover:text-[#DDD6C9]"
+                    }`}
+                  >
+                    Pendientes ({metrics.pendingCount})
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setFilterMode("completed")}
+                    className={`px-2 py-0.5 rounded transition-all cursor-pointer ${
+                      filterMode === "completed"
+                        ? "bg-[#1C2219] text-[#7EA35A] font-bold"
+                        : "text-[#8E867B] hover:text-[#DDD6C9]"
+                    }`}
+                  >
+                    Completadas ({metrics.completedCount})
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setFilterMode("all")}
+                    className={`px-2 py-0.5 rounded transition-all cursor-pointer ${
+                      filterMode === "all"
+                        ? "bg-[#1A1917] text-[#F5F2EB] font-bold"
+                        : "text-[#8E867B] hover:text-[#DDD6C9]"
+                    }`}
+                  >
+                    Todas ({metrics.totalCount})
+                  </button>
+                </div>
               </div>
             </div>
 
@@ -571,63 +650,48 @@ interface ClassifiedProjectResource {
               </button>
             </form>
 
-            {/* Tasks List */}
-            <div className="space-y-2">
-              {filteredTasks.length > 0 ? (
-                filteredTasks.map((task) => {
-                  const priority = getTaskPriorityInfo(task.priority);
-                  const { cleanTitle } = parseTaskPrefix(task.text);
-
-                  return (
-                    <div
+            {/* Tasks Table */}
+            {sortedTasks.length > 0 ? (
+              <div className="rounded-xl border border-[#2A2723] bg-[#141311] overflow-hidden shadow-md">
+                <TableHeader
+                  showTypeColumn={false}
+                  sortField={sortField}
+                  sortDirection={sortDirection}
+                  onSort={handleSort}
+                />
+                <div className="divide-y divide-[#22201D]">
+                  {sortedTasks.map((task) => (
+                    <TaskItem
                       key={task.id}
-                      onClick={() => handleToggleTask(task.id, Boolean(task.completed))}
-                      className={`flex items-center justify-between p-3 rounded-lg border transition-all cursor-pointer select-none group ${
-                        task.completed
-                          ? "bg-[#141813] border-[#7EA35A]/30 text-[#8E867B]"
-                          : "bg-[#141311] border-[#2A2723] hover:border-[#3D3425] text-[#F5F2EB]"
-                      }`}
-                    >
-                      <div className="flex items-center gap-3 flex-1 min-w-0">
-                        <div
-                          className={`flex size-4.5 shrink-0 items-center justify-center rounded border transition-colors ${
-                            task.completed
-                              ? "bg-[#7EA35A] border-[#7EA35A] text-[#121110] font-bold"
-                              : "border-[#38332D] bg-[#181715] group-hover:border-[#D99B43]"
-                          }`}
-                        >
-                          {task.completed && <Check className="size-3 stroke-3" />}
-                        </div>
-
-                        <span
-                          className={`text-xs truncate ${
-                            task.completed ? "line-through text-[#8E867B]" : "text-[#F5F2EB]"
-                          }`}
-                        >
-                          {cleanTitle}
-                        </span>
-                      </div>
-
-                      <div className="flex items-center gap-2 shrink-0 ml-2">
-                        {priority && (
-                          <span
-                            className={`text-[10px] font-mono px-1.5 py-0.5 rounded border ${priority.badge}`}
-                          >
-                            {priority.label}
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                  );
-                })
-              ) : (
-                <div className="p-8 rounded-lg border border-dashed border-[#2A2723] text-center text-xs font-mono text-[#8E867B]">
-                  {filterMode === "pending"
+                      task={task}
+                      tags={_tags}
+                      tagsMap={tagsMap}
+                      isSelected={selectedTaskId === task.id}
+                      onSelect={() =>
+                        setSelectedTaskId(selectedTaskId === task.id ? null : task.id)
+                      }
+                      showTypeBadge={false}
+                    />
+                  ))}
+                </div>
+              </div>
+            ) : (
+              <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-[#2A2723] bg-[#141311] py-12 text-center">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#1C1A17] text-[#8E867B]">
+                  <Sparkles className="h-4 w-4 text-[#D99B43]" />
+                </div>
+                <h3 className="mt-2.5 font-serif text-xs font-semibold text-[#F5F2EB]">
+                  No se encontraron tareas
+                </h3>
+                <p className="mt-0.5 text-xs text-[#8E867B]">
+                  {taskSearchQuery
+                    ? "Ninguna tarea coincide con la búsqueda."
+                    : filterMode === "pending"
                     ? "No hay tareas pendientes en este proyecto."
                     : "No hay tareas registradas con este filtro."}
-                </div>
-              )}
-            </div>
+                </p>
+              </div>
+            )}
           </div>
 
           {/* Section: Contextual Notes */}
@@ -889,6 +953,23 @@ interface ClassifiedProjectResource {
           </div>
         </div>
       </div>
+
+      {/* Task Inspector Slide-over Drawer */}
+      {selectedTask && (
+        <div className="fixed inset-0 z-50 flex justify-end animate-in fade-in duration-200">
+          <div
+            onClick={() => setSelectedTaskId(null)}
+            className="fixed inset-0 bg-black/60 backdrop-blur-xs transition-opacity"
+          />
+          <div className="relative z-10 w-full max-w-lg bg-[#141311] border-l border-[#2A2723] shadow-2xl p-4 overflow-y-auto animate-in slide-in-from-right duration-200">
+            <TaskInspectorPane
+              task={selectedTask}
+              tags={_tags}
+              onClose={() => setSelectedTaskId(null)}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 }
