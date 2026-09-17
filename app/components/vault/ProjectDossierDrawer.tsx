@@ -52,6 +52,11 @@ const STATUS_CONFIG: Record<
     color: "text-[#D99B43]",
     badge: "border-[#D99B43]/30 bg-[#221D16] text-[#D99B43]",
   },
+  completed: {
+    label: "Completado",
+    color: "text-[#7EA35A]",
+    badge: "border-[#7EA35A]/40 bg-[#17241A] text-[#7EA35A]",
+  },
   launched: {
     label: "Lanzado",
     color: "text-[#7EA35A]",
@@ -266,9 +271,10 @@ export function ProjectDossierDrawer({
                 onChange={(e) => handleUpdateStatus(e.target.value as ProjectStatus)}
                 className={`text-[11px] font-mono font-bold px-2.5 py-0.5 rounded-lg border ${statusMeta.badge} bg-[#121110] focus:outline-none cursor-pointer`}
               >
-                <option value="permanent">Permanente</option>
                 <option value="in_progress">En Desarrollo</option>
+                <option value="completed">Completado</option>
                 <option value="launched">Lanzado / Prod</option>
+                <option value="permanent">Permanente</option>
                 <option value="idea">Idea</option>
                 <option value="paused">Pausado</option>
               </select>
@@ -397,9 +403,10 @@ export function ProjectDossierDrawer({
                       onChange={(e) => setEditStatus(e.target.value as ProjectStatus)}
                       className="w-full rounded-lg border border-[#2A2723] bg-[#121110] p-2 text-xs text-[#F5F2EB] focus:outline-none focus:border-[#D99B43] font-mono"
                     >
-                      <option value="permanent">Permanente</option>
                       <option value="in_progress">En Desarrollo</option>
+                      <option value="completed">Completado</option>
                       <option value="launched">Lanzado</option>
+                      <option value="permanent">Permanente</option>
                       <option value="idea">Idea</option>
                       <option value="paused">Pausado</option>
                     </select>

@@ -197,7 +197,7 @@ export async function updateProjectStatusAction(
     const sql = getDb();
 
     let projectTitle = "Proyecto";
-    if (status === "launched") {
+    if (status === "launched" || status === "completed") {
       const rows = await sql`SELECT title FROM projects WHERE id = ${id} LIMIT 1;`;
       if (rows.length > 0) {
         projectTitle = (rows[0].title as string) || projectTitle;
@@ -210,6 +210,12 @@ export async function updateProjectStatusAction(
         SET status = ${status}, progress = ${progress}, updated_at = NOW()
         WHERE id = ${id};
       `;
+    } else if (status === "completed" || status === "launched") {
+      await sql`
+        UPDATE projects
+        SET status = ${status}, progress = 100, updated_at = NOW()
+        WHERE id = ${id};
+      `;
     } else {
       await sql`
         UPDATE projects
@@ -218,10 +224,10 @@ export async function updateProjectStatusAction(
       `;
     }
 
-    if (status === "launched") {
+    if (status === "launched" || status === "completed") {
       await awardHabiticaEvent("PROJECT_COMPLETED", {
         customTitle: `Proyecto: ${projectTitle}`,
-        customNotes: `Proyecto completado y lanzado en Brio`,
+        customNotes: `Proyecto completado en Brio`,
       });
     }
 

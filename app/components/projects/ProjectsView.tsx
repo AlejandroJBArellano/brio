@@ -31,27 +31,32 @@ interface ProjectsViewProps {
 
 const STATUS_LABELS: Record<ProjectStatus, { label: string; color: string; badge: string }> = {
   permanent: {
-    label: "♾️ Permanente",
+    label: "Permanente",
     color: "border-[#4EAB9E]/40 bg-[#142321] text-[#4EAB9E]",
     badge: "text-[#4EAB9E] bg-[#142321] border-[#4EAB9E]/30",
   },
   in_progress: {
-    label: "⚡ En Desarrollo",
+    label: "En Desarrollo",
     color: "border-[#D99B43]/30 bg-[#221D16] text-[#D99B43]",
     badge: "text-[#D99B43] bg-[#221D16] border-[#D99B43]/30",
   },
+  completed: {
+    label: "Completado",
+    color: "border-[#7EA35A]/40 bg-[#17241A] text-[#7EA35A]",
+    badge: "text-[#7EA35A] bg-[#17241A] border-[#7EA35A]/30",
+  },
   launched: {
-    label: "🚀 Lanzado",
+    label: "Lanzado",
     color: "border-[#7EA35A]/30 bg-[#1C2219] text-[#7EA35A]",
     badge: "text-[#7EA35A] bg-[#1C2219] border-[#7EA35A]/30",
   },
   idea: {
-    label: "💡 Idea",
+    label: "Idea",
     color: "border-[#8E867B]/30 bg-[#1A1917] text-[#C2BAAD]",
     badge: "text-[#C2BAAD] bg-[#1A1917] border-[#8E867B]/30",
   },
   paused: {
-    label: "⏸️ Pausado",
+    label: "Pausado",
     color: "border-[#2A2723] bg-[#181715] text-[#8E867B]",
     badge: "text-[#8E867B] bg-[#181715] border-[#2A2723]",
   },
@@ -78,6 +83,7 @@ export function ProjectsView({ data, onRefresh }: ProjectsViewProps) {
     return {
       all: list.length,
       in_progress: list.filter((p) => p.status === "in_progress").length,
+      completed: list.filter((p) => p.status === "completed").length,
       launched: list.filter((p) => p.status === "launched").length,
       permanent: list.filter((p) => p.status === "permanent").length,
       idea: list.filter((p) => p.status === "idea").length,
@@ -216,8 +222,21 @@ export function ProjectsView({ data, onRefresh }: ProjectsViewProps) {
                 : "bg-[#181715] text-[#8E867B] hover:text-[#DDD6C9] border border-[#2A2723]"
             }`}
           >
-            <span>⚡ En Desarrollo</span>
+            <span>En Desarrollo</span>
             <span className="text-[10px] opacity-70">({counts.in_progress})</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setActiveFilter("completed")}
+            className={`px-3 py-1.5 rounded-lg text-xs font-mono transition-all cursor-pointer shrink-0 flex items-center gap-1.5 ${
+              activeFilter === "completed"
+                ? "bg-[#17241A] text-[#7EA35A] border border-[#7EA35A]/50 font-bold"
+                : "bg-[#181715] text-[#8E867B] hover:text-[#DDD6C9] border border-[#2A2723]"
+            }`}
+          >
+            <span>Completado</span>
+            <span className="text-[10px] opacity-70">({counts.completed})</span>
           </button>
 
           <button
@@ -229,7 +248,7 @@ export function ProjectsView({ data, onRefresh }: ProjectsViewProps) {
                 : "bg-[#181715] text-[#8E867B] hover:text-[#DDD6C9] border border-[#2A2723]"
             }`}
           >
-            <span>🚀 Lanzado</span>
+            <span>Lanzado</span>
             <span className="text-[10px] opacity-70">({counts.launched})</span>
           </button>
 
@@ -242,7 +261,7 @@ export function ProjectsView({ data, onRefresh }: ProjectsViewProps) {
                 : "bg-[#181715] text-[#8E867B] hover:text-[#DDD6C9] border border-[#2A2723]"
             }`}
           >
-            <span>♾️ Permanente</span>
+            <span>Permanente</span>
             <span className="text-[10px] opacity-70">({counts.permanent})</span>
           </button>
 
@@ -255,8 +274,21 @@ export function ProjectsView({ data, onRefresh }: ProjectsViewProps) {
                 : "bg-[#181715] text-[#8E867B] hover:text-[#DDD6C9] border border-[#2A2723]"
             }`}
           >
-            <span>💡 Idea</span>
+            <span>Idea</span>
             <span className="text-[10px] opacity-70">({counts.idea})</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setActiveFilter("paused")}
+            className={`px-3 py-1.5 rounded-lg text-xs font-mono transition-all cursor-pointer shrink-0 flex items-center gap-1.5 ${
+              activeFilter === "paused"
+                ? "bg-[#181715] text-[#8E867B] border border-[#8E867B]/50 font-bold"
+                : "bg-[#181715] text-[#8E867B] hover:text-[#DDD6C9] border border-[#2A2723]"
+            }`}
+          >
+            <span>Pausado</span>
+            <span className="text-[10px] opacity-70">({counts.paused})</span>
           </button>
         </div>
 
@@ -311,11 +343,12 @@ export function ProjectsView({ data, onRefresh }: ProjectsViewProps) {
                         }
                         className={`text-[10px] font-bold px-2 py-0.5 rounded border ${statusMeta.color} bg-[#121110] focus:outline-none cursor-pointer`}
                       >
-                        <option value="permanent">♾️ Permanente</option>
-                        <option value="in_progress">⚡ En Desarrollo</option>
-                        <option value="launched">🚀 Lanzado</option>
-                        <option value="idea">💡 Idea</option>
-                        <option value="paused">⏸️ Pausado</option>
+                        <option value="in_progress">En Desarrollo</option>
+                        <option value="completed">Completado</option>
+                        <option value="launched">Lanzado</option>
+                        <option value="permanent">Permanente</option>
+                        <option value="idea">Idea</option>
+                        <option value="paused">Pausado</option>
                       </select>
                       <span className="rounded bg-[#221D16] border border-[#3D3425] px-1.5 py-0.5 font-mono text-[9px] text-[#D99B43] font-semibold">
                         {metrics.canonicalPrefix}
@@ -472,11 +505,12 @@ export function ProjectsView({ data, onRefresh }: ProjectsViewProps) {
                   onChange={(e) => setNewStatus(e.target.value as ProjectStatus)}
                   className="w-full rounded-lg border border-[#2A2723] bg-[#121110] p-2 text-xs text-[#F5F2EB] focus:outline-none focus:border-[#D99B43] font-mono cursor-pointer"
                 >
-                  <option value="in_progress">⚡ En Desarrollo</option>
-                  <option value="idea">💡 Idea</option>
-                  <option value="launched">🚀 Lanzado</option>
-                  <option value="permanent">♾️ Permanente</option>
-                  <option value="paused">⏸️ Pausado</option>
+                  <option value="in_progress">En Desarrollo</option>
+                  <option value="completed">Completado</option>
+                  <option value="idea">Idea</option>
+                  <option value="launched">Lanzado</option>
+                  <option value="permanent">Permanente</option>
+                  <option value="paused">Pausado</option>
                 </select>
               </div>
 

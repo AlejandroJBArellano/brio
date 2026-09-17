@@ -294,7 +294,7 @@ const TOOLS = [
         },
         status: {
           type: "string",
-          enum: ["idea", "in_progress", "permanent", "paused", "launched"],
+          enum: ["idea", "in_progress", "completed", "permanent", "paused", "launched"],
           default: "in_progress",
           description: "Initial status of the project.",
         },
