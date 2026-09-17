@@ -23,7 +23,6 @@ import {
   NoteCategory,
   ProjectItem,
 } from "@/lib/types";
-import { extractAndClassifyLinks } from "@/lib/urlClassifier";
 import { parseTaskPrefix } from "@/lib/utils";
 import {
   Check,
@@ -34,7 +33,6 @@ import {
   ExternalLink,
   FileText,
   FolderGit2,
-  Globe,
   Layers,
   Lightbulb,
   ListTodo,
@@ -210,8 +208,6 @@ export function ProjectFocusCard({
         title: "Brio OS",
         description: "",
         status: "in_progress",
-        techStack: ["Next.js 15", "PostgreSQL", "Tailwind", "Habitica"],
-        repoUrl: "https://github.com/alejandro/brio",
         progress: 0,
       }
     );
@@ -258,10 +254,8 @@ export function ProjectFocusCard({
     return autoDetectedTag;
   }, [selectedTagId, tags, autoDetectedTag]);
 
-  // Tab State: 'tasks' | 'notes' | 'resources'
-  const [activeTab, setActiveTab] = useState<"tasks" | "notes" | "resources">(
-    "tasks"
-  );
+  // Tab State: 'tasks' | 'notes'
+  const [activeTab, setActiveTab] = useState<"tasks" | "notes">("tasks");
 
   // Selected Task for Drawer
   const [activeTaskForDrawer, setActiveTaskForDrawer] =
@@ -767,18 +761,6 @@ export function ProjectFocusCard({
             >
               {projectNotes.length}
             </span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setActiveTab("resources")}
-            className={`py-1 px-2.5 rounded-md font-semibold transition-all cursor-pointer flex items-center gap-1.5 ${activeTab === "resources"
-              ? "bg-[#1C2219] text-[#7EA35A] border border-[#7EA35A]/30 shadow-2xs"
-              : "text-[#8E867B] hover:text-[#DDD6C9]"
-              }`}
-          >
-            <Layers className="h-3.5 w-3.5" />
-            <span className="hidden sm:inline">Recursos</span>
           </button>
         </div>
 
@@ -1414,44 +1396,7 @@ export function ProjectFocusCard({
         </div>
       )}
 
-      {/* TAB 3: RECURSOS Y ENLACES */}
-      {activeTab === "resources" && (
-        <div className="rounded-xl border border-[#2A2723] bg-[#121110] p-5 space-y-4">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-            {(() => {
-              const classifiedLinks = extractAndClassifyLinks(
-                activeProject.repoUrl,
-                activeProject.liveUrl
-              );
 
-              return classifiedLinks.map((link, idx) => (
-                <a
-                  key={idx}
-                  href={link.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className={`flex items-center justify-between p-3.5 rounded-xl border transition-all hover:scale-101 ${link.badgeStyle}`}
-                >
-                  <div className="flex items-center gap-2.5 min-w-0">
-                    {link.category === "git" ? (
-                      <FolderGit2 className="h-4 w-4 shrink-0 text-[#DDD6C9]" />
-                    ) : (
-                      <Globe className="h-4 w-4 shrink-0 text-[#4EAB9E]" />
-                    )}
-                    <div className="truncate">
-                      <div className="text-xs font-bold font-mono">{link.label}</div>
-                      <div className="text-[10px] text-[#8E867B] font-mono truncate opacity-80">
-                        {link.url}
-                      </div>
-                    </div>
-                  </div>
-                  <ExternalLink className="h-3.5 w-3.5 shrink-0 opacity-60 ml-2" />
-                </a>
-              ));
-            })()}
-          </div>
-        </div>
-      )}
 
       {/* Expanded Note Modal */}
       {expandedNote && (

@@ -10,12 +10,10 @@ import { ProjectDossierDrawer } from "@/app/components/vault/ProjectDossierDrawe
 import { matchTasksToProject } from "@/lib/projectMatcher";
 import { soundFx } from "@/lib/soundFx";
 import { ProjectItem, ProjectStatus } from "@/lib/types";
-import { extractAndClassifyLinks } from "@/lib/urlClassifier";
 import {
   ChevronRight,
   Code2,
   FolderGit2,
-  Globe,
   ListTodo,
   Plus,
   Search,
@@ -73,10 +71,8 @@ export function ProjectsView({ data, onRefresh }: ProjectsViewProps) {
   const [newTitle, setNewTitle] = useState("");
   const [newDescription, setNewDescription] = useState("");
   const [newStatus, setNewStatus] = useState<ProjectStatus>("in_progress");
-  const [newTechStack, setNewTechStack] = useState("");
   const [newCanonicalPrefix, setNewCanonicalPrefix] = useState("");
   const [newTaskPrefixes, setNewTaskPrefixes] = useState("");
-  const [newUrls, setNewUrls] = useState<string[]>([""]);
 
   const counts = useMemo(() => {
     const list = data.projects || [];
@@ -100,9 +96,8 @@ export function ProjectsView({ data, onRefresh }: ProjectsViewProps) {
       const q = searchQuery.toLowerCase();
       const titleMatch = p.title.toLowerCase().includes(q);
       const descMatch = (p.description || "").toLowerCase().includes(q);
-      const techMatch = (p.techStack || []).some((t) => t.toLowerCase().includes(q));
 
-      return titleMatch || descMatch || techMatch;
+      return titleMatch || descMatch;
     });
   }, [data.projects, activeFilter, searchQuery]);
 
@@ -126,14 +121,6 @@ export function ProjectsView({ data, onRefresh }: ProjectsViewProps) {
     e.preventDefault();
     if (!newTitle.trim() || isPending) return;
 
-    const techArray = newTechStack
-      .split(",")
-      .map((s) => s.trim())
-      .filter(Boolean);
-
-    const validUrls = newUrls.map((u) => u.trim()).filter(Boolean);
-    const gitLinks = validUrls.filter((u) => u.includes("git") || u.includes("github"));
-    const liveLinks = validUrls.filter((u) => !u.includes("git") && !u.includes("github"));
     const prefixesArray = newTaskPrefixes
       .split(",")
       .map((s) => s.trim())
@@ -144,9 +131,6 @@ export function ProjectsView({ data, onRefresh }: ProjectsViewProps) {
         title: newTitle.trim(),
         description: newDescription.trim() || undefined,
         status: newStatus,
-        techStack: techArray,
-        repoUrl: gitLinks.length > 0 ? gitLinks.join(", ") : undefined,
-        liveUrl: liveLinks.length > 0 ? liveLinks.join(", ") : undefined,
         canonicalPrefix: newCanonicalPrefix.trim() || undefined,
         taskPrefixes: prefixesArray,
       });
@@ -155,10 +139,8 @@ export function ProjectsView({ data, onRefresh }: ProjectsViewProps) {
       setIsAddModalOpen(false);
       setNewTitle("");
       setNewDescription("");
-      setNewTechStack("");
       setNewCanonicalPrefix("");
       setNewTaskPrefixes("");
-      setNewUrls([""]);
       if (onRefresh) onRefresh();
     });
   };
@@ -174,14 +156,11 @@ export function ProjectsView({ data, onRefresh }: ProjectsViewProps) {
             </span>
             <div>
               <h1 className="font-serif text-xl sm:text-2xl font-bold text-[#F5F2EB] tracking-tight flex items-center gap-2">
-                <span>Proyectos & Código</span>
+                <span>Proyectos</span>
                 <span className="font-mono text-xs text-[#8E867B] font-normal px-2 py-0.5 rounded-full bg-[#181715] border border-[#2A2723]">
                   {counts.all}
                 </span>
               </h1>
-              <p className="text-xs text-[#8E867B] font-mono">
-                Tablero central de desarrollo, startups y arquitectura de software
-              </p>
             </div>
           </div>
         </div>
@@ -203,11 +182,10 @@ export function ProjectsView({ data, onRefresh }: ProjectsViewProps) {
           <button
             type="button"
             onClick={() => setActiveFilter("all")}
-            className={`px-3 py-1.5 rounded-lg text-xs font-mono transition-all cursor-pointer shrink-0 flex items-center gap-1.5 ${
-              activeFilter === "all"
-                ? "bg-[#221D16] text-[#D99B43] border border-[#D99B43]/50 font-bold"
-                : "bg-[#181715] text-[#8E867B] hover:text-[#DDD6C9] border border-[#2A2723]"
-            }`}
+            className={`px-3 py-1.5 rounded-lg text-xs font-mono transition-all cursor-pointer shrink-0 flex items-center gap-1.5 ${activeFilter === "all"
+              ? "bg-[#221D16] text-[#D99B43] border border-[#D99B43]/50 font-bold"
+              : "bg-[#181715] text-[#8E867B] hover:text-[#DDD6C9] border border-[#2A2723]"
+              }`}
           >
             <span>Todos</span>
             <span className="text-[10px] opacity-70">({counts.all})</span>
@@ -216,11 +194,10 @@ export function ProjectsView({ data, onRefresh }: ProjectsViewProps) {
           <button
             type="button"
             onClick={() => setActiveFilter("in_progress")}
-            className={`px-3 py-1.5 rounded-lg text-xs font-mono transition-all cursor-pointer shrink-0 flex items-center gap-1.5 ${
-              activeFilter === "in_progress"
-                ? "bg-[#221D16] text-[#D99B43] border border-[#D99B43]/50 font-bold"
-                : "bg-[#181715] text-[#8E867B] hover:text-[#DDD6C9] border border-[#2A2723]"
-            }`}
+            className={`px-3 py-1.5 rounded-lg text-xs font-mono transition-all cursor-pointer shrink-0 flex items-center gap-1.5 ${activeFilter === "in_progress"
+              ? "bg-[#221D16] text-[#D99B43] border border-[#D99B43]/50 font-bold"
+              : "bg-[#181715] text-[#8E867B] hover:text-[#DDD6C9] border border-[#2A2723]"
+              }`}
           >
             <span>En Desarrollo</span>
             <span className="text-[10px] opacity-70">({counts.in_progress})</span>
@@ -229,11 +206,10 @@ export function ProjectsView({ data, onRefresh }: ProjectsViewProps) {
           <button
             type="button"
             onClick={() => setActiveFilter("completed")}
-            className={`px-3 py-1.5 rounded-lg text-xs font-mono transition-all cursor-pointer shrink-0 flex items-center gap-1.5 ${
-              activeFilter === "completed"
-                ? "bg-[#17241A] text-[#7EA35A] border border-[#7EA35A]/50 font-bold"
-                : "bg-[#181715] text-[#8E867B] hover:text-[#DDD6C9] border border-[#2A2723]"
-            }`}
+            className={`px-3 py-1.5 rounded-lg text-xs font-mono transition-all cursor-pointer shrink-0 flex items-center gap-1.5 ${activeFilter === "completed"
+              ? "bg-[#17241A] text-[#7EA35A] border border-[#7EA35A]/50 font-bold"
+              : "bg-[#181715] text-[#8E867B] hover:text-[#DDD6C9] border border-[#2A2723]"
+              }`}
           >
             <span>Completado</span>
             <span className="text-[10px] opacity-70">({counts.completed})</span>
@@ -242,11 +218,10 @@ export function ProjectsView({ data, onRefresh }: ProjectsViewProps) {
           <button
             type="button"
             onClick={() => setActiveFilter("launched")}
-            className={`px-3 py-1.5 rounded-lg text-xs font-mono transition-all cursor-pointer shrink-0 flex items-center gap-1.5 ${
-              activeFilter === "launched"
-                ? "bg-[#1C2219] text-[#7EA35A] border border-[#7EA35A]/50 font-bold"
-                : "bg-[#181715] text-[#8E867B] hover:text-[#DDD6C9] border border-[#2A2723]"
-            }`}
+            className={`px-3 py-1.5 rounded-lg text-xs font-mono transition-all cursor-pointer shrink-0 flex items-center gap-1.5 ${activeFilter === "launched"
+              ? "bg-[#1C2219] text-[#7EA35A] border border-[#7EA35A]/50 font-bold"
+              : "bg-[#181715] text-[#8E867B] hover:text-[#DDD6C9] border border-[#2A2723]"
+              }`}
           >
             <span>Lanzado</span>
             <span className="text-[10px] opacity-70">({counts.launched})</span>
@@ -255,11 +230,10 @@ export function ProjectsView({ data, onRefresh }: ProjectsViewProps) {
           <button
             type="button"
             onClick={() => setActiveFilter("permanent")}
-            className={`px-3 py-1.5 rounded-lg text-xs font-mono transition-all cursor-pointer shrink-0 flex items-center gap-1.5 ${
-              activeFilter === "permanent"
-                ? "bg-[#142321] text-[#4EAB9E] border border-[#4EAB9E]/50 font-bold"
-                : "bg-[#181715] text-[#8E867B] hover:text-[#DDD6C9] border border-[#2A2723]"
-            }`}
+            className={`px-3 py-1.5 rounded-lg text-xs font-mono transition-all cursor-pointer shrink-0 flex items-center gap-1.5 ${activeFilter === "permanent"
+              ? "bg-[#142321] text-[#4EAB9E] border border-[#4EAB9E]/50 font-bold"
+              : "bg-[#181715] text-[#8E867B] hover:text-[#DDD6C9] border border-[#2A2723]"
+              }`}
           >
             <span>Permanente</span>
             <span className="text-[10px] opacity-70">({counts.permanent})</span>
@@ -268,11 +242,10 @@ export function ProjectsView({ data, onRefresh }: ProjectsViewProps) {
           <button
             type="button"
             onClick={() => setActiveFilter("idea")}
-            className={`px-3 py-1.5 rounded-lg text-xs font-mono transition-all cursor-pointer shrink-0 flex items-center gap-1.5 ${
-              activeFilter === "idea"
-                ? "bg-[#1A1917] text-[#C2BAAD] border border-[#8E867B]/50 font-bold"
-                : "bg-[#181715] text-[#8E867B] hover:text-[#DDD6C9] border border-[#2A2723]"
-            }`}
+            className={`px-3 py-1.5 rounded-lg text-xs font-mono transition-all cursor-pointer shrink-0 flex items-center gap-1.5 ${activeFilter === "idea"
+              ? "bg-[#1A1917] text-[#C2BAAD] border border-[#8E867B]/50 font-bold"
+              : "bg-[#181715] text-[#8E867B] hover:text-[#DDD6C9] border border-[#2A2723]"
+              }`}
           >
             <span>Idea</span>
             <span className="text-[10px] opacity-70">({counts.idea})</span>
@@ -281,11 +254,10 @@ export function ProjectsView({ data, onRefresh }: ProjectsViewProps) {
           <button
             type="button"
             onClick={() => setActiveFilter("paused")}
-            className={`px-3 py-1.5 rounded-lg text-xs font-mono transition-all cursor-pointer shrink-0 flex items-center gap-1.5 ${
-              activeFilter === "paused"
-                ? "bg-[#181715] text-[#8E867B] border border-[#8E867B]/50 font-bold"
-                : "bg-[#181715] text-[#8E867B] hover:text-[#DDD6C9] border border-[#2A2723]"
-            }`}
+            className={`px-3 py-1.5 rounded-lg text-xs font-mono transition-all cursor-pointer shrink-0 flex items-center gap-1.5 ${activeFilter === "paused"
+              ? "bg-[#181715] text-[#8E867B] border border-[#8E867B]/50 font-bold"
+              : "bg-[#181715] text-[#8E867B] hover:text-[#DDD6C9] border border-[#2A2723]"
+              }`}
           >
             <span>Pausado</span>
             <span className="text-[10px] opacity-70">({counts.paused})</span>
@@ -321,7 +293,6 @@ export function ProjectsView({ data, onRefresh }: ProjectsViewProps) {
           filteredProjects.map((proj) => {
             const statusMeta = STATUS_LABELS[proj.status] || STATUS_LABELS.idea;
             const metrics = matchTasksToProject(proj, data.tasks || []);
-            const classifiedLinks = extractAndClassifyLinks(proj.repoUrl, proj.liveUrl);
 
             return (
               <div
@@ -373,11 +344,6 @@ export function ProjectsView({ data, onRefresh }: ProjectsViewProps) {
                     >
                       {proj.title}
                     </h3>
-                    {proj.description && (
-                      <p className="text-[11px] text-[#8E867B] mt-0.5 line-clamp-1 font-sans">
-                        {proj.description}
-                      </p>
-                    )}
                   </div>
 
                   {/* Habitica Task Live Metrics */}
@@ -386,7 +352,7 @@ export function ProjectsView({ data, onRefresh }: ProjectsViewProps) {
                       <span className="text-[#8E867B] flex items-center gap-1">
                         <ListTodo className="size-2.5 text-[#D99B43]" />
                         <span>
-                          {metrics.completedCount}/{metrics.totalCount} listas
+                          {metrics.completedCount}/{metrics.totalCount} completadas
                         </span>
                       </span>
                       <span className="font-bold text-[#DDD6C9]">
@@ -400,60 +366,14 @@ export function ProjectsView({ data, onRefresh }: ProjectsViewProps) {
                       />
                     </div>
                   </div>
-
-                  {/* Tech Stack Badges */}
-                  {proj.techStack && proj.techStack.length > 0 && (
-                    <div className="flex flex-wrap items-center gap-1 pt-0.5">
-                      {proj.techStack.slice(0, 3).map((tech) => (
-                        <span
-                          key={tech}
-                          className="px-1.5 py-0.2 rounded bg-[#121110] border border-[#2A2723] text-[9px] font-mono text-[#DDD6C9] truncate max-w-28"
-                        >
-                          {tech}
-                        </span>
-                      ))}
-                      {proj.techStack.length > 3 && (
-                        <span className="px-1 py-0.2 rounded bg-[#121110] border border-[#2A2723] text-[9px] font-mono text-[#8E867B]">
-                          +{proj.techStack.length - 3}
-                        </span>
-                      )}
-                    </div>
-                  )}
                 </div>
 
-                {/* Footer Links & Open Dossier */}
-                <div
-                  className="pt-2 border-t border-[#2A2723] flex items-center justify-between text-xs font-mono"
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  <div className="flex items-center gap-2 overflow-hidden mr-2">
-                    {classifiedLinks.slice(0, 2).map((link, idx) => (
-                      <a
-                        key={idx}
-                        href={link.url}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="text-[#8E867B] hover:text-[#F5F2EB] flex items-center gap-1 truncate max-w-28 text-[10px] transition-colors"
-                        title={link.url}
-                      >
-                        {link.category === "git" ? (
-                          <Code2 className="size-3 shrink-0" />
-                        ) : (
-                          <Globe className="size-3 shrink-0 text-[#4EAB9E]" />
-                        )}
-                        <span className="truncate">{link.label}</span>
-                      </a>
-                    ))}
-                  </div>
-
-                  <button
-                    type="button"
-                    onClick={() => setSelectedProject(proj)}
-                    className="inline-flex items-center gap-1 text-[10px] font-semibold text-[#D99B43] hover:text-[#E8AF59] transition-colors cursor-pointer shrink-0 ml-auto"
-                  >
+                {/* Footer: Open Dossier */}
+                <div className="pt-2 border-t border-[#2A2723] flex items-center justify-end text-xs font-mono text-[#8E867B] group-hover:text-[#D99B43] transition-colors">
+                  <span className="flex items-center gap-1">
                     <span>Dossier</span>
-                    <ChevronRight className="size-3 stroke-[2.5]" />
-                  </button>
+                    <ChevronRight className="size-3.5" />
+                  </span>
                 </div>
               </div>
             );
@@ -527,19 +447,6 @@ export function ProjectsView({ data, onRefresh }: ProjectsViewProps) {
                 />
               </div>
 
-              <div className="space-y-1">
-                <label className="block text-xs font-mono text-[#8E867B]">
-                  Stack Tecnológico (separado por comas):
-                </label>
-                <input
-                  type="text"
-                  value={newTechStack}
-                  onChange={(e) => setNewTechStack(e.target.value)}
-                  placeholder="Next.js 15, PostgreSQL, Tailwind, AWS..."
-                  className="w-full rounded-lg border border-[#2A2723] bg-[#121110] p-2 text-xs text-[#F5F2EB] focus:outline-none focus:border-[#D99B43] font-mono"
-                />
-              </div>
-
               {/* Dynamic Prefixes for Habitica matcher */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 p-3 rounded-lg border border-[#2A2723] bg-[#100F0E]">
                 <div className="space-y-1">
@@ -566,36 +473,6 @@ export function ProjectsView({ data, onRefresh }: ProjectsViewProps) {
                     className="w-full rounded-lg border border-[#2A2723] bg-[#121110] p-2 text-xs text-[#F5F2EB] focus:outline-none focus:border-[#D99B43] font-mono"
                   />
                 </div>
-              </div>
-
-              {/* Dynamic URLs */}
-              <div className="space-y-1.5">
-                <div className="flex items-center justify-between">
-                  <label className="block text-xs font-mono text-[#8E867B]">
-                    Enlaces & Recursos:
-                  </label>
-                  <button
-                    type="button"
-                    onClick={() => setNewUrls((prev) => [...prev, ""])}
-                    className="text-[11px] font-mono text-[#D99B43] hover:underline cursor-pointer"
-                  >
-                    + Agregar otro
-                  </button>
-                </div>
-                {newUrls.map((url, idx) => (
-                  <input
-                    key={idx}
-                    type="text"
-                    value={url}
-                    onChange={(e) => {
-                      const updated = [...newUrls];
-                      updated[idx] = e.target.value;
-                      setNewUrls(updated);
-                    }}
-                    placeholder="https://github.com/..., https://mi-sitio.com..."
-                    className="w-full rounded-lg border border-[#2A2723] bg-[#121110] p-2 text-xs text-[#F5F2EB] focus:outline-none focus:border-[#D99B43] font-mono"
-                  />
-                ))}
               </div>
 
               <div className="flex justify-end gap-2 pt-3 border-t border-[#2A2723]">

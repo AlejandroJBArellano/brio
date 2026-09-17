@@ -9,18 +9,10 @@ import { createSingleTaskAction, toggleTaskAction } from "@/app/actions/tasks";
 import { soundFx } from "@/lib/soundFx";
 import { HabiticaTag, HabiticaTask, ProjectItem, ProjectStatus } from "@/lib/types";
 import { matchTasksToProject } from "@/lib/projectMatcher";
-import {
-  classifyUrl,
-  extractAndClassifyLinks,
-  partitionLinksForDb,
-} from "@/lib/urlClassifier";
 import { getTaskPriorityInfo, parseTaskPrefix } from "@/lib/utils";
 import {
   Check,
-  Code2,
   Edit2,
-  ExternalLink,
-  Globe,
   Layers,
   ListTodo,
   Plus,
@@ -97,14 +89,6 @@ export function ProjectDossierDrawer({
   const [editTitle, setEditTitle] = useState(() => project?.title || "");
   const [editDescription, setEditDescription] = useState(() => project?.description || "");
   const [editStatus, setEditStatus] = useState<ProjectStatus>(() => project?.status || "in_progress");
-  const [editTechStack, setEditTechStack] = useState(() =>
-    Array.isArray(project?.techStack) ? project.techStack.join(", ") : ""
-  );
-  const [editUrls, setEditUrls] = useState<string[]>(() => {
-    const classified = extractAndClassifyLinks(project?.repoUrl, project?.liveUrl);
-    return classified.length > 0 ? classified.map((l) => l.url) : [""];
-  });
-  const [editProgress, setEditProgress] = useState(() => project?.progress || 0);
   const [editCanonicalPrefix, setEditCanonicalPrefix] = useState(() => project?.canonicalPrefix || "");
   const [editTaskPrefixes, setEditTaskPrefixes] = useState(() =>
     Array.isArray(project?.taskPrefixes) ? project.taskPrefixes.join(", ") : ""
@@ -116,10 +100,6 @@ export function ProjectDossierDrawer({
       setEditTitle(project.title || "");
       setEditDescription(project.description || "");
       setEditStatus(project.status || "in_progress");
-      setEditTechStack(Array.isArray(project.techStack) ? project.techStack.join(", ") : "");
-      const classified = extractAndClassifyLinks(project.repoUrl, project.liveUrl);
-      setEditUrls(classified.length > 0 ? classified.map((l) => l.url) : [""]);
-      setEditProgress(project.progress || 0);
       setEditCanonicalPrefix(project.canonicalPrefix || "");
       setEditTaskPrefixes(Array.isArray(project.taskPrefixes) ? project.taskPrefixes.join(", ") : "");
       setIsConfirmingDelete(false);
@@ -187,13 +167,6 @@ export function ProjectDossierDrawer({
     e.preventDefault();
     if (!editTitle.trim() || isPending) return;
 
-    const techArray = editTechStack
-      .split(",")
-      .map((s) => s.trim())
-      .filter(Boolean);
-
-    const validUrls = editUrls.map((u) => u.trim()).filter(Boolean);
-    const { repoUrl, liveUrl } = partitionLinksForDb(validUrls);
     const prefixesArray = editTaskPrefixes
       .split(",")
       .map((s) => s.trim())
@@ -205,10 +178,7 @@ export function ProjectDossierDrawer({
         title: editTitle.trim(),
         description: editDescription.trim() || undefined,
         status: editStatus,
-        techStack: techArray,
-        repoUrl,
-        liveUrl,
-        progress: editProgress,
+        progress: metrics.progressPercent,
         canonicalPrefix: editCanonicalPrefix.trim() || undefined,
         taskPrefixes: prefixesArray,
       });
@@ -318,36 +288,7 @@ export function ProjectDossierDrawer({
             </div>
           )}
 
-          {/* Dynamic Auto-Classified Links Ribbon */}
-          {!isEditing && (
-            (() => {
-              const classifiedLinks = extractAndClassifyLinks(project.repoUrl, project.liveUrl);
-              if (classifiedLinks.length === 0) return null;
 
-              return (
-                <div className="flex flex-wrap items-center gap-2 pt-1 text-xs font-mono">
-                  {classifiedLinks.map((link, idx) => (
-                    <a
-                      key={idx}
-                      href={link.url}
-                      target="_blank"
-                      rel="noreferrer"
-                      className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md border text-xs font-mono transition-all hover:scale-102 cursor-pointer ${link.badgeStyle}`}
-                      title={link.url}
-                    >
-                      {link.category === "git" ? (
-                        <Code2 className="size-3.5" />
-                      ) : (
-                        <Globe className="size-3.5" />
-                      )}
-                      <span className="font-semibold">{link.label}</span>
-                      <ExternalLink className="size-3 opacity-60" />
-                    </a>
-                  ))}
-                </div>
-              );
-            })()
-          )}
         </div>
 
         {/* Scrollable Content */}
@@ -392,8 +333,8 @@ export function ProjectDossierDrawer({
                   />
                 </div>
 
-                {/* Status & Progress Grid */}
-                <div className="grid grid-cols-2 gap-3">
+                {/* Status & Dynamic Progress */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div className="space-y-1">
                     <label className="block text-xs font-mono text-[#8E867B]">
                       Estado:
@@ -414,32 +355,20 @@ export function ProjectDossierDrawer({
 
                   <div className="space-y-1">
                     <label className="block text-xs font-mono text-[#8E867B]">
-                      Progreso: {editProgress}%
+                      Progreso Dinámico ({metrics.completedCount}/{metrics.totalCount}):
                     </label>
-                    <input
-                      type="range"
-                      min={0}
-                      max={100}
-                      step={5}
-                      value={editProgress}
-                      onChange={(e) => setEditProgress(Number(e.target.value))}
-                      className="w-full accent-[#D99B43] h-2 bg-[#2A2723] rounded-lg cursor-pointer mt-2"
-                    />
+                    <div className="flex items-center gap-3 pt-2">
+                      <div className="relative h-2 flex-1 overflow-hidden rounded-full bg-[#121110] border border-[#2A2723]">
+                        <div
+                          className="h-full rounded-full bg-linear-to-r from-[#D99B43] to-[#4EAB9E] transition-all duration-300"
+                          style={{ width: `${metrics.progressPercent}%` }}
+                        />
+                      </div>
+                      <span className="font-mono text-xs font-bold text-[#F5F2EB]">
+                        {metrics.progressPercent}%
+                      </span>
+                    </div>
                   </div>
-                </div>
-
-                {/* Tech Stack */}
-                <div className="space-y-1">
-                  <label className="block text-xs font-mono text-[#8E867B]">
-                    Stack Tecnológico (separado por comas):
-                  </label>
-                  <input
-                    type="text"
-                    value={editTechStack}
-                    onChange={(e) => setEditTechStack(e.target.value)}
-                    placeholder="Next.js 15, PostgreSQL, Tailwind, AWS..."
-                    className="w-full rounded-lg border border-[#2A2723] bg-[#121110] p-2.5 text-xs text-[#F5F2EB] focus:outline-none focus:border-[#D99B43] font-mono"
-                  />
                 </div>
 
                 {/* Habitica Prefix & Matcher Config */}
@@ -470,65 +399,7 @@ export function ProjectDossierDrawer({
                   </div>
                 </div>
 
-                {/* Dynamic Smart Links Section */}
-                <div className="space-y-2 pt-2 border-t border-[#2A2723]">
-                  <div className="flex items-center justify-between">
-                    <label className="block text-xs font-mono text-[#8E867B] font-semibold">
-                      Enlaces & Recursos (Autoclasificación):
-                    </label>
-                    <button
-                      type="button"
-                      onClick={() => setEditUrls((prev) => [...prev, ""])}
-                      className="text-[11px] font-mono text-[#D99B43] hover:underline cursor-pointer flex items-center gap-1"
-                    >
-                      <Plus className="size-3" />
-                      <span>+ Agregar enlace</span>
-                    </button>
-                  </div>
 
-                  <div className="space-y-2">
-                    {editUrls.map((url, idx) => {
-                      const classification = url.trim() ? classifyUrl(url) : null;
-                      return (
-                        <div key={idx} className="space-y-1.5 bg-[#121110] p-2.5 rounded-lg border border-[#2A2723]">
-                          <div className="flex items-center gap-2">
-                            <input
-                              type="text"
-                              value={url}
-                              onChange={(e) => {
-                                const updated = [...editUrls];
-                                updated[idx] = e.target.value;
-                                setEditUrls(updated);
-                              }}
-                              placeholder="https://github.com/..., https://strata.us, https://figma.com/..."
-                              className="flex-1 rounded-md border border-[#2A2723] bg-[#181715] px-2.5 py-1.5 text-xs text-[#F5F2EB] focus:outline-none focus:border-[#D99B43] font-mono"
-                            />
-                            {editUrls.length > 1 && (
-                              <button
-                                type="button"
-                                onClick={() => setEditUrls(editUrls.filter((_, i) => i !== idx))}
-                                className="p-1 text-[#8E867B] hover:text-[#E05D52] transition-colors cursor-pointer"
-                                title="Eliminar enlace"
-                              >
-                                <Trash2 className="size-3.5" />
-                              </button>
-                            )}
-                          </div>
-
-                          {/* Live Auto-Classification Pill */}
-                          {classification && classification.url && (
-                            <div className="flex items-center gap-2 pt-0.5">
-                              <span className="text-[10px] text-[#8E867B] font-mono">Origen detectado:</span>
-                              <span className={`text-[10px] font-mono px-2 py-0.5 rounded border ${classification.badgeStyle}`}>
-                                {classification.label}
-                              </span>
-                            </div>
-                          )}
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
 
                 {/* Actions */}
                 <div className="flex items-center justify-between pt-3 border-t border-[#2A2723]">
@@ -612,7 +483,7 @@ export function ProjectDossierDrawer({
                     <span className="text-sm font-bold text-[#F5F2EB]">{metrics.totalCount}</span>
                   </div>
                   <div className="rounded-lg bg-[#181715] p-2 border border-[#22201D]">
-                    <span className="text-[9px] uppercase text-[#7EA35A] block">Listas</span>
+                    <span className="text-[9px] uppercase text-[#7EA35A] block">Completadas</span>
                     <span className="text-sm font-bold text-[#7EA35A]">{metrics.completedCount}</span>
                   </div>
                   <div className="rounded-lg bg-[#181715] p-2 border border-[#22201D]">
@@ -677,7 +548,7 @@ export function ProjectDossierDrawer({
                           : "text-[#8E867B] hover:text-[#DDD6C9]"
                       }`}
                     >
-                      Listas ({metrics.completedCount})
+                      Completadas ({metrics.completedCount})
                     </button>
                     <button
                       type="button"
