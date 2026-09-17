@@ -7,9 +7,6 @@ interface ProjectDbRow {
   title: string;
   description?: string;
   status: string;
-  tech_stack?: string[];
-  repo_url?: string;
-  live_url?: string;
   progress?: number | string;
   task_prefixes?: string[];
   canonical_prefix?: string;
@@ -89,9 +86,6 @@ export async function resolveProject(
       title: p.title,
       description: p.description || undefined,
       status: p.status as ProjectStatus,
-      techStack: Array.isArray(p.tech_stack) ? p.tech_stack : [],
-      repoUrl: p.repo_url || undefined,
-      liveUrl: p.live_url || undefined,
       progress: Number(p.progress) || 0,
       taskPrefixes: Array.isArray(p.task_prefixes) ? p.task_prefixes : [],
       canonicalPrefix: p.canonical_prefix || undefined,

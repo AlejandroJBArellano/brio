@@ -8,7 +8,6 @@ test("getProjectKeywords: uses custom taskPrefixes and canonicalPrefix if provid
     id: "prj-hybridge",
     title: "Hybridge Education — Carrera Ing. de Software & Servicio Social",
     status: "in_progress",
-    techStack: ["TypeScript"],
     progress: 50,
     canonicalPrefix: "[Hybridge]",
     taskPrefixes: [
@@ -33,7 +32,6 @@ test("getProjectKeywords: formats canonicalPrefix with brackets if user omitted 
     id: "prj-custom",
     title: "Mi Proyecto Secreto",
     status: "idea",
-    techStack: [],
     progress: 0,
     canonicalPrefix: "Secreto",
     taskPrefixes: ["secreto", "alpha"],
@@ -51,7 +49,6 @@ test("getProjectKeywords: falls back cleanly when no taskPrefixes or canonicalPr
     id: "prj-new",
     title: "Brio OS — Command Center",
     status: "launched",
-    techStack: ["Next.js"],
     progress: 100,
   };
 
@@ -66,7 +63,6 @@ test("matchTasksToProject: matches tasks accurately and calculates metrics", () 
     id: "prj-hybridge",
     title: "Hybridge Education",
     status: "in_progress",
-    techStack: ["TypeScript"],
     progress: 0,
     canonicalPrefix: "[Hybridge]",
     taskPrefixes: ["hybridge", "sa módulo 4", "ciberseguridad"],

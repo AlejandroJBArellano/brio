@@ -583,9 +583,6 @@ export interface ProjectItem {
   title: string;
   description?: string;
   status: ProjectStatus;
-  techStack: string[];
-  repoUrl?: string;
-  liveUrl?: string;
   progress: number;
   taskPrefixes?: string[];
   canonicalPrefix?: string;

@@ -52,22 +52,16 @@ export async function POST(request: Request) {
 
     const description = body.description || undefined;
     const status: ProjectStatus = body.status || "in_progress";
-    const techStack = Array.isArray(body.techStack) ? body.techStack : [];
     const taskPrefixes = Array.isArray(body.taskPrefixes) ? body.taskPrefixes : [];
     const canonicalPrefix = body.canonicalPrefix || (body.prefix ? `[${body.prefix.replace(/[\[\]]/g, "").trim()}]` : `[${title}]`);
-    const repoUrl = body.repoUrl || undefined;
-    const liveUrl = body.liveUrl || undefined;
     const progress = typeof body.progress === "number" ? body.progress : 0;
 
     const res = await createProjectAction({
       title,
       description,
       status,
-      techStack,
       taskPrefixes,
       canonicalPrefix,
-      repoUrl,
-      liveUrl,
       progress,
     });
 
@@ -85,11 +79,8 @@ export async function POST(request: Request) {
           title,
           description,
           status,
-          techStack,
           taskPrefixes,
           canonicalPrefix,
-          repoUrl,
-          liveUrl,
           progress,
         },
       },

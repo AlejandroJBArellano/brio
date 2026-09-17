@@ -47,9 +47,6 @@ interface ProjectDbRow {
   title: string;
   description?: string;
   status: string;
-  tech_stack?: string[];
-  repo_url?: string;
-  live_url?: string;
   progress?: number | string;
   task_prefixes?: string[];
   canonical_prefix?: string;
@@ -115,9 +112,6 @@ export async function fetchVaultDashboardDataAction(): Promise<VaultDashboardDat
     title: r.title,
     description: r.description || undefined,
     status: r.status as ProjectStatus,
-    techStack: Array.isArray(r.tech_stack) ? r.tech_stack : [],
-    repoUrl: r.repo_url || undefined,
-    liveUrl: r.live_url || undefined,
     progress: Number(r.progress) || 0,
     taskPrefixes: Array.isArray(r.task_prefixes) ? r.task_prefixes : [],
     canonicalPrefix: r.canonical_prefix || undefined,
