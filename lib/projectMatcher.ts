@@ -78,7 +78,11 @@ export function matchTasksToProject(
   const pendingCount = totalCount - completedCount;
 
   const progressPercent =
-    totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0;
+    totalCount > 0
+      ? Math.round((completedCount / totalCount) * 100)
+      : project.status === "completed" || project.status === "launched"
+      ? 100
+      : 0;
 
   return {
     matchedTasks,

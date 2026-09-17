@@ -17,6 +17,24 @@ export const getCachedHabiticaTasks = cache(
   }
 );
 
+export const getCachedHabiticaTasksWithCompleted = cache(
+  async (): Promise<HabiticaTask[]> => {
+    const [active, completed] = await Promise.all([
+      habiticaClient.getUserTasks().catch(() => []),
+      habiticaClient.getUserTasks("completedTodos").catch(() => []),
+    ]);
+
+    const taskMap = new Map<string, HabiticaTask>();
+    for (const t of active) {
+      taskMap.set(t.id, t);
+    }
+    for (const t of completed) {
+      taskMap.set(t.id, { ...t, completed: true });
+    }
+    return Array.from(taskMap.values());
+  }
+);
+
 export const getCachedHabiticaTags = cache(async (): Promise<HabiticaTag[]> => {
   return habiticaClient.getUserTags();
 });

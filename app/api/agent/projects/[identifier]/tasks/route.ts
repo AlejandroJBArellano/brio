@@ -44,7 +44,11 @@ export async function GET(request: Request, context: RouteContext) {
   const statusFilter = searchParams.get("status") || "pending";
 
   try {
-    const rawTasks = await habiticaClient.getUserTasks("todos");
+    const [activeTodos, completedTodos] = await Promise.all([
+      habiticaClient.getUserTasks("todos").catch(() => []),
+      habiticaClient.getUserTasks("completedTodos").catch(() => []),
+    ]);
+    const rawTasks = [...activeTodos, ...completedTodos.map((t) => ({ ...t, completed: true }))];
     const metrics = matchTasksToProject(project, rawTasks);
 
     let filteredTasks: HabiticaTask[] = metrics.matchedTasks;

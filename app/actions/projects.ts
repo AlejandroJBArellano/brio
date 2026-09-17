@@ -12,7 +12,7 @@ import {
   ProjectStatus,
 } from "@/lib/types";
 import { awardHabiticaEvent } from "@/lib/habiticaEvents";
-import { getCachedHabiticaTags, getCachedHabiticaTasks } from "@/lib/dal/habitica";
+import { getCachedHabiticaTags, getCachedHabiticaTasksWithCompleted } from "@/lib/dal/habitica";
 import { revalidatePath } from "next/cache";
 
 interface ProjectDbRow {
@@ -20,9 +20,6 @@ interface ProjectDbRow {
   title: string;
   description?: string;
   status: string;
-  tech_stack?: string[];
-  repo_url?: string;
-  live_url?: string;
   progress?: number | string;
   task_prefixes?: string[];
   canonical_prefix?: string;
@@ -60,7 +57,7 @@ export async function fetchProjectsPageDataAction(): Promise<ProjectsPageData> {
 
   const [projectRows, tasks, tags] = await Promise.all([
     sql`SELECT * FROM projects ORDER BY updated_at DESC;`,
-    getCachedHabiticaTasks().catch(() => []),
+    getCachedHabiticaTasksWithCompleted().catch(() => []),
     getCachedHabiticaTags().catch(() => []),
   ]);
 
@@ -69,9 +66,6 @@ export async function fetchProjectsPageDataAction(): Promise<ProjectsPageData> {
     title: p.title,
     description: p.description || undefined,
     status: p.status as ProjectStatus,
-    techStack: Array.isArray(p.tech_stack) ? p.tech_stack : [],
-    repoUrl: p.repo_url || undefined,
-    liveUrl: p.live_url || undefined,
     progress: Number(p.progress) || 0,
     taskPrefixes: Array.isArray(p.task_prefixes) ? p.task_prefixes : [],
     canonicalPrefix: p.canonical_prefix || undefined,
@@ -103,9 +97,6 @@ export async function fetchProjectsDashboardDataAction(): Promise<ProjectsDashbo
     title: p.title,
     description: p.description || undefined,
     status: p.status as ProjectStatus,
-    techStack: Array.isArray(p.tech_stack) ? p.tech_stack : [],
-    repoUrl: p.repo_url || undefined,
-    liveUrl: p.live_url || undefined,
     progress: Number(p.progress) || 0,
     taskPrefixes: Array.isArray(p.task_prefixes) ? p.task_prefixes : [],
     canonicalPrefix: p.canonical_prefix || undefined,
@@ -144,9 +135,6 @@ export async function createProjectAction(payload: {
   title: string;
   description?: string;
   status?: ProjectStatus;
-  techStack?: string[];
-  repoUrl?: string;
-  liveUrl?: string;
   progress?: number;
   taskPrefixes?: string[];
   canonicalPrefix?: string;
@@ -154,20 +142,16 @@ export async function createProjectAction(payload: {
   try {
     const sql = getDb();
     const id = `prj-${Date.now()}`;
-    const techStackJson = JSON.stringify(payload.techStack || []);
     const prefixesJson = JSON.stringify(payload.taskPrefixes || []);
 
     await sql`
       INSERT INTO projects (
-        id, title, description, status, tech_stack, repo_url, live_url, progress, task_prefixes, canonical_prefix
+        id, title, description, status, progress, task_prefixes, canonical_prefix
       ) VALUES (
         ${id}, 
         ${payload.title}, 
         ${payload.description || null}, 
         ${payload.status || "idea"}, 
-        ${techStackJson}::jsonb, 
-        ${payload.repoUrl || null}, 
-        ${payload.liveUrl || null}, 
         ${payload.progress || 0},
         ${prefixesJson}::jsonb,
         ${payload.canonicalPrefix || null}
@@ -250,16 +234,12 @@ export async function updateProjectDetailsAction(payload: {
   title: string;
   description?: string;
   status: ProjectStatus;
-  techStack?: string[];
-  repoUrl?: string;
-  liveUrl?: string;
   progress?: number;
   taskPrefixes?: string[];
   canonicalPrefix?: string;
 }): Promise<{ success: boolean; error?: string }> {
   try {
     const sql = getDb();
-    const techStackJson = JSON.stringify(payload.techStack || []);
     const prefixesJson = JSON.stringify(payload.taskPrefixes || []);
 
     await sql`
@@ -267,9 +247,6 @@ export async function updateProjectDetailsAction(payload: {
       SET title = ${payload.title},
           description = ${payload.description || null},
           status = ${payload.status},
-          tech_stack = ${techStackJson}::jsonb,
-          repo_url = ${payload.repoUrl || null},
-          live_url = ${payload.liveUrl || null},
           progress = ${payload.progress ?? 0},
           task_prefixes = ${prefixesJson}::jsonb,
           canonical_prefix = ${payload.canonicalPrefix || null},
