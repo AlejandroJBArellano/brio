@@ -335,7 +335,7 @@ export function ProjectsView({ data, onRefresh }: ProjectsViewProps) {
                             )}
                           </div>
 
-                          {/* Habitica Tasks Progress Bar */}
+                          {/* Habitica Tasks Progress */}
                           <div className="space-y-1.5 pt-1">
                             <div className="flex items-center justify-between text-[10px] font-mono">
                               <span className="text-[#8E867B] flex items-center gap-1">
@@ -344,16 +344,20 @@ export function ProjectsView({ data, onRefresh }: ProjectsViewProps) {
                                   {metrics.completedCount}/{metrics.totalCount} hechas
                                 </span>
                               </span>
-                              <span className="font-bold text-[#DDD6C9]">
-                                {metrics.progressPercent}%
-                              </span>
+                              {proj.status !== "permanent" && (
+                                <span className="font-bold text-[#DDD6C9]">
+                                  {metrics.progressPercent}%
+                                </span>
+                              )}
                             </div>
-                            <div className="relative h-1 w-full overflow-hidden rounded-full bg-[#121110] border border-[#2A2723]">
-                              <div
-                                className="h-full rounded-full bg-linear-to-r from-[#D99B43] to-[#4EAB9E] transition-all duration-300"
-                                style={{ width: `${metrics.progressPercent}%` }}
-                              />
-                            </div>
+                            {proj.status !== "permanent" && (
+                              <div className="relative h-1 w-full overflow-hidden rounded-full bg-[#121110] border border-[#2A2723]">
+                                <div
+                                  className="h-full rounded-full bg-linear-to-r from-[#D99B43] to-[#4EAB9E] transition-all duration-300"
+                                  style={{ width: `${metrics.progressPercent}%` }}
+                                />
+                              </div>
+                            )}
                           </div>
                         </Link>
                       );
@@ -433,16 +437,20 @@ export function ProjectsView({ data, onRefresh }: ProjectsViewProps) {
                         {metrics.completedCount}/{metrics.totalCount} hechas
                       </span>
                     </span>
-                    <span className="font-bold text-[#DDD6C9]">
-                      {metrics.progressPercent}%
-                    </span>
+                    {proj.status !== "permanent" && (
+                      <span className="font-bold text-[#DDD6C9]">
+                        {metrics.progressPercent}%
+                      </span>
+                    )}
                   </div>
-                  <div className="relative h-1 w-full overflow-hidden rounded-full bg-[#121110] border border-[#2A2723]">
-                    <div
-                      className="h-full rounded-full bg-linear-to-r from-[#D99B43] to-[#4EAB9E] transition-all duration-500"
-                      style={{ width: `${metrics.progressPercent}%` }}
-                    />
-                  </div>
+                  {proj.status !== "permanent" && (
+                    <div className="relative h-1 w-full overflow-hidden rounded-full bg-[#121110] border border-[#2A2723]">
+                      <div
+                        className="h-full rounded-full bg-linear-to-r from-[#D99B43] to-[#4EAB9E] transition-all duration-500"
+                        style={{ width: `${metrics.progressPercent}%` }}
+                      />
+                    </div>
+                  )}
                 </div>
               </Link>
             );

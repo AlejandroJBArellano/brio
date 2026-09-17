@@ -397,13 +397,17 @@ interface ClassifiedProjectResource {
 
             {/* Quick Metrics Badge */}
             <div className="flex items-center gap-3 bg-[#181715] border border-[#2A2723] rounded-xl p-3 shrink-0">
-              <div className="text-center font-mono px-2">
-                <span className="text-[10px] uppercase text-[#8E867B] block">Progreso</span>
-                <span className="text-base font-bold text-[#D99B43]">
-                  {metrics.progressPercent}%
-                </span>
-              </div>
-              <div className="h-7 w-px bg-[#2A2723]" />
+              {project.status !== "permanent" && (
+                <>
+                  <div className="text-center font-mono px-2">
+                    <span className="text-[10px] uppercase text-[#8E867B] block">Progreso</span>
+                    <span className="text-base font-bold text-[#D99B43]">
+                      {metrics.progressPercent}%
+                    </span>
+                  </div>
+                  <div className="h-7 w-px bg-[#2A2723]" />
+                </>
+              )}
               <div className="text-center font-mono px-2">
                 <span className="text-[10px] uppercase text-[#8E867B] block">Tareas</span>
                 <span className="text-base font-bold text-[#F5F2EB]">
@@ -859,12 +863,14 @@ interface ClassifiedProjectResource {
               </h3>
             </div>
 
-            <div className="h-2 w-full rounded-full bg-[#121110] overflow-hidden border border-[#2A2723]">
-              <div
-                className="h-full rounded-full bg-linear-to-r from-[#D99B43] to-[#4EAB9E] transition-all duration-300"
-                style={{ width: `${metrics.progressPercent}%` }}
-              />
-            </div>
+            {project.status !== "permanent" && (
+              <div className="h-2 w-full rounded-full bg-[#121110] overflow-hidden border border-[#2A2723]">
+                <div
+                  className="h-full rounded-full bg-linear-to-r from-[#D99B43] to-[#4EAB9E] transition-all duration-300"
+                  style={{ width: `${metrics.progressPercent}%` }}
+                />
+              </div>
+            )}
 
             <div className="grid grid-cols-3 gap-2 pt-1 text-center font-mono">
               <div className="rounded-lg bg-[#141311] p-2 border border-[#22201D]">
