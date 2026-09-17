@@ -33,7 +33,7 @@ const EVENT_TEMPLATES: Record<HabiticaEventType, EventTemplate> = {
   WORKOUT_COMPLETED: {
     type: "habit",
     text: "[Brio] Entrenamiento / Ejercicio",
-    notes: "Sesión de fuerza (Hevy) o entrenamiento deportivo completado.",
+    notes: "Sesión de fuerza o entrenamiento deportivo completado.",
     priority: 2,
     up: true,
     down: false,

@@ -428,45 +428,104 @@ export interface BodyCompositionLog {
   createdAt?: string;
 }
 
-export interface HevySet {
+export type WorkoutSetType = "normal" | "warmup" | "failure" | "drop";
+
+export interface WorkoutSet {
   index: number;
-  type: "normal" | "warmup" | "failure" | "drop" | string;
+  type: WorkoutSetType;
   weightKg?: number | null;
   reps?: number | null;
-  distanceMeters?: number | null;
-  durationSeconds?: number | null;
   rpe?: number | null;
+  completed: boolean;
+  isPr?: boolean;
+  prType?: "weight" | "1rm" | "volume";
+  prevWeightKg?: number | null;
+  prevReps?: number | null;
 }
 
-export interface HevyExercise {
+export interface WorkoutExercise {
   index: number;
+  exerciseId: string;
   title: string;
+  muscleGroup: MuscleGroupId;
   notes?: string | null;
-  exerciseTemplateId?: string | null;
-  supersetId?: string | null;
-  sets: HevySet[];
+  targetRestSeconds?: number;
+  sets: WorkoutSet[];
 }
 
-export interface HevyWorkout {
+export interface PRRecord {
+  exerciseTitle: string;
+  type: "weight" | "1rm" | "volume";
+  value: number;
+  prevValue?: number;
+  unit: string;
+  date: string;
+}
+
+export interface WorkoutSession {
   id: string;
   title: string;
   description?: string;
+  routineId?: string | null;
+  status: "in_progress" | "completed" | "discarded";
   startTime: string;
-  endTime: string;
+  endTime?: string | null;
   date: string;
   durationSeconds: number;
   totalVolumeKg: number;
   exercisesCount: number;
   setsCount: number;
-  exercises: HevyExercise[];
+  exercises: WorkoutExercise[];
+  prsAchieved?: PRRecord[];
   createdAt?: string;
   updatedAt?: string;
 }
 
-export interface HevyStats {
-  totalWorkouts: number;
-  totalVolumeKg: number;
-  lastSyncedAt?: string;
+export interface WorkoutRoutineExercise {
+  exerciseId: string;
+  title: string;
+  muscleGroup: MuscleGroupId;
+  targetSets: number;
+  targetReps?: string;
+  targetWeightKg?: number;
+  targetRpe?: number;
+  targetRestSeconds?: number;
+  notes?: string;
+}
+
+export interface WorkoutRoutine {
+  id: string;
+  title: string;
+  description?: string;
+  exercises: WorkoutRoutineExercise[];
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export type EquipmentType =
+  | "barbell"
+  | "dumbbell"
+  | "machine"
+  | "cable"
+  | "bodyweight"
+  | "smith_machine"
+  | "kettlebell"
+  | "other";
+
+export interface ExerciseCatalogItem {
+  id: string;
+  title: string;
+  muscleGroup: MuscleGroupId;
+  secondaryMuscles?: MuscleGroupId[];
+  equipmentType: EquipmentType;
+  notes?: string | null;
+  isCustom: boolean;
+  maxWeightKg?: number;
+  maxEstimated1Rm?: number;
+  lastTrainedAt?: string;
+  totalSessionsCount?: number;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export type MuscleGroupId =
@@ -511,7 +570,6 @@ export interface MuscleRecoverySummary {
   suggestedFocusToday: string[];
 }
 
-
 export interface NutritionSummary {
   kcal: number;
   proteinGrams: number;
@@ -541,8 +599,15 @@ export interface DailyHealthData {
 }
 
 export interface TrainingHealthData {
-  recentHevyWorkouts: HevyWorkout[];
-  hevyStats: HevyStats;
+  activeSession?: WorkoutSession | null;
+  recentWorkouts: WorkoutSession[];
+  routines: WorkoutRoutine[];
+  exercises: ExerciseCatalogItem[];
+  stats: {
+    totalWorkouts: number;
+    totalVolumeKg: number;
+    lastSyncedAt?: string;
+  };
   workoutStreak: number;
   weeklyWorkoutsCount: number;
 }
@@ -565,8 +630,12 @@ export interface HealthDashboardData {
   bodyCompositionLogs?: BodyCompositionLog[];
   latestBodyComposition?: BodyCompositionLog;
   previousBodyComposition?: BodyCompositionLog;
-  recentHevyWorkouts?: HevyWorkout[];
-  hevyStats?: HevyStats;
+  recentWorkouts?: WorkoutSession[];
+  workoutStats?: {
+    totalWorkouts: number;
+    totalVolumeKg: number;
+    lastSyncedAt?: string;
+  };
   nutritionData?: NutritionDashboardData;
   nutritionSummary?: NutritionSummary;
   biomarkersData?: BiomarkersDashboardData;
@@ -586,7 +655,7 @@ export interface ProjectItem {
   progress: number;
   taskPrefixes?: string[];
   canonicalPrefix?: string;
-  integrations?: Record<string, any>;
+  integrations?: Record<string, unknown>;
   createdAt?: string;
 }
 
@@ -935,7 +1004,7 @@ export interface BiomarkersDashboardData {
 export type HormonalPhaseId =
   | "wake_sunlight"      // 07:30 - 08:30: Despertar & Luz Solar
   | "morning_deep_work"  // 08:30 - 12:00: Pico Testosterona / Deep Work
-  | "gym_power"          // 12:00 - 14:00: Gym & Fuerza (Hevy)
+  | "gym_power"          // 12:00 - 14:00: Gym & Fuerza
   | "anabolic_lunch"     // 14:00 - 15:00: Almuerzo Post-Gym Anabólico
   | "afternoon_flow"     // 15:00 - 19:00: Bloque Laboral 2 / Proyectos
   | "evening_hard_stop"  // 19:00 - 21:30: Hard Stop 7PM & Dim Light / Relax

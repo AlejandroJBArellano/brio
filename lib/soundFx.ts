@@ -222,6 +222,66 @@ class SoundFxEngine {
   }
 
   /**
+   * Gym Rest Timer countdown finished alarm (clear dual harmonic ping).
+   */
+  public workoutRestFinished() {
+    if (this.isMuted) return;
+    const ctx = this.initContext();
+    if (!ctx) return;
+
+    const now = ctx.currentTime;
+    // Dual energetic beep (880Hz A5 -> 1174.66Hz D6)
+    [880, 1174.66].forEach((freq, idx) => {
+      const startTime = now + idx * 0.15;
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+
+      osc.type = "sine";
+      osc.frequency.setValueAtTime(freq, startTime);
+
+      gain.gain.setValueAtTime(0.01, startTime);
+      gain.gain.linearRampToValueAtTime(0.25, startTime + 0.02);
+      gain.gain.exponentialRampToValueAtTime(0.001, startTime + 0.25);
+
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+
+      osc.start(startTime);
+      osc.stop(startTime + 0.28);
+    });
+  }
+
+  /**
+   * PR (Personal Record) achieved celebration sound (bright ascending chord).
+   */
+  public prAchieved() {
+    if (this.isMuted) return;
+    const ctx = this.initContext();
+    if (!ctx) return;
+
+    const now = ctx.currentTime;
+    const notes = [587.33, 739.99, 880.0, 1174.66]; // D5, F#5, A5, D6
+    notes.forEach((freq, idx) => {
+      const startTime = now + idx * 0.07;
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+
+      osc.type = "triangle";
+      osc.frequency.setValueAtTime(freq, startTime);
+
+      gain.gain.setValueAtTime(0.01, startTime);
+      gain.gain.linearRampToValueAtTime(0.2, startTime + 0.02);
+      gain.gain.exponentialRampToValueAtTime(0.001, startTime + 0.35);
+
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+
+      osc.start(startTime);
+      osc.stop(startTime + 0.38);
+    });
+  }
+
+  /**
    * Subtle tactile click for general interactions.
    */
   public click() {
