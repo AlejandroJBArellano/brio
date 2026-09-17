@@ -29,127 +29,11 @@ interface NeonSql {
 }
 
 /**
- * Ensures all required workout tables and indexes exist in Neon DB.
- * Automatically seeds the exercise catalog from historical workouts if empty.
- */
-export async function ensureWorkoutTables(sql: NeonSql) {
-  // 1. Table for custom user workout routines
-  await sql`
-    CREATE TABLE IF NOT EXISTS workout_routines (
-      id TEXT PRIMARY KEY,
-      title TEXT NOT NULL,
-      description TEXT,
-      exercises JSONB NOT NULL DEFAULT '[]'::jsonb,
-      created_at TIMESTAMPTZ DEFAULT NOW(),
-      updated_at TIMESTAMPTZ DEFAULT NOW()
-    );
-  `;
-
-  // 2. Table for exercise catalog
-  await sql`
-    CREATE TABLE IF NOT EXISTS exercise_catalog (
-      id TEXT PRIMARY KEY,
-      title TEXT NOT NULL UNIQUE,
-      muscle_group TEXT NOT NULL,
-      secondary_muscles JSONB DEFAULT '[]'::jsonb,
-      equipment_type TEXT NOT NULL DEFAULT 'other',
-      notes TEXT,
-      is_custom BOOLEAN DEFAULT false,
-      max_weight_kg FLOAT,
-      max_estimated_1rm FLOAT,
-      last_trained_at TEXT,
-      total_sessions_count INT DEFAULT 0,
-      created_at TIMESTAMPTZ DEFAULT NOW(),
-      updated_at TIMESTAMPTZ DEFAULT NOW()
-    );
-  `;
-
-  // 3. Table for workout sessions (live tracking & completed workouts)
-  await sql`
-    CREATE TABLE IF NOT EXISTS workout_sessions (
-      id TEXT PRIMARY KEY,
-      title TEXT NOT NULL,
-      description TEXT,
-      routine_id TEXT REFERENCES workout_routines(id) ON DELETE SET NULL,
-      status TEXT NOT NULL DEFAULT 'completed',
-      start_time TIMESTAMPTZ NOT NULL,
-      end_time TIMESTAMPTZ,
-      date TEXT NOT NULL,
-      duration_seconds INT NOT NULL DEFAULT 0,
-      total_volume_kg INT NOT NULL DEFAULT 0,
-      exercises_count INT NOT NULL DEFAULT 0,
-      sets_count INT NOT NULL DEFAULT 0,
-      exercises JSONB NOT NULL DEFAULT '[]'::jsonb,
-      prs_achieved JSONB DEFAULT '[]'::jsonb,
-      created_at TIMESTAMPTZ DEFAULT NOW(),
-      updated_at TIMESTAMPTZ DEFAULT NOW()
-    );
-  `;
-
-  // Indexes for high performance querying
-  await sql`CREATE INDEX IF NOT EXISTS idx_workout_sessions_status ON workout_sessions(status);`;
-  await sql`CREATE INDEX IF NOT EXISTS idx_workout_sessions_date ON workout_sessions(date DESC, start_time DESC);`;
-  await sql`CREATE INDEX IF NOT EXISTS idx_exercise_catalog_muscle ON exercise_catalog(muscle_group);`;
-
-  // Seed exercise_catalog from historical workouts if empty
-  const countRes = (await sql`SELECT COUNT(*)::int as count FROM exercise_catalog;`) as { count: number }[];
-  if (countRes[0]?.count === 0) {
-    try {
-      const historyRows = (await sql`SELECT * FROM workout_sessions WHERE status = 'completed' ORDER BY date DESC LIMIT 100;`) as Record<string, unknown>[];
-      if (historyRows.length > 0) {
-        const parsedSessions: WorkoutSession[] = historyRows.map((r) => ({
-          id: String(r.id),
-          title: String(r.title),
-          status: "completed",
-          startTime: String(r.start_time),
-          endTime: r.end_time ? String(r.end_time) : null,
-          date: String(r.date),
-          durationSeconds: Number(r.duration_seconds || 0),
-          totalVolumeKg: Number(r.total_volume_kg || 0),
-          exercisesCount: Number(r.exercises_count || 0),
-          setsCount: Number(r.sets_count || 0),
-          exercises: Array.isArray(r.exercises) ? (r.exercises as WorkoutExercise[]) : [],
-        }));
-
-        const seededCatalog = extractCatalogFromWorkouts(parsedSessions);
-        for (const item of seededCatalog) {
-          await sql`
-            INSERT INTO exercise_catalog (
-              id, title, muscle_group, secondary_muscles, equipment_type,
-              notes, is_custom, max_weight_kg, max_estimated_1rm,
-              last_trained_at, total_sessions_count, created_at, updated_at
-            ) VALUES (
-              ${item.id},
-              ${item.title},
-              ${item.muscleGroup},
-              ${JSON.stringify(item.secondaryMuscles || [])}::jsonb,
-              ${item.equipmentType},
-              ${item.notes || null},
-              ${item.isCustom},
-              ${item.maxWeightKg || null},
-              ${item.maxEstimated1Rm || null},
-              ${item.lastTrainedAt || null},
-              ${item.totalSessionsCount || 0},
-              NOW(),
-              NOW()
-            )
-            ON CONFLICT (id) DO NOTHING;
-          `;
-        }
-      }
-    } catch {
-      // Silently continue if tables were just initialized
-    }
-  }
-}
-
-/**
  * Server Action: Fetches the current active in-progress workout session if one exists.
  */
 export async function fetchActiveWorkoutSessionAction(): Promise<WorkoutSession | null> {
   try {
     const sql = getDb();
-    await ensureWorkoutTables(sql);
 
     const rows = (await sql`
       SELECT * FROM workout_sessions 
@@ -194,7 +78,6 @@ export async function startWorkoutSessionAction(params: {
 }): Promise<{ success: boolean; session?: WorkoutSession; error?: string }> {
   try {
     const sql = getDb();
-    await ensureWorkoutTables(sql);
 
     // Cancel any existing dangling in-progress session
     await sql`
@@ -360,7 +243,6 @@ export async function finishWorkoutSessionAction(params: {
 }> {
   try {
     const sql = getDb();
-    await ensureWorkoutTables(sql);
 
     const now = new Date();
     const history = await fetchAllHistoricalWorkouts(sql);
@@ -530,7 +412,6 @@ export async function deleteWorkoutSessionAction(params: {
 export async function fetchRoutinesAction(): Promise<WorkoutRoutine[]> {
   try {
     const sql = getDb();
-    await ensureWorkoutTables(sql);
 
     const rows = (await sql`
       SELECT * FROM workout_routines ORDER BY created_at DESC;
@@ -558,7 +439,6 @@ export async function saveRoutineAction(
 ): Promise<{ success: boolean; error?: string }> {
   try {
     const sql = getDb();
-    await ensureWorkoutTables(sql);
 
     const routineId = routine.id || `routine-${Date.now()}`;
 
@@ -619,7 +499,6 @@ export async function fetchExerciseCatalogAction(params?: {
 }): Promise<ExerciseCatalogItem[]> {
   try {
     const sql = getDb();
-    await ensureWorkoutTables(sql);
 
     const muscle = params?.muscleGroup && params.muscleGroup !== "all" ? params.muscleGroup : null;
     const search = params?.query?.trim() ? `%${params.query.trim().toLowerCase()}%` : null;
@@ -664,7 +543,6 @@ export async function createCustomExerciseAction(params: {
 }): Promise<{ success: boolean; exercise?: ExerciseCatalogItem; error?: string }> {
   try {
     const sql = getDb();
-    await ensureWorkoutTables(sql);
 
     const title = params.title.trim();
     if (!title) throw new Error("El título del ejercicio es requerido");
@@ -723,7 +601,6 @@ export async function fetchWorkoutHistoryAction(params?: {
 }): Promise<{ workouts: WorkoutSession[]; totalCount: number }> {
   try {
     const sql = getDb();
-    await ensureWorkoutTables(sql);
 
     const limit = params?.limit || 20;
     const offset = ((params?.page || 1) - 1) * limit;

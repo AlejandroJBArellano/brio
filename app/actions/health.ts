@@ -27,6 +27,12 @@ import { revalidatePath } from "next/cache";
 import { fetchNutritionDashboardDataAction } from "./nutrition";
 import { getTodayDateStr, toDateStr } from "@/lib/dateUtils";
 import { awardHabiticaEvent } from "@/lib/habiticaEvents";
+import {
+  fetchActiveWorkoutSessionAction,
+  fetchExerciseCatalogAction,
+  fetchRoutinesAction,
+  fetchWorkoutHistoryAction,
+} from "./workouts";
 
 interface LabTestReportDbRow {
   id: string;
@@ -350,7 +356,7 @@ export async function fetchDailyHealthDataAction(): Promise<DailyHealthData> {
     getSupplementsCatalog(sql),
     sql`SELECT * FROM health_logs WHERE date = ${todayStr} LIMIT 1;`,
     sql`SELECT * FROM health_logs ORDER BY date DESC LIMIT 14;`,
-    sql`SELECT title, start_time, date FROM workout_sessions WHERE status = 'completed' ORDER BY date DESC, start_time DESC LIMIT 1;`,
+    sql`SELECT title, start_time, date FROM workout_sessions WHERE status = 'completed' ORDER BY date DESC, start_time DESC LIMIT 1;`.catch(() => []),
     fetchNutritionDashboardDataAction(todayStr).catch(() => null),
   ]);
 
@@ -497,17 +503,8 @@ export async function fetchDailyHealthDataAction(): Promise<DailyHealthData> {
   };
 }
 
-import {
-  ensureWorkoutTables,
-  fetchActiveWorkoutSessionAction,
-  fetchExerciseCatalogAction,
-  fetchRoutinesAction,
-  fetchWorkoutHistoryAction,
-} from "./workouts";
-
 export async function fetchTrainingHealthDataAction(): Promise<TrainingHealthData> {
   const sql = getDb();
-  await ensureWorkoutTables(sql);
 
   const [
     recentRows,
@@ -518,7 +515,7 @@ export async function fetchTrainingHealthDataAction(): Promise<TrainingHealthDat
     historyRes,
   ] = await Promise.all([
     sql`SELECT * FROM health_logs ORDER BY date DESC LIMIT 14;`,
-    sql`SELECT COUNT(*)::int as count, COALESCE(SUM(total_volume_kg), 0)::float as volume, MAX(created_at) as last_sync FROM workout_sessions WHERE status = 'completed';`,
+    sql`SELECT COUNT(*)::int as count, COALESCE(SUM(total_volume_kg), 0)::float as volume, MAX(created_at) as last_sync FROM workout_sessions WHERE status = 'completed';`.catch(() => [{ count: 0, volume: 0, last_sync: null }]),
     fetchActiveWorkoutSessionAction(),
     fetchRoutinesAction(),
     fetchExerciseCatalogAction(),
@@ -617,9 +614,9 @@ export async function fetchHealthDashboardDataAction(): Promise<HealthDashboardD
     getBodyCompositionLogs(sql),
     sql`SELECT * FROM health_logs WHERE date = ${todayStr} LIMIT 1;`,
     sql`SELECT * FROM health_logs ORDER BY date DESC LIMIT 14;`,
-    sql`SELECT * FROM workout_sessions WHERE status = 'completed' ORDER BY date DESC, start_time DESC LIMIT 10;`,
-    sql`SELECT COUNT(*)::int as count, COALESCE(SUM(total_volume_kg), 0)::float as volume, MAX(created_at) as last_sync FROM workout_sessions WHERE status = 'completed';`,
-    fetchNutritionDashboardDataAction(todayStr),
+    sql`SELECT * FROM workout_sessions WHERE status = 'completed' ORDER BY date DESC, start_time DESC LIMIT 10;`.catch(() => []),
+    sql`SELECT COUNT(*)::int as count, COALESCE(SUM(total_volume_kg), 0)::float as volume, MAX(created_at) as last_sync FROM workout_sessions WHERE status = 'completed';`.catch(() => [{ count: 0, volume: 0, last_sync: null }]),
+    fetchNutritionDashboardDataAction(todayStr).catch(() => undefined),
     getBiomarkersDashboardData(sql),
   ]);
 
