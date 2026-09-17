@@ -15,8 +15,8 @@ import {
   VaultItemCategory,
   VaultItemStatus,
 } from "@/lib/types";
-import { awardHabiticaEvent } from "@/lib/habiticaEvents";
-import { getCachedHabiticaTags, getCachedHabiticaTasks } from "@/lib/dal/habitica";
+import { awardTaskEvent } from "@/lib/taskEvents";
+import { getCachedTags as getCachedHabiticaTags, getCachedTasks as getCachedHabiticaTasks } from "@/lib/dal/tasks";
 import { revalidatePath } from "next/cache";
 
 interface VaultDbRow {
@@ -328,12 +328,12 @@ export async function incrementVaultItemProgressAction(
     `;
 
     // Award Habitica XP for reading / study session
-    await awardHabiticaEvent("VAULT_PROGRESS", {
+    await awardTaskEvent("VAULT_PROGRESS", {
       customNotes: `+${amount} páginas/unidades en "${item.title || "Recurso"}"`,
     });
 
     if (isCompleted) {
-      await awardHabiticaEvent("VAULT_COMPLETED", {
+      await awardTaskEvent("VAULT_COMPLETED", {
         customTitle: `${item.title || "Recurso"} (${item.category || "Bóveda"})`,
         customNotes: `Completado al 100% (${newProg}/${total})`,
       });
@@ -376,7 +376,7 @@ export async function updateVaultItemStatusAction(
     `;
 
     if (newStatus === "completed") {
-      await awardHabiticaEvent("VAULT_COMPLETED", {
+      await awardTaskEvent("VAULT_COMPLETED", {
         customTitle: `${itemTitle} (${itemCategory})`,
         customNotes: `Marcado como completado en Brio`,
       });

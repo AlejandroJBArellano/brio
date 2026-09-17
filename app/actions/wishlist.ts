@@ -7,7 +7,7 @@ import {
   WishlistPriority,
   WishlistStatus,
 } from "@/lib/types";
-import { awardHabiticaEvent } from "@/lib/habiticaEvents";
+import { awardTaskEvent } from "@/lib/taskEvents";
 import { revalidatePath } from "next/cache";
 import { getTodayDateStr } from "@/lib/dateUtils";
 
@@ -252,7 +252,7 @@ export async function dismissWishlistItemAction(
     `;
 
     // Award Habitica XP for self-control & money saved
-    await awardHabiticaEvent("WISHLIST_DISMISSED_COOLING", {
+    await awardTaskEvent("WISHLIST_DISMISSED_COOLING", {
       customNotes: `Ahorraste $${price} al descartar: ${title}`,
     });
 

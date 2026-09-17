@@ -26,7 +26,7 @@ import {
 import { revalidatePath } from "next/cache";
 import { fetchNutritionDashboardDataAction } from "./nutrition";
 import { getTodayDateStr, toDateStr } from "@/lib/dateUtils";
-import { awardHabiticaEvent } from "@/lib/habiticaEvents";
+import { awardTaskEvent } from "@/lib/taskEvents";
 import {
   fetchActiveWorkoutSessionAction,
   fetchExerciseCatalogAction,
@@ -787,7 +787,7 @@ export async function logWorkoutAction(
     `;
 
     // Award Habitica XP for workout
-    await awardHabiticaEvent("WORKOUT_COMPLETED", {
+    await awardTaskEvent("WORKOUT_COMPLETED", {
       customTitle: `[Brio] Entrenamiento: ${workoutType}`,
       customNotes: `Entrenamiento: ${workoutType}${workoutNotes ? ` • ${workoutNotes}` : ""}`,
     });
@@ -819,7 +819,7 @@ export async function addWaterAction(
     `;
 
     // Award Habitica XP for hydration
-    await awardHabiticaEvent("HYDRATION_LOGGED", {
+    await awardTaskEvent("HYDRATION_LOGGED", {
       customTitle: `[Brio] Hidratación (+${amountMl}ml)`,
       customNotes: `Ingesta de agua: +${amountMl}ml registrados en Brio.`,
     });
@@ -1055,7 +1055,7 @@ export async function toggleSupplementAction(
     try {
       const toggledItem = updatedSupplements.find((s) => s.id === supplementId);
       if (toggledItem && toggledItem.taken) {
-        await awardHabiticaEvent("SUPPLEMENTS_COMPLETED", {
+        await awardTaskEvent("SUPPLEMENTS_COMPLETED", {
           customTitle: `[Brio] Suplemento: ${toggledItem.name}`,
           customNotes: `Suplemento diario tomado: ${toggledItem.name}${toggledItem.dosage ? ` (${toggledItem.dosage})` : ""}.`,
         });
@@ -1145,7 +1145,7 @@ export async function batchToggleSupplementsByTimingAction(
 
     if (completed && modifiedCount > 0) {
       try {
-        await awardHabiticaEvent("SUPPLEMENTS_COMPLETED", {
+        await awardTaskEvent("SUPPLEMENTS_COMPLETED", {
           customTitle: `[Brio] Suplementación: ${timing}`,
           customNotes: `Tanda de suplementación completada (${timing}): ${modifiedCount} suplementos tomados.`,
         });
@@ -1191,7 +1191,7 @@ export async function logSleepAction(
     `;
 
     // Award Habitica XP for sleep log
-    await awardHabiticaEvent("SLEEP_LOGGED", {
+    await awardTaskEvent("SLEEP_LOGGED", {
       customTitle: `[Brio] Descanso & Sueño (${sleepHours}h)`,
       customNotes: `Registro de sueño y recuperación: ${sleepHours}h (Calidad ${sleepQuality}/5).`,
     });
@@ -1271,7 +1271,7 @@ export async function createBodyCompositionLogAction(input: {
     `;
 
     // Award Habitica XP for body composition tracking
-    await awardHabiticaEvent("BODY_COMPOSITION_LOGGED", {
+    await awardTaskEvent("BODY_COMPOSITION_LOGGED", {
       customTitle: "[Brio] InBody / Composición Corporal",
       customNotes: `Peso: ${input.weightKg} kg${input.bodyFatPercentage ? ` • Grasa: ${input.bodyFatPercentage}%` : ""}${input.skeletalMuscleKg ? ` • Músculo: ${input.skeletalMuscleKg} kg` : ""}`,
     });
@@ -1424,7 +1424,7 @@ export async function createLabReportAction(input: {
     }
 
     // Award Habitica XP for lab checkup
-    await awardHabiticaEvent("LAB_REPORT_LOGGED", {
+    await awardTaskEvent("LAB_REPORT_LOGGED", {
       customTitle: `Estudio Clínico: ${input.title} (${input.labName})`,
       customNotes: `${input.biomarkers.length} biomarcadores analizados (${abnormalCount} fuera de rango)`,
     });

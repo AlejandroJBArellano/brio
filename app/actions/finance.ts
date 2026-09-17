@@ -20,7 +20,7 @@ import {
   VariablePaymentScheduleItem,
   WishlistStatus,
 } from "@/lib/types";
-import { awardHabiticaEvent } from "@/lib/habiticaEvents";
+import { awardTaskEvent } from "@/lib/taskEvents";
 import { revalidatePath } from "next/cache";
 import { getTodayDateStr, toDateStr } from "@/lib/dateUtils";
 
@@ -528,7 +528,7 @@ export async function createTransactionAction(payload: {
     `;
 
     // Award Habitica XP for logging transactions
-    await awardHabiticaEvent("DAILY_EXPENSES_LOGGED", {
+    await awardTaskEvent("DAILY_EXPENSES_LOGGED", {
       customNotes: `${payload.type === "expense" ? "Gasto" : "Ingreso"}: $${payload.amount} • ${payload.concept || category}`,
     });
 
@@ -695,7 +695,7 @@ export async function contributeToSavingsGoalAction(
     `;
 
     // Award Habitica XP for saving money
-    await awardHabiticaEvent("SAVINGS_CONTRIBUTION", {
+    await awardTaskEvent("SAVINGS_CONTRIBUTION", {
       customNotes: `Aporte de $${amount} a meta de ahorro`,
     });
 
@@ -1255,7 +1255,7 @@ export async function settleCommitmentPaymentAction(payload: {
     `;
 
     // 4. Award Habitica XP
-    await awardHabiticaEvent("DAILY_EXPENSES_LOGGED", {
+    await awardTaskEvent("DAILY_EXPENSES_LOGGED", {
       customNotes: `Liquidación de compromiso: $${payload.amount} • ${commitment.title}`,
     });
 

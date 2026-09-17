@@ -9,7 +9,7 @@ import {
   HormonalDailyChecklist,
   HormonalScheduleConfig,
 } from "@/lib/types";
-import { awardHabiticaEvent } from "@/lib/habiticaEvents";
+import { awardTaskEvent } from "@/lib/taskEvents";
 import { revalidatePath } from "next/cache";
 import { getTodayDateStr } from "@/lib/dateUtils";
 
@@ -137,7 +137,7 @@ export async function toggleHormonalChecklistItemAction(
         title: `[Brio] Hábito Circadiano: ${key}`,
         notes: `Hábito circadiano cumplido: ${key}`,
       };
-      await awardHabiticaEvent("CIRCADIAN_HABIT_COMPLETED", {
+      await awardTaskEvent("CIRCADIAN_HABIT_COMPLETED", {
         customTitle: meta.title,
         customNotes: meta.notes,
       });

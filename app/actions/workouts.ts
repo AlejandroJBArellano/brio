@@ -2,7 +2,7 @@
 
 import { getDb } from "@/lib/db";
 import { toDateStr } from "@/lib/dateUtils";
-import { awardHabiticaEvent } from "@/lib/habiticaEvents";
+import { awardTaskEvent } from "@/lib/taskEvents";
 import {
   EquipmentType,
   ExerciseCatalogItem,
@@ -337,7 +337,7 @@ export async function finishWorkoutSessionAction(params: {
     `;
 
     // 6. Award Habitica XP
-    await awardHabiticaEvent("WORKOUT_COMPLETED", {
+    await awardTaskEvent("WORKOUT_COMPLETED", {
       customNotes: `${mins} min • ${totalVolumeKg} kg levantados (${totalSetsCount} series)${prsAchieved.length > 0 ? ` • ${prsAchieved.length} PRs batidos` : ""}`,
     });
 

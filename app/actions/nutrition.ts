@@ -2,7 +2,7 @@
 
 import { getWeekDateRange, toDateStr } from "@/lib/dateUtils";
 import { getDb } from "@/lib/db";
-import { awardHabiticaEvent } from "@/lib/habiticaEvents";
+import { awardTaskEvent } from "@/lib/taskEvents";
 import {
   DEFAULT_NUTRITION_SETTINGS,
   MARIANA_MONT_PRESET_RECIPES,
@@ -393,7 +393,7 @@ export async function logDailyPortionsAction(
     // Award Habitica for logging nutrition portions
     const totalPortions = Object.values(portions).reduce((acc, v) => acc + (Number(v) || 0), 0);
     if (totalPortions > 0) {
-      await awardHabiticaEvent("NUTRITION_HABIT", {
+      await awardTaskEvent("NUTRITION_HABIT", {
         customTitle: "[Brio] Plan : Porciones Registradas",
         customNotes: `Registro de ${totalPortions} porciones de comida limpia del plan .`,
       });
@@ -458,7 +458,7 @@ export async function quickAdjustPortionAction(
     // If incrementing a portion, award Habitica
     if (delta > 0) {
       const groupLabel = FOOD_GROUP_NAMES[group] || group;
-      await awardHabiticaEvent("NUTRITION_HABIT", {
+      await awardTaskEvent("NUTRITION_HABIT", {
         customTitle: `[Brio] Nutrición : +${delta} ${groupLabel}`,
         customNotes: `Porción saludable registrada en el plan de  (${groupLabel}).`,
       });
@@ -519,7 +519,7 @@ export async function toggleNutritionHabitAction(
 
     if (habits[habitKey]) {
       const habitLabel = MARIANA_MONT_HABIT_NAMES[habitKey] || habitKey;
-      await awardHabiticaEvent("NUTRITION_HABIT", {
+      await awardTaskEvent("NUTRITION_HABIT", {
         customTitle: `[Brio] ${habitLabel}`,
         customNotes: `Hábito cumplido del plan : ${habitLabel}`,
       });
@@ -661,7 +661,7 @@ export async function toggleScheduledMealCompletedAction(
 
     if (newCompleted) {
       const mealTitle = meal.custom_title || `Comida (${meal.meal_slot})`;
-      await awardHabiticaEvent("SCHEDULED_MEAL_COMPLETED", {
+      await awardTaskEvent("SCHEDULED_MEAL_COMPLETED", {
         customTitle: `[Brio] : ${mealTitle}`,
         customNotes: `Receta o comida completada del plan clínico de  (${meal.meal_slot}).`,
       });

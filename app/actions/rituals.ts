@@ -1,9 +1,8 @@
 "use server";
 
 import { getDb } from "@/lib/db";
-import { parseBatchInput } from "@/lib/parser";
-import { habiticaClient } from "@/lib/habitica";
-import { awardHabiticaEvent } from "@/lib/habiticaEvents";
+import { submitBatchCaptureAction } from "./tasks";
+import { awardTaskEvent } from "@/lib/taskEvents";
 import { RitualLog } from "@/lib/types";
 import { revalidatePath } from "next/cache";
 import { getTodayDateStr } from "@/lib/dateUtils";
@@ -105,7 +104,7 @@ export async function saveMorningRitualAction(payload: {
     if (payload.sleepHours) notesParts.push(`Sueño: ${payload.sleepHours}`);
     if (payload.sleepQuality) notesParts.push(`Calidad: ${payload.sleepQuality}`);
 
-    await awardHabiticaEvent("MORNING_KICKOFF", {
+    await awardTaskEvent("MORNING_KICKOFF", {
       customNotes: notesParts.join(" • "),
     });
 
@@ -172,15 +171,12 @@ export async function saveEveningReviewAction(payload: {
     let tasksCreated = 0;
     // Only parse and create tasks if explicit tomorrow notes are provided
     if (payload.tomorrowNotes && payload.tomorrowNotes.trim()) {
-      const parsed = parseBatchInput(payload.tomorrowNotes.trim());
-      if (parsed.payloads.length > 0) {
-        const batchResult = await habiticaClient.createTasksBatch(parsed.payloads);
-        tasksCreated = batchResult.createdCount;
-      }
+      const batchResult = await submitBatchCaptureAction(payload.tomorrowNotes.trim());
+      tasksCreated = batchResult.createdCount;
     }
 
     // Award Habitica XP for completing Evening Review
-    await awardHabiticaEvent("EVENING_REVIEW", {
+    await awardTaskEvent("EVENING_REVIEW", {
       customNotes: payload.reflection ? `Reflexión: ${payload.reflection}` : undefined,
     });
 

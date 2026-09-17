@@ -12,8 +12,8 @@ import {
   ProjectsDashboardData,
   ProjectStatus,
 } from "@/lib/types";
-import { awardHabiticaEvent } from "@/lib/habiticaEvents";
-import { getCachedHabiticaTags, getCachedHabiticaTasksWithCompleted } from "@/lib/dal/habitica";
+import { awardTaskEvent } from "@/lib/taskEvents";
+import { getCachedTags as getCachedHabiticaTags, getCachedTasksWithCompleted as getCachedHabiticaTasksWithCompleted } from "@/lib/dal/tasks";
 import { fetchContextualNotesAction } from "./notes";
 import { revalidatePath } from "next/cache";
 
@@ -261,7 +261,7 @@ export async function updateProjectStatusAction(
     }
 
     if (status === "launched" || status === "completed") {
-      await awardHabiticaEvent("PROJECT_COMPLETED", {
+      await awardTaskEvent("PROJECT_COMPLETED", {
         customTitle: `Proyecto: ${projectTitle}`,
         customNotes: `Proyecto completado en Brio`,
       });
@@ -507,12 +507,12 @@ export async function updateLearningProgressAction(
     `;
 
     // Award Habitica XP for study session
-    await awardHabiticaEvent("VAULT_PROGRESS", {
+    await awardTaskEvent("VAULT_PROGRESS", {
       customNotes: `Progreso en "${itemTitle}" (${currentProgress}/${totalProg})`,
     });
 
     if (isFinished) {
-      await awardHabiticaEvent("VAULT_COMPLETED", {
+      await awardTaskEvent("VAULT_COMPLETED", {
         customTitle: `${itemTitle} (${itemType})`,
         customNotes: `Completado al 100%`,
       });
