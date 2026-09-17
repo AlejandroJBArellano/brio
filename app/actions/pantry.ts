@@ -15,43 +15,11 @@ interface PantryDbRow {
 }
 
 /**
- * Ensures the pantry_items table exists and is seeded with defaults if empty.
- */
-async function ensurePantryTableExists() {
-  const sql = getDb();
-  await sql`
-    CREATE TABLE IF NOT EXISTS pantry_items (
-      id VARCHAR(64) PRIMARY KEY,
-      name VARCHAR(100) NOT NULL,
-      category VARCHAR(50) NOT NULL,
-      in_stock BOOLEAN NOT NULL DEFAULT true,
-      icon VARCHAR(20),
-      created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-    );
-  `;
-
-  // Check if empty
-  const countRes = await sql`SELECT COUNT(*) as count FROM pantry_items;`;
-  const count = Number(countRes[0]?.count || 0);
-
-  if (count === 0) {
-    for (const item of DEFAULT_PANTRY_ITEMS) {
-      await sql`
-        INSERT INTO pantry_items (id, name, category, in_stock, icon)
-        VALUES (${item.id}, ${item.name}, ${item.category}, ${item.inStock}, ${item.icon || null})
-        ON CONFLICT (id) DO NOTHING;
-      `;
-    }
-  }
-}
-
-/**
  * Server Action: Fetches all pantry items grouped or sorted.
  */
 export async function fetchPantryItemsAction(): Promise<PantryItem[]> {
   try {
     const sql = getDb();
-    await ensurePantryTableExists();
 
     const rows = (await sql`
       SELECT id, name, category, in_stock, icon
@@ -68,7 +36,7 @@ export async function fetchPantryItemsAction(): Promise<PantryItem[]> {
       name: r.name,
       category: r.category as PantryCategory,
       inStock: Boolean(r.in_stock),
-      icon: r.icon || "🥑",
+      icon: r.icon || "",
     }));
   } catch (error) {
     console.error("[Fetch Pantry Error]:", error);
@@ -84,7 +52,6 @@ export async function togglePantryItemAction(
 ): Promise<{ success: boolean; inStock?: boolean; error?: string }> {
   try {
     const sql = getDb();
-    await ensurePantryTableExists();
 
     const current = (await sql`
       SELECT in_stock FROM pantry_items WHERE id = ${id} LIMIT 1;
@@ -118,7 +85,6 @@ export async function batchUpdatePantryStockAction(
 ): Promise<{ success: boolean; error?: string }> {
   try {
     const sql = getDb();
-    await ensurePantryTableExists();
 
     for (const update of updates) {
       await sql`
@@ -150,11 +116,10 @@ export async function addCustomPantryItemAction(
     }
 
     const sql = getDb();
-    await ensurePantryTableExists();
 
     const cleanName = name.trim();
     const id = `custom-${cleanName.toLowerCase().replace(/[^a-z0-9]/g, "-")}-${Date.now().toString(36)}`;
-    const cleanIcon = icon?.trim() || "✨";
+    const cleanIcon = icon?.trim() || "";
 
     await sql`
       INSERT INTO pantry_items (id, name, category, in_stock, icon)
@@ -187,7 +152,6 @@ export async function deletePantryItemAction(
 ): Promise<{ success: boolean; error?: string }> {
   try {
     const sql = getDb();
-    await ensurePantryTableExists();
 
     await sql`
       DELETE FROM pantry_items WHERE id = ${id};

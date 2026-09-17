@@ -14,30 +14,6 @@ import { revalidatePath } from "next/cache";
 import { getTodayDateStr } from "@/lib/dateUtils";
 
 /**
- * Ensures tables for hormonal tracking exist in Neon Postgres.
- */
-async function ensureHormonalTablesExist() {
-  const sql = getDb();
-  await sql`
-    CREATE TABLE IF NOT EXISTS hormonal_settings (
-      id VARCHAR(64) PRIMARY KEY,
-      config JSONB NOT NULL,
-      updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-    );
-  `;
-
-  await sql`
-    CREATE TABLE IF NOT EXISTS hormonal_daily_logs (
-      date DATE PRIMARY KEY,
-      checklist JSONB NOT NULL,
-      notes TEXT,
-      created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-      updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-    );
-  `;
-}
-
-/**
  * Server Action: Fetches hormonal schedule config and today's checklist.
  */
 export async function fetchHormonalDashboardDataAction(): Promise<{
@@ -46,7 +22,6 @@ export async function fetchHormonalDashboardDataAction(): Promise<{
 }> {
   try {
     const sql = getDb();
-    await ensureHormonalTablesExist();
     const todayStr = getTodayDateStr();
 
     const [settingsRow, logRow] = await Promise.all([
@@ -82,7 +57,6 @@ export async function saveHormonalScheduleConfigAction(
 ): Promise<{ success: boolean; error?: string }> {
   try {
     const sql = getDb();
-    await ensureHormonalTablesExist();
 
     const currentData = await fetchHormonalDashboardDataAction();
     const merged = { ...currentData.config, ...newConfig };
@@ -142,7 +116,6 @@ export async function toggleHormonalChecklistItemAction(
 ): Promise<{ success: boolean; checklist?: HormonalDailyChecklist; error?: string }> {
   try {
     const sql = getDb();
-    await ensureHormonalTablesExist();
     const todayStr = getTodayDateStr();
 
     const currentData = await fetchHormonalDashboardDataAction();

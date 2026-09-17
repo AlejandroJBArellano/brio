@@ -64,8 +64,6 @@ export interface ProjectDetailPageData {
 export async function fetchProjectByIdAction(id: string): Promise<ProjectDetailPageData> {
   const sql = getDb();
 
-  await sql`ALTER TABLE projects ADD COLUMN IF NOT EXISTS integrations JSONB DEFAULT '{}'::jsonb;`;
-
   const [projectRows, tasks, tags, notes] = await Promise.all([
     sql`SELECT * FROM projects WHERE id = ${id} LIMIT 1;`,
     getCachedHabiticaTasksWithCompleted().catch(() => []),
@@ -347,7 +345,6 @@ export async function addProjectResourceAction(
 ): Promise<{ success: boolean; error?: string }> {
   try {
     const sql = getDb();
-    await sql`ALTER TABLE projects ADD COLUMN IF NOT EXISTS integrations JSONB DEFAULT '{}'::jsonb;`;
 
     const rows = await sql`SELECT integrations FROM projects WHERE id = ${projectId} LIMIT 1;`;
     if (rows.length === 0) return { success: false, error: "Proyecto no encontrado" };

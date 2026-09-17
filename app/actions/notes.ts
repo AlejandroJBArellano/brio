@@ -18,26 +18,6 @@ interface ContextualNoteDbRow {
 }
 
 /**
- * Initializes the contextual_notes table if not exists.
- */
-async function ensureNotesTable() {
-  const sql = getDb();
-  await sql`
-    CREATE TABLE IF NOT EXISTS contextual_notes (
-      id TEXT PRIMARY KEY,
-      project_id TEXT NOT NULL,
-      task_id TEXT,
-      title TEXT NOT NULL,
-      content TEXT NOT NULL,
-      category TEXT NOT NULL DEFAULT 'idea',
-      tags JSONB DEFAULT '[]'::jsonb,
-      created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-      updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-    );
-  `;
-}
-
-/**
  * Server Action: Fetches all contextual notes, optionally filtered by project and/or task.
  */
 export async function fetchContextualNotesAction(
@@ -45,7 +25,6 @@ export async function fetchContextualNotesAction(
   taskId?: string
 ): Promise<ContextualNote[]> {
   try {
-    await ensureNotesTable();
     const sql = getDb();
 
     let rows: ContextualNoteDbRow[];
@@ -105,7 +84,6 @@ export async function saveContextualNoteAction(payload: {
   tags?: string[];
 }): Promise<{ success: boolean; note?: ContextualNote; error?: string }> {
   try {
-    await ensureNotesTable();
     const sql = getDb();
 
     const noteId = payload.id || `note_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;

@@ -46,9 +46,6 @@ export async function saveNotionIntegrationAction(params: SaveNotionIntegrationP
 
   const sql = getDb();
 
-  // Ensure column exists
-  await sql`ALTER TABLE projects ADD COLUMN IF NOT EXISTS integrations JSONB DEFAULT '{}'::jsonb;`;
-
   // Update projects table with jsonb_set or merging integrations
   await sql`
     UPDATE projects
@@ -79,9 +76,6 @@ export async function syncProjectFromNotionAction(
   projectId: string
 ): Promise<ProjectSyncActionResult> {
   const sql = getDb();
-
-  // Ensure column exists
-  await sql`ALTER TABLE projects ADD COLUMN IF NOT EXISTS integrations JSONB DEFAULT '{}'::jsonb;`;
 
   const rows = await sql`
     SELECT id, title, canonical_prefix, integrations 

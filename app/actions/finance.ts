@@ -83,63 +83,11 @@ interface CommitmentDbRow {
 
 type SqlClient = { (strings: TemplateStringsArray, ...values: unknown[]): Promise<unknown[]> };
 
-export async function ensureFinanceTables(sql: SqlClient) {
-  await sql`
-    CREATE TABLE IF NOT EXISTS finance_categories (
-      id TEXT PRIMARY KEY,
-      name TEXT NOT NULL,
-      icon TEXT,
-      color TEXT,
-      is_ant_default BOOLEAN DEFAULT FALSE,
-      is_fixed BOOLEAN DEFAULT FALSE,
-      order_index INTEGER DEFAULT 0,
-      is_active BOOLEAN DEFAULT TRUE,
-      created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-    );
-  `;
-
-  await sql`
-    CREATE TABLE IF NOT EXISTS finance_accounts (
-      id TEXT PRIMARY KEY,
-      name TEXT NOT NULL,
-      type TEXT DEFAULT 'credit',
-      icon TEXT,
-      color TEXT,
-      order_index INTEGER DEFAULT 0,
-      is_active BOOLEAN DEFAULT TRUE,
-      created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-    );
-  `;
-
-  await sql`
-    CREATE TABLE IF NOT EXISTS finance_commitments (
-      id TEXT PRIMARY KEY,
-      title TEXT NOT NULL,
-      type TEXT NOT NULL,
-      category TEXT DEFAULT 'servicios',
-      default_account TEXT DEFAULT 'dolarapp',
-      total_amount NUMERIC(12, 2),
-      installment_amount NUMERIC(12, 2),
-      installments_total INTEGER,
-      installments_paid INTEGER DEFAULT 0,
-      frequency TEXT DEFAULT 'monthly',
-      next_due_date DATE,
-      variable_schedule JSONB DEFAULT '[]'::jsonb,
-      status TEXT DEFAULT 'active',
-      notes TEXT,
-      created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-      updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-    );
-  `;
-}
-
 export async function getFinanceCatalog(sql: SqlClient): Promise<{
   categories: FinanceCategory[];
   accounts: FinanceAccount[];
 }> {
   try {
-    await ensureFinanceTables(sql);
-
     const [catRows, accRows] = await Promise.all([
       sql`SELECT * FROM finance_categories WHERE is_active = TRUE ORDER BY order_index ASC, created_at ASC;`,
       sql`SELECT * FROM finance_accounts WHERE is_active = TRUE ORDER BY order_index ASC, created_at ASC;`,
@@ -339,7 +287,6 @@ export async function fetchFinanceDashboardDataAction(
   targetYear?: number
 ): Promise<FinanceDashboardData> {
   const sql = getDb();
-  await ensureFinanceTables(sql);
 
   const now = new Date();
   const month = targetMonth || now.getMonth() + 1;
@@ -822,7 +769,6 @@ export async function createFinanceCategoryAction(payload: {
 }): Promise<{ success: boolean; category?: FinanceCategory; error?: string }> {
   try {
     const sql = getDb();
-    await ensureFinanceTables(sql);
 
     const name = payload.name.trim();
     if (!name) return { success: false, error: "El nombre de la categoría es requerido" };
@@ -863,7 +809,6 @@ export async function updateFinanceCategoryAction(
 ): Promise<{ success: boolean; error?: string }> {
   try {
     const sql = getDb();
-    await ensureFinanceTables(sql);
 
     const existingRows = await sql`SELECT * FROM finance_categories WHERE id = ${id} LIMIT 1;`;
     if (existingRows.length === 0) return { success: false, error: "Categoría no encontrada" };
@@ -900,7 +845,6 @@ export async function updateFinanceCategoryAction(
 export async function deleteFinanceCategoryAction(id: string): Promise<{ success: boolean; error?: string }> {
   try {
     const sql = getDb();
-    await ensureFinanceTables(sql);
     await sql`DELETE FROM finance_categories WHERE id = ${id};`;
     revalidatePath("/");
     return { success: true };
@@ -923,7 +867,6 @@ export async function createFinanceAccountAction(payload: {
 }): Promise<{ success: boolean; account?: FinanceAccount; error?: string }> {
   try {
     const sql = getDb();
-    await ensureFinanceTables(sql);
 
     const name = payload.name.trim();
     if (!name) return { success: false, error: "El nombre de la cuenta/tarjeta es requerido" };
@@ -962,7 +905,6 @@ export async function updateFinanceAccountAction(
 ): Promise<{ success: boolean; error?: string }> {
   try {
     const sql = getDb();
-    await ensureFinanceTables(sql);
 
     const existingRows = await sql`SELECT * FROM finance_accounts WHERE id = ${id} LIMIT 1;`;
     if (existingRows.length === 0) return { success: false, error: "Cuenta no encontrada" };
@@ -997,7 +939,6 @@ export async function updateFinanceAccountAction(
 export async function deleteFinanceAccountAction(id: string): Promise<{ success: boolean; error?: string }> {
   try {
     const sql = getDb();
-    await ensureFinanceTables(sql);
     await sql`DELETE FROM finance_accounts WHERE id = ${id};`;
     revalidatePath("/");
     return { success: true };
@@ -1014,7 +955,6 @@ export async function deleteFinanceAccountAction(id: string): Promise<{ success:
 export async function fetchFinanceCommitmentsAction(): Promise<FinanceCommitment[]> {
   try {
     const sql = getDb();
-    await ensureFinanceTables(sql);
     const rows = await sql`
       SELECT * FROM finance_commitments 
       ORDER BY 
@@ -1050,7 +990,6 @@ export async function createFinanceCommitmentAction(payload: {
 }): Promise<{ success: boolean; commitment?: FinanceCommitment; error?: string }> {
   try {
     const sql = getDb();
-    await ensureFinanceTables(sql);
 
     const title = payload.title?.trim();
     if (!title) return { success: false, error: "El título o concepto del compromiso es requerido." };
@@ -1116,7 +1055,6 @@ export async function updateFinanceCommitmentAction(
 ): Promise<{ success: boolean; error?: string }> {
   try {
     const sql = getDb();
-    await ensureFinanceTables(sql);
 
     const existingRows = await sql`SELECT * FROM finance_commitments WHERE id = ${id} LIMIT 1;`;
     if (existingRows.length === 0) return { success: false, error: "Compromiso no encontrado" };
@@ -1168,7 +1106,6 @@ export async function updateFinanceCommitmentAction(
 export async function deleteFinanceCommitmentAction(id: string): Promise<{ success: boolean; error?: string }> {
   try {
     const sql = getDb();
-    await ensureFinanceTables(sql);
     await sql`DELETE FROM finance_commitments WHERE id = ${id};`;
     revalidatePath("/");
     return { success: true };
@@ -1192,7 +1129,6 @@ export async function settleCommitmentPaymentAction(payload: {
 }): Promise<{ success: boolean; transactionId?: string; error?: string }> {
   try {
     const sql = getDb();
-    await ensureFinanceTables(sql);
 
     const commitmentRows = await sql`
       SELECT * FROM finance_commitments WHERE id = ${payload.commitmentId} LIMIT 1;

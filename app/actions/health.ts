@@ -125,18 +125,6 @@ type SqlClient = { (strings: TemplateStringsArray, ...values: unknown[]): Promis
  */
 async function getSupplementsCatalog(sql: SqlClient): Promise<UserSupplement[]> {
   try {
-    await sql`
-      CREATE TABLE IF NOT EXISTS user_supplements (
-        id TEXT PRIMARY KEY,
-        name TEXT NOT NULL,
-        dosage TEXT,
-        timing TEXT,
-        order_index INTEGER DEFAULT 0,
-        is_active BOOLEAN DEFAULT true,
-        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-      );
-    `;
-
     const rows = await sql`
       SELECT * FROM user_supplements WHERE is_active = true ORDER BY order_index ASC, created_at ASC;
     `;
@@ -1422,47 +1410,7 @@ export async function createLabReportAction(input: {
       (b) => b.status === "high" || b.status === "low" || b.status === "critical"
     ).length;
 
-    // 1. Ensure tables exist (resilient DDL)
-    await sql`
-      CREATE TABLE IF NOT EXISTS lab_test_reports (
-        id VARCHAR(64) PRIMARY KEY,
-        date DATE NOT NULL,
-        lab_name VARCHAR(100) NOT NULL DEFAULT 'Laboratorio Chopo',
-        order_number VARCHAR(50),
-        patient_id VARCHAR(50),
-        title VARCHAR(150) NOT NULL,
-        doctor_notes TEXT,
-        file_url TEXT,
-        file_key TEXT,
-        total_biomarkers INT DEFAULT 0,
-        abnormal_count INT DEFAULT 0,
-        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-        updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-      );
-    `;
-
-    await sql`
-      CREATE TABLE IF NOT EXISTS biomarker_logs (
-        id VARCHAR(64) PRIMARY KEY,
-        report_id VARCHAR(64) REFERENCES lab_test_reports(id) ON DELETE CASCADE,
-        date DATE NOT NULL,
-        category VARCHAR(50) NOT NULL,
-        name VARCHAR(100) NOT NULL,
-        code VARCHAR(50),
-        value_numeric NUMERIC,
-        value_text VARCHAR(100),
-        unit VARCHAR(30),
-        ref_min NUMERIC,
-        ref_max NUMERIC,
-        ref_text VARCHAR(150),
-        status VARCHAR(20) NOT NULL DEFAULT 'normal',
-        notes TEXT,
-        order_index INT DEFAULT 0,
-        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-      );
-    `;
-
-    // 2. Insert report header
+    // Insert report header
     await sql`
       INSERT INTO lab_test_reports (
         id, date, lab_name, order_number, patient_id, title,
