@@ -17,7 +17,6 @@ import {
 import {
   calculateWorkoutVolume,
   detectWorkoutPRs,
-  extractCatalogFromWorkouts,
   getPreviousPerformanceForExercise,
   normalizeExerciseTitle,
 } from "@/lib/workouts";

@@ -43,7 +43,6 @@ import {
   RefreshCw,
   Scale,
   Search,
-  Tag,
   Trash2,
   Users,
   X,
@@ -126,7 +125,7 @@ function getFirstParagraphPreview(markdown: string): string {
 export function ProjectFocusCard({
   projects,
   tasks,
-  tags = [],
+  tags: _tags = [],
   contextualNotes,
   onRefreshData,
   isFocusMode = false,
@@ -212,46 +211,7 @@ export function ProjectFocusCard({
     );
   }, [activeProjects, projects, selectedProjectId]);
 
-  // Find Best Matching Habitica Tag or allow manual tag selection
-  const autoDetectedTag = useMemo(() => {
-    if (!tags || tags.length === 0) return null;
-    const projectWords = activeProject.title
-      .toLowerCase()
-      .split(/[\s—\-_()]+/)
-      .filter((w) => w.length >= 3);
 
-    if (projectWords.length === 0) return null;
-
-    // 1. Try first word exact match (e.g. "unpo")
-    const primaryWord = projectWords[0];
-    const exactPrimaryMatch = tags.find(
-      (t) => t.name.toLowerCase() === primaryWord
-    );
-    if (exactPrimaryMatch) return exactPrimaryMatch;
-
-    // 2. Try whole title match
-    const cleanTitle = activeProject.title.toLowerCase();
-    const exactTitleMatch = tags.find(
-      (t) => cleanTitle.includes(t.name.toLowerCase()) && t.name.toLowerCase() === primaryWord
-    );
-    if (exactTitleMatch) return exactTitleMatch;
-
-    // Do NOT auto-match generic parent tags like "Proficient" if it doesn't match primary project name
-    return null;
-  }, [tags, activeProject]);
-
-  const [selectedTagId, setSelectedTagId] = useState<string | null>(null);
-
-  // Active Tag ID: Manual selection or Auto-detected
-  const activeTag = useMemo(() => {
-    if (selectedTagId === "none") {
-      return null;
-    }
-    if (selectedTagId !== null) {
-      return tags.find((t) => t.id === selectedTagId) || null;
-    }
-    return autoDetectedTag;
-  }, [selectedTagId, tags, autoDetectedTag]);
 
   // Tab State: 'tasks' | 'notes'
   const [activeTab, setActiveTab] = useState<"tasks" | "notes">("tasks");
@@ -290,14 +250,7 @@ export function ProjectFocusCard({
     // 1. Strict filter: ONLY to-dos (no dailies, no habits)
     const todoTasks = localTasks.filter((t) => t.type === "todo");
 
-    // 2. Strategy A: Filter by active Habitica Tag ID if selected
-    if (activeTag) {
-      return todoTasks.filter(
-        (t) => t.tags && Array.isArray(t.tags) && t.tags.includes(activeTag.id)
-      );
-    }
-
-    // 3. Strategy B: Filter by project canonical prefixes and keywords
+    // 2. Filter by project canonical prefixes and keywords
     const { prefixes } = getProjectKeywords(activeProject);
     return todoTasks.filter((t) => {
       const { prefix } = parseTaskPrefix(t.text || "");
@@ -312,7 +265,7 @@ export function ProjectFocusCard({
       }
       return false;
     });
-  }, [localTasks, activeTag, activeProject]);
+  }, [localTasks, activeProject]);
 
   // Priority & Search Filters for Tasks
   const [priorityFilter, setPriorityFilter] = useState<"all" | "high" | "medium" | "low">("all");
@@ -613,11 +566,6 @@ export function ProjectFocusCard({
               <h3 className="font-serif text-sm sm:text-base font-bold text-[#F5F2EB] truncate">
                 {activeProject.title}
               </h3>
-              {activeTag && (
-                <span className="font-mono text-[10px] text-[#4EAB9E] bg-[#141C1A] px-2 py-0.5 rounded border border-[#4EAB9E]/30 hidden sm:inline">
-                  #{activeTag.name}
-                </span>
-              )}
             </div>
             <p className="text-xs text-[#8E867B] font-mono">
               {pendingTasksCount} tareas pendientes • {projectNotes.length} notas
@@ -665,7 +613,7 @@ export function ProjectFocusCard({
       {/* 1. COMPACT UNIFIED HEADER                                                 */}
       {/* ========================================================================= */}
       <div className="flex flex-wrap sm:flex-nowrap items-center justify-between gap-3 pb-1">
-        {/* Left: Project Selector / Title & Habitica Tag Badge */}
+        {/* Left: Project Selector / Title */}
         <div className="flex items-center gap-2 min-w-0">
           {activeProjects.length > 1 ? (
             <div className="relative flex items-center min-w-0 group">
@@ -673,7 +621,6 @@ export function ProjectFocusCard({
                 value={activeProject.id}
                 onChange={(e) => {
                   setSelectedProjectId(e.target.value);
-                  setSelectedTagId(null); // reset tag override to auto
                 }}
                 className="font-serif text-lg sm:text-xl font-bold text-[#F5F2EB] tracking-tight bg-transparent border-none focus:outline-none cursor-pointer hover:text-[#D99B43] transition-colors appearance-none pr-5 truncate max-w-44 sm:max-w-64"
                 title="Cambiar proyecto"
@@ -690,33 +637,6 @@ export function ProjectFocusCard({
             <h2 className="font-serif text-lg sm:text-xl font-bold text-[#F5F2EB] tracking-tight truncate max-w-44 sm:max-w-64">
               {activeProject.title}
             </h2>
-          )}
-
-          {/* Habitica Tag Dropdown / Badge */}
-          {tags.length > 0 ? (
-            <div className="flex items-center gap-1 font-mono text-[10px] text-[#4EAB9E] bg-[#141C1A] px-2 py-0.5 rounded-md border border-[#4EAB9E]/30 shrink-0">
-              <Tag className="h-2.5 w-2.5 shrink-0" />
-              <select
-                value={selectedTagId !== null ? selectedTagId : activeTag ? activeTag.id : "none"}
-                onChange={(e) => setSelectedTagId(e.target.value)}
-                className="bg-transparent border-none text-[#4EAB9E] font-bold focus:outline-none cursor-pointer pr-0.5 text-[10px]"
-              >
-                <option value="none" className="bg-[#181715] text-[#8E867B]">
-                  Proyecto
-                </option>
-                {tags.map((t) => (
-                  <option key={t.id} value={t.id} className="bg-[#181715] text-[#4EAB9E]">
-                    #{t.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-          ) : (
-            activeTag && (
-              <span className="font-mono text-[10px] text-[#4EAB9E] bg-[#141C1A] px-2 py-0.5 rounded-md border border-[#4EAB9E]/30 shrink-0">
-                #{activeTag.name}
-              </span>
-            )
           )}
         </div>
 
