@@ -22,7 +22,7 @@ export interface ClassifiedLink {
 }
 
 export function classifyUrl(rawUrl: string): ClassifiedLink {
-  let cleanUrl = rawUrl.trim();
+  let cleanUrl = rawUrl.trim().replace(/^[<(\[{'"]+|[>)\],}'".]+$/g, "");
   if (!cleanUrl) {
     return {
       url: "",
@@ -42,6 +42,17 @@ export function classifyUrl(rawUrl: string): ClassifiedLink {
     const parsed = new URL(cleanUrl);
     const host = parsed.hostname.toLowerCase().replace(/^www\./, "");
     const pathname = parsed.pathname.toLowerCase();
+
+    // Validate that hostname is not just a random word (must contain a dot with valid TLD or be localhost)
+    if (host !== "localhost" && (!host.includes(".") || host.split(".").pop()!.length < 2)) {
+      return {
+        url: "",
+        category: "general",
+        label: cleanUrl,
+        domain: host,
+        badgeStyle: "bg-[#181715] text-[#8E867B] border-[#2A2723]",
+      };
+    }
 
     // 1. Git / Code Repositories
     if (

@@ -22,7 +22,7 @@ import {
   ProjectItem,
   ProjectStatus,
 } from "@/lib/types";
-import { classifyUrl, extractAndClassifyLinks } from "@/lib/urlClassifier";
+import { classifyUrl, LinkCategory } from "@/lib/urlClassifier";
 import { getTaskPriorityInfo, parseTaskPrefix } from "@/lib/utils";
 import {
   ArrowLeft,
@@ -147,7 +147,7 @@ export function ProjectDetailView({
 interface ClassifiedProjectResource {
   url: string;
   label: string;
-  category: string;
+  category: LinkCategory;
   domain: string;
   badgeStyle: string;
   isCustom: boolean;
@@ -156,62 +156,29 @@ interface ClassifiedProjectResource {
   const metrics = matchTasksToProject(project, tasks);
   const statusMeta = STATUS_CONFIG[project.status] || STATUS_CONFIG.idea;
 
-  // Extract Resources
+  // Extract Resources (explicitly registered resources)
   const integrations = project.integrations;
-  const projectDescription = project.description;
 
-  const resourcesFromIntegrations = useMemo(() => {
+  const allResources = useMemo<ClassifiedProjectResource[]>(() => {
     const raw = integrations?.resources;
     if (!Array.isArray(raw)) return [];
     return raw
       .map((item: { url?: string; label?: string } | string) => {
-        if (typeof item === "string") {
-          const c = classifyUrl(item);
-          return {
-            url: c.url,
-            label: c.label,
-            category: c.category,
-            domain: c.domain,
-            badgeStyle: c.badgeStyle,
-            isCustom: true,
-          };
-        }
-        const c = classifyUrl(item.url || "");
+        const rawUrl = typeof item === "string" ? item : item.url || "";
+        const customLabel = typeof item === "string" ? undefined : item.label;
+        const c = classifyUrl(rawUrl);
+        if (!c.url) return null;
         return {
           url: c.url,
-          label: item.label || c.label,
+          label: customLabel || c.label,
           category: c.category,
           domain: c.domain,
           badgeStyle: c.badgeStyle,
           isCustom: true,
         };
       })
-      .filter((r) => Boolean(r.url));
+      .filter((r): r is ClassifiedProjectResource => Boolean(r));
   }, [integrations]);
-
-  const resourcesFromDesc = useMemo(() => {
-    if (!projectDescription) return [];
-    const extracted = extractAndClassifyLinks(projectDescription);
-    return extracted.map((e) => ({
-      url: e.url,
-      label: e.label,
-      category: e.category,
-      domain: e.domain,
-      badgeStyle: e.badgeStyle,
-      isCustom: false,
-    }));
-  }, [projectDescription]);
-
-  const allResources = useMemo(() => {
-    const map = new Map<string, ClassifiedProjectResource>();
-    for (const r of resourcesFromIntegrations) {
-      if (r.url) map.set(r.url, r);
-    }
-    for (const r of resourcesFromDesc) {
-      if (r.url && !map.has(r.url)) map.set(r.url, r);
-    }
-    return Array.from(map.values());
-  }, [resourcesFromIntegrations, resourcesFromDesc]);
 
   const filteredTasks = metrics.matchedTasks.filter((t) => {
     if (filterMode === "pending") return !t.completed;
