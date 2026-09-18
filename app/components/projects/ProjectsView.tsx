@@ -25,6 +25,7 @@ import {
   Zap,
 } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useMemo, useState, useTransition } from "react";
 
 interface ProjectsViewProps {
@@ -600,29 +601,46 @@ function ProjectCard({
   onUpdateStatus: (id: string, status: ProjectStatus) => void;
   onDelete: (id: string) => void;
 }) {
+  const router = useRouter();
   const metrics = matchTasksToProject(project, tasks);
   const isPermanent = project.status === "permanent";
 
+  const handleCardClick = (e: React.MouseEvent) => {
+    const target = e.target as HTMLElement;
+    if (target.closest("select, button, a, input, textarea")) {
+      return;
+    }
+    if (e.metaKey || e.ctrlKey) {
+      window.open(`/projects/${project.id}`, "_blank");
+      return;
+    }
+    router.push(`/projects/${project.id}`);
+  };
+
   return (
-    <Link
-      href={`/projects/${project.id}`}
+    <div
+      onClick={handleCardClick}
       className="group block rounded-xl border border-[#2A2723] bg-[#181715] hover:border-[#D99B43]/50 hover:bg-[#1D1B18] p-3.5 shadow-sm transition-all space-y-3 cursor-pointer"
     >
       {/* Card Top: Prefix, Status Dropdown, Delete */}
-      <div
-        className="flex items-center justify-between gap-1"
-        onClick={(e) => e.stopPropagation()}
-      >
+      <div className="flex items-center justify-between gap-1">
         <span className="rounded bg-[#221D16] border border-[#3D3425] px-1.5 py-0.5 font-mono text-[9px] text-[#D99B43] font-semibold truncate max-w-36">
           {metrics.canonicalPrefix}
         </span>
 
-        <div className="flex items-center gap-1">
+        <div
+          className="flex items-center gap-1"
+          onClick={(e) => e.stopPropagation()}
+          onMouseDown={(e) => e.stopPropagation()}
+        >
           <select
             value={project.status}
-            onChange={(e) =>
-              onUpdateStatus(project.id, e.target.value as ProjectStatus)
-            }
+            onClick={(e) => e.stopPropagation()}
+            onMouseDown={(e) => e.stopPropagation()}
+            onChange={(e) => {
+              e.stopPropagation();
+              onUpdateStatus(project.id, e.target.value as ProjectStatus);
+            }}
             className="text-[9px] font-mono font-bold px-1.5 py-0.5 rounded border border-[#2A2723] bg-[#121110] text-[#8E867B] hover:text-[#DDD6C9] focus:outline-none cursor-pointer"
           >
             {STATUS_SELECT_OPTIONS.map((opt) => (
@@ -634,7 +652,10 @@ function ProjectCard({
 
           <button
             type="button"
-            onClick={() => onDelete(project.id)}
+            onClick={(e) => {
+              e.stopPropagation();
+              onDelete(project.id);
+            }}
             className="opacity-0 group-hover:opacity-100 p-1 text-[#8E867B] hover:text-[#E05D52] transition-opacity cursor-pointer"
             title="Eliminar proyecto"
           >
@@ -645,9 +666,12 @@ function ProjectCard({
 
       {/* Card Title & Description */}
       <div className="space-y-1">
-        <h4 className="font-serif text-sm font-bold text-[#F5F2EB] group-hover:text-[#FFFFFF] transition-colors leading-snug line-clamp-2">
+        <Link
+          href={`/projects/${project.id}`}
+          className="font-serif text-sm font-bold text-[#F5F2EB] group-hover:text-[#FFFFFF] transition-colors leading-snug line-clamp-2 block"
+        >
           {project.title}
-        </h4>
+        </Link>
         {project.description && (
           <p className="text-xs text-[#8E867B] line-clamp-2 font-sans leading-relaxed">
             {project.description}
@@ -679,6 +703,6 @@ function ProjectCard({
           </div>
         )}
       </div>
-    </Link>
+    </div>
   );
 }
