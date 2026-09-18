@@ -15,7 +15,6 @@ import {
   FolderGit2,
   Kanban,
   LayoutGrid,
-  Lightbulb,
   ListTodo,
   PauseCircle,
   Plus,
@@ -47,10 +46,10 @@ const BOARD_COLUMNS: BoardColumn[] = [
   {
     id: "idea",
     statuses: ["idea"],
-    title: "Ideas",
+    title: "To-Do",
     defaultStatus: "idea",
     badgeStyle: "border-[#8E867B]/30 bg-[#1A1917] text-[#C2BAAD]",
-    icon: <Lightbulb className="size-3.5 text-[#C2BAAD]" />,
+    icon: <ListTodo className="size-3.5 text-[#C2BAAD]" />,
   },
   {
     id: "in_progress",
@@ -71,7 +70,7 @@ const BOARD_COLUMNS: BoardColumn[] = [
 ];
 
 const STATUS_SELECT_OPTIONS: { value: ProjectStatus; label: string }[] = [
-  { value: "idea", label: "Idea" },
+  { value: "idea", label: "To-Do" },
   { value: "in_progress", label: "En Desarrollo" },
   { value: "permanent", label: "Permanente" },
   { value: "paused", label: "Pausado" },
@@ -418,7 +417,7 @@ export function ProjectsView({ data, onRefresh }: ProjectsViewProps) {
               },
               {
                 id: "idea",
-                label: "Ideas",
+                label: "To-Do",
                 count: filteredProjects.filter((p) => p.status === "idea").length,
               },
               {
@@ -527,7 +526,7 @@ export function ProjectsView({ data, onRefresh }: ProjectsViewProps) {
                   onChange={(e) => setNewStatus(e.target.value as ProjectStatus)}
                   className="w-full rounded-lg border border-[#2A2723] bg-[#121110] p-2 text-xs text-[#F5F2EB] focus:outline-none focus:border-[#D99B43] font-mono"
                 >
-                  <option value="idea">Idea</option>
+                  <option value="idea">To-Do</option>
                   <option value="in_progress">En Desarrollo</option>
                   <option value="permanent">Permanente</option>
                   <option value="paused">Pausado</option>

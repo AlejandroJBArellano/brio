@@ -90,7 +90,7 @@ const STATUS_CONFIG: Record<
     badge: "border-[#7EA35A]/30 bg-[#1C2219] text-[#7EA35A]",
   },
   idea: {
-    label: "Idea",
+    label: "To-Do",
     color: "text-[#C2BAAD]",
     badge: "border-[#8E867B]/30 bg-[#1A1917] text-[#C2BAAD]",
   },
@@ -494,7 +494,7 @@ export function ProjectDetailView({
                   <option value="completed">Completado</option>
                   <option value="launched">Lanzado</option>
                   <option value="permanent">Permanente</option>
-                  <option value="idea">Idea</option>
+                  <option value="idea">To-Do</option>
                   <option value="paused">Pausado</option>
                 </select>
               </div>
