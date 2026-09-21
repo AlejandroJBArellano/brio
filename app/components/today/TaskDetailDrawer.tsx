@@ -21,6 +21,7 @@ import { parseTaskMetadata } from "@/lib/taskMetadata";
 import { ContextualNote, HabiticaTask } from "@/lib/types";
 import {
   AlertCircle,
+  Calendar,
   Check,
   CheckCircle2,
   Copy,
@@ -70,6 +71,7 @@ export function TaskDetailDrawer({
   const [isEditingTask, setIsEditingTask] = useState(false);
   const [taskTitle, setTaskTitle] = useState(task?.text || "");
   const [taskNotes, setTaskNotes] = useState(task?.notes || "");
+  const [taskDueDate, setTaskDueDate] = useState(task?.date ? task.date.slice(0, 10) : "");
   const [taskPriority, setTaskPriority] = useState<number>(task?.priority ?? 1.5);
   const [previewTaskNotes, setPreviewTaskNotes] = useState(false);
   const [isSavingTask, setIsSavingTask] = useState(false);
@@ -255,6 +257,7 @@ export function TaskDetailDrawer({
         text: taskTitle.trim(),
         notes: taskNotes,
         priority: taskPriority,
+        date: taskDueDate || "",
       });
       if (res.success) {
         soundFx.taskComplete();
@@ -508,6 +511,7 @@ export function TaskDetailDrawer({
                     setTaskTitle(activeTask.text);
                     setTaskNotes(activeTask.notes || "");
                     setTaskPriority(activeTask.priority ?? 1.5);
+                    setTaskDueDate(activeTask.date ? activeTask.date.slice(0, 10) : "");
                     setIsEditingTask(true);
                   }}
                   className="flex items-center gap-1 text-xs font-mono text-[#D99B43] hover:text-[#E8AF59] bg-[#221D16] px-2.5 py-1 rounded-md border border-[#D99B43]/30 transition-colors cursor-pointer"
@@ -531,8 +535,8 @@ export function TaskDetailDrawer({
           {/* VIEW MODE vs EDIT MODE */}
           {!isEditingTask ? (
             <>
-              {/* Title */}
-              <div>
+              {/* Title & Metadata */}
+              <div className="space-y-2">
                 <div className="inline-flex items-center gap-2.5 flex-wrap">
                   <h3
                     onClick={handleCopyTitle}
@@ -551,6 +555,31 @@ export function TaskDetailDrawer({
                     </span>
                   )}
                 </div>
+
+                {activeTask.date && (
+                  <div className="flex items-center gap-2 pt-0.5">
+                    <span className="inline-flex items-center gap-1.5 rounded-md border border-[#3D3425] bg-[#221D16] px-2.5 py-1 font-mono text-xs text-[#D99B43]">
+                      <Calendar className="size-3.5 text-[#D99B43]" />
+                      <span>
+                        Fecha límite:{" "}
+                        {(() => {
+                          try {
+                            const d = new Date(activeTask.date);
+                            return isNaN(d.getTime())
+                              ? activeTask.date.slice(0, 10)
+                              : d.toLocaleDateString("es-MX", {
+                                  day: "numeric",
+                                  month: "long",
+                                  year: "numeric",
+                                });
+                          } catch {
+                            return activeTask.date.slice(0, 10);
+                          }
+                        })()}
+                      </span>
+                    </span>
+                  </div>
+                )}
               </div>
 
               {/* Notes / Description from Habitica */}
@@ -612,6 +641,31 @@ export function TaskDetailDrawer({
                       {p.label}
                     </button>
                   ))}
+                </div>
+              </div>
+
+              {/* Edit Due Date */}
+              <div className="space-y-1.5">
+                <label className="text-[10px] font-mono uppercase tracking-wider text-[#8E867B]">
+                  Fecha Límite (Due Date)
+                </label>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="date"
+                    value={taskDueDate}
+                    onChange={(e) => setTaskDueDate(e.target.value)}
+                    className="w-full rounded-lg border border-[#2A2723] bg-[#121110] px-3 py-2 text-xs text-[#F5F2EB] font-mono focus:border-[#D99B43] focus:outline-none"
+                  />
+                  {taskDueDate && (
+                    <button
+                      type="button"
+                      onClick={() => setTaskDueDate("")}
+                      className="p-2 text-xs text-[#8E867B] hover:text-[#E05D52] transition-colors rounded-lg border border-[#2A2723] bg-[#121110] cursor-pointer shrink-0"
+                      title="Quitar fecha"
+                    >
+                      <X className="size-3.5" />
+                    </button>
+                  )}
                 </div>
               </div>
 

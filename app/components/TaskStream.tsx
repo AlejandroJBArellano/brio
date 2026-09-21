@@ -761,6 +761,7 @@ export function TaskStream({
 
                 <div className="rounded-xl border border-[#2A2723] bg-[#141311] overflow-hidden shadow-lg">
                   <TableHeader
+                    dateColumnLabel="Racha"
                     sortField={sortField}
                     sortDirection={sortDirection}
                     onSort={handleSort}
@@ -846,6 +847,7 @@ export function TaskStream({
                         {!isCollapsed && (
                           <div>
                             <TableHeader
+                              dateColumnLabel="Fecha"
                               sortField={sortField}
                               sortDirection={sortDirection}
                               onSort={handleSort}
@@ -889,6 +891,7 @@ export function TaskStream({
 
                 <div className="rounded-xl border border-[#2A2723] bg-[#141311] overflow-hidden shadow-lg">
                   <TableHeader
+                    dateColumnLabel="Métrica"
                     sortField={sortField}
                     sortDirection={sortDirection}
                     onSort={handleSort}
@@ -913,6 +916,7 @@ export function TaskStream({
           <div className="rounded-xl border border-[#2A2723] bg-[#141311] overflow-hidden shadow-lg">
             <TableHeader
               showTypeColumn={activeTab === "all"}
+              dateColumnLabel={activeTab === "todos" ? "Fecha" : activeTab === "dailies" ? "Racha" : activeTab === "habits" ? "Métrica" : "Fecha / Métrica"}
               sortField={sortField}
               sortDirection={sortDirection}
               onSort={handleSort}
@@ -1008,11 +1012,13 @@ export function TaskStream({
  */
 export function TableHeader({
   showTypeColumn = false,
+  dateColumnLabel = "Fecha / Métrica",
   sortField,
   sortDirection,
   onSort,
 }: {
   showTypeColumn?: boolean;
+  dateColumnLabel?: string;
   sortField?: SortField | null;
   sortDirection?: SortDirection | null;
   onSort?: (field: SortField) => void;
@@ -1086,10 +1092,10 @@ export function TableHeader({
         <button
           type="button"
           onClick={() => onSort?.("date")}
-          className={`w-16 justify-end ${getHeaderClass("date")}`}
-          title="Ordenar por Métrica / Fecha"
+          className={`w-20 justify-end ${getHeaderClass("date")}`}
+          title="Ordenar por Fecha o Métrica"
         >
-          <span>Métrica</span>
+          <span>{dateColumnLabel}</span>
           {renderSortIndicator("date")}
         </button>
       </div>

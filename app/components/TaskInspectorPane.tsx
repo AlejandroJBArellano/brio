@@ -57,6 +57,7 @@ function TaskInspectorPaneContent({
 }) {
   const [title, setTitle] = useState(task.text || "");
   const [notes, setNotes] = useState(task.notes || "");
+  const [dueDate, setDueDate] = useState(task.date ? task.date.slice(0, 10) : "");
   const [previewNotes, setPreviewNotes] = useState(false);
   const [priority, setPriority] = useState<number>(task.priority || 1);
   const [newChecklistText, setNewChecklistText] = useState("");
@@ -88,13 +89,12 @@ function TaskInspectorPaneContent({
   ) => {
     const updated = {
       ...repeatDays,
-      [dayKey]: !(repeatDays[dayKey] ?? true),
+      [dayKey]: !repeatDays[dayKey],
     };
     setRepeatDays(updated);
     startTransition(async () => {
       await updateTaskAction(task.id, {
         repeat: updated,
-        frequency: "weekly",
       });
       setHasSaved(true);
       setTimeout(() => setHasSaved(false), 2000);
@@ -111,6 +111,7 @@ function TaskInspectorPaneContent({
         text: title,
         notes: notes,
         priority: priority,
+        date: dueDate || "",
       });
       if (res.success) {
         setHasSaved(true);
@@ -267,6 +268,48 @@ function TaskInspectorPaneContent({
           </div>
         </div>
 
+        {/* Due Date for To-Dos */}
+        {task.type === "todo" && (
+          <div>
+            <label className="block text-[11px] font-semibold uppercase tracking-wider text-[#8E867B] mb-1 font-mono">
+              Fecha Límite (Due Date)
+            </label>
+            <div className="flex items-center gap-2">
+              <input
+                type="date"
+                value={dueDate}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  setDueDate(val);
+                  startTransition(async () => {
+                    await updateTaskAction(task.id, { date: val });
+                    setHasSaved(true);
+                    setTimeout(() => setHasSaved(false), 2000);
+                  });
+                }}
+                className="w-full rounded-lg border border-[#2A2723] bg-[#121110] p-2 text-xs text-[#DDD6C9] focus:border-[#D99B43] focus:outline-none font-mono"
+              />
+              {dueDate && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setDueDate("");
+                    startTransition(async () => {
+                      await updateTaskAction(task.id, { date: "" });
+                      setHasSaved(true);
+                      setTimeout(() => setHasSaved(false), 2000);
+                    });
+                  }}
+                  className="p-2 text-xs text-[#8E867B] hover:text-[#E05D52] transition-colors rounded-lg border border-[#2A2723] bg-[#121110] cursor-pointer"
+                  title="Quitar fecha"
+                >
+                  <X className="size-3.5" />
+                </button>
+              )}
+            </div>
+          </div>
+        )}
+
         {/* Daily Streak & Habit Counter badges */}
         {task.type === "daily" && (
           <>
@@ -288,7 +331,7 @@ function TaskInspectorPaneContent({
                   <span className="font-semibold">Días que repite (Semanal)</span>
                 </div>
                 <span className="text-[10px] font-mono text-[#D99B43]">
-                  {task.isDue !== false ? "🟢 Toca hoy" : "😴 Descanso hoy"}
+                  {task.isDue !== false ? "Toca hoy" : "Descanso hoy"}
                 </span>
               </div>
 

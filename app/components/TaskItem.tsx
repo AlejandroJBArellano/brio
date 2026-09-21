@@ -305,25 +305,34 @@ export function TaskItem({
         )}
 
         {/* Indicador de Fecha Límite (To-Dos) */}
-        {task.type === "todo" && task.date && (
-          <span
-            className="hidden sm:inline-flex items-center gap-1 rounded border border-[#2E2A25] bg-[#191815] px-1.5 py-0.5 font-mono text-[9px] font-medium text-[#A69E91]"
-            title={`Fecha límite: ${task.date.slice(0, 10)}`}
-          >
-            <Calendar className="size-2.5 text-[#8E867B]" />
-            <span>
-              {(() => {
-                try {
-                  const d = new Date(task.date);
-                  return isNaN(d.getTime())
-                    ? task.date.slice(0, 10)
-                    : d.toLocaleDateString(undefined, { month: "short", day: "numeric" });
-                } catch {
-                  return task.date.slice(0, 10);
-                }
-              })()}
+        {task.type === "todo" && (
+          task.date ? (
+            <span
+              className="inline-flex items-center gap-1 rounded border border-[#3D3425] bg-[#221D16] px-1.5 py-0.5 font-mono text-[9px] font-medium text-[#D99B43]"
+              title={`Fecha límite: ${task.date.slice(0, 10)}`}
+            >
+              <Calendar className="size-2.5 text-[#D99B43]" />
+              <span>
+                {(() => {
+                  try {
+                    const d = new Date(task.date);
+                    return isNaN(d.getTime())
+                      ? task.date.slice(0, 10)
+                      : d.toLocaleDateString("es-MX", { month: "short", day: "numeric" });
+                  } catch {
+                    return task.date.slice(0, 10);
+                  }
+                })()}
+              </span>
             </span>
-          </span>
+          ) : (
+            <span
+              className="hidden sm:inline-flex items-center gap-1 text-[9px] font-mono text-[#4A453E]"
+              title="Sin fecha límite asignada (haz clic para editar)"
+            >
+              <span>—</span>
+            </span>
+          )
         )}
 
         {/* Flecha de Selección / Inspector */}

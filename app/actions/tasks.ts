@@ -344,13 +344,16 @@ export async function updateTaskAction(
     const sql = getDb();
     const cleanText = payload.text !== undefined ? stripEmojis(payload.text) : undefined;
     const cleanNotes = payload.notes !== undefined ? stripEmojis(payload.notes, true) : undefined;
+    const hasDate = payload.date !== undefined;
+    const dueDate = hasDate ? (payload.date ? new Date(payload.date).toISOString() : null) : null;
 
-    if (cleanText !== undefined || cleanNotes !== undefined || payload.priority !== undefined) {
+    if (cleanText !== undefined || cleanNotes !== undefined || payload.priority !== undefined || hasDate) {
       await sql`
         UPDATE tasks
         SET text = COALESCE(${cleanText ?? null}, text),
             notes = COALESCE(${cleanNotes ?? null}, notes),
             priority = COALESCE(${payload.priority ?? null}, priority),
+            due_date = CASE WHEN ${hasDate} THEN ${dueDate} ELSE due_date END,
             updated_at = NOW()
         WHERE id = ${taskId};
       `;
