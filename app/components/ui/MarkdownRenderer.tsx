@@ -48,7 +48,9 @@ type BlockToken =
 // ----------------------------------------------------------------------
 
 function parseMarkdownBlocks(raw: string): BlockToken[] {
-  const lines = raw.split(/\r?\n/);
+  // Normalize literal escaped \n if text has escaped newlines without real ones
+  const normalized = raw.includes("\\n") && !raw.includes("\n") ? raw.replace(/\\n/g, "\n") : raw;
+  const lines = normalized.split(/\r?\n/);
   const blocks: BlockToken[] = [];
 
   let inCode = false;

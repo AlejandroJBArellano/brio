@@ -509,14 +509,14 @@ export function ProjectsView({ data, onRefresh }: ProjectsViewProps) {
 
               <div className="space-y-1">
                 <label className="block text-xs font-mono text-[#8E867B]">
-                  Descripción (Opcional)
+                  Descripción (Markdown opcional)
                 </label>
                 <textarea
-                  rows={2}
+                  rows={3}
                   value={newDescription}
                   onChange={(e) => setNewDescription(e.target.value)}
-                  placeholder="Resumen del alcance o tecnología..."
-                  className="w-full rounded-lg border border-[#2A2723] bg-[#121110] p-2.5 text-xs text-[#F5F2EB] placeholder:text-[#8E867B] focus:outline-none focus:border-[#D99B43] resize-none font-sans"
+                  placeholder="Resumen del alcance, especificaciones o tecnología en Markdown..."
+                  className="w-full rounded-lg border border-[#2A2723] bg-[#121110] p-2.5 text-xs text-[#F5F2EB] placeholder:text-[#8E867B] focus:outline-none focus:border-[#D99B43] resize-y font-mono"
                 />
               </div>
 

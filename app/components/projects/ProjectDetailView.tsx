@@ -35,6 +35,7 @@ import {
   ArrowLeft,
   Edit2,
   ExternalLink,
+  Eye,
   FileText,
   FolderGit2,
   Globe,
@@ -45,6 +46,7 @@ import {
   Trash2,
   X
 } from "lucide-react";
+import { NoteContentRenderer } from "@/app/components/notes/NoteContentRenderer";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useMemo, useState, useTransition } from "react";
@@ -159,6 +161,7 @@ export function ProjectDetailView({
   const [isEditing, setIsEditing] = useState(false);
   const [editTitle, setEditTitle] = useState(project.title);
   const [editDescription, setEditDescription] = useState(project.description || "");
+  const [previewDescription, setPreviewDescription] = useState(false);
   const [editStatus, setEditStatus] = useState<ProjectStatus>(project.status);
   const [editCanonicalPrefix, setEditCanonicalPrefix] = useState(project.canonicalPrefix || "");
   const [editTaskPrefixes, setEditTaskPrefixes] = useState(
@@ -441,9 +444,9 @@ export function ProjectDetailView({
               </h1>
 
               {project.description && (
-                <p className="text-xs sm:text-sm text-[#8E867B] max-w-3xl leading-relaxed">
-                  {project.description}
-                </p>
+                <div className="max-w-4xl text-xs sm:text-sm text-[#DDD6C9] leading-relaxed pt-1">
+                  <NoteContentRenderer content={project.description} />
+                </div>
               )}
             </div>
 
@@ -500,14 +503,38 @@ export function ProjectDetailView({
               </div>
             </div>
 
-            <div className="space-y-1">
-              <label className="block text-xs font-mono text-[#8E867B]">Descripción:</label>
-              <textarea
-                rows={2}
-                value={editDescription}
-                onChange={(e) => setEditDescription(e.target.value)}
-                className="w-full rounded-lg border border-[#2A2723] bg-[#121110] p-2 text-xs text-[#F5F2EB] focus:outline-none focus:border-[#D99B43] resize-none font-sans"
-              />
+            <div className="space-y-1.5">
+              <div className="flex items-center justify-between">
+                <label className="block text-xs font-mono text-[#8E867B]">
+                  Descripción (Markdown):
+                </label>
+                <button
+                  type="button"
+                  onClick={() => setPreviewDescription(!previewDescription)}
+                  className="text-[11px] font-mono text-[#D99B43] hover:underline flex items-center gap-1 cursor-pointer"
+                >
+                  <Eye className="size-3" />
+                  <span>{previewDescription ? "Escribir" : "Previa"}</span>
+                </button>
+              </div>
+
+              {previewDescription ? (
+                <div className="rounded-lg border border-[#2A2723] bg-[#121110] p-3 min-h-24 max-h-64 overflow-y-auto text-xs text-[#DDD6C9]">
+                  {editDescription.trim() ? (
+                    <NoteContentRenderer content={editDescription} />
+                  ) : (
+                    <p className="text-xs text-[#8E867B] italic">Sin descripción.</p>
+                  )}
+                </div>
+              ) : (
+                <textarea
+                  rows={4}
+                  value={editDescription}
+                  onChange={(e) => setEditDescription(e.target.value)}
+                  placeholder="Descripción, objetivos y especificaciones del proyecto en Markdown..."
+                  className="w-full rounded-lg border border-[#2A2723] bg-[#121110] p-2.5 text-xs text-[#F5F2EB] placeholder:text-[#8E867B] focus:outline-none focus:border-[#D99B43] resize-y font-mono"
+                />
+              )}
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -797,9 +824,9 @@ export function ProjectDetailView({
                         <h4 className="font-serif text-xs sm:text-sm font-bold text-[#F5F2EB]">
                           {note.title}
                         </h4>
-                        <p className="text-xs text-[#8E867B] font-sans whitespace-pre-wrap leading-relaxed line-clamp-4">
-                          {note.content}
-                        </p>
+                        <div className="text-xs text-[#DDD6C9] font-sans leading-relaxed line-clamp-4">
+                          <NoteContentRenderer content={note.content} maxTextLines={4} />
+                        </div>
                       </div>
 
                       <div className="pt-2 border-t border-[#2A2723]/50 text-[9px] font-mono text-[#8E867B]">
