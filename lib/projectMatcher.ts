@@ -21,16 +21,6 @@ export function getProjectKeywords(project: ProjectItem): {
   const cleanTitle = project.title.split(/[—\-:]/)[0].trim();
   const titleLower = cleanTitle.toLowerCase();
 
-  // Extract custom prefixes configured by the user on the project
-  const userPrefixes = Array.isArray(project.taskPrefixes)
-    ? project.taskPrefixes.map((p) => p.trim().toLowerCase()).filter(Boolean)
-    : [];
-
-  // Include user-defined prefixes and clean title (deduplicated)
-  const prefixes = userPrefixes.length > 0
-    ? Array.from(new Set([...userPrefixes, titleLower]))
-    : [titleLower];
-
   // Canonical bracket prefix (e.g. "[Hybridge]", "[Brio]")
   let canonicalPrefix = project.canonicalPrefix?.trim();
   if (canonicalPrefix) {
@@ -39,6 +29,18 @@ export function getProjectKeywords(project: ProjectItem): {
   } else {
     canonicalPrefix = `[${cleanTitle}]`;
   }
+
+  const canonicalClean = canonicalPrefix.replace(/[\[\]]/g, "").trim().toLowerCase();
+
+  // Extract custom prefixes configured by the user on the project
+  const userPrefixes = Array.isArray(project.taskPrefixes)
+    ? project.taskPrefixes.map((p) => p.trim().toLowerCase()).filter(Boolean)
+    : [];
+
+  // Include canonical prefix, user-defined prefixes and clean title (deduplicated)
+  const prefixes = Array.from(
+    new Set([canonicalClean, ...userPrefixes, titleLower].filter(Boolean))
+  );
 
   return {
     prefixes,
