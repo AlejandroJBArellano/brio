@@ -7,8 +7,6 @@ import {
 import { quickAdjustPortionAction, toggleNutritionHabitAction } from "@/app/actions/nutrition";
 import { createSingleTaskAction } from "@/app/actions/tasks";
 import {
-  DEFAULT_FINANCE_ACCOUNTS,
-  DEFAULT_FINANCE_CATEGORIES,
   DEFAULT_USER_SUPPLEMENTS,
   FinanceAccount,
   FinanceCategory,
@@ -18,17 +16,31 @@ import {
 import { FinanceIcon } from "@/app/components/finance/FinanceIcon";
 import { getTodayDateStr } from "@/lib/dateUtils";
 import {
+  Activity,
+  Apple,
+  Ban,
   Check,
   CheckSquare,
+  Clock,
+  Coffee,
+  CookingPot,
   DollarSign,
   Droplet,
+  Fish,
+  FlaskConical,
+  Leaf,
   Loader2,
+  Pill,
   Salad,
+  Sparkles,
+  UtensilsCrossed,
+  Wheat,
   X,
   Zap,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useEffect, useState, useTransition } from "react";
+import { soundFx } from "@/lib/soundFx";
+import React, { useEffect, useState, useTransition } from "react";
 
 type SheetTab = "expense" | "task" | "water" | "nutrition";
 
@@ -41,20 +53,18 @@ interface MobileBottomSheetProps {
   accounts?: FinanceAccount[];
 }
 
-function getSupplementEmoji(name: string, id: string): string {
+function getSupplementIcon(name: string, id: string): React.ComponentType<{ className?: string }> {
   const lower = (name + " " + id).toLowerCase();
-  if (lower.includes("ensalada") || lower.includes("salad")) return "🥗";
-  if (lower.includes("procesado") || lower.includes("clean") || lower.includes("chatarra")) return "🚫";
-  if (lower.includes("creatina") || lower.includes("creatine")) return "⚡";
-  if (lower.includes("omega") || lower.includes("pescado") || lower.includes("fish")) return "🐟";
-  if (lower.includes("b12") || lower.includes("vitamina b")) return "💊";
-  if (lower.includes("magnesio") || lower.includes("zinc") || lower.includes("calcio")) return "🧪";
-  if (lower.includes("proteina") || lower.includes("shake") || lower.includes("whey")) return "🥤";
-  if (lower.includes("multivitamin") || lower.includes("vitamina") || lower.includes("vitamin")) return "💊";
-  if (lower.includes("cafe") || lower.includes("te") || lower.includes("matcha")) return "🍵";
-  if (lower.includes("ayuno") || lower.includes("fasting")) return "⏱️";
-  if (lower.includes("agua") || lower.includes("water") || lower.includes("hidrata")) return "💧";
-  return "✨";
+  if (lower.includes("ensalada") || lower.includes("salad")) return Salad;
+  if (lower.includes("procesado") || lower.includes("clean") || lower.includes("chatarra")) return Ban;
+  if (lower.includes("creatina") || lower.includes("creatine")) return Zap;
+  if (lower.includes("omega") || lower.includes("pescado") || lower.includes("fish")) return Fish;
+  if (lower.includes("b12") || lower.includes("vitamina") || lower.includes("vitamin") || lower.includes("suplemento")) return Pill;
+  if (lower.includes("magnesio") || lower.includes("zinc") || lower.includes("calcio")) return FlaskConical;
+  if (lower.includes("cafe") || lower.includes("te") || lower.includes("matcha")) return Coffee;
+  if (lower.includes("ayuno") || lower.includes("fasting")) return Clock;
+  if (lower.includes("agua") || lower.includes("water") || lower.includes("hidrata")) return Droplet;
+  return Activity;
 }
 
 export function MobileBottomSheet({
@@ -83,21 +93,15 @@ export function MobileBottomSheet({
       setDbAccounts(accounts);
     }
 
-    if (isOpen) {
-      if (categories.length === 0 || accounts.length === 0) {
-        fetchFinanceCatalogAction()
-          .then((catalog) => {
-            if (catalog.categories && catalog.categories.length > 0) {
-              setDbCategories(catalog.categories);
-            }
-            if (catalog.accounts && catalog.accounts.length > 0) {
-              setDbAccounts(catalog.accounts);
-            }
-          })
-          .catch((err) => {
-            console.error("[MobileBottomSheet] Failed to load finance catalog:", err);
-          });
-      }
+    if (isOpen && (categories.length === 0 || accounts.length === 0)) {
+      fetchFinanceCatalogAction()
+        .then((catalog) => {
+          setDbCategories(catalog.categories || []);
+          setDbAccounts(catalog.accounts || []);
+        })
+        .catch((err) => {
+          console.error("[MobileBottomSheet] Failed to load finance catalog:", err);
+        });
 
       fetchSupplementsCatalogAction()
         .then((supps) => {
@@ -111,20 +115,15 @@ export function MobileBottomSheet({
     }
   }, [isOpen, categories, accounts]);
 
-  const effectiveCategories =
-    dbCategories.length > 0 ? dbCategories : DEFAULT_FINANCE_CATEGORIES;
-
-  const effectiveAccounts =
-    dbAccounts.length > 0 ? dbAccounts : DEFAULT_FINANCE_ACCOUNTS;
-
-  const effectiveSupplements =
-    dbSupplements.length > 0 ? dbSupplements : DEFAULT_USER_SUPPLEMENTS;
+  const effectiveCategories = dbCategories;
+  const effectiveAccounts = dbAccounts;
+  const effectiveSupplements = dbSupplements;
 
   // Expense form state
-  const [amount, setAmount] = useState<string>("");
+  const [amount, setAmount] = useState<string>("" );
   const [concept, setConcept] = useState<string>("");
-  const [category, setCategory] = useState<string>(effectiveCategories[0]?.id || "comida");
-  const [account, setAccount] = useState<string>(effectiveAccounts[0]?.id || "nu");
+  const [category, setCategory] = useState<string>(effectiveCategories[0]?.id || "");
+  const [account, setAccount] = useState<string>(effectiveAccounts[0]?.id || "");
   const [isAntExpense, setIsAntExpense] = useState<boolean>(true);
 
   // Sync selected category and account when dynamic catalog loads
@@ -161,6 +160,7 @@ export function MobileBottomSheet({
     const numAmount = parseFloat(amount);
     if (!numAmount || numAmount <= 0) return;
 
+    soundFx.transactionAdded();
     startTransition(async () => {
       const res = await createTransactionAction({
         amount: numAmount,
@@ -172,14 +172,10 @@ export function MobileBottomSheet({
       });
 
       if (res.success) {
-        setSuccessMessage(`-$${numAmount.toFixed(2)} MXN registrado`);
-        setTimeout(() => {
-          setAmount("");
-          setConcept("");
-          setSuccessMessage(null);
-          onClose();
-          router.refresh();
-        }, 700);
+        setAmount("");
+        setConcept("");
+        onClose();
+        router.refresh();
       }
     });
   };
@@ -188,6 +184,7 @@ export function MobileBottomSheet({
     e.preventDefault();
     if (!taskText.trim()) return;
 
+    soundFx.click();
     startTransition(async () => {
       let formattedText = taskText.trim();
       if (taskPriority === "urgent") {
@@ -198,49 +195,40 @@ export function MobileBottomSheet({
 
       const res = await createSingleTaskAction(formattedText);
       if (res.success) {
-        setSuccessMessage("Tarea añadida a Habitica");
-        setTimeout(() => {
-          setTaskText("");
-          setSuccessMessage(null);
-          onClose();
-          router.refresh();
-        }, 700);
+        soundFx.taskComplete();
+        setTaskText("");
+        onClose();
+        router.refresh();
       }
     });
   };
 
   const handleAddWater = (ml: number) => {
+    soundFx.waterLogged();
     startTransition(async () => {
       const res = await logWaterAction(ml);
       if (res.success) {
-        setSuccessMessage(`+${ml}ml de agua registrados`);
-        setTimeout(() => {
-          setSuccessMessage(null);
-          onClose();
-          router.refresh();
-        }, 700);
+        onClose();
+        router.refresh();
       }
     });
   };
 
-
-  const handleQuickPortion = (group: FoodGroupKey, name: string) => {
+  const handleQuickPortion = (group: FoodGroupKey, _name: string) => {
     const todayStr = getTodayDateStr();
+    soundFx.click();
     startTransition(async () => {
       const res = await quickAdjustPortionAction(todayStr, group, 1.0);
       if (res.success) {
-        setSuccessMessage(`+1 ${name} registrado`);
-        setTimeout(() => {
-          setSuccessMessage(null);
-          onClose();
-          router.refresh();
-        }, 700);
+        onClose();
+        router.refresh();
       }
     });
   };
 
   const handleQuickSupplementOrHabit = (item: UserSupplement) => {
     const todayStr = getTodayDateStr();
+    soundFx.supplementChecked();
     startTransition(async () => {
       if (item.id === "salad" || item.id === "dailySalad") {
         await toggleNutritionHabitAction(todayStr, "dailySalad");
@@ -252,12 +240,8 @@ export function MobileBottomSheet({
 
       const res = await toggleSupplementAction(item.id);
       if (res.success) {
-        setSuccessMessage(`${item.name} registrado`);
-        setTimeout(() => {
-          setSuccessMessage(null);
-          onClose();
-          router.refresh();
-        }, 700);
+        onClose();
+        router.refresh();
       }
     });
   };
@@ -413,7 +397,7 @@ export function MobileBottomSheet({
                       }`}
                     >
                       <FinanceIcon icon={c.icon || "tag"} className="h-3.5 w-3.5 shrink-0" />
-                      <span>#{c.id}</span>
+                      <span>{c.name || c.id}</span>
                     </button>
                   ))}
                 </div>
@@ -437,7 +421,7 @@ export function MobileBottomSheet({
                         icon={acc.icon || (acc.type === "cash" ? "banknote" : "credit-card")}
                         className="h-3.5 w-3.5 shrink-0"
                       />
-                      <span>@{acc.id}</span>
+                      <span>{acc.name || acc.id}</span>
                     </button>
                   ))}
                 </div>
@@ -532,25 +516,28 @@ export function MobileBottomSheet({
                 </span>
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                   {[
-                    { key: "fruits" as const, name: "Fruta", icon: "🍎", color: "border-[#E05D52]/30 bg-[#221716] text-[#E05D52]" },
-                    { key: "vegetables" as const, name: "Verdura", icon: "🥦", color: "border-[#7EA35A]/30 bg-[#1C2219] text-[#7EA35A]" },
-                    { key: "cereals" as const, name: "Cereal", icon: "🌾", color: "border-[#D99B43]/30 bg-[#221D16] text-[#D99B43]" },
-                    { key: "legumes" as const, name: "Legumbre/Tofu", icon: "🫘", color: "border-[#4EAB9E]/30 bg-[#162121] text-[#4EAB9E]" },
-                    { key: "fats_seeds" as const, name: "Semillas/Grasa", icon: "🥑", color: "border-[#7EA35A]/30 bg-[#1C2219] text-[#7EA35A]" },
-                    { key: "leafy_greens" as const, name: "Hojas", icon: "🥬", color: "border-[#7EA35A]/30 bg-[#1C2219] text-[#7EA35A]" },
-                    { key: "tubers" as const, name: "Tubérculo", icon: "🍠", color: "border-[#D99B43]/30 bg-[#221D16] text-[#D99B43]" },
-                  ].map((item) => (
-                    <button
-                      key={item.key}
-                      type="button"
-                      onClick={() => handleQuickPortion(item.key, item.name)}
-                      disabled={isPending}
-                      className={`flex flex-col items-center justify-center p-3 rounded-lg border text-xs font-semibold transition-all active:scale-95 cursor-pointer ${item.color}`}
-                    >
-                      <span className="text-xl mb-1">{item.icon}</span>
-                      <span>+1 {item.name}</span>
-                    </button>
-                  ))}
+                    { key: "fruits" as const, name: "Fruta", icon: Apple, color: "border-[#E05D52]/30 bg-[#221716] text-[#E05D52]" },
+                    { key: "vegetables" as const, name: "Verdura", icon: Salad, color: "border-[#7EA35A]/30 bg-[#1C2219] text-[#7EA35A]" },
+                    { key: "cereals" as const, name: "Cereal", icon: Wheat, color: "border-[#D99B43]/30 bg-[#221D16] text-[#D99B43]" },
+                    { key: "legumes" as const, name: "Legumbre/Tofu", icon: CookingPot, color: "border-[#4EAB9E]/30 bg-[#162121] text-[#4EAB9E]" },
+                    { key: "fats_seeds" as const, name: "Semillas/Grasa", icon: Sparkles, color: "border-[#7EA35A]/30 bg-[#1C2219] text-[#7EA35A]" },
+                    { key: "leafy_greens" as const, name: "Hojas", icon: Leaf, color: "border-[#7EA35A]/30 bg-[#1C2219] text-[#7EA35A]" },
+                    { key: "tubers" as const, name: "Tubérculo", icon: UtensilsCrossed, color: "border-[#D99B43]/30 bg-[#221D16] text-[#D99B43]" },
+                  ].map((item) => {
+                    const ItemIcon = item.icon;
+                    return (
+                      <button
+                        key={item.key}
+                        type="button"
+                        onClick={() => handleQuickPortion(item.key, item.name)}
+                        disabled={isPending}
+                        className={`flex flex-col items-center justify-center p-3 rounded-lg border text-xs font-semibold transition-all active:scale-95 cursor-pointer ${item.color}`}
+                      >
+                        <ItemIcon className="size-5 mb-1.5" />
+                        <span>+1 {item.name}</span>
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
 
@@ -562,7 +549,7 @@ export function MobileBottomSheet({
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-48 overflow-y-auto pr-0.5">
                   {effectiveSupplements.map((item) => {
-                    const emoji = getSupplementEmoji(item.name, item.id);
+                    const SuppIcon = getSupplementIcon(item.name, item.id);
                     return (
                       <button
                         key={item.id}
@@ -572,7 +559,7 @@ export function MobileBottomSheet({
                         className="flex items-center justify-between p-2.5 rounded-lg bg-[#121110] border border-[#2A2723] hover:border-[#D99B43]/40 text-xs font-semibold text-[#DDD6C9] hover:text-[#F5F2EB] hover:bg-[#181715] transition-all text-left cursor-pointer active:scale-95 group"
                       >
                         <div className="flex items-center gap-2.5 truncate min-w-0 pr-2">
-                          <span className="text-base shrink-0">{emoji}</span>
+                          <SuppIcon className="size-4 shrink-0 text-[#D99B43]" />
                           <div className="truncate">
                             <div className="text-xs font-bold truncate text-[#F5F2EB] group-hover:text-[#D99B43] transition-colors">
                               {item.name}

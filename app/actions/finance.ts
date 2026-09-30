@@ -7,8 +7,6 @@ import {
   CommitmentStatus,
   CommitmentSummaryStats,
   CommitmentType,
-  DEFAULT_FINANCE_ACCOUNTS,
-  DEFAULT_FINANCE_CATEGORIES,
   FinanceAccount,
   FinanceCategory,
   FinanceCommitment,
@@ -93,59 +91,35 @@ export async function getFinanceCatalog(sql: SqlClient): Promise<{
       sql`SELECT * FROM finance_accounts WHERE is_active = TRUE ORDER BY order_index ASC, created_at ASC;`,
     ]);
 
-    let categories: FinanceCategory[] = [];
-    if (catRows.length > 0) {
-      categories = (catRows as unknown as CategoryDbRow[]).map((r) => ({
-        id: r.id,
-        name: r.name,
-        icon: r.icon || undefined,
-        color: r.color || undefined,
-        isAntDefault: Boolean(r.is_ant_default),
-        isFixed: Boolean(r.is_fixed),
-        orderIndex: Number(r.order_index) || 0,
-        isActive: r.is_active ?? true,
-        createdAt: r.created_at?.toString(),
-      }));
-    } else {
-      for (const cat of DEFAULT_FINANCE_CATEGORIES) {
-        await sql`
-          INSERT INTO finance_categories (id, name, icon, color, is_ant_default, is_fixed, order_index, is_active)
-          VALUES (${cat.id}, ${cat.name}, ${cat.icon || null}, ${cat.color || null}, ${Boolean(cat.isAntDefault)}, ${Boolean(cat.isFixed)}, ${cat.orderIndex || 0}, TRUE)
-          ON CONFLICT (id) DO NOTHING;
-        `;
-      }
-      categories = DEFAULT_FINANCE_CATEGORIES;
-    }
+    const categories: FinanceCategory[] = (catRows as unknown as CategoryDbRow[]).map((r) => ({
+      id: r.id,
+      name: r.name,
+      icon: r.icon || undefined,
+      color: r.color || undefined,
+      isAntDefault: Boolean(r.is_ant_default),
+      isFixed: Boolean(r.is_fixed),
+      orderIndex: Number(r.order_index) || 0,
+      isActive: r.is_active ?? true,
+      createdAt: r.created_at?.toString(),
+    }));
 
-    let accounts: FinanceAccount[] = [];
-    if (accRows.length > 0) {
-      accounts = (accRows as unknown as AccountDbRow[]).map((r) => ({
-        id: r.id,
-        name: r.name,
-        type: r.type || "credit",
-        icon: r.icon || undefined,
-        color: r.color || undefined,
-        orderIndex: Number(r.order_index) || 0,
-        isActive: r.is_active ?? true,
-        createdAt: r.created_at?.toString(),
-      }));
-    } else {
-      for (const acc of DEFAULT_FINANCE_ACCOUNTS) {
-        await sql`
-          INSERT INTO finance_accounts (id, name, type, icon, color, order_index, is_active)
-          VALUES (${acc.id}, ${acc.name}, ${acc.type || "credit"}, ${acc.icon || null}, ${acc.color || null}, ${acc.orderIndex || 0}, TRUE)
-          ON CONFLICT (id) DO NOTHING;
-        `;
-      }
-      accounts = DEFAULT_FINANCE_ACCOUNTS;
-    }
+    const accounts: FinanceAccount[] = (accRows as unknown as AccountDbRow[]).map((r) => ({
+      id: r.id,
+      name: r.name,
+      type: r.type || "credit",
+      icon: r.icon || undefined,
+      color: r.color || undefined,
+      orderIndex: Number(r.order_index) || 0,
+      isActive: r.is_active ?? true,
+      createdAt: r.created_at?.toString(),
+    }));
 
     return { categories, accounts };
   } catch (error) {
     console.error("[Get Finance Catalog Error]:", error);
     return {
-      categories: DEFAULT_FINANCE_CATEGORIES,
-      accounts: DEFAULT_FINANCE_ACCOUNTS,
+      categories: [],
+      accounts: [],
     };
   }
 }
@@ -513,23 +487,25 @@ export async function createTransactionAction(payload: {
     const isAnt = Boolean(payload.isAntExpense);
     const notes = [payload.concept, payload.notes].filter(Boolean).join(" - ");
 
-    await sql`
-      INSERT INTO transactions (id, amount, type, category, account, notes, is_ant_expense, date)
-      VALUES (${id}, ${payload.amount}, ${payload.type}, ${category}, ${account}, ${notes}, ${isAnt}, ${date});
-    `;
+    await Promise.all([
+      sql`
+        INSERT INTO transactions (id, amount, type, category, account, notes, is_ant_expense, date)
+        VALUES (${id}, ${payload.amount}, ${payload.type}, ${category}, ${account}, ${notes}, ${isAnt}, ${date});
+      `,
+      sql`
+        INSERT INTO daily_activity_logs (date, expenses_count)
+        VALUES (${date}, 1)
+        ON CONFLICT (date) DO UPDATE
+        SET expenses_count = daily_activity_logs.expenses_count + 1,
+            updated_at = NOW();
+      `,
+    ]);
 
-    // Increment daily activity log for expenses
-    await sql`
-      INSERT INTO daily_activity_logs (date, expenses_count)
-      VALUES (${date}, 1)
-      ON CONFLICT (date) DO UPDATE
-      SET expenses_count = daily_activity_logs.expenses_count + 1,
-          updated_at = NOW();
-    `;
-
-    // Award Habitica XP for logging transactions
-    await awardTaskEvent("DAILY_EXPENSES_LOGGED", {
+    // Dispatch gamification event asynchronously in background without blocking response
+    awardTaskEvent("DAILY_EXPENSES_LOGGED", {
       customNotes: `${payload.type === "expense" ? "Gasto" : "Ingreso"}: $${payload.amount} • ${payload.concept || category}`,
+    }).catch((err) => {
+      console.warn("[createTransactionAction] awardTaskEvent background error:", err);
     });
 
     revalidatePath("/");
