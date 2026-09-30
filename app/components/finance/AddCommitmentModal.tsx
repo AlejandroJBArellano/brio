@@ -473,7 +473,7 @@ export function AddCommitmentModal({
               >
                 {categories.map((c) => (
                   <option key={c.id} value={c.id}>
-                    {c.icon || "🏷️"} {c.name}
+                    {c.name || c.id}
                   </option>
                 ))}
               </select>
@@ -488,7 +488,7 @@ export function AddCommitmentModal({
               >
                 {accounts.map((acc) => (
                   <option key={acc.id} value={acc.id}>
-                    {acc.icon || "💳"} {acc.name}
+                    {acc.name || acc.id}
                   </option>
                 ))}
               </select>

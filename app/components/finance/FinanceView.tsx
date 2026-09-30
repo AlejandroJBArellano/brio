@@ -370,10 +370,10 @@ export function FinanceView({ data, onRefresh }: FinanceViewProps) {
                           ? "bg-[#221D16] border-[#D99B43] text-[#D99B43]"
                           : "bg-[#121110] border-[#2A2723] text-[#DDD6C9] hover:border-[#38332D]"
                       }`}
-                      title={`Filtrar por #${cat.category}`}
+                      title={`Filtrar por ${cat.category}`}
                     >
                       <span className="font-semibold capitalize">
-                        #{cat.category}
+                        {cat.category}
                       </span>
                       <span className="text-[#8E867B]">
                         ${cat.total.toLocaleString()}
@@ -508,9 +508,9 @@ export function FinanceView({ data, onRefresh }: FinanceViewProps) {
                         <div className="flex items-center gap-2 text-[11px] text-[#8E867B] font-mono mt-0.5">
                           <span>{tx.date}</span>
                           <span>•</span>
-                          <span className="text-[#D99B43]">#{tx.category}</span>
+                          <span className="text-[#D99B43] capitalize">{tx.category}</span>
                           <span>•</span>
-                          <span>@{tx.account}</span>
+                          <span className="capitalize">{tx.account}</span>
                         </div>
                       </div>
                     </div>

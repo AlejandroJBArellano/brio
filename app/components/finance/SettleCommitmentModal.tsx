@@ -165,7 +165,7 @@ export function SettleCommitmentModal({
             >
               {accounts.map((acc) => (
                 <option key={acc.id} value={acc.id}>
-                  {acc.icon || "💳"} {acc.name} ({acc.type || "cuenta"})
+                  {acc.name || acc.id} ({acc.type || "cuenta"})
                 </option>
               ))}
             </select>

@@ -88,7 +88,7 @@ export function AntExpenseThermometer({
           Acumulado del mes: <span className="font-semibold text-[#F5F2EB]">${spentThisMonth.toFixed(2)} MXN</span>
         </div>
         <div className="text-[11px] text-[#8E867B]">
-          💡 Usa <code className="rounded bg-[#121110] border border-[#2A2723] px-1 py-0.5 text-[#D99B43] font-mono">-$50 Café #antojo @nu</code> en el Omnibar
+          Omnibar: <code className="rounded bg-[#121110] border border-[#2A2723] px-1 py-0.5 text-[#D99B43] font-mono">-$50 Café antojo</code>
         </div>
       </div>
     </div>

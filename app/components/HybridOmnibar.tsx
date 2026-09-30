@@ -166,8 +166,8 @@ export function HybridOmnibar({
         if (res.success) {
           setInput("");
           setTagQuery(null);
-          setFeedbackToast(`💰 Movimiento guardado: ${financialParse.type === "income" ? "+" : "-"}$${financialParse.amount} (${financialParse.concept})`);
-          setTimeout(() => setFeedbackToast(null), 3500);
+          setFeedbackToast(`Movimiento guardado: ${financialParse.type === "income" ? "+" : "-"}$${financialParse.amount} (${financialParse.concept})`);
+          setTimeout(() => setFeedbackToast(null), 3000);
           if (onRefreshFinance) onRefreshFinance();
         }
       } else {
@@ -176,7 +176,7 @@ export function HybridOmnibar({
         if (res.success) {
           setInput("");
           setTagQuery(null);
-          setFeedbackToast(`⚡ Tarea creada en Habitica`);
+          setFeedbackToast(`Tarea creada en Habitica`);
           setTimeout(() => setFeedbackToast(null), 3000);
         }
       }
@@ -277,8 +277,8 @@ export function HybridOmnibar({
         <div className="mt-2 flex items-center gap-2 text-[11px] text-[#E8AF59] font-mono px-2 animate-in fade-in duration-150">
           <span>Detectado Brio Finanzas:</span>
           <strong>{financialParse.type === "income" ? "+ Ingreso" : "- Gasto"} ${financialParse.amount}</strong>
-          <span>• #{financialParse.category}</span>
-          <span>• @{financialParse.account}</span>
+          <span>• {financialParse.category}</span>
+          <span>• {financialParse.account}</span>
           {financialParse.isAntExpense && <span className="text-[#E05D52] font-bold">(Gasto Hormiga)</span>}
         </div>
       )}
