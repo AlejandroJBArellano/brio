@@ -8,8 +8,6 @@ import {
 import { getTodayDateStr } from "@/lib/dateUtils";
 import { soundFx } from "@/lib/soundFx";
 import {
-  DEFAULT_FINANCE_ACCOUNTS,
-  DEFAULT_FINANCE_CATEGORIES,
   FinanceAccount,
   FinanceCategory,
   Transaction,
@@ -90,12 +88,8 @@ function TransactionModalContent({
     if (categories.length === 0 || accounts.length === 0) {
       fetchFinanceCatalogAction()
         .then((catalog) => {
-          if (catalog.categories && catalog.categories.length > 0) {
-            setDbCategories(catalog.categories);
-          }
-          if (catalog.accounts && catalog.accounts.length > 0) {
-            setDbAccounts(catalog.accounts);
-          }
+          setDbCategories(catalog.categories || []);
+          setDbAccounts(catalog.accounts || []);
         })
         .catch((err) => {
           console.error("[TransactionModal] Failed to load finance catalog:", err);
@@ -103,10 +97,8 @@ function TransactionModalContent({
     }
   }, [categories, accounts]);
 
-  const effectiveCategories =
-    dbCategories.length > 0 ? dbCategories : DEFAULT_FINANCE_CATEGORIES;
-  const effectiveAccounts =
-    dbAccounts.length > 0 ? dbAccounts : DEFAULT_FINANCE_ACCOUNTS;
+  const effectiveCategories = dbCategories;
+  const effectiveAccounts = dbAccounts;
 
   const [type, setType] = useState<TransactionType>(
     transactionToEdit?.type || "expense"
@@ -116,10 +108,10 @@ function TransactionModalContent({
   );
   const [concept, setConcept] = useState(transactionToEdit?.notes || "");
   const [category, setCategory] = useState(
-    transactionToEdit?.category || effectiveCategories[0]?.id || "comida"
+    transactionToEdit?.category || effectiveCategories[0]?.id || ""
   );
   const [account, setAccount] = useState(
-    transactionToEdit?.account || effectiveAccounts[0]?.id || "nu"
+    transactionToEdit?.account || effectiveAccounts[0]?.id || ""
   );
   const [isAntExpense, setIsAntExpense] = useState(
     Boolean(transactionToEdit?.isAntExpense)
@@ -363,7 +355,7 @@ function TransactionModalContent({
               >
                 {effectiveCategories.map((c) => (
                   <option key={c.id} value={c.id}>
-                    {c.icon || "🏷️"} {c.name}
+                    {c.name || c.id}
                   </option>
                 ))}
               </select>
@@ -392,7 +384,7 @@ function TransactionModalContent({
               >
                 {effectiveAccounts.map((a) => (
                   <option key={a.id} value={a.id}>
-                    {a.icon || "💳"} {a.name}
+                    {a.name || a.id}
                   </option>
                 ))}
               </select>

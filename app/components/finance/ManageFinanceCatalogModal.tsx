@@ -15,8 +15,6 @@ import {
   LUCIDE_CATEGORY_ICONS,
 } from "@/app/components/finance/FinanceIcon";
 import {
-  DEFAULT_FINANCE_ACCOUNTS,
-  DEFAULT_FINANCE_CATEGORIES,
   FinanceAccount,
   FinanceCategory,
 } from "@/lib/types";
@@ -69,12 +67,8 @@ export function ManageFinanceCatalogModal({
   const reloadCatalog = async () => {
     try {
       const catalog = await fetchFinanceCatalogAction();
-      if (catalog.categories && catalog.categories.length > 0) {
-        setDbCategories(catalog.categories);
-      }
-      if (catalog.accounts && catalog.accounts.length > 0) {
-        setDbAccounts(catalog.accounts);
-      }
+      setDbCategories(catalog.categories || []);
+      setDbAccounts(catalog.accounts || []);
     } catch (err) {
       console.error("[ManageFinanceCatalogModal] Failed to reload catalog:", err);
     }
@@ -89,10 +83,8 @@ export function ManageFinanceCatalogModal({
     }
   }, [isOpen, categories, accounts]);
 
-  const effectiveCategories =
-    dbCategories.length > 0 ? dbCategories : DEFAULT_FINANCE_CATEGORIES;
-  const effectiveAccounts =
-    dbAccounts.length > 0 ? dbAccounts : DEFAULT_FINANCE_ACCOUNTS;
+  const effectiveCategories = dbCategories;
+  const effectiveAccounts = dbAccounts;
 
   // Form states for Accounts
   const [editingAccountId, setEditingAccountId] = useState<string | null>(null);
@@ -379,27 +371,22 @@ export function ManageFinanceCatalogModal({
 
                     <div>
                       <label className="block text-[11px] font-sans font-medium text-[#DDD6C9] mb-1">
-                        ID / Atajo Rápido (@slug)
+                        ID / Atajo Rápido
                       </label>
-                      <div className="relative">
-                        <span className="absolute left-3 top-1/2 -translate-y-1/2 font-mono text-[#8E867B] text-xs">
-                          @
-                        </span>
-                        <input
-                          type="text"
-                          placeholder="nu, bbva, amex, efectivo..."
-                          value={accountId}
-                          disabled={Boolean(editingAccountId)}
-                          onChange={(e) =>
-                            setAccountId(
-                              e.target.value
-                                .toLowerCase()
-                                .replace(/[^a-z0-9-_]/g, "")
-                            )
-                          }
-                          className="w-full rounded-lg border border-[#2A2723] bg-[#181715] pl-7 pr-3 py-2 font-mono text-xs text-[#F5F2EB] placeholder:text-[#8E867B] focus:border-[#D99B43] focus:outline-none disabled:opacity-50"
-                        />
-                      </div>
+                      <input
+                        type="text"
+                        placeholder="nu, bbva, amex, efectivo..."
+                        value={accountId}
+                        disabled={Boolean(editingAccountId)}
+                        onChange={(e) =>
+                          setAccountId(
+                            e.target.value
+                              .toLowerCase()
+                              .replace(/[^a-z0-9-_]/g, "")
+                          )
+                        }
+                        className="w-full rounded-lg border border-[#2A2723] bg-[#181715] px-3 py-2 font-mono text-xs text-[#F5F2EB] placeholder:text-[#8E867B] focus:border-[#D99B43] focus:outline-none disabled:opacity-50"
+                      />
                     </div>
                   </div>
 
@@ -493,7 +480,7 @@ export function ManageFinanceCatalogModal({
                             <span>{acc.name}</span>
                           </div>
                           <div className="flex items-center gap-1.5 text-[10px] text-[#8E867B] mt-0.5">
-                            <span className="font-mono text-[#D99B43]">@{acc.id}</span>
+                            <span className="font-mono text-[#D99B43]">{acc.id}</span>
                             <span>•</span>
                             <span className="capitalize">
                               {ACCOUNT_TYPES.find((t) => t.id === acc.type)?.label || acc.type || "Cuenta"}
@@ -577,27 +564,22 @@ export function ManageFinanceCatalogModal({
 
                     <div>
                       <label className="block text-[11px] font-sans font-medium text-[#DDD6C9] mb-1">
-                        ID / Tag Rápido (#slug)
+                        ID / Tag Rápido
                       </label>
-                      <div className="relative">
-                        <span className="absolute left-3 top-1/2 -translate-y-1/2 font-mono text-[#8E867B] text-xs">
-                          #
-                        </span>
-                        <input
-                          type="text"
-                          placeholder="mascotas, viajes, educacion..."
-                          value={categoryId}
-                          disabled={Boolean(editingCategoryId)}
-                          onChange={(e) =>
-                            setCategoryId(
-                              e.target.value
-                                .toLowerCase()
-                                .replace(/[^a-z0-9-_]/g, "")
-                            )
-                          }
-                          className="w-full rounded-lg border border-[#2A2723] bg-[#181715] pl-7 pr-3 py-2 font-mono text-xs text-[#F5F2EB] placeholder:text-[#8E867B] focus:border-[#D99B43] focus:outline-none disabled:opacity-50"
-                        />
-                      </div>
+                      <input
+                        type="text"
+                        placeholder="mascotas, viajes, educacion..."
+                        value={categoryId}
+                        disabled={Boolean(editingCategoryId)}
+                        onChange={(e) =>
+                          setCategoryId(
+                            e.target.value
+                              .toLowerCase()
+                              .replace(/[^a-z0-9-_]/g, "")
+                          )
+                        }
+                        className="w-full rounded-lg border border-[#2A2723] bg-[#181715] px-3 py-2 font-mono text-xs text-[#F5F2EB] placeholder:text-[#8E867B] focus:border-[#D99B43] focus:outline-none disabled:opacity-50"
+                      />
                     </div>
                   </div>
 
@@ -703,7 +685,7 @@ export function ManageFinanceCatalogModal({
                             <span>{cat.name}</span>
                           </div>
                           <div className="flex items-center gap-1.5 text-[10px] text-[#8E867B] mt-0.5">
-                            <span className="font-mono text-[#D99B43]">#{cat.id}</span>
+                            <span className="font-mono text-[#D99B43]">{cat.id}</span>
                             {cat.isAntDefault && (
                               <span className="rounded bg-[#221D16] border border-[#D99B43]/30 text-[#D99B43] px-1.5 py-0.2 text-[9px] font-bold flex items-center gap-1">
                                 <Coffee className="size-2.5" />
