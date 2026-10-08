@@ -18,6 +18,7 @@ import {
 import { awardTaskEvent } from "@/lib/taskEvents";
 import { getCachedTags as getCachedHabiticaTags, getCachedTasks as getCachedHabiticaTasks } from "@/lib/dal/tasks";
 import { revalidatePath } from "next/cache";
+import { scrapeUrlMetadata, ScrapedMetadata } from "@/lib/metascraper";
 
 interface VaultDbRow {
   id: string;
@@ -266,7 +267,8 @@ export async function createVaultItemAction(
       );
     `;
 
-    revalidatePath("/");
+    revalidatePath("/vault");
+    revalidatePath("/today");
 
     return {
       success: true,
@@ -423,7 +425,8 @@ export async function updateVaultItemAction(
       WHERE id = ${id};
     `;
 
-    revalidatePath("/");
+    revalidatePath("/vault");
+    revalidatePath("/today");
     return { success: true };
   } catch (error) {
     console.error("[Update Vault Item Error]:", error);
@@ -453,10 +456,90 @@ export async function deleteVaultItemAction(
       DELETE FROM vault_items WHERE id = ${id};
     `;
 
-    revalidatePath("/");
+    revalidatePath("/vault");
+    revalidatePath("/today");
     return { success: true };
   } catch (error) {
     console.error("[Delete Vault Item Error]:", error);
     return { success: false, error: "No se pudo eliminar el elemento." };
+  }
+}
+
+/**
+ * Server Action: Scrapes OpenGraph / HTML metadata for a given URL without AI.
+ */
+export async function scrapeMetadataAction(
+  url: string
+): Promise<{ success: boolean; data?: ScrapedMetadata; error?: string }> {
+  try {
+    const metadata = await scrapeUrlMetadata(url);
+    return { success: true, data: metadata };
+  } catch (error) {
+    console.error("[Scrape Metadata Error]:", error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Error al extraer metadatos",
+    };
+  }
+}
+
+/**
+ * Server Action: Quickly adds a link, movie, video, or course from URL into Vault using metascraper.
+ */
+export async function quickAddVaultResourceAction(
+  url: string,
+  categoryOverride?: VaultItemCategory
+): Promise<{ success: boolean; item?: VaultItem; error?: string }> {
+  try {
+    const meta = await scrapeUrlMetadata(url);
+    const category: VaultItemCategory = categoryOverride || meta.category || "link";
+    const id = `vault-${Date.now()}`;
+    const sql = getDb();
+
+    await sql`
+      INSERT INTO vault_items (
+        id, category, title, author_or_creator, status,
+        platform, url, cover_url, notes, progress, created_at, updated_at
+      )
+      VALUES (
+        ${id},
+        ${category},
+        ${meta.title},
+        ${meta.authorOrCreator || null},
+        'backlog',
+        ${meta.platform},
+        ${meta.url},
+        ${meta.coverUrl || null},
+        ${meta.description || null},
+        0,
+        NOW(),
+        NOW()
+      );
+    `;
+
+    revalidatePath("/vault");
+    revalidatePath("/today");
+
+    return {
+      success: true,
+      item: {
+        id,
+        category,
+        title: meta.title,
+        authorOrCreator: meta.authorOrCreator,
+        status: "backlog",
+        platform: meta.platform,
+        url: meta.url,
+        coverUrl: meta.coverUrl,
+        notes: meta.description,
+        progress: 0,
+      },
+    };
+  } catch (error) {
+    console.error("[Quick Add Vault Resource Error]:", error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Error al agregar recurso",
+    };
   }
 }

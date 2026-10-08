@@ -67,6 +67,7 @@ interface CommandCenterContextValue {
   // Server Refresh Transition
   isRefreshing: boolean;
   refreshData: () => void;
+  refreshFinance: () => void;
 }
 
 const CommandCenterContext = createContext<CommandCenterContextValue | null>(null);
@@ -103,6 +104,12 @@ export function CommandCenterProvider({
     setModalPayload(null);
   }, []);
 
+  const refreshFinance = useCallback(() => {
+    startTransition(() => {
+      router.refresh();
+    });
+  }, [router]);
+
   const refreshData = useCallback(() => {
     startTransition(async () => {
       try {
@@ -134,6 +141,7 @@ export function CommandCenterProvider({
         closeModal,
         isRefreshing,
         refreshData,
+        refreshFinance,
       }}
     >
       {children}

@@ -161,22 +161,21 @@ export function MobileBottomSheet({
     if (!numAmount || numAmount <= 0) return;
 
     soundFx.transactionAdded();
-    startTransition(async () => {
-      const res = await createTransactionAction({
-        amount: numAmount,
-        type: "expense",
-        concept: concept.trim() || undefined,
-        category,
-        account,
-        isAntExpense,
-      });
+    const payload = {
+      amount: numAmount,
+      type: "expense" as const,
+      concept: concept.trim() || undefined,
+      category,
+      account,
+      isAntExpense,
+    };
+    setAmount("");
+    setConcept("");
+    onClose();
 
-      if (res.success) {
-        setAmount("");
-        setConcept("");
-        onClose();
-        router.refresh();
-      }
+    startTransition(async () => {
+      await createTransactionAction(payload);
+      router.refresh();
     });
   };
 

@@ -508,7 +508,8 @@ export async function createTransactionAction(payload: {
       console.warn("[createTransactionAction] awardTaskEvent background error:", err);
     });
 
-    revalidatePath("/");
+    revalidatePath("/finance");
+    revalidatePath("/today");
 
     return {
       success: true,
@@ -539,7 +540,8 @@ export async function deleteTransactionAction(id: string): Promise<{ success: bo
   try {
     const sql = getDb();
     await sql`DELETE FROM transactions WHERE id = ${id};`;
-    revalidatePath("/");
+    revalidatePath("/finance");
+    revalidatePath("/today");
     return { success: true };
   } catch (error) {
     console.error("[Delete Transaction Error]:", error);
@@ -588,7 +590,8 @@ export async function updateTransactionAction(
       WHERE id = ${id};
     `;
 
-    revalidatePath("/");
+    revalidatePath("/finance");
+    revalidatePath("/today");
     return { success: true };
   } catch (error) {
     console.error("[Update Transaction Error]:", error);

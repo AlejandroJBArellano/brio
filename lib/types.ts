@@ -672,6 +672,13 @@ export interface LearningItem {
   createdAt?: string;
 }
 
+export interface ScratchpadNoteItem {
+  id: string;
+  title: string;
+  content: string;
+  updatedAt: string;
+}
+
 export interface ProjectsDashboardData {
   projects: ProjectItem[];
   learningItems: LearningItem[];

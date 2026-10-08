@@ -11,6 +11,7 @@ import {
   ProjectItem,
   ProjectsDashboardData,
   ProjectStatus,
+  ScratchpadNoteItem,
 } from "@/lib/types";
 import { awardTaskEvent } from "@/lib/taskEvents";
 import { getCachedTags as getCachedHabiticaTags, getCachedTasksWithCompleted as getCachedHabiticaTasksWithCompleted } from "@/lib/dal/tasks";
@@ -541,26 +542,120 @@ export async function deleteLearningItemAction(id: string): Promise<{ success: b
   }
 }
 
+function extractNoteTitle(id: string, content: string): string {
+  if (id === "default") return "Bloc principal";
+  const lines = content.split("\n").map((l) => l.trim()).filter(Boolean);
+  for (const line of lines) {
+    const clean = line.replace(/^[#\-*>\s]+/, "").trim();
+    if (clean) return clean.slice(0, 40);
+  }
+  return id.replace(/^note-/, "").replace(/[-_]+/g, " ");
+}
+
+/**
+ * Server Action: Fetches all saved scratchpad notes.
+ */
+export async function fetchScratchpadNotesAction(): Promise<ScratchpadNoteItem[]> {
+  try {
+    const sql = getDb();
+    const rows = (await sql`
+      SELECT id, content, updated_at 
+      FROM scratchpad_notes 
+      ORDER BY updated_at DESC;
+    `) as Array<{ id: string; content: string; updated_at: string | Date }>;
+
+    return rows.map((r) => ({
+      id: r.id,
+      title: extractNoteTitle(r.id, r.content || ""),
+      content: r.content || "",
+      updatedAt: r.updated_at ? new Date(r.updated_at).toISOString() : new Date().toISOString(),
+    }));
+  } catch (error) {
+    console.error("[Fetch Scratchpad Notes Error]:", error);
+    return [];
+  }
+}
+
 /**
  * Server Action: Saves scratchpad content to Neon DB.
  */
 export async function saveScratchpadAction(
-  content: string
+  content: string,
+  noteId: string = "default"
 ): Promise<{ success: boolean; error?: string }> {
   try {
     const sql = getDb();
 
     await sql`
       INSERT INTO scratchpad_notes (id, content, updated_at)
-      VALUES ('default', ${content}, NOW())
+      VALUES (${noteId}, ${content}, NOW())
       ON CONFLICT (id) DO UPDATE
       SET content = ${content}, updated_at = NOW();
     `;
 
-    revalidatePath("/");
     return { success: true };
   } catch (error) {
     console.error("[Save Scratchpad Error]:", error);
     return { success: false, error: "Failed to save scratchpad" };
+  }
+}
+
+/**
+ * Server Action: Creates a new scratchpad note.
+ */
+export async function createScratchpadNoteAction(
+  title: string,
+  initialContent: string = ""
+): Promise<{ success: boolean; note?: ScratchpadNoteItem; error?: string }> {
+  try {
+    const sql = getDb();
+    const slug = title
+      .toLowerCase()
+      .trim()
+      .replace(/[^a-z0-9]+/g, "-")
+      .slice(0, 30);
+    const id = `note-${Date.now()}${slug ? `-${slug}` : ""}`;
+    const content = initialContent || `# ${title}\n\n`;
+
+    await sql`
+      INSERT INTO scratchpad_notes (id, content, updated_at, created_at)
+      VALUES (${id}, ${content}, NOW(), NOW());
+    `;
+
+    return {
+      success: true,
+      note: {
+        id,
+        title,
+        content,
+        updatedAt: new Date().toISOString(),
+      },
+    };
+  } catch (error) {
+    console.error("[Create Scratchpad Note Error]:", error);
+    return { success: false, error: "Error al crear la nota" };
+  }
+}
+
+/**
+ * Server Action: Deletes a scratchpad note.
+ */
+export async function deleteScratchpadNoteAction(
+  noteId: string
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    if (noteId === "default") {
+      // Clear default note content instead of deleting the row
+      const sql = getDb();
+      await sql`UPDATE scratchpad_notes SET content = '', updated_at = NOW() WHERE id = 'default';`;
+      return { success: true };
+    }
+
+    const sql = getDb();
+    await sql`DELETE FROM scratchpad_notes WHERE id = ${noteId};`;
+    return { success: true };
+  } catch (error) {
+    console.error("[Delete Scratchpad Note Error]:", error);
+    return { success: false, error: "Error al eliminar la nota" };
   }
 }

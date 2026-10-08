@@ -70,6 +70,7 @@ function BrioCommandCenterContent({
     setSelectedTask,
     openModal,
     refreshData,
+    refreshFinance,
   } = useCommandCenter();
 
   const currentSelectedTask = selectedTask
@@ -152,7 +153,7 @@ function BrioCommandCenterContent({
         tags={tags}
         onOpenBatchModal={() => openModal("batch")}
         onOpenFinanceModal={() => openModal("finance")}
-        onRefreshFinance={refreshData}
+        onRefreshFinance={refreshFinance}
       />
 
       {/* 4. Tab Views Switcher */}

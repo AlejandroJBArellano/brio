@@ -120,9 +120,10 @@ export function ModalManager({
     setSelectedTask,
     setActiveTaskTab,
     setActiveTagFilter,
-    mustWinTaskIds,
+    mustWinTaskIds: _mustWinTaskIds,
     setMustWinTaskIds: _setMustWinTaskIds,
     refreshData,
+    refreshFinance,
   } = useCommandCenter();
 
   if (!activeModal) return null;
@@ -188,7 +189,7 @@ export function ModalManager({
           tasks={tasks}
           totalAntSpentToday={financeData?.totalAntExpensesToday || 0}
           dailyAntLimit={financeData?.currentBudget?.dailyAntLimit || 150}
-          onSuccess={refreshData}
+          onSuccess={refreshFinance}
           onOpenNewTransaction={() => openModal("finance")}
         />
       )}
@@ -197,7 +198,7 @@ export function ModalManager({
         <TransactionModal
           isOpen={true}
           onClose={closeModal}
-          onSuccess={refreshData}
+          onSuccess={refreshFinance}
           categories={financeData?.categories}
           accounts={financeData?.accounts}
           onOpenManageCatalog={() => openModal("manageFinanceCatalog")}
@@ -210,7 +211,7 @@ export function ModalManager({
           onClose={closeModal}
           categories={financeData?.categories || []}
           accounts={financeData?.accounts || []}
-          onSuccess={refreshData}
+          onSuccess={refreshFinance}
         />
       )}
 

@@ -4,9 +4,12 @@ import {
   VaultDashboardData,
   VaultItemCategory,
 } from "@/lib/types";
+import { quickAddVaultResourceAction } from "@/app/actions/vault";
 import {
   BookOpen,
   GraduationCap,
+  Link2,
+  Loader2,
   Music,
   Plus,
   Video,
@@ -27,6 +30,9 @@ export function VaultView({ data, onRefresh, onOpenScratchpad }: VaultViewProps)
   const [activeTab, setActiveTab] = useState<VaultTab>("courses");
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [addModalCategory, setAddModalCategory] = useState<VaultItemCategory>("course");
+  const [quickUrl, setQuickUrl] = useState("");
+  const [isScraping, setIsScraping] = useState(false);
+  const [quickFeedback, setQuickFeedback] = useState<string | null>(null);
 
   const handleOpenAddModal = (cat: VaultItemCategory) => {
     setAddModalCategory(cat);
@@ -142,6 +148,64 @@ export function VaultView({ data, onRefresh, onOpenScratchpad }: VaultViewProps)
           </button>
         </div>
       </div>
+
+      {/* Quick Add URL (Metascraper sin IA) */}
+      <form
+        onSubmit={async (e) => {
+          e.preventDefault();
+          if (!quickUrl.trim() || isScraping) return;
+          setIsScraping(true);
+          try {
+            const res = await quickAddVaultResourceAction(quickUrl.trim());
+            if (res.success && res.item) {
+              setQuickUrl("");
+              setQuickFeedback(`Guardado: ${res.item.title}`);
+              setTimeout(() => setQuickFeedback(null), 3500);
+              if (onRefresh) onRefresh();
+            } else {
+              setQuickFeedback(res.error || "Error al procesar");
+              setTimeout(() => setQuickFeedback(null), 3500);
+            }
+          } catch {
+            setQuickFeedback("Error al procesar");
+            setTimeout(() => setQuickFeedback(null), 3500);
+          } finally {
+            setIsScraping(false);
+          }
+        }}
+        className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 rounded-xl border border-[#2A2723] bg-[#181715] p-2 focus-within:border-[#D99B43] transition-colors"
+      >
+        <div className="flex items-center gap-2 flex-1 px-1">
+          <Link2 className="h-4 w-4 text-[#8E867B] shrink-0" />
+          <input
+            type="url"
+            value={quickUrl}
+            onChange={(e) => setQuickUrl(e.target.value)}
+            placeholder="Pegar enlace (Letterboxd, IMDb, YouTube, curso o artículo) para guardar en 1 clic..."
+            className="w-full bg-transparent text-xs text-[#F5F2EB] placeholder:text-[#8E867B] focus:outline-none font-mono"
+            disabled={isScraping}
+          />
+        </div>
+        <div className="flex items-center gap-2 shrink-0">
+          {quickFeedback && (
+            <span className="text-[11px] font-mono text-[#4EAB9E] px-2 truncate max-w-xs">
+              {quickFeedback}
+            </span>
+          )}
+          <button
+            type="submit"
+            disabled={!quickUrl.trim() || isScraping}
+            className="flex items-center justify-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-[#22201D] hover:bg-[#2A2723] text-xs font-semibold text-[#DDD6C9] hover:text-[#F5F2EB] border border-[#2A2723] transition-all disabled:opacity-40 cursor-pointer"
+          >
+            {isScraping ? (
+              <Loader2 className="h-3.5 w-3.5 animate-spin text-[#D99B43]" />
+            ) : (
+              <Plus className="h-3.5 w-3.5 text-[#D99B43]" />
+            )}
+            <span>{isScraping ? "Guardando..." : "Guardar enlace"}</span>
+          </button>
+        </div>
+      </form>
 
       {/* 3. Sub-View Rendering */}
       {activeTab === "courses" && (

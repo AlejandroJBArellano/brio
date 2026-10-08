@@ -150,37 +150,38 @@ export function HybridOmnibar({
   const handleSubmit = () => {
     if (!input.trim() || isPending) return;
 
-    startTransition(async () => {
-      if (financialParse.isFinancial && financialParse.amount && financialParse.type) {
-        // Financial capture to Neon PostgreSQL
-        const res = await createTransactionAction({
-          amount: financialParse.amount,
-          type: financialParse.type,
-          concept: financialParse.concept || "Gasto rápido",
-          category: financialParse.category || "general",
-          account: financialParse.account || "default",
-          isAntExpense: financialParse.isAntExpense,
-          notes: financialParse.notes,
-        });
+    if (financialParse.isFinancial && financialParse.amount && financialParse.type) {
+      const payload = {
+        amount: financialParse.amount,
+        type: financialParse.type,
+        concept: financialParse.concept || "Gasto rápido",
+        category: financialParse.category || "general",
+        account: financialParse.account || "default",
+        isAntExpense: financialParse.isAntExpense,
+        notes: financialParse.notes,
+      };
 
-        if (res.success) {
-          setInput("");
-          setTagQuery(null);
-          setFeedbackToast(`Movimiento guardado: ${financialParse.type === "income" ? "+" : "-"}$${financialParse.amount} (${financialParse.concept})`);
-          setTimeout(() => setFeedbackToast(null), 3000);
-          if (onRefreshFinance) onRefreshFinance();
-        }
-      } else {
-        // Habitica Task Capture
-        const res = await createSingleTaskAction(input);
-        if (res.success) {
-          setInput("");
-          setTagQuery(null);
-          setFeedbackToast(`Tarea creada en Habitica`);
-          setTimeout(() => setFeedbackToast(null), 3000);
-        }
-      }
-    });
+      const displayText = `${financialParse.type === "income" ? "+" : "-"}$${financialParse.amount} (${financialParse.concept || "General"})`;
+      setInput("");
+      setTagQuery(null);
+      setFeedbackToast(`Movimiento guardado: ${displayText}`);
+      setTimeout(() => setFeedbackToast(null), 3000);
+
+      startTransition(async () => {
+        await createTransactionAction(payload);
+        if (onRefreshFinance) onRefreshFinance();
+      });
+    } else {
+      const taskInput = input;
+      setInput("");
+      setTagQuery(null);
+      setFeedbackToast("Tarea creada");
+      setTimeout(() => setFeedbackToast(null), 3000);
+
+      startTransition(async () => {
+        await createSingleTaskAction(taskInput);
+      });
+    }
   };
 
   return (

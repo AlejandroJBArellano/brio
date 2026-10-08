@@ -157,6 +157,10 @@ function TransactionModalContent({
     }
 
     setError(null);
+    soundFx.click();
+    onClose();
+    if (onSuccess) onSuccess();
+
     startTransition(async () => {
       if (isEditing && transactionToEdit) {
         const res = await updateTransactionAction(transactionToEdit.id, {
@@ -169,12 +173,8 @@ function TransactionModalContent({
           date,
         });
 
-        if (res.success) {
-          soundFx.click();
-          onClose();
-          if (onSuccess) onSuccess();
-        } else {
-          setError(res.error || "Error al actualizar la transacción");
+        if (!res.success) {
+          console.error("[Update Transaction Error]:", res.error);
         }
       } else {
         const res = await createTransactionAction({
@@ -187,12 +187,8 @@ function TransactionModalContent({
           date,
         });
 
-        if (res.success) {
-          soundFx.click();
-          onClose();
-          if (onSuccess) onSuccess();
-        } else {
-          setError(res.error || "Error al registrar la transacción");
+        if (!res.success) {
+          console.error("[Create Transaction Error]:", res.error);
         }
       }
     });

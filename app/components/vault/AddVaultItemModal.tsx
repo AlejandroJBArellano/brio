@@ -1,6 +1,6 @@
 "use client";
 
-import { createVaultItemAction } from "@/app/actions/vault";
+import { createVaultItemAction, scrapeMetadataAction } from "@/app/actions/vault";
 import { VaultItemCategory, VaultItemStatus } from "@/lib/types";
 import {
   BookOpen,
@@ -8,8 +8,10 @@ import {
   FolderGit2,
   GraduationCap,
   Link as LinkIcon,
+  Loader2,
   Music,
   Plus,
+  Sparkles,
   UploadCloud,
   Video,
   X,
@@ -51,8 +53,9 @@ export function AddVaultItemModal({
   const [tags, setTags] = useState("");
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [selectedCover, setSelectedCover] = useState<File | null>(null);
-  const [coverUrl, _setCoverUrl] = useState("");
+  const [coverUrl, setCoverUrl] = useState("");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [isScrapingUrl, setIsScrapingUrl] = useState(false);
   const [isPending, startTransition] = useTransition();
 
   const handleUrlChange = (newUrl: string) => {
@@ -272,9 +275,41 @@ export function AddVaultItemModal({
               </div>
 
               <div className="sm:col-span-2">
-                <label className="block text-xs font-sans font-medium text-[#DDD6C9] mb-1.5">
-                  Enlace
-                </label>
+                <div className="flex items-center justify-between mb-1.5">
+                  <label className="text-xs font-sans font-medium text-[#DDD6C9]">
+                    Enlace
+                  </label>
+                  {url.trim() && (
+                    <button
+                      type="button"
+                      onClick={async () => {
+                        setIsScrapingUrl(true);
+                        try {
+                          const res = await scrapeMetadataAction(url);
+                          if (res.success && res.data) {
+                            if (!title.trim() && res.data.title) setTitle(res.data.title);
+                            if (!authorOrCreator.trim() && res.data.authorOrCreator) setAuthorOrCreator(res.data.authorOrCreator);
+                            if (res.data.platform) setPlatform(res.data.platform);
+                            if (res.data.coverUrl) setCoverUrl(res.data.coverUrl);
+                            if (!notes.trim() && res.data.description) setNotes(res.data.description);
+                            if (res.data.category && category === "link") setCategory(res.data.category);
+                          }
+                        } finally {
+                          setIsScrapingUrl(false);
+                        }
+                      }}
+                      disabled={isScrapingUrl}
+                      className="text-[10px] text-[#D99B43] hover:underline flex items-center gap-1 cursor-pointer font-mono"
+                    >
+                      {isScrapingUrl ? (
+                        <Loader2 className="h-3 w-3 animate-spin" />
+                      ) : (
+                        <Sparkles className="h-3 w-3" />
+                      )}
+                      <span>{isScrapingUrl ? "Extrayendo..." : "Auto-completar datos"}</span>
+                    </button>
+                  )}
+                </div>
                 <input
                   type="url"
                   value={url}
