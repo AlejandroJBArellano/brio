@@ -4,6 +4,7 @@ import { getDb } from "@/lib/db";
 import { decryptSecret, encryptSecret } from "@/lib/crypto";
 import { parseNotionUrl, syncNotionTasksToHabitica } from "@/lib/notion";
 import { revalidatePath } from "next/cache";
+import { requireAuth } from "@/lib/dal/auth";
 
 export interface SaveNotionIntegrationParams {
   projectId: string;
@@ -16,6 +17,7 @@ export interface SaveNotionIntegrationParams {
  * Server Action: Encrypts sensitive session token and saves Notion configuration to Neon DB.
  */
 export async function saveNotionIntegrationAction(params: SaveNotionIntegrationParams) {
+  await requireAuth();
   const { projectId, tokenV2, userId, notionUrl } = params;
 
   if (!projectId || !tokenV2 || !notionUrl) {
@@ -75,6 +77,7 @@ export interface ProjectSyncActionResult {
 export async function syncProjectFromNotionAction(
   projectId: string
 ): Promise<ProjectSyncActionResult> {
+  await requireAuth();
   const sql = getDb();
 
   const rows = await sql`
@@ -102,7 +105,7 @@ export async function syncProjectFromNotionAction(
   let decryptedToken = "";
   try {
     decryptedToken = decryptSecret(notionConfig.encryptedToken);
-  } catch (err) {
+  } catch (_err) {
     return {
       success: false,
       error: "Error al descifrar las credenciales de Notion.",

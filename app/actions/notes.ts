@@ -4,6 +4,7 @@ import { getDb } from "@/lib/db";
 import { generateS3FileKey, uploadBufferToS3 } from "@/lib/s3";
 import { ContextualNote, NoteCategory } from "@/lib/types";
 import { revalidatePath } from "next/cache";
+import { requireAuth } from "@/lib/dal/auth";
 
 interface ContextualNoteDbRow {
   id: string;
@@ -25,6 +26,7 @@ export async function fetchContextualNotesAction(
   taskId?: string
 ): Promise<ContextualNote[]> {
   try {
+    await requireAuth();
     const sql = getDb();
 
     let rows: ContextualNoteDbRow[];
@@ -84,6 +86,7 @@ export async function saveContextualNoteAction(payload: {
   tags?: string[];
 }): Promise<{ success: boolean; note?: ContextualNote; error?: string }> {
   try {
+    await requireAuth();
     const sql = getDb();
 
     const noteId = payload.id || `note_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
@@ -146,6 +149,7 @@ export async function deleteContextualNoteAction(
   id: string
 ): Promise<{ success: boolean; error?: string }> {
   try {
+    await requireAuth();
     const sql = getDb();
     await sql`DELETE FROM contextual_notes WHERE id = ${id};`;
 
@@ -165,6 +169,7 @@ export async function uploadNoteImageAction(
   formData: FormData
 ): Promise<{ success: boolean; url?: string; key?: string; fileName?: string; error?: string }> {
   try {
+    await requireAuth();
     const file = formData.get("file") as File | null;
     if (!file || file.size === 0) {
       return { success: false, error: "No se seleccionó ningún archivo." };

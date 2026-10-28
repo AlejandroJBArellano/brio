@@ -28,6 +28,7 @@ import { after } from "next/server";
 import { fetchNutritionDashboardDataAction } from "./nutrition";
 import { getTodayDateStr, toDateStr } from "@/lib/dateUtils";
 import { awardTaskEvent } from "@/lib/taskEvents";
+import { requireAuth } from "@/lib/dal/auth";
 import {
   fetchActiveWorkoutSessionAction,
   fetchExerciseCatalogAction,
@@ -109,7 +110,7 @@ interface HealthLogDbRow {
   steps_count?: number | string;
 }
 
-interface WorkoutDbRow {
+interface _WorkoutDbRow {
   id: string;
   date: Date | string;
   type: string;
@@ -162,6 +163,7 @@ async function getSupplementsCatalog(sql: SqlClient): Promise<UserSupplement[]> 
  * Server Action: Fetches active supplements and habits catalog.
  */
 export async function fetchSupplementsCatalogAction(): Promise<UserSupplement[]> {
+  await requireAuth();
   const sql = getDb();
   return getSupplementsCatalog(sql);
 }
@@ -332,6 +334,7 @@ async function getBiomarkersDashboardData(sql: SqlClient): Promise<BiomarkersDas
  * Fast, lightweight query optimized for the Daily tab and Today dashboard.
  */
 export async function fetchDailyHealthDataAction(): Promise<DailyHealthData> {
+  await requireAuth();
   const sql = getDb();
   const todayStr = getTodayDateStr();
 
@@ -493,6 +496,7 @@ export async function fetchDailyHealthDataAction(): Promise<DailyHealthData> {
 }
 
 export async function fetchTrainingHealthDataAction(): Promise<TrainingHealthData> {
+  await requireAuth();
   const sql = getDb();
 
   const [
@@ -559,6 +563,7 @@ export async function fetchTrainingHealthDataAction(): Promise<TrainingHealthDat
  * Server Action: Fetches dedicated biometrics data (clinical lab biomarkers & InBody scans).
  */
 export async function fetchBiometricsHealthDataAction(): Promise<BiometricsHealthData> {
+  await requireAuth();
   const sql = getDb();
 
   const [
@@ -585,6 +590,7 @@ export async function fetchBiometricsHealthDataAction(): Promise<BiometricsHealt
  * Uses Promise.all to fetch supplements, body composition, health logs, workouts, nutrition, and biomarkers concurrently.
  */
 export async function fetchHealthDashboardDataAction(): Promise<HealthDashboardData> {
+  await requireAuth();
   const sql = getDb();
   const todayStr = getTodayDateStr();
 
@@ -767,6 +773,7 @@ export async function logWorkoutAction(
   workoutNotes?: string
 ): Promise<{ success: boolean; error?: string }> {
   try {
+    await requireAuth();
     const sql = getDb();
     const todayStr = getTodayDateStr();
 
@@ -808,6 +815,7 @@ export async function addWaterAction(
   amountMl: number
 ): Promise<{ success: boolean; newTotal?: number; error?: string }> {
   try {
+    await requireAuth();
     const sql = getDb();
     const todayStr = getTodayDateStr();
 
@@ -841,6 +849,7 @@ export async function addWaterAction(
  * Server Action: Fetches the master supplements catalog.
  */
 export async function fetchUserSupplementsAction(): Promise<UserSupplement[]> {
+  await requireAuth();
   const sql = getDb();
   return getSupplementsCatalog(sql);
 }
@@ -854,6 +863,7 @@ export async function createSupplementAction(input: {
   timing?: string;
 }): Promise<{ success: boolean; supplement?: UserSupplement; error?: string }> {
   try {
+    await requireAuth();
     if (!input.name || !input.name.trim()) {
       return { success: false, error: "El nombre del suplemento es requerido." };
     }
@@ -931,6 +941,7 @@ export async function updateSupplementAction(
   }
 ): Promise<{ success: boolean; error?: string }> {
   try {
+    await requireAuth();
     if (!input.name || !input.name.trim()) {
       return { success: false, error: "El nombre del suplemento es requerido." };
     }
@@ -987,6 +998,7 @@ export async function deleteSupplementAction(
   id: string
 ): Promise<{ success: boolean; error?: string }> {
   try {
+    await requireAuth();
     const sql = getDb();
 
     await sql`
@@ -1022,6 +1034,7 @@ export async function toggleSupplementAction(
   supplementId: string
 ): Promise<{ success: boolean; error?: string }> {
   try {
+    await requireAuth();
     const sql = getDb();
     const todayStr = getTodayDateStr();
 
@@ -1089,6 +1102,7 @@ export async function batchToggleSupplementsByTimingAction(
   completed: boolean = true
 ): Promise<{ success: boolean; modifiedCount: number; error?: string }> {
   try {
+    await requireAuth();
     const sql = getDb();
     const todayStr = getTodayDateStr();
 
@@ -1183,6 +1197,7 @@ export async function logSleepAction(
   sleepQuality: number
 ): Promise<{ success: boolean; error?: string }> {
   try {
+    await requireAuth();
     const sql = getDb();
     const todayStr = getTodayDateStr();
 
@@ -1214,6 +1229,7 @@ export async function logSleepAction(
  * Server Action: Fetches all body composition logs.
  */
 export async function fetchBodyCompositionLogsAction(): Promise<BodyCompositionLog[]> {
+  await requireAuth();
   const sql = getDb();
   return getBodyCompositionLogs(sql);
 }
@@ -1235,6 +1251,7 @@ export async function createBodyCompositionLogAction(input: {
   notes?: string;
 }): Promise<{ success: boolean; id?: string; error?: string }> {
   try {
+    await requireAuth();
     if (!input.date || !input.weightKg) {
       return { success: false, error: "La fecha y el peso son requeridos." };
     }
@@ -1296,6 +1313,7 @@ export async function deleteBodyCompositionLogAction(
   id: string
 ): Promise<{ success: boolean; error?: string }> {
   try {
+    await requireAuth();
     const sql = getDb();
     await sql`
       DELETE FROM body_composition_logs WHERE id = ${id};
@@ -1321,6 +1339,7 @@ export async function createBodyCompositionAction(input: {
   skeletalMuscleKg?: number;
   notes?: string;
 }): Promise<{ success: boolean; id?: string; error?: string }> {
+  await requireAuth();
   const dateStr = toDateStr(input.date);
   return createBodyCompositionLogAction({
     date: dateStr,
@@ -1335,6 +1354,7 @@ export async function createBodyCompositionAction(input: {
  * Server Action: Fetches clinical lab reports and biomarker dashboard data.
  */
 export async function fetchBiomarkersDashboardDataAction(): Promise<BiomarkersDashboardData> {
+  await requireAuth();
   const sql = getDb();
   return getBiomarkersDashboardData(sql);
 }
@@ -1367,6 +1387,7 @@ export async function createLabReportAction(input: {
   }>;
 }): Promise<{ success: boolean; id?: string; error?: string }> {
   try {
+    await requireAuth();
     if (!input.date || !input.title) {
       return { success: false, error: "La fecha y el título del estudio son obligatorios." };
     }
@@ -1447,6 +1468,7 @@ export async function createLabReportAction(input: {
  */
 export async function deleteLabReportAction(id: string): Promise<{ success: boolean; error?: string }> {
   try {
+    await requireAuth();
     const sql = getDb();
     await sql`
       DELETE FROM lab_test_reports WHERE id = ${id};

@@ -4,6 +4,7 @@ import { getDb } from "@/lib/db";
 import { DEFAULT_PANTRY_ITEMS } from "@/lib/pantryCatalog";
 import { PantryCategory, PantryItem } from "@/lib/types";
 import { revalidatePath } from "next/cache";
+import { requireAuth } from "@/lib/dal/auth";
 
 interface PantryDbRow {
   id: string;
@@ -19,6 +20,7 @@ interface PantryDbRow {
  */
 export async function fetchPantryItemsAction(): Promise<PantryItem[]> {
   try {
+    await requireAuth();
     const sql = getDb();
 
     const rows = (await sql`
@@ -51,6 +53,7 @@ export async function togglePantryItemAction(
   id: string
 ): Promise<{ success: boolean; inStock?: boolean; error?: string }> {
   try {
+    await requireAuth();
     const sql = getDb();
 
     const current = (await sql`
@@ -84,6 +87,7 @@ export async function batchUpdatePantryStockAction(
   updates: Array<{ id: string; inStock: boolean }>
 ): Promise<{ success: boolean; error?: string }> {
   try {
+    await requireAuth();
     const sql = getDb();
 
     for (const update of updates) {
@@ -111,6 +115,7 @@ export async function addCustomPantryItemAction(
   icon?: string
 ): Promise<{ success: boolean; item?: PantryItem; error?: string }> {
   try {
+    await requireAuth();
     if (!name.trim()) {
       return { success: false, error: "El nombre del ingrediente es requerido" };
     }
@@ -151,6 +156,7 @@ export async function deletePantryItemAction(
   id: string
 ): Promise<{ success: boolean; error?: string }> {
   try {
+    await requireAuth();
     const sql = getDb();
 
     await sql`

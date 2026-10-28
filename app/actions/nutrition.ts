@@ -23,6 +23,7 @@ import {
 } from "@/lib/types";
 import { revalidatePath } from "next/cache";
 import { after } from "next/server";
+import { requireAuth } from "@/lib/dal/auth";
 
 const DEFAULT_HABITS: NutritionHabitLog = {
   dailySalad: false,
@@ -131,6 +132,7 @@ export async function fetchNutritionDashboardDataAction(
   targetDateStr?: string
 ): Promise<NutritionDashboardData> {
   try {
+    await requireAuth();
     const sql = getDb();
     const todayDate = toDateStr(targetDateStr);
     const { mondayStr, sundayStr } = getWeekDateRange(todayDate);
@@ -352,6 +354,7 @@ export async function logDailyPortionsAction(
   notes?: string
 ) {
   try {
+    await requireAuth();
     const sql = getDb();
     const targetDate = toDateStr(dateStr);
     const settings = await getSettings(sql);
@@ -417,6 +420,7 @@ export async function quickAdjustPortionAction(
   delta: number
 ) {
   try {
+    await requireAuth();
     const sql = getDb();
     const targetDate = toDateStr(dateStr);
     const settings = await getSettings(sql);
@@ -485,6 +489,7 @@ export async function toggleNutritionHabitAction(
   habitKey: keyof NutritionHabitLog
 ) {
   try {
+    await requireAuth();
     const sql = getDb();
     const targetDate = toDateStr(dateStr);
 
@@ -554,6 +559,7 @@ export async function scheduleMealSlotAction(payload: {
   notes?: string;
 }) {
   try {
+    await requireAuth();
     const sql = getDb();
     const id = `meal-${payload.date}-${payload.mealSlot}-${Date.now().toString(36)}`;
     const targetDate = toDateStr(payload.date);
@@ -599,6 +605,7 @@ export async function toggleScheduledMealCompletedAction(
   autoFillPortions: boolean = true
 ) {
   try {
+    await requireAuth();
     const sql = getDb();
 
     const mealRows = await sql`
@@ -689,6 +696,7 @@ export async function toggleScheduledMealCompletedAction(
  */
 export async function deleteScheduledMealAction(mealId: string) {
   try {
+    await requireAuth();
     const sql = getDb();
 
     await sql`
@@ -708,6 +716,7 @@ export async function deleteScheduledMealAction(mealId: string) {
  */
 export async function saveRecipeAction(recipe: Partial<NutritionRecipe>) {
   try {
+    await requireAuth();
     const sql = getDb();
     const id = recipe.id || `rec-custom-${Date.now().toString(36)}`;
 
@@ -749,6 +758,7 @@ export async function saveRecipeAction(recipe: Partial<NutritionRecipe>) {
  */
 export async function deleteRecipeAction(recipeId: string) {
   try {
+    await requireAuth();
     const sql = getDb();
 
     await sql`
@@ -768,6 +778,7 @@ export async function deleteRecipeAction(recipeId: string) {
  */
 export async function updateNutritionSettingsAction(settings: Partial<NutritionSettings>) {
   try {
+    await requireAuth();
     const sql = getDb();
     const current = await getSettings(sql);
 
@@ -826,6 +837,7 @@ export async function generateGroceryListAction(
   endDateStr: string
 ): Promise<GroceryListCategory[]> {
   try {
+    await requireAuth();
     const sql = getDb();
     const start = toDateStr(startDateStr);
     const end = toDateStr(endDateStr);

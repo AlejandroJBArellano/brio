@@ -13,6 +13,7 @@ import {
   HabiticaUser,
 } from "@/lib/types";
 import { revalidatePath } from "next/cache";
+import { requireAuth } from "@/lib/dal/auth";
 
 function stripEmojis(str = "", preserveNewlines = false) {
   if (!str) return "";
@@ -148,6 +149,7 @@ async function insertTaskInternal(payload: HabiticaTaskPayload): Promise<Habitic
  * Parses multiline raw text and creates tasks directly in PostgreSQL.
  */
 export async function submitBatchCaptureAction(rawText: string): Promise<BatchActionResult> {
+  await requireAuth();
   const trimmed = rawText?.trim() || "";
 
   if (!trimmed) {
@@ -250,6 +252,7 @@ export async function createSingleTaskAction(
   rawInput: string
 ): Promise<{ success: boolean; task?: HabiticaTask; error?: string }> {
   try {
+    await requireAuth();
     const parsed = parseTaskLine(rawInput);
     if (!parsed) {
       return { success: false, error: "Texto de tarea inválido" };
@@ -278,6 +281,7 @@ export async function toggleTaskAction(
   direction: "up" | "down" = "up"
 ): Promise<{ success: boolean; error?: string }> {
   try {
+    await requireAuth();
     const sql = getDb();
     const rows = await sql`SELECT * FROM tasks WHERE id = ${taskId} LIMIT 1;`;
     if (rows.length === 0) {
@@ -344,6 +348,7 @@ export async function updateTaskAction(
   payload: Partial<HabiticaTaskPayload>
 ): Promise<{ success: boolean; task?: HabiticaTask; error?: string }> {
   try {
+    await requireAuth();
     const sql = getDb();
     const cleanText = payload.text !== undefined ? stripEmojis(payload.text) : undefined;
     const cleanNotes = payload.notes !== undefined ? stripEmojis(payload.notes, true) : undefined;
@@ -409,6 +414,7 @@ export async function deleteTaskAction(
   taskId: string
 ): Promise<{ success: boolean; error?: string }> {
   try {
+    await requireAuth();
     const sql = getDb();
     await sql`DELETE FROM tasks WHERE id = ${taskId};`;
 
@@ -432,6 +438,7 @@ export async function convertTaskTypeAction(
   targetType: "daily" | "habit" | "todo"
 ): Promise<{ success: boolean; newTask?: HabiticaTask; error?: string }> {
   try {
+    await requireAuth();
     const sql = getDb();
     await sql`
       UPDATE tasks
@@ -461,6 +468,7 @@ export async function toggleSleepAction(): Promise<{
   resting?: boolean;
   error?: string;
 }> {
+  await requireAuth();
   return { success: true, resting: false };
 }
 
@@ -468,6 +476,7 @@ export async function toggleSleepAction(): Promise<{
  * Server Action: Force Sync & Run Cron
  */
 export async function syncHabiticaDataAction(): Promise<{ success: boolean }> {
+  await requireAuth();
   revalidatePath("/", "layout");
   revalidatePath("/today");
   revalidatePath("/tasks");
@@ -483,6 +492,7 @@ export async function fetchSingleTaskAction(
   _skipCache: boolean = true
 ): Promise<{ success: boolean; task?: HabiticaTask; error?: string }> {
   try {
+    await requireAuth();
     const task = await fetchTaskWithDetails(taskId);
     if (!task) return { success: false, error: "Tarea no encontrada" };
     return { success: true, task };
@@ -500,6 +510,7 @@ export async function addChecklistItemAction(
   text: string
 ): Promise<{ success: boolean; task?: HabiticaTask; error?: string }> {
   try {
+    await requireAuth();
     const sql = getDb();
     const id = crypto.randomUUID();
     const cleanText = stripEmojis(text) || text;
@@ -537,6 +548,7 @@ export async function toggleChecklistItemAction(
   itemId: string
 ): Promise<{ success: boolean; task?: HabiticaTask; error?: string }> {
   try {
+    await requireAuth();
     const sql = getDb();
     await sql`
       UPDATE task_checklists
@@ -565,6 +577,7 @@ export async function deleteChecklistItemAction(
   itemId: string
 ): Promise<{ success: boolean; task?: HabiticaTask; error?: string }> {
   try {
+    await requireAuth();
     const sql = getDb();
     await sql`
       DELETE FROM task_checklists
@@ -588,6 +601,7 @@ export async function deleteChecklistItemAction(
  * Server Action: Fetch Tags
  */
 export async function fetchTagsAction(): Promise<HabiticaTag[]> {
+  await requireAuth();
   return getCachedTags();
 }
 
@@ -600,5 +614,6 @@ export async function fetchDashboardDataAction(): Promise<{
   tags: HabiticaTag[];
   isConfigured: boolean;
 }> {
+  await requireAuth();
   return getCachedDashboardData();
 }

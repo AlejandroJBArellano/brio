@@ -12,6 +12,7 @@ import {
 import { awardTaskEvent } from "@/lib/taskEvents";
 import { revalidatePath } from "next/cache";
 import { getTodayDateStr } from "@/lib/dateUtils";
+import { requireAuth } from "@/lib/dal/auth";
 
 /**
  * Server Action: Fetches hormonal schedule config and today's checklist.
@@ -21,6 +22,7 @@ export async function fetchHormonalDashboardDataAction(): Promise<{
   todayChecklist: HormonalDailyChecklist;
 }> {
   try {
+    await requireAuth();
     const sql = getDb();
     const todayStr = getTodayDateStr();
 
@@ -56,6 +58,7 @@ export async function saveHormonalScheduleConfigAction(
   newConfig: Partial<HormonalScheduleConfig>
 ): Promise<{ success: boolean; error?: string }> {
   try {
+    await requireAuth();
     const sql = getDb();
 
     const currentData = await fetchHormonalDashboardDataAction();
@@ -115,6 +118,7 @@ export async function toggleHormonalChecklistItemAction(
   key: keyof HormonalDailyChecklist
 ): Promise<{ success: boolean; checklist?: HormonalDailyChecklist; error?: string }> {
   try {
+    await requireAuth();
     const sql = getDb();
     const todayStr = getTodayDateStr();
 

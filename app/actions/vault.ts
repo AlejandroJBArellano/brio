@@ -19,6 +19,7 @@ import { awardTaskEvent } from "@/lib/taskEvents";
 import { getCachedTags as getCachedHabiticaTags, getCachedTasks as getCachedHabiticaTasks } from "@/lib/dal/tasks";
 import { revalidatePath } from "next/cache";
 import { scrapeUrlMetadata, ScrapedMetadata } from "@/lib/metascraper";
+import { requireAuth } from "@/lib/dal/auth";
 
 interface VaultDbRow {
   id: string;
@@ -63,6 +64,7 @@ interface ScratchpadDbRow {
  * Uses Promise.all to fetch vault items, projects, and scratchpad concurrently.
  */
 export async function fetchVaultDashboardDataAction(): Promise<VaultDashboardData> {
+  await requireAuth();
   const sql = getDb();
 
   const [rows, projectRows, scratchRows, tasks, tags] = await Promise.all([
@@ -149,6 +151,7 @@ export async function fetchVaultDashboardDataAction(): Promise<VaultDashboardDat
  */
 export async function getVaultFileDownloadUrlAction(id: string): Promise<{ url?: string; error?: string }> {
   try {
+    await requireAuth();
     const sql = getDb();
     const rows = await sql`
       SELECT file_key, file_url FROM vault_items WHERE id = ${id} LIMIT 1;
@@ -182,6 +185,7 @@ export async function createVaultItemAction(
   formData: FormData
 ): Promise<{ success: boolean; item?: VaultItem; error?: string }> {
   try {
+    await requireAuth();
     const category = formData.get("category") as VaultItemCategory;
     const title = formData.get("title") as string;
     const authorOrCreator = (formData.get("authorOrCreator") as string) || null;
@@ -307,6 +311,7 @@ export async function incrementVaultItemProgressAction(
   amount: number
 ): Promise<{ success: boolean; error?: string }> {
   try {
+    await requireAuth();
     const sql = getDb();
 
     const rows = await sql`
@@ -357,6 +362,7 @@ export async function updateVaultItemStatusAction(
   newStatus: VaultItemStatus
 ): Promise<{ success: boolean; error?: string }> {
   try {
+    await requireAuth();
     const sql = getDb();
 
     let itemTitle = "Recurso";
@@ -409,6 +415,7 @@ export async function updateVaultItemAction(
   }
 ): Promise<{ success: boolean; error?: string }> {
   try {
+    await requireAuth();
     const sql = getDb();
 
     await sql`
@@ -441,9 +448,8 @@ export async function deleteVaultItemAction(
   id: string
 ): Promise<{ success: boolean; error?: string }> {
   try {
+    await requireAuth();
     const sql = getDb();
-
-    // Check if there is an S3 file key
     const rows = await sql`
       SELECT file_key FROM vault_items WHERE id = ${id} LIMIT 1;
     `;
@@ -472,6 +478,7 @@ export async function scrapeMetadataAction(
   url: string
 ): Promise<{ success: boolean; data?: ScrapedMetadata; error?: string }> {
   try {
+    await requireAuth();
     const metadata = await scrapeUrlMetadata(url);
     return { success: true, data: metadata };
   } catch (error) {
@@ -491,6 +498,7 @@ export async function quickAddVaultResourceAction(
   categoryOverride?: VaultItemCategory
 ): Promise<{ success: boolean; item?: VaultItem; error?: string }> {
   try {
+    await requireAuth();
     const meta = await scrapeUrlMetadata(url);
     const category: VaultItemCategory = categoryOverride || meta.category || "link";
     const id = `vault-${Date.now()}`;

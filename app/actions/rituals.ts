@@ -6,6 +6,7 @@ import { awardTaskEvent } from "@/lib/taskEvents";
 import { RitualLog } from "@/lib/types";
 import { revalidatePath } from "next/cache";
 import { getTodayDateStr } from "@/lib/dateUtils";
+import { requireAuth } from "@/lib/dal/auth";
 
 interface RitualDbRow {
   date: Date | string;
@@ -21,6 +22,7 @@ interface RitualDbRow {
  */
 export async function fetchTodayRitualAction(): Promise<RitualLog | null> {
   try {
+    await requireAuth();
     const sql = getDb();
     const todayStr = getTodayDateStr();
 
@@ -56,6 +58,7 @@ export async function saveMorningRitualAction(payload: {
   dayIntention?: string;
 }): Promise<{ success: boolean; error?: string }> {
   try {
+    await requireAuth();
     const sql = getDb();
     const todayStr = getTodayDateStr();
     const tasksJson = JSON.stringify(payload.mustWinTasks || []);
@@ -126,6 +129,7 @@ export async function setMustWinTasksAction(
   taskIds: string[]
 ): Promise<{ success: boolean; error?: string }> {
   try {
+    await requireAuth();
     const sql = getDb();
     const todayStr = getTodayDateStr();
     const tasksJson = JSON.stringify(taskIds);
@@ -157,6 +161,7 @@ export async function saveEveningReviewAction(payload: {
   nightRoutineCompleted?: boolean;
 }): Promise<{ success: boolean; tasksCreated?: number; error?: string }> {
   try {
+    await requireAuth();
     const sql = getDb();
     const todayStr = getTodayDateStr();
 

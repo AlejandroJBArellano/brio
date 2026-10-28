@@ -17,6 +17,7 @@ import { awardTaskEvent } from "@/lib/taskEvents";
 import { getCachedTags as getCachedHabiticaTags, getCachedTasksWithCompleted as getCachedHabiticaTasksWithCompleted } from "@/lib/dal/tasks";
 import { fetchContextualNotesAction } from "./notes";
 import { revalidatePath } from "next/cache";
+import { requireAuth } from "@/lib/dal/auth";
 
 interface ProjectDbRow {
   id: string;
@@ -63,6 +64,7 @@ export interface ProjectDetailPageData {
  * Server Action: Fetches a single project with its tasks, tags, and contextual notes.
  */
 export async function fetchProjectByIdAction(id: string): Promise<ProjectDetailPageData> {
+  await requireAuth();
   const sql = getDb();
 
   const [projectRows, tasks, tags, notes] = await Promise.all([
@@ -106,6 +108,7 @@ export async function fetchProjectByIdAction(id: string): Promise<ProjectDetailP
  * Server Action: Fetches all projects with Habitica tasks and tags for the dedicated /projects page.
  */
 export async function fetchProjectsPageDataAction(): Promise<ProjectsPageData> {
+  await requireAuth();
   const sql = getDb();
 
   const [projectRows, tasks, tags] = await Promise.all([
@@ -137,6 +140,7 @@ export async function fetchProjectsPageDataAction(): Promise<ProjectsPageData> {
  * Server Action: Fetches all projects, learning items, and scratchpad content concurrently.
  */
 export async function fetchProjectsDashboardDataAction(): Promise<ProjectsDashboardData> {
+  await requireAuth();
   const sql = getDb();
 
   const [projectRows, learningRows, scratchRows] = await Promise.all([
@@ -193,6 +197,7 @@ export async function createProjectAction(payload: {
   canonicalPrefix?: string;
 }): Promise<{ success: boolean; error?: string }> {
   try {
+    await requireAuth();
     const sql = getDb();
     const id = `prj-${Date.now()}`;
     const prefixesJson = JSON.stringify(payload.taskPrefixes || []);
@@ -231,6 +236,7 @@ export async function updateProjectStatusAction(
   progress?: number
 ): Promise<{ success: boolean; error?: string }> {
   try {
+    await requireAuth();
     const sql = getDb();
 
     let projectTitle = "Proyecto";
@@ -293,6 +299,7 @@ export async function updateProjectDetailsAction(payload: {
   integrations?: Record<string, any>;
 }): Promise<{ success: boolean; error?: string }> {
   try {
+    await requireAuth();
     const sql = getDb();
     const prefixesJson = JSON.stringify(payload.taskPrefixes || []);
 
@@ -345,6 +352,7 @@ export async function addProjectResourceAction(
   label?: string
 ): Promise<{ success: boolean; error?: string }> {
   try {
+    await requireAuth();
     const sql = getDb();
 
     const rows = await sql`SELECT integrations FROM projects WHERE id = ${projectId} LIMIT 1;`;
@@ -396,6 +404,7 @@ export async function removeProjectResourceAction(
   url: string
 ): Promise<{ success: boolean; error?: string }> {
   try {
+    await requireAuth();
     const sql = getDb();
     const rows = await sql`SELECT integrations FROM projects WHERE id = ${projectId} LIMIT 1;`;
     if (rows.length === 0) return { success: false, error: "Proyecto no encontrado" };
@@ -438,6 +447,7 @@ export async function removeProjectResourceAction(
  */
 export async function deleteProjectAction(id: string): Promise<{ success: boolean; error?: string }> {
   try {
+    await requireAuth();
     const sql = getDb();
     await sql`DELETE FROM projects WHERE id = ${id};`;
     revalidatePath("/");
@@ -461,6 +471,7 @@ export async function createLearningItemAction(payload: {
   totalProgress?: number;
 }): Promise<{ success: boolean; error?: string }> {
   try {
+    await requireAuth();
     const sql = getDb();
     const id = `lrn-${Date.now()}`;
 
@@ -487,6 +498,7 @@ export async function updateLearningProgressAction(
   status?: LearningStatus
 ): Promise<{ success: boolean; error?: string }> {
   try {
+    await requireAuth();
     const sql = getDb();
 
     const rows = await sql`
@@ -532,6 +544,7 @@ export async function updateLearningProgressAction(
  */
 export async function deleteLearningItemAction(id: string): Promise<{ success: boolean; error?: string }> {
   try {
+    await requireAuth();
     const sql = getDb();
     await sql`DELETE FROM learning_items WHERE id = ${id};`;
     revalidatePath("/");
@@ -557,6 +570,7 @@ function extractNoteTitle(id: string, content: string): string {
  */
 export async function fetchScratchpadNotesAction(): Promise<ScratchpadNoteItem[]> {
   try {
+    await requireAuth();
     const sql = getDb();
     const rows = (await sql`
       SELECT id, content, updated_at 
@@ -584,6 +598,7 @@ export async function saveScratchpadAction(
   noteId: string = "default"
 ): Promise<{ success: boolean; error?: string }> {
   try {
+    await requireAuth();
     const sql = getDb();
 
     await sql`
@@ -608,6 +623,7 @@ export async function createScratchpadNoteAction(
   initialContent: string = ""
 ): Promise<{ success: boolean; note?: ScratchpadNoteItem; error?: string }> {
   try {
+    await requireAuth();
     const sql = getDb();
     const slug = title
       .toLowerCase()
@@ -644,6 +660,7 @@ export async function deleteScratchpadNoteAction(
   noteId: string
 ): Promise<{ success: boolean; error?: string }> {
   try {
+    await requireAuth();
     if (noteId === "default") {
       // Clear default note content instead of deleting the row
       const sql = getDb();

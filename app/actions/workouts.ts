@@ -22,6 +22,7 @@ import {
 } from "@/lib/workouts";
 import { identifyMusclesForExercise } from "@/lib/muscleRecovery";
 import { revalidatePath } from "next/cache";
+import { requireAuth } from "@/lib/dal/auth";
 
 interface NeonSql {
   (strings: TemplateStringsArray, ...values: unknown[]): Promise<unknown[]>;
@@ -32,6 +33,7 @@ interface NeonSql {
  */
 export async function fetchActiveWorkoutSessionAction(): Promise<WorkoutSession | null> {
   try {
+    await requireAuth();
     const sql = getDb();
 
     const rows = (await sql`
@@ -76,6 +78,7 @@ export async function startWorkoutSessionAction(params: {
   title?: string;
 }): Promise<{ success: boolean; session?: WorkoutSession; error?: string }> {
   try {
+    await requireAuth();
     const sql = getDb();
 
     // Cancel any existing dangling in-progress session
@@ -199,6 +202,7 @@ export async function updateActiveWorkoutSessionAction(params: {
   exercises: WorkoutExercise[];
 }): Promise<{ success: boolean; error?: string }> {
   try {
+    await requireAuth();
     const sql = getDb();
     const { totalVolumeKg, totalSetsCount } = calculateWorkoutVolume(params.exercises);
 
@@ -241,6 +245,7 @@ export async function finishWorkoutSessionAction(params: {
   error?: string;
 }> {
   try {
+    await requireAuth();
     const sql = getDb();
 
     const now = new Date();
@@ -369,6 +374,7 @@ export async function discardActiveWorkoutSessionAction(params: {
   sessionId: string;
 }): Promise<{ success: boolean; error?: string }> {
   try {
+    await requireAuth();
     const sql = getDb();
     await sql`
       DELETE FROM workout_sessions
@@ -392,6 +398,7 @@ export async function deleteWorkoutSessionAction(params: {
   sessionId: string;
 }): Promise<{ success: boolean; error?: string }> {
   try {
+    await requireAuth();
     const sql = getDb();
     await sql`DELETE FROM workout_sessions WHERE id = ${params.sessionId};`;
     revalidatePath("/health/training");
@@ -410,8 +417,8 @@ export async function deleteWorkoutSessionAction(params: {
  */
 export async function fetchRoutinesAction(): Promise<WorkoutRoutine[]> {
   try {
+    await requireAuth();
     const sql = getDb();
-
     const rows = (await sql`
       SELECT * FROM workout_routines ORDER BY created_at DESC;
     `) as Record<string, unknown>[];
@@ -437,6 +444,7 @@ export async function saveRoutineAction(
   routine: WorkoutRoutine
 ): Promise<{ success: boolean; error?: string }> {
   try {
+    await requireAuth();
     const sql = getDb();
 
     const routineId = routine.id || `routine-${Date.now()}`;
@@ -476,6 +484,7 @@ export async function deleteRoutineAction(
   routineId: string
 ): Promise<{ success: boolean; error?: string }> {
   try {
+    await requireAuth();
     const sql = getDb();
     await sql`DELETE FROM workout_routines WHERE id = ${routineId};`;
     revalidatePath("/health/training");
@@ -497,6 +506,7 @@ export async function fetchExerciseCatalogAction(params?: {
   query?: string;
 }): Promise<ExerciseCatalogItem[]> {
   try {
+    await requireAuth();
     const sql = getDb();
 
     const muscle = params?.muscleGroup && params.muscleGroup !== "all" ? params.muscleGroup : null;
@@ -541,6 +551,7 @@ export async function createCustomExerciseAction(params: {
   notes?: string;
 }): Promise<{ success: boolean; exercise?: ExerciseCatalogItem; error?: string }> {
   try {
+    await requireAuth();
     const sql = getDb();
 
     const title = params.title.trim();
@@ -599,6 +610,7 @@ export async function fetchWorkoutHistoryAction(params?: {
   limit?: number;
 }): Promise<{ workouts: WorkoutSession[]; totalCount: number }> {
   try {
+    await requireAuth();
     const sql = getDb();
 
     const limit = params?.limit || 20;

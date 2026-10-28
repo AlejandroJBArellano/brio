@@ -10,6 +10,7 @@ import {
 import { awardTaskEvent } from "@/lib/taskEvents";
 import { revalidatePath } from "next/cache";
 import { getTodayDateStr } from "@/lib/dateUtils";
+import { requireAuth } from "@/lib/dal/auth";
 
 const DEFAULT_COOLING_DAYS = 30;
 
@@ -77,6 +78,7 @@ function processWishlistRow(r: WishlistDbRow): WishlistItem {
  * Server Action: Fetches all Wishlist items and computes financial & cooling statistics.
  */
 export async function fetchWishlistDataAction(): Promise<WishlistDashboardData> {
+  await requireAuth();
   const sql = getDb();
 
   const rows = await sql`
@@ -127,6 +129,7 @@ export async function createWishlistItemAction(input: {
   coolingDaysTotal?: number;
 }): Promise<{ success: boolean; item?: WishlistItem; error?: string }> {
   try {
+    await requireAuth();
     if (!input.title || !input.title.trim()) {
       return { success: false, error: "El título del artículo es requerido." };
     }
@@ -178,6 +181,7 @@ export async function purchaseWishlistItemAction(
   }
 ): Promise<{ success: boolean; error?: string }> {
   try {
+    await requireAuth();
     const sql = getDb();
 
     // 1. Fetch item
@@ -237,6 +241,7 @@ export async function dismissWishlistItemAction(
   id: string
 ): Promise<{ success: boolean; error?: string }> {
   try {
+    await requireAuth();
     const sql = getDb();
 
     const itemRows = await sql`
@@ -271,6 +276,7 @@ export async function deleteWishlistItemAction(
   id: string
 ): Promise<{ success: boolean; error?: string }> {
   try {
+    await requireAuth();
     const sql = getDb();
 
     await sql`
