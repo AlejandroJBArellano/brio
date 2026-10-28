@@ -9,7 +9,7 @@ import {
   FinanceCommitment,
   VariablePaymentScheduleItem,
 } from "@/lib/types";
-import { getTodayDateStr } from "@/lib/dateUtils";
+import { addMonthsToDateStr, getTodayDateStr } from "@/lib/dateUtils";
 import {
   AlertCircle,
   Calendar,
@@ -72,9 +72,7 @@ export function AddCommitmentModal({
   if (!isOpen) return null;
 
   const handleAddScheduleItem = () => {
-    const nextDate = new Date();
-    nextDate.setMonth(nextDate.getMonth() + variableSchedule.length);
-    const dateStr = nextDate.toISOString().split("T")[0];
+    const dateStr = addMonthsToDateStr(getTodayDateStr(), variableSchedule.length);
 
     setVariableSchedule([
       ...variableSchedule,

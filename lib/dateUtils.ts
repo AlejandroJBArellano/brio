@@ -135,3 +135,49 @@ export function getDaysAgoDateStr(days: number, timeZone: string = APP_TIMEZONE)
   target.setUTCDate(target.getUTCDate() - days);
   return target.toISOString().split("T")[0];
 }
+
+/**
+ * Calendar-accurate month addition/subtraction on a 'YYYY-MM-DD' date string.
+ * Clamps days to target month length (e.g. 2026-01-31 + 1 month -> 2026-02-28).
+ * Pure calendar math without UTC/local timezone shifts.
+ */
+export function addMonthsToDateStr(dateStr: string, monthsToAdd: number): string {
+  const cleanDate = toDateStr(dateStr);
+  const [y, m, d] = cleanDate.split("-").map(Number);
+  const totalMonths = y * 12 + (m - 1) + monthsToAdd;
+  const targetYear = Math.floor(totalMonths / 12);
+  const targetMonth = ((totalMonths % 12) + 12) % 12 + 1;
+  const daysInTargetMonth = new Date(Date.UTC(targetYear, targetMonth, 0)).getUTCDate();
+  const targetDay = Math.min(d, daysInTargetMonth);
+
+  const mm = String(targetMonth).padStart(2, "0");
+  const dd = String(targetDay).padStart(2, "0");
+  return `${targetYear}-${mm}-${dd}`;
+}
+
+/**
+ * Calendar-accurate day addition/subtraction on a 'YYYY-MM-DD' date string.
+ */
+export function addDaysToDateStr(dateStr: string, daysToAdd: number): string {
+  const cleanDate = toDateStr(dateStr);
+  const [y, m, d] = cleanDate.split("-").map(Number);
+  const utcDate = new Date(Date.UTC(y, m - 1, d + daysToAdd, 12, 0, 0));
+  return utcDate.toISOString().split("T")[0];
+}
+
+/**
+ * Calendar-accurate year addition/subtraction on a 'YYYY-MM-DD' date string.
+ * Clamps leap year Feb 29 to Feb 28 on non-leap years.
+ */
+export function addYearsToDateStr(dateStr: string, yearsToAdd: number): string {
+  const cleanDate = toDateStr(dateStr);
+  const [y, m, d] = cleanDate.split("-").map(Number);
+  const targetYear = y + yearsToAdd;
+  const daysInTargetMonth = new Date(Date.UTC(targetYear, m, 0)).getUTCDate();
+  const targetDay = Math.min(d, daysInTargetMonth);
+
+  const mm = String(m).padStart(2, "0");
+  const dd = String(targetDay).padStart(2, "0");
+  return `${targetYear}-${mm}-${dd}`;
+}
+

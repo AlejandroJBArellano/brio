@@ -91,7 +91,7 @@ async function resetDailiesIfNeeded() {
           updated_at = NOW()
       WHERE type = 'daily'
         AND completed = TRUE
-        AND completed_at < ${startOfToday};
+        AND (completed_at IS NULL OR completed_at < ${startOfToday});
     `;
 
     // 2. Refresh is_due for all dailies based on today's scheduled day of the week
