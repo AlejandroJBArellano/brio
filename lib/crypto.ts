@@ -1,6 +1,7 @@
 import crypto from "crypto";
 
 const ALGORITHM = "aes-256-gcm";
+const devFallbackCipherSecret = crypto.randomBytes(32).toString("hex");
 
 /**
  * Derives a consistent 32-byte key from available environment secrets.
@@ -9,8 +10,11 @@ function getCipherKey(): Buffer {
   const secret =
     process.env.BRIO_CIPHER_SECRET ||
     process.env.BETTER_AUTH_SECRET ||
-    process.env.BRIO_AGENT_TOKEN ||
-    "brio_secure_cryptographic_master_key_2026";
+    (process.env.NODE_ENV === "production" ? undefined : devFallbackCipherSecret);
+
+  if (!secret) {
+    throw new Error("Missing BRIO_CIPHER_SECRET or BETTER_AUTH_SECRET in environment variables.");
+  }
 
   return crypto.createHash("sha256").update(secret).digest();
 }

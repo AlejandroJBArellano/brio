@@ -14,7 +14,10 @@ const rawApiUrl = (process.env.BRIO_API_URL || "https://brio-sand.vercel.app");
 const BRIO_API_URL = (rawApiUrl.includes("localhost") || rawApiUrl.includes("127.0.0.1") || !rawApiUrl)
   ? "https://brio-sand.vercel.app"
   : rawApiUrl.replace(new RegExp("/+$"), "");
-const BRIO_AGENT_TOKEN = process.env.BRIO_AGENT_TOKEN || "brio_sec_ceb79d568cd0c82323bf4f53ab6d2ec010bf5af4";
+const BRIO_AGENT_TOKEN = process.env.BRIO_AGENT_TOKEN || "";
+if (!BRIO_AGENT_TOKEN) {
+  console.error("[brio-mcp-server] WARNING: BRIO_AGENT_TOKEN environment variable is not set.");
+}
 
 /**
  * Logs diagnostics to stderr so it doesn't pollute stdout JSON-RPC stream.

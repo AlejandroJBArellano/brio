@@ -1,6 +1,7 @@
 import { getDb } from "@/lib/db";
 import { getProjectKeywords } from "@/lib/projectMatcher";
 import { ProjectItem, ProjectStatus } from "@/lib/types";
+import crypto from "crypto";
 
 interface ProjectDbRow {
   id: string;
@@ -10,7 +11,7 @@ interface ProjectDbRow {
   progress?: number | string;
   task_prefixes?: string[];
   canonical_prefix?: string;
-  integrations?: Record<string, any>;
+  integrations?: Record<string, unknown>;
   created_at?: Date | string;
 }
 
@@ -46,11 +47,24 @@ export function verifyAgentAuth(request: Request): {
     providedToken = brioTokenHeader.trim();
   }
 
-  if (!providedToken || providedToken !== configuredToken) {
+  if (!providedToken) {
     return {
       authorized: false,
       status: 401,
-      error: "Unauthorized: Invalid or missing Brio Agent Token.",
+      error: "Missing agent authentication token.",
+    };
+  }
+
+  const providedBuf = Buffer.from(providedToken);
+  const configuredBuf = Buffer.from(configuredToken);
+  if (
+    providedBuf.length !== configuredBuf.length ||
+    !crypto.timingSafeEqual(providedBuf, configuredBuf)
+  ) {
+    return {
+      authorized: false,
+      status: 401,
+      error: "Invalid agent authentication token.",
     };
   }
 
