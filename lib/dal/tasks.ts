@@ -1,5 +1,6 @@
 import { cache } from "react";
 import { getDb } from "@/lib/db";
+import { getStartOfTodayISO, getTodayDateStr, getTodayDayKey } from "@/lib/dateUtils";
 import { HabiticaTag, HabiticaTask, HabiticaUser } from "@/lib/types";
 
 export const DEFAULT_BRIO_USER: HabiticaUser = {
@@ -68,14 +69,20 @@ interface TaskTagDbRow {
   tag_id: string;
 }
 
+// Date (CDMX) of the last successful reset on this server instance
+let lastDailyResetDate: string | null = null;
+
 /**
- * Runs a lightweight daily reset for daily tasks whose completion was on an earlier date.
+ * Runs the daily reset once per day (CDMX) for daily tasks whose completion was on an earlier date.
  */
 async function resetDailiesIfNeeded() {
+  const todayStr = getTodayDateStr();
+  if (lastDailyResetDate === todayStr) return;
+
   try {
     const sql = getDb();
-    const dayMap = ["su", "m", "t", "w", "th", "f", "s"] as const;
-    const todayDayKey = dayMap[new Date().getDay()];
+    const todayDayKey = getTodayDayKey();
+    const startOfToday = getStartOfTodayISO();
 
     // 1. Uncheck completed dailies from previous days
     await sql`
@@ -84,7 +91,7 @@ async function resetDailiesIfNeeded() {
           updated_at = NOW()
       WHERE type = 'daily'
         AND completed = TRUE
-        AND completed_at < CURRENT_DATE;
+        AND completed_at < ${startOfToday};
     `;
 
     // 2. Refresh is_due for all dailies based on today's scheduled day of the week
@@ -97,6 +104,8 @@ async function resetDailiesIfNeeded() {
           END
       WHERE type = 'daily';
     `;
+
+    lastDailyResetDate = todayStr;
   } catch (error) {
     console.error("[Tasks DAL] Error resetting dailies:", error);
   }

@@ -95,6 +95,37 @@ export function getWeekDateRange(
 }
 
 /**
+ * Returns today's Habitica-style weekday key (su, m, t, w, th, f, s) in the configured timezone.
+ */
+export function getTodayDayKey(timeZone: string = APP_TIMEZONE): "su" | "m" | "t" | "w" | "th" | "f" | "s" {
+  const dayKeys = ["su", "m", "t", "w", "th", "f", "s"] as const;
+  const today = getTodayDateStr(timeZone);
+  return dayKeys[new Date(`${today}T12:00:00Z`).getUTCDay()];
+}
+
+/**
+ * Returns the UTC instant (ISO string) at which today started in the configured timezone.
+ */
+export function getStartOfTodayISO(timeZone: string = APP_TIMEZONE): string {
+  const [y, m, d] = getTodayDateStr(timeZone).split("-").map(Number);
+  const utcMidnight = new Date(Date.UTC(y, m - 1, d));
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone,
+    hourCycle: "h23",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+  }).formatToParts(utcMidnight);
+  const get = (type: string) => Number(parts.find((p) => p.type === type)?.value);
+  const zonedAsUtc = Date.UTC(get("year"), get("month") - 1, get("day"), get("hour"), get("minute"), get("second"));
+  const offsetMs = zonedAsUtc - utcMidnight.getTime();
+  return new Date(utcMidnight.getTime() - offsetMs).toISOString();
+}
+
+/**
  * Returns date string for N days ago in the configured timezone.
  */
 export function getDaysAgoDateStr(days: number, timeZone: string = APP_TIMEZONE): string {

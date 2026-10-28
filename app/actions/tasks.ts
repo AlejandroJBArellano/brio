@@ -2,6 +2,7 @@
 
 import { getDb } from "@/lib/db";
 import { getCachedDashboardData, getCachedTags } from "@/lib/dal/tasks";
+import { getTodayDayKey } from "@/lib/dateUtils";
 import { parseBatchInput, parseTaskLine, toHabiticaPayload } from "@/lib/parser";
 import {
   BatchActionResult,
@@ -86,13 +87,15 @@ async function insertTaskInternal(payload: HabiticaTaskPayload): Promise<Habitic
   const everyX = typeof payload.everyX === "number" ? payload.everyX : 1;
   const up = payload.up !== undefined ? Boolean(payload.up) : true;
   const down = payload.down !== undefined ? Boolean(payload.down) : false;
+  // The daily reset only runs once per day, so set is_due for new dailies here
+  const isDue = payload.repeat ? payload.repeat[getTodayDayKey()] !== false : true;
 
   await sql`
     INSERT INTO tasks (
-      id, text, notes, type, priority, completed, due_date,
+      id, text, notes, type, priority, completed, due_date, is_due,
       repeat_days, frequency, every_x, up, down, counter_up, counter_down, created_at, updated_at
     ) VALUES (
-      ${id}, ${cleanText}, ${cleanNotes}, ${type}, ${priority}, FALSE, ${dueDate},
+      ${id}, ${cleanText}, ${cleanNotes}, ${type}, ${priority}, FALSE, ${dueDate}, ${isDue},
       ${repeatDays}::jsonb, ${frequency}, ${everyX}, ${up}, ${down}, 0, 0, NOW(), NOW()
     );
   `;

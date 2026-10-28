@@ -24,6 +24,7 @@ import {
   WorkoutType,
 } from "@/lib/types";
 import { revalidatePath } from "next/cache";
+import { after } from "next/server";
 import { fetchNutritionDashboardDataAction } from "./nutrition";
 import { getTodayDateStr, toDateStr } from "@/lib/dateUtils";
 import { awardTaskEvent } from "@/lib/taskEvents";
@@ -818,11 +819,15 @@ export async function addWaterAction(
           updated_at = NOW();
     `;
 
-    // Award Habitica XP for hydration
-    await awardTaskEvent("HYDRATION_LOGGED", {
-      customTitle: `[Brio] Hidratación (+${amountMl}ml)`,
-      customNotes: `Ingesta de agua: +${amountMl}ml registrados en Brio.`,
-    });
+    // Award Habitica XP for hydration after the response is sent
+    after(() =>
+      awardTaskEvent("HYDRATION_LOGGED", {
+        customTitle: `[Brio] Hidratación (+${amountMl}ml)`,
+        customNotes: `Ingesta de agua: +${amountMl}ml registrados en Brio.`,
+      }).catch((err) => {
+        console.warn("[addWaterAction] awardTaskEvent background error:", err);
+      })
+    );
 
     revalidatePath("/");
     return { success: true };
@@ -1051,17 +1056,17 @@ export async function toggleSupplementAction(
           updated_at = NOW();
     `;
 
-    // Award Habitica XP safely without blocking
-    try {
-      const toggledItem = updatedSupplements.find((s) => s.id === supplementId);
-      if (toggledItem && toggledItem.taken) {
-        await awardTaskEvent("SUPPLEMENTS_COMPLETED", {
+    // Award Habitica XP after the response is sent
+    const toggledItem = updatedSupplements.find((s) => s.id === supplementId);
+    if (toggledItem && toggledItem.taken) {
+      after(() =>
+        awardTaskEvent("SUPPLEMENTS_COMPLETED", {
           customTitle: `[Brio] Suplemento: ${toggledItem.name}`,
           customNotes: `Suplemento diario tomado: ${toggledItem.name}${toggledItem.dosage ? ` (${toggledItem.dosage})` : ""}.`,
-        });
-      }
-    } catch (gamifyErr) {
-      console.warn("[Habitica Gamify Non-blocking Warning]:", gamifyErr);
+        }).catch((gamifyErr) => {
+          console.warn("[Habitica Gamify Non-blocking Warning]:", gamifyErr);
+        })
+      );
     }
 
     try {

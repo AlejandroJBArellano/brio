@@ -173,9 +173,9 @@ export function MobileBottomSheet({
     setConcept("");
     onClose();
 
+    // The action's revalidatePath already refreshes /finance and /today in the same response
     startTransition(async () => {
       await createTransactionAction(payload);
-      router.refresh();
     });
   };
 
@@ -197,7 +197,6 @@ export function MobileBottomSheet({
         soundFx.taskComplete();
         setTaskText("");
         onClose();
-        router.refresh();
       }
     });
   };

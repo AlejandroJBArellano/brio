@@ -22,6 +22,7 @@ import {
   ScheduledMealItem,
 } from "@/lib/types";
 import { revalidatePath } from "next/cache";
+import { after } from "next/server";
 
 const DEFAULT_HABITS: NutritionHabitLog = {
   dailySalad: false,
@@ -455,13 +456,17 @@ export async function quickAdjustPortionAction(
         updated_at = NOW();
     `;
 
-    // If incrementing a portion, award Habitica
+    // If incrementing a portion, award Habitica after the response is sent
     if (delta > 0) {
       const groupLabel = FOOD_GROUP_NAMES[group] || group;
-      await awardTaskEvent("NUTRITION_HABIT", {
-        customTitle: `[Brio] Nutrición : +${delta} ${groupLabel}`,
-        customNotes: `Porción saludable registrada en el plan de  (${groupLabel}).`,
-      });
+      after(() =>
+        awardTaskEvent("NUTRITION_HABIT", {
+          customTitle: `[Brio] Nutrición : +${delta} ${groupLabel}`,
+          customNotes: `Porción saludable registrada en el plan de  (${groupLabel}).`,
+        }).catch((err) => {
+          console.warn("[quickAdjustPortionAction] awardTaskEvent background error:", err);
+        })
+      );
     }
 
     revalidatePath("/");
@@ -519,10 +524,14 @@ export async function toggleNutritionHabitAction(
 
     if (habits[habitKey]) {
       const habitLabel = MARIANA_MONT_HABIT_NAMES[habitKey] || habitKey;
-      await awardTaskEvent("NUTRITION_HABIT", {
-        customTitle: `[Brio] ${habitLabel}`,
-        customNotes: `Hábito cumplido del plan : ${habitLabel}`,
-      });
+      after(() =>
+        awardTaskEvent("NUTRITION_HABIT", {
+          customTitle: `[Brio] ${habitLabel}`,
+          customNotes: `Hábito cumplido del plan : ${habitLabel}`,
+        }).catch((err) => {
+          console.warn("[toggleNutritionHabitAction] awardTaskEvent background error:", err);
+        })
+      );
     }
 
     revalidatePath("/");
