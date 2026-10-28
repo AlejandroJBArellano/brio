@@ -1,9 +1,19 @@
 import { getDb } from "@/lib/db";
 import { getBucketName, getS3Client } from "@/lib/s3";
+import { getCachedOwnerSession } from "@/lib/dal/auth";
+import { verifyAgentAuth } from "@/lib/agentAuth";
 import { GetObjectCommand } from "@aws-sdk/client-s3";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(request: NextRequest) {
+  // 1. Enforce authentication (owner session or authorized agent token)
+  const session = await getCachedOwnerSession();
+  const agentAuth = verifyAgentAuth(request);
+
+  if (!session.isAuthenticated && !agentAuth.authorized) {
+    return new NextResponse("Unauthorized", { status: 401 });
+  }
+
   const { searchParams } = new URL(request.url);
   const id = searchParams.get("id");
   const key = searchParams.get("key");
@@ -11,6 +21,11 @@ export async function GET(request: NextRequest) {
 
   if (!id && !key) {
     return new NextResponse("Missing file identifier", { status: 400 });
+  }
+
+  // Prevent path traversal attempts
+  if (key && (key.includes("..") || key.startsWith("/"))) {
+    return new NextResponse("Invalid file key", { status: 400 });
   }
 
   try {
@@ -58,7 +73,8 @@ export async function GET(request: NextRequest) {
       `${disposition}; filename="${encodeURIComponent(fileName)}"`
     );
     headers.set("Content-Length", bytes.length.toString());
-    headers.set("Cache-Control", "public, max-age=86400, stale-while-revalidate=43200");
+    // Strict private caching to prevent public CDN or proxy leaking of vault documents
+    headers.set("Cache-Control", "private, no-cache, no-store, must-revalidate");
 
     return new NextResponse(Buffer.from(bytes), {
       status: 200,

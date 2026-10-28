@@ -49,6 +49,72 @@ function extractAttribute(tag: string, attrName: string): string | null {
 }
 
 /**
+ * Validates that a target URL is public and not targeting local/internal network resources (SSRF protection).
+ */
+function isSafePublicUrl(url: URL): boolean {
+  if (url.protocol !== "http:" && url.protocol !== "https:") {
+    return false;
+  }
+
+  const hostname = url.hostname.toLowerCase().replace(/^\[|\]$/g, "");
+
+  // Block localhost, link-local, and cloud metadata hostnames
+  if (
+    hostname === "localhost" ||
+    hostname.endsWith(".localhost") ||
+    hostname.endsWith(".local") ||
+    hostname.endsWith(".internal") ||
+    hostname.endsWith(".lan") ||
+    hostname === "metadata.google.internal" ||
+    hostname === "169.254.169.254" ||
+    hostname === "0.0.0.0" ||
+    hostname === "::1" ||
+    hostname === "::"
+  ) {
+    return false;
+  }
+
+  // Check IPv4 ranges
+  const ipv4Match = hostname.match(/^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/);
+  if (ipv4Match) {
+    const o1 = Number(ipv4Match[1]);
+    const o2 = Number(ipv4Match[2]);
+    const o3 = Number(ipv4Match[3]);
+    const o4 = Number(ipv4Match[4]);
+    if (o1 > 255 || o2 > 255 || o3 > 255 || o4 > 255) return false;
+
+    // 127.0.0.0/8 (Loopback)
+    if (o1 === 127) return false;
+    // 10.0.0.0/8 (Private)
+    if (o1 === 10) return false;
+    // 172.16.0.0/12 (Private)
+    if (o1 === 172 && o2 >= 16 && o2 <= 31) return false;
+    // 192.168.0.0/16 (Private)
+    if (o1 === 192 && o2 === 168) return false;
+    // 169.254.0.0/16 (Link-local / Cloud metadata)
+    if (o1 === 169 && o2 === 254) return false;
+    // 0.0.0.0/8
+    if (o1 === 0) return false;
+  }
+
+  // Check IPv6 ranges (fc00::/7 unique local, fe80::/10 link local)
+  if (hostname.includes(":")) {
+    if (
+      hostname.startsWith("fc") ||
+      hostname.startsWith("fd") ||
+      hostname.startsWith("fe8") ||
+      hostname.startsWith("fe9") ||
+      hostname.startsWith("fea") ||
+      hostname.startsWith("feb")
+    ) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
+/**
  * Pure metadata scraper (OpenGraph / HTML Meta tags) without AI.
  * Fast, lightweight, zero token costs.
  */
@@ -63,6 +129,9 @@ export async function scrapeUrlMetadata(targetUrl: string): Promise<ScrapedMetad
   }
 
   const parsedUrl = new URL(cleanUrl);
+  if (!isSafePublicUrl(parsedUrl)) {
+    throw new Error("URL no permitida");
+  }
   const hostname = parsedUrl.hostname.toLowerCase().replace(/^www\./, "");
 
   // Determine platform and default category
