@@ -98,9 +98,9 @@ export function MobileQuickDashboard({
 
   // Finance Data
   const antSpent = financeData.totalAntExpensesToday || 0;
-  const antLimit = financeData.currentBudget?.dailyAntLimit || 150;
+  const antLimit = financeData.currentBudget?.dailyAntLimit ?? 150;
   const antRemaining = financeData.remainingDailyAntBudget ?? Math.max(0, antLimit - antSpent);
-  const antPercent = Math.min(100, Math.round((antSpent / (antLimit || 1)) * 100));
+  const antPercent = Math.min(100, Math.round((antSpent / (antLimit === 0 ? 1 : antLimit)) * 100));
   const isAntExceeded = antSpent > antLimit;
 
   // Filtered supplements

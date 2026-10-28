@@ -21,7 +21,7 @@ export function NotificationManager({
       const todaySupplements = healthData?.todayHealth?.supplements || [];
       const waterMl = healthData?.todayHealth?.waterMl || 0;
       const todayAntExpenses = financeData?.totalAntExpensesToday || 0;
-      const antExpenseDailyLimit = financeData?.currentBudget?.dailyAntLimit || 150;
+      const antExpenseDailyLimit = financeData?.currentBudget?.dailyAntLimit ?? 150;
       const hasCompletedMorningRitual = Boolean(todayRitual?.mustWinTasks && todayRitual.mustWinTasks.length > 0);
       const hasCompletedEveningReview = Boolean(todayRitual?.expensesLogged);
 

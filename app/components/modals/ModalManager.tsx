@@ -188,7 +188,7 @@ export function ModalManager({
           user={user}
           tasks={tasks}
           totalAntSpentToday={financeData?.totalAntExpensesToday || 0}
-          dailyAntLimit={financeData?.currentBudget?.dailyAntLimit || 150}
+          dailyAntLimit={financeData?.currentBudget?.dailyAntLimit ?? 150}
           onSuccess={refreshFinance}
           onOpenNewTransaction={() => openModal("finance")}
         />
@@ -263,7 +263,7 @@ export function ModalManager({
             financeData?.remainingDailyAntBudget ??
             Math.max(
               0,
-              (financeData?.currentBudget?.dailyAntLimit || 150) -
+              (financeData?.currentBudget?.dailyAntLimit ?? 150) -
                 (financeData?.totalAntExpensesToday || 0)
             )
           }

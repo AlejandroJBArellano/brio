@@ -20,7 +20,14 @@ import {
 } from "@/lib/types";
 import { awardTaskEvent } from "@/lib/taskEvents";
 import { revalidatePath } from "next/cache";
-import { getTodayDateStr, toDateStr } from "@/lib/dateUtils";
+import {
+  addDaysToDateStr,
+  addMonthsToDateStr,
+  addYearsToDateStr,
+  getTodayDateStr,
+  toDateStr,
+} from "@/lib/dateUtils";
+import { requireAuth } from "@/lib/dal/auth";
 
 interface WishlistDbRow {
   id: string;
@@ -131,6 +138,7 @@ export async function fetchFinanceCatalogAction(): Promise<{
   categories: FinanceCategory[];
   accounts: FinanceAccount[];
 }> {
+  await requireAuth();
   const sql = getDb();
   return getFinanceCatalog(sql);
 }
@@ -260,11 +268,14 @@ export async function fetchFinanceDashboardDataAction(
   targetMonth?: number,
   targetYear?: number
 ): Promise<FinanceDashboardData> {
+  await requireAuth();
   const sql = getDb();
 
-  const now = new Date();
-  const month = targetMonth || now.getMonth() + 1;
-  const year = targetYear || now.getFullYear();
+  const todayParts = getTodayDateStr().split("-").map(Number);
+  const cdmxYear = todayParts[0];
+  const cdmxMonth = todayParts[1];
+  const month = targetMonth || cdmxMonth;
+  const year = targetYear || cdmxYear;
   const budgetId = `${year}-${String(month).padStart(2, "0")}`;
 
   const startDate = `${year}-${String(month).padStart(2, "0")}-01`;
@@ -293,7 +304,7 @@ export async function fetchFinanceDashboardDataAction(
       budgetedIncome: Number(row.budgeted_income) || 0,
       budgetedFixedExpenses: Number(row.budgeted_fixed_expenses) || 0,
       budgetedVariableExpenses: Number(row.budgeted_variable_expenses) || 0,
-      dailyAntLimit: Number(row.daily_ant_limit) || 150,
+      dailyAntLimit: row.daily_ant_limit != null ? Number(row.daily_ant_limit) : 150,
     };
   } else {
     currentBudget = {
@@ -478,6 +489,7 @@ export async function createTransactionAction(payload: {
   date?: string;
 }): Promise<{ success: boolean; transaction?: Transaction; error?: string }> {
   try {
+    await requireAuth();
     const sql = getDb();
 
     const id = `tx-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
@@ -535,11 +547,128 @@ export async function createTransactionAction(payload: {
 
 /**
  * Server Action: Deletes a transaction.
+ * Atomically decrements daily activity count and reverts commitment state if linked.
  */
 export async function deleteTransactionAction(id: string): Promise<{ success: boolean; error?: string }> {
   try {
+    await requireAuth();
     const sql = getDb();
-    await sql`DELETE FROM transactions WHERE id = ${id};`;
+
+    // 1. Fetch transaction to know date, type, notes
+    const existingRows = await sql`SELECT * FROM transactions WHERE id = ${id} LIMIT 1;`;
+    if (existingRows.length === 0) {
+      return { success: true };
+    }
+
+    const tx = existingRows[0];
+    const txDate = toDateStr(tx.date as string | Date);
+    const txType = tx.type;
+
+    const queries = [];
+
+    // Delete transaction
+    queries.push(sql`DELETE FROM transactions WHERE id = ${id};`);
+
+    // Decrement daily activity log if expense
+    if (txType === "expense") {
+      queries.push(sql`
+        UPDATE daily_activity_logs
+        SET expenses_count = GREATEST(0, expenses_count - 1),
+            updated_at = NOW()
+        WHERE date = ${txDate};
+      `);
+    }
+
+    // 2. Revert commitment if this transaction was linked
+    let commitmentId: string | null = null;
+    if (id.startsWith("tx-cmt-")) {
+      const parts = id.split("-");
+      if (parts.length >= 4) {
+        commitmentId = parts.slice(2, parts.length - 1).join("-");
+      }
+    }
+
+    const cmtRows = await sql`
+      SELECT * FROM finance_commitments 
+      WHERE (id = ${commitmentId || ""}) 
+         OR (variable_schedule::text LIKE ${`%${id}%`});
+    `;
+
+    for (const cmt of cmtRows) {
+      if (cmt.type === "variable_schedule") {
+        let schedule: VariablePaymentScheduleItem[] = [];
+        try {
+          schedule = typeof cmt.variable_schedule === "string"
+            ? JSON.parse(cmt.variable_schedule)
+            : (cmt.variable_schedule || []);
+        } catch {
+          schedule = [];
+        }
+
+        let updated = false;
+        schedule = schedule.map((item) => {
+          if (item.transactionId === id) {
+            updated = true;
+            return {
+              ...item,
+              isPaid: false,
+              paidAt: undefined,
+              transactionId: undefined,
+            };
+          }
+          return item;
+        });
+
+        if (updated) {
+          const nextUnpaid = schedule.find((item) => !item.isPaid);
+          const nextDueDate = nextUnpaid ? nextUnpaid.date : null;
+          queries.push(sql`
+            UPDATE finance_commitments
+            SET variable_schedule = ${JSON.stringify(schedule)}::jsonb,
+                status = 'active',
+                next_due_date = ${nextDueDate},
+                updated_at = NOW()
+            WHERE id = ${cmt.id};
+          `);
+        }
+      } else if (cmt.type === "installment") {
+        const paidCount = Math.max(0, (Number(cmt.installments_paid) || 0) - 1);
+        let nextDueDate = cmt.next_due_date ? toDateStr(cmt.next_due_date) : null;
+        if (nextDueDate) {
+          nextDueDate = addMonthsToDateStr(nextDueDate, -1);
+        }
+        queries.push(sql`
+          UPDATE finance_commitments
+          SET installments_paid = ${paidCount},
+              status = 'active',
+              next_due_date = ${nextDueDate},
+              updated_at = NOW()
+          WHERE id = ${cmt.id};
+        `);
+      } else if (cmt.type === "recurring") {
+        let nextDueDate = cmt.next_due_date ? toDateStr(cmt.next_due_date) : null;
+        if (nextDueDate) {
+          if (cmt.frequency === "biweekly") {
+            nextDueDate = addDaysToDateStr(nextDueDate, -14);
+          } else if (cmt.frequency === "weekly") {
+            nextDueDate = addDaysToDateStr(nextDueDate, -7);
+          } else if (cmt.frequency === "annual") {
+            nextDueDate = addYearsToDateStr(nextDueDate, -1);
+          } else {
+            nextDueDate = addMonthsToDateStr(nextDueDate, -1);
+          }
+        }
+        queries.push(sql`
+          UPDATE finance_commitments
+          SET next_due_date = ${nextDueDate},
+              updated_at = NOW()
+          WHERE id = ${cmt.id};
+        `);
+      }
+    }
+
+    await sql.transaction(queries);
+
     revalidatePath("/finance");
     revalidatePath("/today");
     return { success: true };
@@ -565,6 +694,7 @@ export async function updateTransactionAction(
   }
 ): Promise<{ success: boolean; error?: string }> {
   try {
+    await requireAuth();
     const sql = getDb();
     const existingRows = await sql`SELECT * FROM transactions WHERE id = ${id} LIMIT 1;`;
     if (existingRows.length === 0) return { success: false, error: "Transacción no encontrada" };
@@ -611,17 +741,19 @@ export async function updateMonthlyBudgetAction(payload: {
   dailyAntLimit: number;
 }): Promise<{ success: boolean; error?: string }> {
   try {
+    await requireAuth();
     const sql = getDb();
     const id = `${payload.year}-${String(payload.month).padStart(2, "0")}`;
+    const dailyAntLimit = payload.dailyAntLimit ?? 150;
 
     await sql`
       INSERT INTO monthly_budgets (id, month, year, budgeted_income, budgeted_fixed_expenses, budgeted_variable_expenses, daily_ant_limit, updated_at)
-      VALUES (${id}, ${payload.month}, ${payload.year}, ${payload.budgetedIncome}, ${payload.budgetedFixedExpenses}, ${payload.budgetedVariableExpenses}, ${payload.dailyAntLimit}, NOW())
+      VALUES (${id}, ${payload.month}, ${payload.year}, ${payload.budgetedIncome}, ${payload.budgetedFixedExpenses}, ${payload.budgetedVariableExpenses}, ${dailyAntLimit}, NOW())
       ON CONFLICT (id) DO UPDATE
       SET budgeted_income = ${payload.budgetedIncome},
           budgeted_fixed_expenses = ${payload.budgetedFixedExpenses},
           budgeted_variable_expenses = ${payload.budgetedVariableExpenses},
-          daily_ant_limit = ${payload.dailyAntLimit},
+          daily_ant_limit = ${dailyAntLimit},
           updated_at = NOW();
     `;
 
@@ -645,6 +777,7 @@ export async function createSavingsGoalAction(payload: {
   color?: string;
 }): Promise<{ success: boolean; error?: string }> {
   try {
+    await requireAuth();
     const sql = getDb();
     const id = `goal-${Date.now()}`;
 
@@ -666,6 +799,7 @@ export async function contributeToSavingsGoalAction(
   amount: number
 ): Promise<{ success: boolean; error?: string }> {
   try {
+    await requireAuth();
     const sql = getDb();
     await sql`
       UPDATE savings_goals
@@ -691,6 +825,7 @@ export async function updateSavingsGoalAction(
   updates: Partial<SavingsGoal>
 ): Promise<{ success: boolean; error?: string }> {
   try {
+    await requireAuth();
     const sql = getDb();
     const existing = await sql`SELECT * FROM savings_goals WHERE id = ${goalId} LIMIT 1;`;
     if (existing.length === 0) return { success: false, error: "Meta no encontrada" };
@@ -724,6 +859,7 @@ export async function updateSavingsGoalAction(
 
 export async function deleteSavingsGoalAction(goalId: string): Promise<{ success: boolean; error?: string }> {
   try {
+    await requireAuth();
     const sql = getDb();
     await sql`DELETE FROM savings_goals WHERE id = ${goalId};`;
     revalidatePath("/");
@@ -747,13 +883,14 @@ export async function createFinanceCategoryAction(payload: {
   orderIndex?: number;
 }): Promise<{ success: boolean; category?: FinanceCategory; error?: string }> {
   try {
+    await requireAuth();
     const sql = getDb();
 
     const name = payload.name.trim();
     if (!name) return { success: false, error: "El nombre de la categoría es requerido" };
 
     const id = (payload.id || name.toLowerCase().replace(/[^a-z0-9]+/g, "-")).trim() || `cat-${Date.now()}`;
-    const icon = payload.icon?.trim() || "🏷️";
+    const icon = payload.icon?.trim() || "tag";
     const color = payload.color?.trim() || "#f59e0b";
     const isAnt = Boolean(payload.isAntDefault);
     const isFixed = Boolean(payload.isFixed);
@@ -787,6 +924,7 @@ export async function updateFinanceCategoryAction(
   updates: Partial<FinanceCategory>
 ): Promise<{ success: boolean; error?: string }> {
   try {
+    await requireAuth();
     const sql = getDb();
 
     const existingRows = await sql`SELECT * FROM finance_categories WHERE id = ${id} LIMIT 1;`;
@@ -823,6 +961,7 @@ export async function updateFinanceCategoryAction(
 
 export async function deleteFinanceCategoryAction(id: string): Promise<{ success: boolean; error?: string }> {
   try {
+    await requireAuth();
     const sql = getDb();
     await sql`DELETE FROM finance_categories WHERE id = ${id};`;
     revalidatePath("/");
@@ -845,6 +984,7 @@ export async function createFinanceAccountAction(payload: {
   orderIndex?: number;
 }): Promise<{ success: boolean; account?: FinanceAccount; error?: string }> {
   try {
+    await requireAuth();
     const sql = getDb();
 
     const name = payload.name.trim();
@@ -852,7 +992,7 @@ export async function createFinanceAccountAction(payload: {
 
     const id = (payload.id || name.toLowerCase().replace(/[^a-z0-9]+/g, "-")).trim() || `acc-${Date.now()}`;
     const type = payload.type?.trim() || "credit";
-    const icon = payload.icon?.trim() || (type === "cash" ? "💵" : type === "debit" || type === "bank" ? "🏦" : "💳");
+    const icon = payload.icon?.trim() || (type === "cash" ? "banknote" : type === "debit" || type === "bank" ? "landmark" : "credit-card");
     const color = payload.color?.trim() || "#6366f1";
     const orderIndex = Number(payload.orderIndex) || 0;
 
@@ -883,6 +1023,7 @@ export async function updateFinanceAccountAction(
   updates: Partial<FinanceAccount>
 ): Promise<{ success: boolean; error?: string }> {
   try {
+    await requireAuth();
     const sql = getDb();
 
     const existingRows = await sql`SELECT * FROM finance_accounts WHERE id = ${id} LIMIT 1;`;
@@ -917,6 +1058,7 @@ export async function updateFinanceAccountAction(
 
 export async function deleteFinanceAccountAction(id: string): Promise<{ success: boolean; error?: string }> {
   try {
+    await requireAuth();
     const sql = getDb();
     await sql`DELETE FROM finance_accounts WHERE id = ${id};`;
     revalidatePath("/");
@@ -933,6 +1075,7 @@ export async function deleteFinanceAccountAction(id: string): Promise<{ success:
 
 export async function fetchFinanceCommitmentsAction(): Promise<FinanceCommitment[]> {
   try {
+    await requireAuth();
     const sql = getDb();
     const rows = await sql`
       SELECT * FROM finance_commitments 
@@ -968,6 +1111,7 @@ export async function createFinanceCommitmentAction(payload: {
   notes?: string;
 }): Promise<{ success: boolean; commitment?: FinanceCommitment; error?: string }> {
   try {
+    await requireAuth();
     const sql = getDb();
 
     const title = payload.title?.trim();
@@ -1033,6 +1177,7 @@ export async function updateFinanceCommitmentAction(
   updates: Partial<FinanceCommitment>
 ): Promise<{ success: boolean; error?: string }> {
   try {
+    await requireAuth();
     const sql = getDb();
 
     const existingRows = await sql`SELECT * FROM finance_commitments WHERE id = ${id} LIMIT 1;`;
@@ -1084,6 +1229,7 @@ export async function updateFinanceCommitmentAction(
 
 export async function deleteFinanceCommitmentAction(id: string): Promise<{ success: boolean; error?: string }> {
   try {
+    await requireAuth();
     const sql = getDb();
     await sql`DELETE FROM finance_commitments WHERE id = ${id};`;
     revalidatePath("/");
@@ -1107,6 +1253,7 @@ export async function settleCommitmentPaymentAction(payload: {
   scheduleItemId?: string;
 }): Promise<{ success: boolean; transactionId?: string; error?: string }> {
   try {
+    await requireAuth();
     const sql = getDb();
 
     const commitmentRows = await sql`
@@ -1117,7 +1264,7 @@ export async function settleCommitmentPaymentAction(payload: {
     }
 
     const commitment = commitmentRows[0] as unknown as CommitmentDbRow;
-    const txId = `tx-cmt-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
+    const txId = `tx-cmt-${payload.commitmentId}-${Date.now()}`;
     const txDate = toDateStr(payload.date || getTodayDateStr());
     const account = (payload.account || commitment.default_account || "dolarapp").toLowerCase().trim();
     const category = (commitment.category || "servicios").toLowerCase().trim();
@@ -1131,22 +1278,7 @@ export async function settleCommitmentPaymentAction(payload: {
       txNotes = `${commitment.title} - ${payload.notes}`;
     }
 
-    // 1. Insert transaction into Neon DB
-    await sql`
-      INSERT INTO transactions (id, amount, type, category, account, notes, is_ant_expense, date)
-      VALUES (${txId}, ${payload.amount}, 'expense', ${category}, ${account}, ${txNotes}, FALSE, ${txDate});
-    `;
-
-    // 2. Increment daily activity log
-    await sql`
-      INSERT INTO daily_activity_logs (date, expenses_count)
-      VALUES (${txDate}, 1)
-      ON CONFLICT (date) DO UPDATE
-      SET expenses_count = daily_activity_logs.expenses_count + 1,
-          updated_at = NOW();
-    `;
-
-    // 3. Update commitment state
+    // Update commitment state
     let newStatus = commitment.status || "active";
     let newPaidCount = Number(commitment.installments_paid) || 0;
     let newDueDate = commitment.next_due_date ? toDateStr(commitment.next_due_date) : null;
@@ -1160,11 +1292,9 @@ export async function settleCommitmentPaymentAction(payload: {
       if (total > 0 && newPaidCount >= total) {
         newStatus = "completed";
       }
-      // Advance due date by 1 month if present
+      // Advance due date by 1 calendar month
       if (newDueDate) {
-        const d = new Date(newDueDate + "T00:00:00");
-        d.setMonth(d.getMonth() + 1);
-        newDueDate = toDateStr(d.toISOString());
+        newDueDate = addMonthsToDateStr(newDueDate, 1);
       }
     } else if (commitment.type === "variable_schedule") {
       let schedule: VariablePaymentScheduleItem[] = [];
@@ -1205,33 +1335,45 @@ export async function settleCommitmentPaymentAction(payload: {
       }
       newScheduleJson = JSON.stringify(schedule);
     } else if (commitment.type === "recurring") {
-      // Advance due date by frequency
+      // Advance due date by frequency with calendar-accurate math
       if (newDueDate) {
-        const d = new Date(newDueDate + "T00:00:00");
         if (commitment.frequency === "biweekly") {
-          d.setDate(d.getDate() + 14);
+          newDueDate = addDaysToDateStr(newDueDate, 14);
         } else if (commitment.frequency === "weekly") {
-          d.setDate(d.getDate() + 7);
+          newDueDate = addDaysToDateStr(newDueDate, 7);
         } else if (commitment.frequency === "annual") {
-          d.setFullYear(d.getFullYear() + 1);
+          newDueDate = addYearsToDateStr(newDueDate, 1);
         } else {
-          d.setMonth(d.getMonth() + 1);
+          newDueDate = addMonthsToDateStr(newDueDate, 1);
         }
-        newDueDate = toDateStr(d.toISOString());
       }
     } else if (commitment.type === "one_time") {
       newStatus = "completed";
     }
 
-    await sql`
-      UPDATE finance_commitments
-      SET installments_paid = ${newPaidCount},
-          status = ${newStatus},
-          next_due_date = ${newDueDate},
-          variable_schedule = ${newScheduleJson}::jsonb,
-          updated_at = NOW()
-      WHERE id = ${payload.commitmentId};
-    `;
+    // Atomic transaction for all writes
+    await sql.transaction([
+      sql`
+        INSERT INTO transactions (id, amount, type, category, account, notes, is_ant_expense, date)
+        VALUES (${txId}, ${payload.amount}, 'expense', ${category}, ${account}, ${txNotes}, FALSE, ${txDate});
+      `,
+      sql`
+        INSERT INTO daily_activity_logs (date, expenses_count)
+        VALUES (${txDate}, 1)
+        ON CONFLICT (date) DO UPDATE
+        SET expenses_count = daily_activity_logs.expenses_count + 1,
+            updated_at = NOW();
+      `,
+      sql`
+        UPDATE finance_commitments
+        SET installments_paid = ${newPaidCount},
+            status = ${newStatus},
+            next_due_date = ${newDueDate},
+            variable_schedule = ${newScheduleJson}::jsonb,
+            updated_at = NOW()
+        WHERE id = ${payload.commitmentId};
+      `,
+    ]);
 
     // 4. Award Habitica XP
     await awardTaskEvent("DAILY_EXPENSES_LOGGED", {
